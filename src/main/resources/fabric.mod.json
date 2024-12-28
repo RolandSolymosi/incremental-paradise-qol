@@ -16,16 +16,16 @@
 	"environment": "*",
 	"entrypoints": {
 		"main": [
-			"com.example.TemplateMod"
+			"com.incrementalqol.TemplateMod"
 		],
 		"client": [
-			"com.example.EntryPointClient"
+			"com.incrementalqol.EntryPointClient"
 		]
 	},
 	"mixins": [
 		"template-mod.mixins.json",
 		{
-			"config": "template-mod.client.mixins.json",
+			"config": "incremental-qol.client.mixins.json",
 			"environment": "client"
 		}
 	],

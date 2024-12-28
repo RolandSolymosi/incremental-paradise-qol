@@ -1,4 +1,4 @@
-package com.example;
+package com.incrementalqol;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;

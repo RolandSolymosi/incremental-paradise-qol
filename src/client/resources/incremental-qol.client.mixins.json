@@ -1,6 +1,6 @@
 {
 	"required": true,
-	"package": "com.example.mixin.client",
+	"package": "com.incrementalqol",
 	"compatibilityLevel": "JAVA_21",
 	"client": [
 
