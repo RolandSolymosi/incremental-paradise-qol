@@ -1,0 +1,41 @@
+{
+	"schemaVersion": 1,
+	"id": "incremental-paradise-qol",
+	"version": "${version}",
+	"name": "Incremental Paradise QoL",
+	"description": "A bunch of handy tweaks and additions for the Incremental Paradise server. Client-side only.",
+	"authors": [
+		"Johulk",
+		"Razorspined"
+	],
+	"contact": {
+		"sources": "https://github.com/FabricMC/fabric-example-mod"
+	},
+	"license": "CC0-1.0",
+	"icon": "assets/template-mod/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"com.example.TemplateMod"
+		],
+		"client": [
+			"com.example.EntryPointClient"
+		]
+	},
+	"mixins": [
+		"template-mod.mixins.json",
+		{
+			"config": "template-mod.client.mixins.json",
+			"environment": "client"
+		}
+	],
+	"depends": {
+		"fabricloader": ">=0.16.9",
+		"minecraft": "~1.21.4",
+		"java": ">=21",
+		"fabric-api": "*"
+	},
+	"suggests": {
+		"another-mod": "*"
+	}
+}
