@@ -239,7 +239,7 @@ public class Task{
             List<String> veil = List.of("Spotters", "Verdemites", "Endermen", "Verdelith", "Shy");
             List<String> infernal = List.of("Ghasts", "Ghast Souls", "Blazes", "Nrubs", "Infernal Imps", "Azuregem", "Bubbler", "Magmafish"
                     , "Molten Jellyfish", "Lavafruit");
-            List<String> abyss = List.of("Wicks", "Glow Squids", "Slinkers", "Aurorium", "Twine", "Zephyr", "Abyssal Crabs");
+            List<String> abyss = List.of("Wicks", "Glow Squids", "Slinkers", "Aurorium", "Twine", "Zephyr", "Abyssal Crabs", "Lampposts");
 
             if (lush.contains(this.normalizedTaskTarget())) return "§2lush";
             else if(veil.contains(normalizedTaskTarget())) return "§3veil";
