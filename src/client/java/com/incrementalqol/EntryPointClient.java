@@ -110,9 +110,9 @@ public class EntryPointClient implements ClientModInitializer {
                 for (int i = 0; i < taskList.size(); i++) {
 
                     if (taskList.get(i).isCompleted()) {
-                        drawContext.drawText(textRenderer, taskList.get(i).render(), rectangleX + 2, rectangleY + 5 + (15 * i), CompletedGreen, true);
+                        drawContext.drawText(textRenderer, taskList.get(i).render(true), rectangleX + 2, rectangleY + 5 + (15 * i), CompletedGreen, true);
                     } else {
-                        drawContext.drawText(textRenderer, taskList.get(i).render(), rectangleX + 2, rectangleY + 5 + (15 * i), toComplete, true);
+                        drawContext.drawText(textRenderer, taskList.get(i).render(false), rectangleX + 2, rectangleY + 5 + (15 * i), toComplete, true);
 
                     }
                 }
