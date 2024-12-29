@@ -92,7 +92,7 @@ public class EntryPointClient implements ClientModInitializer {
 
             TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
 
-            int color = ColorHelper.getArgb(100, 0, 0, 0);
+            int color = ColorHelper.getArgb(80, 0, 0, 0);
             int CompletedGreen = ColorHelper.getArgb(255, 0, 194, 32);
             int toComplete = ColorHelper.getArgb(255, 255, 255, 255);
             int rectangleX = 10;
@@ -107,7 +107,7 @@ public class EntryPointClient implements ClientModInitializer {
                     }
                 }
 
-                drawContext.fill(rectangleX, rectangleY, rectangleX + (size * 5), rectangleY + 5 + (15 * taskList.size()), color);
+                drawContext.fill(rectangleX, rectangleY, rectangleX + (size * 6), rectangleY + 5 + (15 * taskList.size()), color);
                 for (int i = 0; i < taskList.size(); i++) {
 
                     if (taskList.get(i).isCompleted()) {
