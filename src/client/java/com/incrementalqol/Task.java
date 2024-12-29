@@ -28,7 +28,7 @@ public class Task{
     List<Pattern> misc = List.of(
             Pattern.compile("Clean (?<amount>\\d+) (?<type>.+) \\(?(?<progress>\\d+)"),
             Pattern.compile("Repair (?<amount>\\d+) (?<type>.+) in .+\\((?<progress>\\d)"),
-            Pattern.compile("Sell (?<amount>\\d+\\,?\\d*) (?<type>.+)"),
+            Pattern.compile("Sell (?<amount>\\d+\\,?\\d*) (?<type>.+) \\((?<progress>\\d+\\,?\\d*)"),
             Pattern.compile("Gain (?<amount>\\d+\\,?\\d*) (?<type>.+) from selling.+ \\(?(?<progress>\\d+\\,?\\d*)")
     );
 
