@@ -300,7 +300,7 @@ public class Task{
             return taskTarget.replace(" from Shiny Ores", "");
         }
         else if (taskTarget.contains("colored Riverfish")) {
-            return taskTarget.replace(" colored Riverfish", "").replace(" using a Fishing Spear", "");
+            return taskTarget.replace(" colored Riverfish", " Riverfish").replace(" using a Fishing Spear", "");
         }
         else if (taskTarget.contains("using a Fishing Spear")) {
             return taskTarget.replace(" using a Fishing Spear", "");
