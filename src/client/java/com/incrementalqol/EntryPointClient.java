@@ -25,6 +25,7 @@ import org.lwjgl.glfw.GLFW;
 
 
 import java.util.*;
+import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -106,7 +107,7 @@ public class EntryPointClient implements ClientModInitializer {
                     }
                 }
 
-                drawContext.fill(rectangleX, rectangleY, rectangleX + (size * 6), rectangleY + 5 + (15 * taskList.size()), color);
+                drawContext.fill(rectangleX, rectangleY, rectangleX + (size * 3), rectangleY + 5 + (15 * taskList.size()), color);
                 for (int i = 0; i < taskList.size(); i++) {
 
                     if (taskList.get(i).isCompleted()) {
@@ -321,10 +322,20 @@ public class EntryPointClient implements ClientModInitializer {
 
                     LoreComponent lore = stack.get(DataComponentTypes.LORE);
                     List<Text> text = lore.styledLines();
+                    Pattern descriptorPattern = Pattern.compile("World #(?<world>\\d+)\\s*(?<type>.+)\\s*Task");
+                    Matcher m = descriptorPattern.matcher(text.get(0).getString());
+
+                    String world = "";
+                    String type = "";
+
+                    if (m.find()) {
+                        world = m.group("world");
+                        type = m.group("type");
+                    }
 
                     String description = text.get(2).getString() + text.get(3).getString();
                     int pixelSize = text.get(2).getString().length() + text.get(3).getString().length();
-                    Task newTask = new Task(name.getString(), description, "/warp ", pixelSize, false);
+                    Task newTask = new Task(name.getString(), description, "/warp ", pixelSize, false, world, type);
 
                     if (currentItem.getName().getString().contains("Written")) {
                         newTask.setCompleted();
