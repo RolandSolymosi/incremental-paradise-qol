@@ -43,7 +43,7 @@ public class Task{
     );
 
     List<Pattern> combat = List.of(
-            Pattern.compile("Slay ?(?:the)? (?<type>.) \\(?(?<progress>\\d+).*"),
+            Pattern.compile("Slay (?:the) (?<type>.+) \\((?<progress>\\d+)\\/(?<amount>\\d+)"),
             Pattern.compile("Collect (?<amount>\\d+\\,?\\d*) drops from (?<type>.+) \\(?(?<progress>\\d+\\,?\\d*)")
     );
 
@@ -241,18 +241,18 @@ public class Task{
                     , "Molten Jellyfish", "Lavafruit");
             List<String> abyss = List.of("Wicks", "Glow Squids", "Slinkers", "Aurorium", "Twine", "Zephyr", "Abyssal Crabs");
 
-            if (lush.contains(this.normalizedTaskTarget())) return "lush";
-            else if(veil.contains(normalizedTaskTarget())) return "veil";
-            else if(infernal.contains(normalizedTaskTarget())) return "infernal";
-            else if(abyss.contains(normalizedTaskTarget())) return "abyss";
+            if (lush.contains(this.normalizedTaskTarget())) return "§2lush";
+            else if(veil.contains(normalizedTaskTarget())) return "§3veil";
+            else if(infernal.contains(normalizedTaskTarget())) return "§4infernal";
+            else if(abyss.contains(normalizedTaskTarget())) return "§5abyss";
             else return "";
         }
     }
 
     private String getLocation(boolean completed) {
         return (completed) ?
-                "§2[w" + world + (getSubLocation().isEmpty() ? "" : "-" + getSubLocation()) + "]" :
-                "[§bw" + world + "§f" + (getSubLocation().isEmpty() ? "" : "-§d" + getSubLocation()) + "§f]";
+                "§2[w" + world + (getSubLocation().isEmpty() ? "" : "-" + getSubLocation()).replaceAll("\\d", "2") + "]" :
+                "[§8w" + world + "§f" + (getSubLocation().isEmpty() ? "" : "-§d" + getSubLocation()) + "§f]";
     }
     public int getStrWidth() {
         return strWidth;
@@ -299,14 +299,14 @@ public class Task{
             isShiny = taskTarget.contains("Shiny Ores");
             return taskTarget.replace(" from Shiny Ores", "");
         }
+        else if (taskTarget.contains("colored Riverfish")) {
+            return taskTarget.replace(" colored Riverfish", "").replace(" using a Fishing Spear", "");
+        }
         else if (taskTarget.contains("using a Fishing Spear")) {
             return taskTarget.replace(" using a Fishing Spear", "");
         }
         else if (taskTarget.contains("drops from")) {
             return taskTarget.replace(" drops from", "");
-        }
-        else if (taskTarget.contains("colored Riverfish")) {
-            return taskTarget.replace(" colored Riverfish", "");
         }
         else return taskTarget;
     }
