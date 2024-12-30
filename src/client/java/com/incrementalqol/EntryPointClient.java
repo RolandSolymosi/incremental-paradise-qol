@@ -95,9 +95,9 @@ public class EntryPointClient implements ClientModInitializer {
 
             TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
 
-            int color = ColorHelper.getArgb(80, 0, 0, 0);
-            int CompletedGreen = ColorHelper.getArgb(255, 0, 194, 32);
-            int toComplete = ColorHelper.getArgb(255, 255, 255, 255);
+            int color = (80 << 24) | (0 << 16) | (0 << 8) | 0;
+            int CompletedGreen = (255 << 24) | (0 << 16) | (194 << 8) | 32;
+            int toComplete = (255 << 24) | (255 << 16) | (255 << 8) | 255;
             int rectangleX = 10;
             int rectangleY = 10;
             // x1, y1, x2, y2, color
@@ -110,7 +110,7 @@ public class EntryPointClient implements ClientModInitializer {
                     }
                 }
 
-                if(drawBackground == true) {
+                if(drawBackground) {
                     drawContext.fill(rectangleX, rectangleY, rectangleX + (size * 6), rectangleY + 5 + (15 * taskList.size()), color);
                 }
                 for (int i = 0; i < taskList.size(); i++) {
@@ -340,14 +340,23 @@ public class EntryPointClient implements ClientModInitializer {
                     LoreComponent lore = stack.get(DataComponentTypes.LORE);
                     List<Text> text = lore.styledLines();
                     Pattern descriptorPattern = Pattern.compile("World #(?<world>\\d+)\\s*(?<type>.+)\\s*Task");
+                    Pattern questTaskPattern = Pattern.compile("\\s*(?<type>.+)\\s*Task");
                     Matcher m = descriptorPattern.matcher(text.get(0).getString());
                     // TODO: support for Quest Task (has no world, only called Quest Task)
+
                     String world = "";
                     String type = "";
 
                     if (m.find()) {
                         world = m.group("world");
                         type = m.group("type");
+                    }
+                    else {
+                        m = questTaskPattern.matcher(text.getFirst().getString());
+                        if (m.find()) {
+                            world = "--";
+                            type = m.group("type");
+                        }
                     }
 
                     String description = text.get(2).getString() + text.get(3).getString();
