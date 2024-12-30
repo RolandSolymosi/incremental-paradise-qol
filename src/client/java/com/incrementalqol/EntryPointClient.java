@@ -46,6 +46,9 @@ public class EntryPointClient implements ClientModInitializer {
     private KeyBinding loadout3;
     private KeyBinding loadout4;
     private KeyBinding loadout5;
+    private KeyBinding backgroundKey;
+
+    private Boolean drawBackground;
 
 
     @Override
@@ -107,7 +110,9 @@ public class EntryPointClient implements ClientModInitializer {
                     }
                 }
 
-                drawContext.fill(rectangleX, rectangleY, rectangleX + (size * 6), rectangleY + 5 + (15 * taskList.size()), color);
+                if(drawBackground == true) {
+                    drawContext.fill(rectangleX, rectangleY, rectangleX + (size * 6), rectangleY + 5 + (15 * taskList.size()), color);
+                }
                 for (int i = 0; i < taskList.size(); i++) {
 
                     if (taskList.get(i).isCompleted()) {
@@ -152,6 +157,11 @@ public class EntryPointClient implements ClientModInitializer {
             MinecraftClient.getInstance().player.networkHandler.sendCommand("wardrobe 5");
             MinecraftClient.getInstance().player.networkHandler.sendCommand("pets 5");
 
+        }
+
+        while (backgroundKey.wasPressed()) {
+            assert MinecraftClient.getInstance().player != null;
+            drawBackground=false;
         }
     }
 
@@ -297,6 +307,13 @@ public class EntryPointClient implements ClientModInitializer {
                 "Equip Loadout 5",
                 InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_KP_5,
+                "Incremental QOL"
+        ));
+
+        backgroundKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+                "Toggle Task HUD Background",
+                InputUtil.Type.KEYSYM,
+                GLFW.GLFW_KEY_MINUS,
                 "Incremental QOL"
         ));
 
