@@ -48,7 +48,7 @@ public class EntryPointClient implements ClientModInitializer {
     private KeyBinding loadout5;
     private KeyBinding backgroundKey;
 
-    private Boolean drawBackground;
+    private Boolean drawBackground = true;
 
 
     @Override
@@ -161,7 +161,7 @@ public class EntryPointClient implements ClientModInitializer {
 
         while (backgroundKey.wasPressed()) {
             assert MinecraftClient.getInstance().player != null;
-            drawBackground=false;
+            drawBackground=!drawBackground;
         }
     }
 
