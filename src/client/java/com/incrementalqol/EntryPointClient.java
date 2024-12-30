@@ -46,9 +46,15 @@ public class EntryPointClient implements ClientModInitializer {
     private KeyBinding loadout3;
     private KeyBinding loadout4;
     private KeyBinding loadout5;
+    private KeyBinding optionsScreen;
     private KeyBinding backgroundKey;
 
     private Boolean drawBackground = true;
+
+    private int hudX = 10; // Initial X position of the HUD
+    private int hudY = 10; // Initial Y position of the HUD
+    private boolean dragging = false; // Whether the HUD is being dragged
+    private int dragOffsetX, dragOffsetY; // Offset between the mouse and the HUD position
 
 
     @Override
@@ -90,6 +96,8 @@ public class EntryPointClient implements ClientModInitializer {
                 }
             }
         });
+
+
 
         HudRenderCallback.EVENT.register(((drawContext, renderTickCounter) -> {
 
@@ -162,6 +170,10 @@ public class EntryPointClient implements ClientModInitializer {
         while (backgroundKey.wasPressed()) {
             assert MinecraftClient.getInstance().player != null;
             drawBackground=!drawBackground;
+        }
+
+        while (optionsScreen.wasPressed()) {
+            MinecraftClient.getInstance().setScreen(new OptionsScreen(MinecraftClient.getInstance().currentScreen));
         }
     }
 
@@ -314,6 +326,13 @@ public class EntryPointClient implements ClientModInitializer {
                 "Toggle Task HUD Background",
                 InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_MINUS,
+                "Incremental QOL"
+        ));
+
+        optionsScreen = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+                "Options Screen",
+                InputUtil.Type.KEYSYM,
+                GLFW.GLFW_KEY_O,
                 "Incremental QOL"
         ));
 
