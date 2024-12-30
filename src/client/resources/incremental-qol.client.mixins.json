@@ -1,9 +1,9 @@
 {
 	"required": true,
-	"package": "com.incrementalqol.mixin.client",
+	"package": "com.incrementalqol.mixins",
 	"compatibilityLevel": "JAVA_21",
 	"client": [
-
+		"TaskProgressMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
