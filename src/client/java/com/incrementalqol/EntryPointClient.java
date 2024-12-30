@@ -262,7 +262,7 @@ public class EntryPointClient implements ClientModInitializer {
         else if (Arrays.asList("rodrick", "ro").contains(location)) return "rodrick";
         else if (Arrays.asList("sky", "sk").contains(location)) return "sky";
         else if (Arrays.asList("bakery", "ba").contains(location)) return "bakery";
-        else return "";
+        else return location;
     }
 
     private void initializeKeybinds() {
