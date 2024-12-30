@@ -324,7 +324,7 @@ public class EntryPointClient implements ClientModInitializer {
                     List<Text> text = lore.styledLines();
                     Pattern descriptorPattern = Pattern.compile("World #(?<world>\\d+)\\s*(?<type>.+)\\s*Task");
                     Matcher m = descriptorPattern.matcher(text.get(0).getString());
-
+                    // TODO: support for Quest Task (has no world, only called Quest Task)
                     String world = "";
                     String type = "";
 

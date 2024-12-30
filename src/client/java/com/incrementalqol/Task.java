@@ -43,7 +43,7 @@ public class Task{
     );
 
     List<Pattern> combat = List.of(
-            Pattern.compile("Slay (?:the) (?<type>.+) \\((?<progress>\\d+)\\/(?<amount>\\d+)"),
+            Pattern.compile("Slay ?(?:the)?(?<type>.+) \\((?<progress>\\d+)\\/(?<amount>\\d+)"),
             Pattern.compile("Collect (?<amount>\\d+\\,?\\d*) drops from (?<type>.+) \\(?(?<progress>\\d+\\,?\\d*)")
     );
 
@@ -300,7 +300,9 @@ public class Task{
             return taskTarget.replace(" from Shiny Ores", "");
         }
         else if (taskTarget.contains("colored Riverfish")) {
-            return taskTarget.replace(" colored Riverfish", " Riverfish").replace(" using a Fishing Spear", "");
+            return taskTarget.replace(" colored Riverfish", " Riverfish")
+                    .replace(" using a Fishing Spear", "")
+                    .replace(" drops from", "");
         }
         else if (taskTarget.contains("using a Fishing Spear")) {
             return taskTarget.replace(" using a Fishing Spear", "");
