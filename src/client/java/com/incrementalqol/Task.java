@@ -130,6 +130,7 @@ public class Task{
                         }
                         this.applicablePattern = Pattern.compile(p.pattern().
                                 replace("(?<type>.+)", "(?<type>" + taskTarget + ")"));
+                        this.taskTarget = this.taskTarget.trim();
                         break;
                     }
                 }
@@ -211,6 +212,13 @@ public class Task{
                                 replace("(?<type>.+)", "(?<type>" + taskTarget + ")"));
                         break;
                     }
+                }
+            } break;
+            case "Quest": {
+                Matcher m = Pattern.compile(".+").matcher(description);
+
+                if (m.find()) {
+                    this.taskTarget = m.group();
                 }
             } break;
         }
@@ -299,13 +307,10 @@ public class Task{
             isShiny = taskTarget.contains("Shiny Ores");
             return taskTarget.replace(" from Shiny Ores", "");
         }
-        else if (taskTarget.contains("colored Riverfish")) {
+        else if (taskTarget.contains("colored Riverfish") || taskTarget.contains("using a Fishing Spear")) {
             return taskTarget.replace(" colored Riverfish", " Riverfish")
                     .replace(" using a Fishing Spear", "")
                     .replace(" drops from", "");
-        }
-        else if (taskTarget.contains("using a Fishing Spear")) {
-            return taskTarget.replace(" using a Fishing Spear", "");
         }
         else if (taskTarget.contains("drops from")) {
             return taskTarget.replace(" drops from", "");
@@ -314,13 +319,21 @@ public class Task{
     }
 
     public String render(boolean completed) {
-        if (completed) return
-                getLocation(true) + " " +
-                        this.taskType + ": §2" + ((isShiny) ? "(*)" : "") + normalizedTaskTarget() + ((isShiny) ? "(*)" : "") +
-                        " (" + this.progress + "/" + this.targetAmount + ")§f";
-        else return
-                getLocation(false) + " " +
-                        this.taskType + ": §6§n" + ((isShiny) ? "(*)" : "") + normalizedTaskTarget() +((isShiny) ? "(*)" : "") +
-                        "§r (§9" + this.progress + "§f/§c" + this.targetAmount + "§f)";
+        if (taskType.equals("Quest")) {
+            if (completed) return
+                    "§2[" + world + "]" + this.taskType + ": §2" + name +")§f";
+            else return
+                    "[§8" + world + "§f]" + this.taskType + ": §6§n" + name +")§f";
+        }
+        else {
+            if (completed) return
+                    getLocation(true) + " " +
+                            this.taskType + ": §2" + ((isShiny) ? "Shiny" : "") + normalizedTaskTarget() +
+                            " (" + this.progress + "/" + this.targetAmount + ")§f";
+            else return
+                    getLocation(false) + " " +
+                            this.taskType + ": §6§n" + ((isShiny) ? "Shiny " : "") + normalizedTaskTarget() +
+                            "§r (§9" + this.progress + "§f/§c" + this.targetAmount + "§f)";
+        }
     }
 }
