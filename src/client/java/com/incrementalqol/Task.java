@@ -35,7 +35,8 @@ public class Task{
     List<Pattern> games = List.of(
             Pattern.compile("Play (?<amount>\\d+) (?<opt>.+) of (?<type>.+) \\(?(?<progress>\\d+)"),
             Pattern.compile("Earn (?<amount>\\d+) (?<opt>.+) in (?<type>.+) \\(?(?<progress>\\d+)"),
-            Pattern.compile("Earn (?<amount>\\d+)\\s+(?<opt>.+) playing (?<type>.+) \\(?(?<progress>\\d+)")
+            Pattern.compile("Earn (?<amount>\\d+)\\s+(?<opt>.+) playing (?<type>.+) \\(?(?<progress>\\d+)"),
+            Pattern.compile("Find (?<amount>\\d+) (?<opt>.+) while playing (?<type>.+) \\((?<progress>\\d+)")
     );
 
     List<Pattern> forage = List.of(
