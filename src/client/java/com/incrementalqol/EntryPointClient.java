@@ -1,5 +1,8 @@
 package com.incrementalqol;
 
+import com.incrementalqol.config.Config;
+import com.incrementalqol.config.ConfigHandler;
+import com.incrementalqol.config.ConfigScreen;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
@@ -22,17 +25,18 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.ColorHelper;
 import org.lwjgl.glfw.GLFW;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 import java.util.*;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 
 public class EntryPointClient implements ClientModInitializer {
     public static final String MOD_ID = "incremental-qol";
-    //public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
+    public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
     public static Item harvestItem = null;
     private boolean commandsRegistered = false;
@@ -49,7 +53,8 @@ public class EntryPointClient implements ClientModInitializer {
     private KeyBinding optionsScreen;
     private KeyBinding backgroundKey;
 
-    private Boolean drawBackground = true;
+
+    private final Config config = ConfigHandler.getConfig();
 
     private int hudX = 10; // Initial X position of the HUD
     private int hudY = 10; // Initial Y position of the HUD
@@ -62,6 +67,7 @@ public class EntryPointClient implements ClientModInitializer {
         System.out.println("------- LOADING ---------");
 
         initializeKeybinds();
+
         ClientTickEvents.END_CLIENT_TICK.register(EntryPointClient::loop);
 
         MinecraftClient.getInstance().execute(() -> {
@@ -118,15 +124,15 @@ public class EntryPointClient implements ClientModInitializer {
                     }
                 }
 
-                if(drawBackground == true) {
-                    drawContext.fill(rectangleX, rectangleY, rectangleX + (size * 6), rectangleY + 5 + (15 * taskList.size()), color);
+                if(config.getHudBackground()) {
+                    drawContext.fill(config.getHudPosX(), config.getHudPosY(), config.getHudPosX() + (size * 6), config.getHudPosY() + 5 + (15 * taskList.size()), color);
                 }
                 for (int i = 0; i < taskList.size(); i++) {
 
                     if (taskList.get(i).isCompleted()) {
-                        drawContext.drawText(textRenderer, taskList.get(i).render(true), rectangleX + 2, rectangleY + 5 + (15 * i), CompletedGreen, true);
+                        drawContext.drawText(textRenderer, taskList.get(i).render(true), config.getHudPosX() + 2, config.getHudPosY() + 5 + (15 * i), CompletedGreen, true);
                     } else {
-                        drawContext.drawText(textRenderer, taskList.get(i).render(false), rectangleX + 2, rectangleY + 5 + (15 * i), toComplete, true);
+                        drawContext.drawText(textRenderer, taskList.get(i).render(false), config.getHudPosX() + 2, config.getHudPosY() + 5 + (15 * i), toComplete, true);
 
                     }
                 }
@@ -169,11 +175,11 @@ public class EntryPointClient implements ClientModInitializer {
 
         while (backgroundKey.wasPressed()) {
             assert MinecraftClient.getInstance().player != null;
-            drawBackground=!drawBackground;
+            config.setHudBackground(!config.getHudBackground());
         }
 
         while (optionsScreen.wasPressed()) {
-            MinecraftClient.getInstance().setScreen(new OptionsScreen(MinecraftClient.getInstance().currentScreen));
+            MinecraftClient.getInstance().setScreen(new ConfigScreen(MinecraftClient.getInstance().currentScreen));
         }
     }
 
