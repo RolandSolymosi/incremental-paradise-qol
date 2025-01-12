@@ -26,38 +26,39 @@ public class Task{
     private Pattern generalProgressPattern;
 
     List<Pattern> misc = List.of(
-            Pattern.compile("Clean (?<amount>\\d+) (?<type>.+) \\(?(?<progress>\\d+)"),
-            Pattern.compile("Repair (?<amount>\\d+) (?<type>.+) in .+\\((?<progress>\\d)"),
-            Pattern.compile("Sell (?<amount>\\d+\\,?\\d*) (?<type>.+) \\((?<progress>\\d+\\,?\\d*)"),
-            Pattern.compile("Gain (?<amount>\\d+\\,?\\d*) (?<type>.+) from selling.+ \\(?(?<progress>\\d+\\,?\\d*)")
+            Pattern.compile("Clean (?<amount>\\d+[km]?) (?<type>.+) \\(?(?<progress>\\d+[km]?)"),
+            Pattern.compile("Repair (?<amount>\\d+[km]?) (?<type>.+) in .+\\((?<progress>\\d[km]?)"),
+            Pattern.compile("Sell (?<amount>\\d+\\,?\\d*[km]?) (?<type>.+) \\((?<progress>\\d+\\,?\\d*[km]?)"),
+            Pattern.compile("Gain (?<amount>\\d+\\,?\\d*[km]?) (?<type>.+) from selling.+ \\(?(?<progress>\\d+\\,?\\d*[km]?)")
     );
 
     List<Pattern> games = List.of(
-            Pattern.compile("Play (?<amount>\\d+) (?<opt>.+) of (?<type>.+) \\(?(?<progress>\\d+)"),
-            Pattern.compile("Earn (?<amount>\\d+) (?<opt>.+) in (?<type>.+) \\(?(?<progress>\\d+)"),
-            Pattern.compile("Earn (?<amount>\\d+)\\s+(?<opt>.+) playing (?<type>.+) \\(?(?<progress>\\d+)")
+            Pattern.compile("Play (?<amount>\\d+[km]?) (?<opt>.+) of (?<type>.+) \\(?(?<progress>\\d+[km]?)"),
+            Pattern.compile("Earn (?<amount>\\d+[km]?) (?<opt>.+) in (?<type>.+) \\(?(?<progress>\\d+[km]?)"),
+            Pattern.compile("Earn (?<amount>\\d+[km]?)\\s+(?<opt>.+) playing (?<type>.+) \\(?(?<progress>\\d+[km]?)"),
+            Pattern.compile("Find (?<amount>\\d+[km]?) (?<opt>.+) while playing (?<type>.+) \\((?<progress>\\d+[km]?)")
     );
 
     List<Pattern> forage = List.of(
-            Pattern.compile("Collect (?<amount>\\d+\\,?\\d*) (?<type>.+) \\(?(?<progress>\\d+\\,?\\d*)")
+            Pattern.compile("Collect (?<amount>\\d+\\,?\\d*[km]?) (?<type>.+) \\(?(?<progress>\\d+\\,?\\d*[km]?)")
     );
 
     List<Pattern> combat = List.of(
-            Pattern.compile("Slay ?(?:the)?(?<type>.+) \\((?<progress>\\d+)\\/(?<amount>\\d+)"),
-            Pattern.compile("Collect (?<amount>\\d+\\,?\\d*) drops from (?<type>.+) \\(?(?<progress>\\d+\\,?\\d*)")
+            Pattern.compile("Slay ?(?:the)?(?<type>.+) \\((?<progress>\\d+[km]?)\\/(?<amount>\\d+[km]?)"),
+            Pattern.compile("Collect (?<amount>\\d+\\,?\\d*[km]?) drops from (?<type>.+) \\(?(?<progress>\\d+\\,?\\d*[km]?)")
     );
 
     List<Pattern> fish = List.of(
-            Pattern.compile("Spear (?<type>.+) without missing (?<amount>\\d+).+\\((?<progress>\\d+)"),
-            Pattern.compile("Collect (?<amount>\\d+\\,?\\d*) (?<type>.+) \\(?(?<progress>\\d+\\,?\\d*)")
+            Pattern.compile("Spear (?<type>.+) without missing (?<amount>\\d+[km]?).+\\((?<progress>\\d+[km]?)"),
+            Pattern.compile("Collect (?<amount>\\d+\\,?\\d*[km]?) (?<type>.+) \\(?(?<progress>\\d+\\,?\\d*[km]?)")
     );
 
     List<Pattern> mine = List.of(
-            Pattern.compile("Collect (?<amount>\\d+\\,?\\d*) (?<type>.+) \\(?(?<progress>\\d+\\,?\\d*)")
+            Pattern.compile("Collect (?<amount>\\d+\\,?\\d*[km]?) (?<type>.+) \\(?(?<progress>\\d+\\,?\\d*[km]?)")
     );
 
     List<Pattern> farm = List.of(
-            Pattern.compile("Harvest (?<amount>\\d+\\,?\\d*) (?<type>.+) \\(?(?<progress>\\d+\\,?\\d*)")
+            Pattern.compile("Harvest (?<amount>\\d+\\,?\\d*[km]?) (?<type>.+) \\(?(?<progress>\\d+\\,?\\d*[km]?)")
     );
 
     public Task (String name, String description, String warp, int strWidth, boolean completed, String world, String type) {
@@ -66,7 +67,7 @@ public class Task{
         this.warp=warp;
         this.strWidth = strWidth;
         this.completed=completed;
-        this.generalProgressPattern = Pattern.compile(this.name + " \\(?(?<progress>\\d+\\,?\\d*)");
+        this.generalProgressPattern = Pattern.compile(this.name + " \\(?(?<progress>\\d+\\,?\\d*[km]?)");
         this.world = world;
         this.taskType = type.trim();
 

@@ -365,6 +365,8 @@ public class EntryPointClient implements ClientModInitializer {
                     LoreComponent lore = stack.get(DataComponentTypes.LORE);
                     List<Text> text = lore.styledLines();
                     Pattern descriptorPattern = Pattern.compile("World #(?<world>\\d+)\\s*(?<type>.+)\\s*Task");
+                    Pattern questPattern = Pattern.compile("(?<type>.+) Task");
+
                     Matcher m = descriptorPattern.matcher(text.get(0).getString());
                     // TODO: support for Quest Task (has no world, only called Quest Task)
                     String world = "";
@@ -373,6 +375,13 @@ public class EntryPointClient implements ClientModInitializer {
                     if (m.find()) {
                         world = m.group("world");
                         type = m.group("type");
+                    }
+                    else {
+                        m = questPattern.matcher(text.get(0).getString());
+                        if (m.find()) {
+                            world = "-";
+                            type = m.group("type");
+                        }
                     }
 
                     String description = text.get(2).getString() + text.get(3).getString();
