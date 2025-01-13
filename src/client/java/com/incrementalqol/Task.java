@@ -1,20 +1,19 @@
 package com.incrementalqol;
 
 import net.minecraft.client.gui.hud.ClientBossBar;
-
 import java.util.List;
-import java.util.Map;
-import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class Task{
+public class Task {
     private final String name;
     private final String description;
     private final String warp;
     private final int strWidth;
     private boolean completed;
     private boolean isShiny = false;
+    private boolean isTicket = false;
+    private boolean isSocialite = false;
     private String taskType = "";
     private String targetAmount = "";
     private String taskTarget = "";
@@ -25,203 +24,95 @@ public class Task{
     private Pattern applicablePattern;
     private Pattern generalProgressPattern;
 
-    List<Pattern> misc = List.of(
+    private static final List<Pattern> MISC_PATTERNS = List.of(
             Pattern.compile("Clean (?<amount>\\d+[km]?) (?<type>.+) \\(?(?<progress>\\d+[km]?)"),
-            Pattern.compile("Repair (?<amount>\\d+[km]?) (?<type>.+) in .+\\((?<progress>\\d[km]?)"),
+            Pattern.compile("Repair (?<amount>\\d+[km]?) (?<type>.+) in .+\\((?<progress>\\d+[km]?)"),
             Pattern.compile("Sell (?<amount>\\d+\\,?\\d*[km]?) (?<type>.+) \\((?<progress>\\d+\\,?\\d*[km]?)"),
             Pattern.compile("Gain (?<amount>\\d+\\,?\\d*[km]?) (?<type>.+) from selling.+ \\(?(?<progress>\\d+\\,?\\d*[km]?)")
     );
 
-    List<Pattern> games = List.of(
+    private static final List<Pattern> GAMES_PATTERNS = List.of(
             Pattern.compile("Play (?<amount>\\d+[km]?) (?<opt>.+) of (?<type>.+) \\(?(?<progress>\\d+[km]?)"),
             Pattern.compile("Earn (?<amount>\\d+[km]?) (?<opt>.+) in (?<type>.+) \\(?(?<progress>\\d+[km]?)"),
             Pattern.compile("Earn (?<amount>\\d+[km]?)\\s+(?<opt>.+) playing (?<type>.+) \\(?(?<progress>\\d+[km]?)"),
             Pattern.compile("Find (?<amount>\\d+[km]?) (?<opt>.+) while playing (?<type>.+) \\((?<progress>\\d+[km]?)")
     );
 
-    List<Pattern> forage = List.of(
+    private static final List<Pattern> FORAGING_PATTERNS = List.of(
             Pattern.compile("Collect (?<amount>\\d+\\,?\\d*[km]?) (?<type>.+) \\(?(?<progress>\\d+\\,?\\d*[km]?)")
     );
 
-    List<Pattern> combat = List.of(
+    private static final List<Pattern> COMBAT_PATTERNS = List.of(
             Pattern.compile("Slay ?(?:the)?(?<type>.+) \\((?<progress>\\d+[km]?)\\/(?<amount>\\d+[km]?)"),
             Pattern.compile("Collect (?<amount>\\d+\\,?\\d*[km]?) drops from (?<type>.+) \\(?(?<progress>\\d+\\,?\\d*[km]?)")
     );
 
-    List<Pattern> fish = List.of(
+    private static final List<Pattern> FISHING_PATTERNS = List.of(
             Pattern.compile("Spear (?<type>.+) without missing (?<amount>\\d+[km]?).+\\((?<progress>\\d+[km]?)"),
             Pattern.compile("Collect (?<amount>\\d+\\,?\\d*[km]?) (?<type>.+) \\(?(?<progress>\\d+\\,?\\d*[km]?)")
     );
 
-    List<Pattern> mine = List.of(
+    private static final List<Pattern> MINING_PATTERNS = List.of(
             Pattern.compile("Collect (?<amount>\\d+\\,?\\d*[km]?) (?<type>.+) \\(?(?<progress>\\d+\\,?\\d*[km]?)")
     );
 
-    List<Pattern> farm = List.of(
+    private static final List<Pattern> FARMING_PATTERNS = List.of(
             Pattern.compile("Harvest (?<amount>\\d+\\,?\\d*[km]?) (?<type>.+) \\(?(?<progress>\\d+\\,?\\d*[km]?)")
     );
 
-    public Task (String name, String description, String warp, int strWidth, boolean completed, String world, String type) {
-        this.name=name;
-        this.description=description;
-        this.warp=warp;
+
+
+    public Task(String name, String description, String warp, int strWidth, boolean completed, String world, String type) {
+        this.name = name;
+        this.description = description;
+        this.warp = warp;
         this.strWidth = strWidth;
-        this.completed=completed;
+        this.completed = completed;
         this.generalProgressPattern = Pattern.compile(this.name + " \\(?(?<progress>\\d+\\,?\\d*[km]?)");
         this.world = world;
         this.taskType = type.trim();
 
-        switch(this.taskType) {
-            case "Misc": {
-                for (Pattern p : misc) {
-                    Matcher m = p.matcher(description);
+        determineTaskAttributes();
+    }
 
-                    if (m.find()) {
-                        try {
-                            this.taskTarget = m.group("type") == null ? "" : m.group("type");
-                            this.progress = m.group("progress") == null ? "" : m.group("progress");
-                            this.targetAmount = m.group("amount") == null ? "" : m.group("amount");
-                        } catch (IllegalArgumentException e) {
-                            this.taskTarget = "";
-                            this.progress = "";
-                            this.targetAmount = "";
-                        }
-                        this.applicablePattern = Pattern.compile(p.pattern().
-                                replace("(?<type>.+)", "(?<type>" + taskTarget + ")"));
-                        break;
-                    }
-                }
-            } break;
-            case "Gaming": {
-                for (Pattern p : games) {
-                    Matcher m = p.matcher(description);
+    private void determineTaskAttributes() {
+        List<Pattern> patterns = getPatternsForType();
+        for (Pattern pattern : patterns) {
+            Matcher matcher = pattern.matcher(description);
+            if (matcher.find()) {
+                extractAttributes(matcher);
+                this.applicablePattern = Pattern.compile(pattern.pattern().replace("(?<type>.+)", "(?<type>" + taskTarget + ")"));
+                break;
+            }
+        }
+    }
 
-                    if (m.find()) {
-                        String opt = "";
-                        try {
-                            this.progress = m.group("progress") == null ? "" : m.group("progress");
-                            this.targetAmount = m.group("amount") == null ? "" : m.group("amount");
-                            this.taskTarget = m.group("type") == null ? "" : m.group("type");
-                            opt = m.group("opt") == null ? "" : m.group("opt");
-                        } catch (IllegalArgumentException e) {
-                            this.taskTarget = "";
-                            this.targetAmount = "";
-                            this.progress = "";
-                        }
-                        this.applicablePattern = Pattern.compile(p.pattern().
-                                replace("(?<type>.+)", "(?<type>" + taskTarget + ")"));
-                        this.taskTarget += " " + opt;
-                        break;
-                    }
-                }
-            } break;
-            case "Combat": {
-                for (Pattern p : combat) {
-                    Matcher m = p.matcher(description);
+    private List<Pattern> getPatternsForType() {
+        return switch (this.taskType) {
+            case "Misc" -> MISC_PATTERNS;
+            case "Gaming" -> GAMES_PATTERNS;
+            case "Farming" -> FARMING_PATTERNS;
+            case "Combat" -> COMBAT_PATTERNS;
+            case "Fishing" -> FISHING_PATTERNS;
+            case "Mining" -> MINING_PATTERNS;
+            case "Foraging" -> FORAGING_PATTERNS;
+            //case "Quest" -> QUESTING_PATTERNS;
 
-                    if (m.find()) {
-                        try {
-                            this.progress = m.group("progress") == null ? "" : m.group("progress");
-                            this.taskTarget = m.group("type") == null ? "" : m.group("type");
-                            this.targetAmount = m.group("amount") == null ? "" : m.group("amount");
-                        } catch (IllegalArgumentException e) {
-                            this.taskTarget = "";
-                            this.progress = "";
-                            this.targetAmount = "";
-                        }
-                        this.applicablePattern = Pattern.compile(p.pattern().
-                                replace("(?<type>.+)", "(?<type>" + taskTarget + ")"));
-                        this.taskTarget = this.taskTarget.trim();
-                        break;
-                    }
-                }
-            } break;
-            case "Farming": {
-                for (Pattern p : farm) {
-                    Matcher m = p.matcher(description);
-                    if (m.find()) {
-                        try {
-                            this.taskTarget = m.group("type") == null ? "" : m.group("type");
-                            this.progress = m.group("progress") == null ? "" : m.group("progress");
-                            this.targetAmount = m.group("amount") == null ? "" : m.group("amount");
-                        } catch (IllegalArgumentException e) {
-                            this.taskTarget = "";
-                            this.progress = "";
-                            this.targetAmount = "";
-                        }
-                        this.applicablePattern = Pattern.compile(p.pattern().
-                                replace("(?<type>.+)", "(?<type>" + taskTarget + ")"));
-                        break;
-                    }
-                }
-            } break;
-            case "Mining": {
-                for (Pattern p : mine) {
-                    Matcher m = p.matcher(description);
+            default -> List.of();
+        };
+    }
 
-                    if (m.find()) {
-                        try {
-                            this.taskTarget = m.group("type") == null ? "" : m.group("type");
-                            this.progress = m.group("progress") == null ? "" : m.group("progress");
-                            this.targetAmount = m.group("amount") == null ? "" : m.group("amount");
-                        } catch (IllegalArgumentException e) {
-                            this.taskTarget = "";
-                            this.progress = "";
-                            this.targetAmount = "";
-                        }
-                        this.applicablePattern = Pattern.compile(p.pattern().
-                                replace("(?<type>.+)", "(?<type>" + taskTarget + ")"));
-                        break;
-                    }
-                }
-            } break;
-            case "Fishing": {
-                for (Pattern p : fish) {
-                    Matcher m = p.matcher(description);
+    private void extractAttributes(Matcher matcher) {
+        this.taskTarget = getGroupValue(matcher, "type"); //drops from Abyssal Crabs
+        this.progress = getGroupValue(matcher, "progress");
+        this.targetAmount = getGroupValue(matcher, "amount");
+    }
 
-                    if (m.find()) {
-                        try {
-                            this.taskTarget = m.group("type") == null ? "" : m.group("type");
-                            this.progress = m.group("progress") == null ? "" : m.group("progress");
-                            this.targetAmount = m.group("amount") == null ? "" : m.group("amount");
-                        } catch (IllegalArgumentException e) {
-                            this.taskTarget = "";
-                            this.progress = "";
-                            this.targetAmount = "";
-                        }
-                        this.applicablePattern = Pattern.compile(p.pattern().
-                                replace("(?<type>.+)", "(?<type>" + taskTarget + ")"));
-                        break;
-                    }
-                }
-            } break;
-            case "Foraging": {
-                for (Pattern p : forage) {
-                    Matcher m = p.matcher(description);
-
-                    if (m.find()) {
-                        try {
-                            this.taskTarget = m.group("type") == null ? "" : m.group("type");
-                            this.progress = m.group("progress") == null ? "" : m.group("progress");
-                            this.targetAmount = m.group("amount") == null ? "" : m.group("amount");
-                        } catch (IllegalArgumentException e) {
-                            this.taskTarget = "";
-                            this.progress = "";
-                            this.targetAmount = "";
-                        }
-                        this.applicablePattern = Pattern.compile(p.pattern().
-                                replace("(?<type>.+)", "(?<type>" + taskTarget + ")"));
-                        break;
-                    }
-                }
-            } break;
-            case "Quest": {
-                Matcher m = Pattern.compile(".+").matcher(description);
-
-                if (m.find()) {
-                    this.taskTarget = m.group();
-                }
-            } break;
+    private String getGroupValue(Matcher matcher, String groupName) {
+        try {
+            return matcher.group(groupName) == null ? "" : matcher.group(groupName);
+        } catch (IllegalArgumentException e) {
+            return "";
         }
     }
 
@@ -250,10 +141,10 @@ public class Task{
                     , "Molten Jellyfish", "Lavafruit");
             List<String> abyss = List.of("Wicks", "Glow Squids", "Slinkers", "Aurorium", "Twine", "Zephyr", "Abyssal Crabs", "Lampposts");
 
-            if (lush.contains(this.normalizedTaskTarget())) return "§2lush";
-            else if(veil.contains(normalizedTaskTarget())) return "§3veil";
-            else if(infernal.contains(normalizedTaskTarget())) return "§4infernal";
-            else if(abyss.contains(normalizedTaskTarget())) return "§5abyss";
+            if (lush.contains(normalizedTaskTarget())) return "§2Lush";
+            else if(veil.contains(normalizedTaskTarget())) return "§3Veil";
+            else if(infernal.contains(normalizedTaskTarget())) return "§4Infernal";
+            else if(abyss.contains(normalizedTaskTarget())) return "§5Abyss";
             else return "";
         }
     }
@@ -263,6 +154,7 @@ public class Task{
                 "§2[w" + world + (getSubLocation().isEmpty() ? "" : "-" + getSubLocation()).replaceAll("\\d", "2") + "]" :
                 "[§8w" + world + "§f" + (getSubLocation().isEmpty() ? "" : "-§d" + getSubLocation()) + "§f]";
     }
+
     public int getStrWidth() {
         return strWidth;
     }
@@ -275,10 +167,7 @@ public class Task{
         boolean matched = false;
         String data = bar.getName().getString();
         if (this.applicablePattern == null) return;
-//        Logger.getAnonymousLogger().info("=== [" + taskType + "] " + name + " (" + description + ")" + " target: " + taskTarget + " -- general: " + this.generalProgressPattern + " -- applicable: " + applicablePattern);
-//
-//        Logger.getAnonymousLogger().info("++WILL TRY TO MATCH GENERAL" + data + " AGAINST " + this.generalProgressPattern);
-//        Logger.getAnonymousLogger().info("++WILL TRY TO MATCH APPLICABLE" + data + " AGAINST " + this.applicablePattern);
+
         Matcher m = generalProgressPattern.matcher(data);
         if (!m.find()) {
             m = applicablePattern.matcher(data);
@@ -299,24 +188,29 @@ public class Task{
         else {
             this.progress = m.group("progress") == null ? "" : m.group("progress");
             matched = true;
-        }
-    }
+        }    }
 
     private String normalizedTaskTarget() {
-        if (taskTarget.isEmpty()) return taskTarget;
-        else if (taskTarget.contains("Shiny Ores")) {
-            isShiny = taskTarget.contains("Shiny Ores");
+        if (taskTarget.isEmpty()) {
+            return taskTarget;
+        }
+
+        if (taskTarget.contains("Shiny Ores")) {
+            isShiny = true; // We already know it contains "Shiny Ores"
             return taskTarget.replace(" from Shiny Ores", "");
         }
-        else if (taskTarget.contains("colored Riverfish") || taskTarget.contains("using a Fishing Spear")) {
+
+        if (taskTarget.contains("colored Riverfish") || taskTarget.contains("using a Fishing Spear")) {
             return taskTarget.replace(" colored Riverfish", " Riverfish")
                     .replace(" using a Fishing Spear", "")
                     .replace(" drops from", "");
         }
-        else if (taskTarget.contains("drops from")) {
+
+        if (taskTarget.contains("drops from")) {
             return taskTarget.replace(" drops from", "");
         }
-        else return taskTarget;
+
+        return taskTarget;
     }
 
     public String render(boolean completed) {
@@ -329,7 +223,7 @@ public class Task{
         else {
             if (completed) return
                     getLocation(true) + " " +
-                            this.taskType + ": §2" + ((isShiny) ? "Shiny" : "") + normalizedTaskTarget() +
+                            this.taskType + ": §2" + ((isShiny) ? "Shiny " : "") + normalizedTaskTarget() +
                             " (" + this.progress + "/" + this.targetAmount + ")§f";
             else return
                     getLocation(false) + " " +
