@@ -56,10 +56,6 @@ public class EntryPointClient implements ClientModInitializer {
 
     private final Config config = ConfigHandler.getConfig();
 
-    private int hudX = 10; // Initial X position of the HUD
-    private int hudY = 10; // Initial Y position of the HUD
-    private boolean dragging = false; // Whether the HUD is being dragged
-    private int dragOffsetX, dragOffsetY; // Offset between the mouse and the HUD position
 
 
     @Override
@@ -363,29 +359,52 @@ public class EntryPointClient implements ClientModInitializer {
                 if (currentItem.getName().getString().contains("Book")) {
 
                     LoreComponent lore = stack.get(DataComponentTypes.LORE);
-                    List<Text> text = lore.styledLines();
-                    Pattern descriptorPattern = Pattern.compile("World #(?<world>\\d+)\\s*(?<type>.+)\\s*Task");
+                    List<Text> text = lore.lines();
+                    Pattern descriptorPattern = Pattern.compile("(?<world>World|Nightmare) #(?<number>\\d+)\\s*(?<type>.+)\\s*Task");
                     Pattern questPattern = Pattern.compile("(?<type>.+) Task");
 
-                    Matcher m = descriptorPattern.matcher(text.get(0).getString());
+                    List<String> blocks = new ArrayList<>();
+                    StringBuilder blockBuilder = new StringBuilder();
+                    for (Text line : text)
+                    {
+                        if (Objects.equals(line.getString(), " "))
+                        {
+                            // Copy current string to the path
+                            blocks.add(blockBuilder.toString());
+                            // Reset the StringBuilder
+                            blockBuilder.setLength(0);
+                        } else {
+                            blockBuilder.append(line.getString());
+                        }
+                    }
+                    // If anything remaining in the stringBuilder put it into blocks
+                    if (!blockBuilder.isEmpty())
+                    {
+                        blocks.add(blockBuilder.toString());
+                    }
+
+                    Matcher m = descriptorPattern.matcher(blocks.getFirst());
                     // TODO: support for Quest Task (has no world, only called Quest Task)
                     String world = "";
+                    String number = "";
                     String type = "";
 
                     if (m.find()) {
+
                         world = m.group("world");
+                        number = m.group("number");
                         type = m.group("type");
                     }
                     else {
-                        m = questPattern.matcher(text.get(0).getString());
+                        m = questPattern.matcher(blocks.getFirst());
                         if (m.find()) {
                             world = "-";
                             type = m.group("type");
                         }
                     }
 
-                    String description = text.get(2).getString() + text.get(3).getString();
-                    int pixelSize = text.get(2).getString().length() + text.get(3).getString().length();
+                    String description = blocks.get(1);
+                    int pixelSize = blocks.get(1).length();
                     Task newTask = new Task(name.getString(), description, "/warp ", pixelSize, false, world, type);
 
                     if (currentItem.getName().getString().contains("Written")) {
