@@ -15,7 +15,7 @@
 	"icon": "template-mod/icon.png",
 	"environment": "client",
 	"entrypoints": {
-		"client": ["com.incrementalqol.EntryPointClient"]
+		"client": ["com.incrementalqol.EntryPointClient", "com.incrementalqol.AutoBank"]
 	},
 	"mixins": [
 		"incremental-qol.client.mixins.json"
