@@ -10,11 +10,16 @@ import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import org.lwjgl.glfw.GLFW;
 import net.minecraft.screen.slot.SlotActionType;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public class AutoBank implements ClientModInitializer {
 
+	private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+
 	private static KeyBinding autoBank;
-	private static int autoDepositState = 0; // 0 not depositing, 1 depositing, 2 already deposited
+	private static int autoDepositState = 0; // 0 not depositing, 1 depositing
 
 	public static void sendMenuOpenInteraction(MinecraftClient client)
 	{
@@ -24,9 +29,14 @@ public class AutoBank implements ClientModInitializer {
 			return;
 		}
 
-		autoDepositState = 1;
-		player.networkHandler.sendChatCommand("bank");
-	}
+		if (autoDepositState != 1){
+			autoDepositState = 1;
+			player.networkHandler.sendChatCommand("bank");
+			scheduler.schedule(() -> {
+				autoDepositState = 0;
+			}, 500, TimeUnit.MILLISECONDS);
+		}
+    }
 
 	public static void handleOpenedMenu(MinecraftClient client){
 		if (autoDepositState == 0 || client.interactionManager == null || client.player == null) {
@@ -45,24 +55,8 @@ public class AutoBank implements ClientModInitializer {
 				return;
 			}
 
-			if (autoDepositState == 1) {
-				int mouseButton = 0; // 0 for left click, 1 for right click
-				SlotActionType clickType = SlotActionType.PICKUP; // Replace with your desired click type
-				client.interactionManager.clickSlot(screen.getScreenHandler().syncId, slotId, mouseButton, clickType, client.player);
-
-				if (slotId == 23) {
-					autoDepositState = 2;
-				}
-
-				client.setScreen(null);
-			}
-			else if (autoDepositState == 2) {
-				autoDepositState = 0;
-				client.setScreen(null);
-			}
-		}
-		else{
-			autoDepositState = 0;
+			client.interactionManager.clickSlot(screen.getScreenHandler().syncId, slotId, 0, SlotActionType.PICKUP, client.player);
+			client.setScreen(null);
 		}
 	}
 
