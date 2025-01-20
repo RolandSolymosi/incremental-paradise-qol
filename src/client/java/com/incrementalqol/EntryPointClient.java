@@ -10,18 +10,22 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
+import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screen.TaskScreen;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
 import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.LoreComponent;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.ColorHelper;
 import org.lwjgl.glfw.GLFW;
@@ -30,6 +34,9 @@ import org.slf4j.LoggerFactory;
 
 
 import java.util.*;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -44,14 +51,16 @@ public class EntryPointClient implements ClientModInitializer {
     public static List<Task> taskList = new ArrayList<>();
     private static Screen previousScreen = null;
 
+    private static Map<KeyBinding, String> loadoutKeyBindings;
 
-    private KeyBinding loadout1;
-    private KeyBinding loadout2;
-    private KeyBinding loadout3;
-    private KeyBinding loadout4;
-    private KeyBinding loadout5;
-    private KeyBinding optionsScreen;
-    private KeyBinding backgroundKey;
+    private static final ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(1);
+    private static KeyBinding autoBank;
+    private static int autoDepositState = 0; // 0 not depositing, 1 depositing
+
+
+
+    private static KeyBinding taskWarp;
+    private static KeyBinding optionsScreen;
 
 
     private final Config config = ConfigHandler.getConfig();
@@ -69,7 +78,7 @@ public class EntryPointClient implements ClientModInitializer {
         MinecraftClient.getInstance().execute(() -> {
             ClientTickEvents.END_CLIENT_TICK.register(client -> {
 
-                keybindCheck();
+                keybindCheck(MinecraftClient.getInstance());
 
                 if (ClientCommandManager.getActiveDispatcher() != null && !commandsRegistered) {
                     System.out.println("Registering commands....");
@@ -99,6 +108,13 @@ public class EntryPointClient implements ClientModInitializer {
             }
         });
 
+        ClientTickEvents.END_CLIENT_TICK.register(EntryPointClient::keybindCheck);
+
+        ScreenEvents.AFTER_INIT.register((client, screen, scaledWidth, scaledHeight) -> {
+            if (screen instanceof GenericContainerScreen) {
+                handleOpenedMenu(client);
+            }
+        });
 
 
         HudRenderCallback.EVENT.register(((drawContext, renderTickCounter) -> {
@@ -120,62 +136,98 @@ public class EntryPointClient implements ClientModInitializer {
                     }
                 }
 
+                if(config.getSortedByType()){
+                    taskList.sort(Comparator.comparing(Task::getTaskType));
+                }
+
+
+                float scaleFactor = (float) config.getHudScale();
+
+                MatrixStack matrixStack = drawContext.getMatrices();
+                matrixStack.push();
+                matrixStack.scale(scaleFactor, scaleFactor, scaleFactor);
+
+
                 if(config.getHudBackground()) {
-                    drawContext.fill(config.getHudPosX(), config.getHudPosY(), config.getHudPosX() + (size * 6), config.getHudPosY() + 5 + (15 * taskList.size()), color);
+                    drawContext.fill(config.getHudPosX(), config.getHudPosY(), config.getHudPosX() + ((size+1) * 5), config.getHudPosY() + 5 + (15 * taskList.size()), color);
                 }
                 for (int i = 0; i < taskList.size(); i++) {
 
                     if (taskList.get(i).isCompleted()) {
+
                         drawContext.drawText(textRenderer, taskList.get(i).render(true), config.getHudPosX() + 2, config.getHudPosY() + 5 + (15 * i), CompletedGreen, true);
                     } else {
                         drawContext.drawText(textRenderer, taskList.get(i).render(false), config.getHudPosX() + 2, config.getHudPosY() + 5 + (15 * i), toComplete, true);
 
                     }
                 }
+                matrixStack.pop();
             }
         }));
     }
+    public static void sendMenuOpenInteraction(MinecraftClient client)
+    {
+        var player = client.player;
 
-    private void keybindCheck() {
-
-        while (loadout1.wasPressed()) {
-            assert MinecraftClient.getInstance().player != null;
-            MinecraftClient.getInstance().player.networkHandler.sendCommand("wardrobe 1");
-            MinecraftClient.getInstance().player.networkHandler.sendCommand("pets 1");
-
-        }
-        while (loadout2.wasPressed()) {
-            assert MinecraftClient.getInstance().player != null;
-            MinecraftClient.getInstance().player.networkHandler.sendCommand("wardrobe 2");
-            MinecraftClient.getInstance().player.networkHandler.sendCommand("pets 2");
-
-        }
-        while (loadout3.wasPressed()) {
-            assert MinecraftClient.getInstance().player != null;
-            MinecraftClient.getInstance().player.networkHandler.sendCommand("wardrobe 3");
-            MinecraftClient.getInstance().player.networkHandler.sendCommand("pets 3");
-
-        }
-        while (loadout4.wasPressed()) {
-            assert MinecraftClient.getInstance().player != null;
-            MinecraftClient.getInstance().player.networkHandler.sendCommand("wardrobe 4");
-            MinecraftClient.getInstance().player.networkHandler.sendCommand("pets 4");
-
-        }
-        while (loadout5.wasPressed()) {
-            assert MinecraftClient.getInstance().player != null;
-            MinecraftClient.getInstance().player.networkHandler.sendCommand("wardrobe 5");
-            MinecraftClient.getInstance().player.networkHandler.sendCommand("pets 5");
-
+        if (player == null){
+            return;
         }
 
-        while (backgroundKey.wasPressed()) {
-            assert MinecraftClient.getInstance().player != null;
-            config.setHudBackground(!config.getHudBackground());
+        if (autoDepositState != 1){
+            autoDepositState = 1;
+            player.networkHandler.sendChatCommand("bank");
+            scheduler.schedule(() -> {
+                autoDepositState = 0;
+            }, 500, TimeUnit.MILLISECONDS);
         }
+    }
+
+    public static void handleOpenedMenu(MinecraftClient client){
+        if (autoDepositState == 0 || client.interactionManager == null || client.player == null) {
+            return;
+        }
+
+        if (client.currentScreen instanceof GenericContainerScreen screen) {
+            int slotId;
+            if (screen.getTitle().getString().contains("Bank")) {
+                slotId = 21;
+            }
+            else if (screen.getTitle().getString().contains("Safe")){
+                slotId = 23;
+            }
+            else {
+                return;
+            }
+
+            client.interactionManager.clickSlot(screen.getScreenHandler().syncId, slotId, 0, SlotActionType.PICKUP, client.player);
+            client.setScreen(null);
+        }
+    }
+    private static void keybindCheck(MinecraftClient minecraftClient) {
+
+        loadoutKeyBindings.forEach(((keyBinding, loadout) ->{
+            while (keyBinding.wasPressed()){
+                assert MinecraftClient.getInstance().player != null;
+                MinecraftClient.getInstance().player.networkHandler.sendCommand("wardrobe " + loadout);
+                MinecraftClient.getInstance().player.networkHandler.sendCommand("pets " + loadout);
+            }
+        } ));
 
         while (optionsScreen.wasPressed()) {
             MinecraftClient.getInstance().setScreen(new ConfigScreen(MinecraftClient.getInstance().currentScreen));
+        }
+
+        while (taskWarp.wasPressed()){
+            Optional<Task> firstIncompleteTask = taskList.stream()
+                    .filter(task -> !task.isCompleted())
+                    .findFirst();
+            assert MinecraftClient.getInstance().player != null;
+            MinecraftClient.getInstance().player.networkHandler.sendCommand(firstIncompleteTask.get().getWarp());
+        }
+
+        while (autoBank.wasPressed()) {
+            assert MinecraftClient.getInstance().player != null;
+            sendMenuOpenInteraction(MinecraftClient.getInstance());
         }
     }
 
@@ -291,50 +343,33 @@ public class EntryPointClient implements ClientModInitializer {
 
     private void initializeKeybinds() {
 
-        loadout1 = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-                "Equip Loadout 1",
-                InputUtil.Type.KEYSYM,
-                GLFW.GLFW_KEY_KP_1,
-                "Incremental QOL"
-        ));
+        loadoutKeyBindings = Map.of(
+                KeyBindingHelper.registerKeyBinding(new KeyBinding("Equip Loadout 1", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_KP_1, "Incremental QOL")), "1",
+                KeyBindingHelper.registerKeyBinding(new KeyBinding("Equip Loadout 2", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_KP_2, "Incremental QOL")), "2",
+                KeyBindingHelper.registerKeyBinding(new KeyBinding("Equip Loadout 3", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_KP_3, "Incremental QOL")), "3",
+                KeyBindingHelper.registerKeyBinding(new KeyBinding("Equip Loadout 4", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_KP_4, "Incremental QOL")), "4",
+                KeyBindingHelper.registerKeyBinding(new KeyBinding("Equip Loadout 5", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_KP_5, "Incremental QOL")), "5"
+        );
 
-        loadout2 = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-                "Equip Loadout 2",
-                InputUtil.Type.KEYSYM,
-                GLFW.GLFW_KEY_KP_2,
-                "Incremental QOL"
-        ));
-
-        loadout3 = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-                "Equip Loadout 3",
-                InputUtil.Type.KEYSYM,
-                GLFW.GLFW_KEY_KP_3,
-                "Incremental QOL"
-        ));
-        loadout4 = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-                "Equip Loadout 4",
-                InputUtil.Type.KEYSYM,
-                GLFW.GLFW_KEY_KP_4,
-                "Incremental QOL"
-        ));
-        loadout5 = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-                "Equip Loadout 5",
-                InputUtil.Type.KEYSYM,
-                GLFW.GLFW_KEY_KP_5,
-                "Incremental QOL"
-        ));
-
-        backgroundKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-                "Toggle Task HUD Background",
-                InputUtil.Type.KEYSYM,
-                GLFW.GLFW_KEY_MINUS,
-                "Incremental QOL"
-        ));
 
         optionsScreen = KeyBindingHelper.registerKeyBinding(new KeyBinding(
                 "Options Screen",
                 InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_O,
+                "Incremental QOL"
+        ));
+
+        autoBank = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+                "Auto Bank",
+                InputUtil.Type.KEYSYM,
+                GLFW.GLFW_KEY_B,
+                "Incremental QOL"
+        ));
+
+        taskWarp = KeyBindingHelper.registerKeyBinding(new KeyBinding(
+                "Warp to Task Location",
+                InputUtil.Type.KEYSYM,
+                GLFW.GLFW_KEY_R,
                 "Incremental QOL"
         ));
 
@@ -344,76 +379,124 @@ public class EntryPointClient implements ClientModInitializer {
         if (!(screen instanceof GenericContainerScreen containerScreen)) {
             return;
         }
+
         Inventory inventory = containerScreen.getScreenHandler().getInventory();
         if (inventory.isEmpty()) {
             return;
         }
+
         if (Objects.equals(containerScreen.getTitle().getString(), "Tasks")) {
             int inventorySize = inventory.size();
             taskList.clear();
+
             for (int i = 0; i < inventorySize; i++) {
-                ItemStack stack = inventory.getStack(i); // Get the item stack
-                Item currentItem = stack.getItem(); // Get the item
-
-                Text name = stack.getName(); // Get the display name
-                if (currentItem.getName().getString().contains("Book")) {
-
-                    LoreComponent lore = stack.get(DataComponentTypes.LORE);
-                    List<Text> text = lore.lines();
-                    Pattern descriptorPattern = Pattern.compile("(?<world>World|Nightmare) #(?<number>\\d+)\\s*(?<type>.+)\\s*Task");
-                    Pattern questPattern = Pattern.compile("(?<type>.+) Task");
-
-                    List<String> blocks = new ArrayList<>();
-                    StringBuilder blockBuilder = new StringBuilder();
-                    for (Text line : text)
-                    {
-                        if (Objects.equals(line.getString(), " "))
-                        {
-                            // Copy current string to the path
-                            blocks.add(blockBuilder.toString());
-                            // Reset the StringBuilder
-                            blockBuilder.setLength(0);
-                        } else {
-                            blockBuilder.append(line.getString());
-                        }
-                    }
-                    // If anything remaining in the stringBuilder put it into blocks
-                    if (!blockBuilder.isEmpty())
-                    {
-                        blocks.add(blockBuilder.toString());
-                    }
-
-                    Matcher m = descriptorPattern.matcher(blocks.getFirst());
-                    // TODO: support for Quest Task (has no world, only called Quest Task)
-                    String world = "";
-                    String number = "";
-                    String type = "";
-
-                    if (m.find()) {
-
-                        world = m.group("world");
-                        number = m.group("number");
-                        type = m.group("type");
-                    }
-                    else {
-                        m = questPattern.matcher(blocks.getFirst());
-                        if (m.find()) {
-                            world = "-";
-                            type = m.group("type");
-                        }
-                    }
-
-                    String description = blocks.get(1);
-                    int pixelSize = blocks.get(1).length();
-                    Task newTask = new Task(name.getString(), description, "/warp ", pixelSize, false, world, type);
-
-                    if (currentItem.getName().getString().contains("Written")) {
-                        newTask.setCompleted();
-                    }
-                    taskList.add(newTask);
+                ItemStack stack = inventory.getStack(i);
+                if (isTaskBook(stack)) {
+                    processTaskBook(stack);
+                }
+                else if(isPlayerHead(stack)){
+                    processTicketTask(stack);
                 }
             }
         }
+    }
+
+    private static boolean isTaskBook(ItemStack stack) {
+        Item currentItem = stack.getItem();
+        return currentItem.getName().getString().contains("Book");
+    }
+
+    private static boolean isPlayerHead(ItemStack stack) {
+        Item currentItem = stack.getItem();
+        return currentItem.getName().getString().contains("Head");
+    }
+
+
+    private static void processTicketTask(ItemStack stack) {
+        LoreComponent lore = stack.get(DataComponentTypes.LORE);
+        List<Text> text = lore.lines();
+        List<String> blocks = parseLoreLines(text);
+
+
+        if (blocks.get(0).contains("Ticket Task")) {
+            String[] taskDetails = extractTaskDetails(blocks.get(0));
+
+            String description = blocks.size() > 1 ? blocks.get(1) : "";
+
+            String world = taskDetails[0];
+            String number = taskDetails[1];
+            String type = taskDetails[2];
+
+            Task newTask = new Task(stack.getName().getString(), description, "/warp ", 1, false, world, number, type,true);
+            if (stack.getItem().getName().getString().contains("Written")) {
+                newTask.setCompleted();
+            }
+            taskList.add(newTask);
+        }
+    }
+
+    private static void processTaskBook(ItemStack stack) {
+        LoreComponent lore = stack.get(DataComponentTypes.LORE);
+        List<Text> text = lore.lines();
+        List<String> blocks = parseLoreLines(text);
+
+        String[] taskDetails = extractTaskDetails(blocks.get(0));
+        String description = blocks.size() > 1 ? blocks.get(1) : "";
+
+        String world = taskDetails[0];
+        String number = taskDetails[1];
+        String type = taskDetails[2];
+
+        LOGGER.warn(type + " xDDDDDD");
+
+        Task newTask = new Task(stack.getName().getString(), description, "/warp ", 1, false, world, number, type,false);
+        if (stack.getItem().getName().getString().contains("Written")) {
+            newTask.setCompleted();
+        }
+        taskList.add(newTask);
+    }
+
+    private static List<String> parseLoreLines(List<Text> text) {
+        List<String> blocks = new ArrayList<>();
+        StringBuilder blockBuilder = new StringBuilder();
+        for (Text line : text) {
+            if (line.getString().equals(" ")) {
+                blocks.add(blockBuilder.toString());
+                blockBuilder.setLength(0);
+            } else {
+                blockBuilder.append(line.getString());
+            }
+        }
+        if (!blockBuilder.isEmpty()) {
+            blocks.add(blockBuilder.toString());
+        }
+        return blocks;
+    }
+
+
+    private static String[] extractTaskDetails(String block) {
+        String world = "";
+        String number = "";
+        String type = "";
+
+        if (block.contains("World") || block.contains("Nightmare")) {
+            Pattern descriptorPattern = Pattern.compile("(?<world>World|Nightmare) #(?<number>\\d+)\\s*(?<type>.+)\\s*Task");
+            Matcher m = descriptorPattern.matcher(block);
+            if (m.find()) {
+                world = m.group("world");
+                number = m.group("number");
+                type = m.group("type");
+            }
+        } else {
+            Pattern questPattern = Pattern.compile("(?<type>.+) Task");
+            Matcher m = questPattern.matcher(block);
+            if (m.find()) {
+                world = "-";
+                type = m.group("type");
+            }
+        }
+
+        return new String[] {world, number, type};
     }
 
     public static void loop(MinecraftClient client) {

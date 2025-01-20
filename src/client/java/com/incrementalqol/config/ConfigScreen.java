@@ -6,6 +6,9 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.tooltip.Tooltip;
 import net.minecraft.client.gui.widget.ButtonWidget;
 import net.minecraft.client.gui.widget.CheckboxWidget;
+import net.minecraft.client.gui.widget.SliderWidget;
+import net.minecraft.client.search.SearchManager;
+import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,17 +28,10 @@ public class ConfigScreen extends Screen {
 
     public ButtonWidget button1;
     public CheckboxWidget button2;
-    private static final int WINDOW_WIDTH = 200;
-    private static final int WINDOW_HEIGHT = 100;
-    private static final int HEADER_HEIGHT = 20;
+    public CheckboxWidget button3;
 
-    private int windowX = 100;
-    private int windowY = 100;
-    private boolean isDragging = false;
-    private int dragOffsetX = 0;
-    private int dragOffsetY = 0;
-    private static int buttonXPosition = 100;
-    private static int buttonYPosition = 100;
+    public SliderWidget scaleSlider;
+
 
     @Override
     protected void init() {
@@ -46,19 +42,41 @@ public class ConfigScreen extends Screen {
 
         })
                 .dimensions(width/2 - 200,20,200,20)
-                .position(buttonXPosition, buttonYPosition)
+                .position(15, 20)
                 .tooltip(Tooltip.of(Text.literal("Tooltip of Button 1")))
                 .build();
+
 
         button2 = CheckboxWidget.builder(Text.literal("HUD Background"),textRenderer)
                 .checked(config.getHudBackground())
                 .callback((button2,checked) -> {
                     config.setHudBackground(checked);
         }).build();
-        button2.setPosition(10,10);
+        button2.setPosition(15,50);
+
+        scaleSlider = new ScaleWidget(15,80,100,30,Text.literal("Scale"),config.getHudScale(),0.5,2) {
+            {
+                this.updateMessage();
+            }
+
+
+            @Override
+            protected void applyValue() {
+            config.setHudScale(this.snapToStep(min + (this.value * (max - min))));
+            }
+        };
+
+        button3 = CheckboxWidget.builder(Text.literal("Sort By Task Type"),textRenderer)
+                .checked(config.getSortedByType())
+                .callback((button3,checked) -> {
+                    config.setSortedByType(checked);
+                }).build();
+        button3.setPosition(15,140);
 
         addDrawableChild(button1);
         addDrawableChild(button2);
+        addDrawableChild(scaleSlider);
+        addDrawableChild(button3);
 
     }
     @Override

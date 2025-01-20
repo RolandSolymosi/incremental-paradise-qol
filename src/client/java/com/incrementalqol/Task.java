@@ -8,8 +8,9 @@ import java.util.regex.Pattern;
 public class Task {
     private final String name;
     private final String description;
-    private final String warp;
-    private final int strWidth;
+    private String warp;
+    private int strWidth;
+    private final String number;
     private boolean completed;
     private boolean isShiny = false;
     private boolean isTicket = false;
@@ -23,6 +24,9 @@ public class Task {
 
     private Pattern applicablePattern;
     private Pattern generalProgressPattern;
+
+    private static final Pattern COLOR_CODE_PATTERN = Pattern.compile("§.");
+
 
     private static final List<Pattern> MISC_PATTERNS = List.of(
             Pattern.compile("Clean (?<amount>\\d+[km]?) (?<type>.+) \\(?(?<progress>\\d+[km]?)"),
@@ -62,7 +66,7 @@ public class Task {
 
 
 
-    public Task(String name, String description, String warp, int strWidth, boolean completed, String world, String type) {
+    public Task(String name, String description, String warp, int strWidth, boolean completed, String world,String number, String type,boolean isTicket) {
         this.name = name;
         this.description = description;
         this.warp = warp;
@@ -70,7 +74,9 @@ public class Task {
         this.completed = completed;
         this.generalProgressPattern = Pattern.compile(this.name + " \\(?(?<progress>\\d+\\,?\\d*[km]?)");
         this.world = world;
+        this.number = number;
         this.taskType = type.trim();
+        this.isTicket = isTicket;
 
         determineTaskAttributes();
     }
@@ -128,9 +134,11 @@ public class Task {
         return description;
     }
 
-    public String getWarp(boolean completed) {
+    public String getWarp() {
         return warp;
     }
+
+    public String getTaskType(){ return taskType; }
 
     private String getSubLocation() {
         if (this.world.equals("1")) return "";
@@ -150,9 +158,18 @@ public class Task {
     }
 
     private String getLocation(boolean completed) {
-        return (completed) ?
-                "§2[w" + world + (getSubLocation().isEmpty() ? "" : "-" + getSubLocation()).replaceAll("\\d", "2") + "]" :
-                "[§8w" + world + "§f" + (getSubLocation().isEmpty() ? "" : "-§d" + getSubLocation()) + "§f]";
+
+        return switch (this.world) {
+            case "World" -> (completed) ?
+                    "§2[w" + number + (getSubLocation().isEmpty() ? "" : "-" + getSubLocation()).replaceAll("\\d", "2") + "]" :
+                    "[§8w" + number + "§f" + (getSubLocation().isEmpty() ? "" : "-§d" + getSubLocation()) + "§f]";
+            case "Nightmare" -> (completed) ?
+                    "§2[nm" + number + (getSubLocation().isEmpty() ? "" : "-" + getSubLocation()).replaceAll("\\d", "2") + "]" :
+                    "[§8nm" + number + "§f" + (getSubLocation().isEmpty() ? "" : "-§d" + getSubLocation()) + "§f]";
+            default -> "";
+        };
+
+
     }
 
     public int getStrWidth() {
@@ -168,7 +185,15 @@ public class Task {
         String data = bar.getName().getString();
         if (this.applicablePattern == null) return;
 
+
+        Pattern warpPattern = Pattern.compile("/warp\\s+\\S+");
+        Matcher warpMatcher = warpPattern.matcher(data);
+        if(warpMatcher.find()) {this.warp = warpMatcher.group().replace("/","");}
+
+
         Matcher m = generalProgressPattern.matcher(data);
+
+
         if (!m.find()) {
             m = applicablePattern.matcher(data);
             if (m.find()) {
@@ -214,21 +239,39 @@ public class Task {
     }
 
     public String render(boolean completed) {
+        String renderedString;
+
+
         if (taskType.equals("Quest")) {
-            if (completed) return
-                    "§2[" + world + "]" + this.taskType + ": §2" + name +")§f";
-            else return
-                    "[§8" + world + "§f]" + this.taskType + ": §6§n" + name +")§f";
+            if (completed) {
+                renderedString = "§2[" + world + "]" + this.taskType + ": §2" + name + ")§f";
+            } else {
+                renderedString = "[§8" + world + "§f]" + this.taskType + ": §6§n" + name + ")§f";
+            }
+        } else {
+            if (completed) {
+                renderedString = getLocation(true) + " " +
+                        this.taskType + ": §2" + (isShiny ? "Shiny " : "") + normalizedTaskTarget() +
+                        " (" + this.progress + "/" + this.targetAmount + ")§f";
+            } else {
+                renderedString = getLocation(false) + " " +
+                        this.taskType + ": §6§n" + (isShiny ? "Shiny " : "") + normalizedTaskTarget() +
+                        "§r (§9" + this.progress + "§f/§c" + this.targetAmount + "§f)";
+            }
         }
-        else {
-            if (completed) return
-                    getLocation(true) + " " +
-                            this.taskType + ": §2" + ((isShiny) ? "Shiny " : "") + normalizedTaskTarget() +
-                            " (" + this.progress + "/" + this.targetAmount + ")§f";
-            else return
-                    getLocation(false) + " " +
-                            this.taskType + ": §6§n" + ((isShiny) ? "Shiny " : "") + normalizedTaskTarget() +
-                            "§r (§9" + this.progress + "§f/§c" + this.targetAmount + "§f)";
+
+
+        calculateDisplayLength(renderedString);
+
+        if (isTicket){
+            return renderedString.replaceAll("§[0-9a-fA-F]", "§5");
         }
+        return renderedString;
+    }
+
+    private void calculateDisplayLength(String input) {
+        // Remove color codes and return the length of the cleaned string
+        String cleanedInput = COLOR_CODE_PATTERN.matcher(input).replaceAll("");
+        this.strWidth=  cleanedInput.length();
     }
 }
