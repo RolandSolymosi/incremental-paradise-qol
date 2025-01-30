@@ -1,6 +1,6 @@
 package com.incrementalqol.mixins;
 
-import com.incrementalqol.EntryPointClient;
+import com.incrementalqol.modules.TaskTracker.TaskTrackerModule;
 import org.spongepowered.asm.mixin.*;
 import org.spongepowered.asm.mixin.injection.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -24,7 +24,7 @@ public class TaskProgressMixin {
     private void onRender(DrawContext ctx, CallbackInfo ci) {
         if (bossBars != null && !bossBars.isEmpty()) {
             bossBars.forEach((uuid, bar) -> {
-                EntryPointClient.taskList.forEach(task -> {
+                TaskTrackerModule.taskList.forEach(task -> {
                     task.bossBarForTask(bar);
                 });
             });

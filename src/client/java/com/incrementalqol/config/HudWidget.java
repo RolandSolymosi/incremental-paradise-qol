@@ -8,7 +8,7 @@ import net.minecraft.text.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static com.incrementalqol.EntryPointClient.MOD_ID;
+import static com.incrementalqol.modules.OptionsModule.MOD_ID;
 
 public class HudWidget extends ClickableWidget {
 

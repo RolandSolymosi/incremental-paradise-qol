@@ -1,4 +1,4 @@
-package com.incrementalqol;
+package com.incrementalqol.modules.TaskTracker;
 
 import net.minecraft.client.gui.hud.ClientBossBar;
 import java.util.List;

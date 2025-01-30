@@ -11,11 +11,11 @@ import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
-import java.util.Optional;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import static com.incrementalqol.EntryPointClient.MOD_ID;
+import static com.incrementalqol.modules.OptionsModule.MOD_ID;
 
 public class ConfigHandler {
 
