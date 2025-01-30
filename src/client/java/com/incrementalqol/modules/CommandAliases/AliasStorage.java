@@ -1,4 +1,4 @@
-package com.incrementalqol;
+package com.incrementalqol.modules.CommandAliases;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;

@@ -15,7 +15,13 @@
 	"icon": "template-mod/icon.png",
 	"environment": "client",
 	"entrypoints": {
-		"client": ["com.incrementalqol.EntryPointClient"]
+		"client": [
+			"com.incrementalqol.modules.DepositHotkey.DepositHotkeyModule",
+			"com.incrementalqol.modules.TaskTracker.TaskTrackerModule",
+			"com.incrementalqol.modules.CommandAliases.CommandAliasModule",
+			"com.incrementalqol.modules.Loadouts.LoadoutsModule",
+			"com.incrementalqol.modules.OptionsModule"
+		]
 	},
 	"mixins": [
 		"incremental-qol.client.mixins.json"

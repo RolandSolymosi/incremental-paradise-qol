@@ -23,7 +23,6 @@ loom {
 
 	mods {
 		"incremental-qol" {
-			sourceSet sourceSets.main
 			sourceSet sourceSets.client
 		}
 	}
