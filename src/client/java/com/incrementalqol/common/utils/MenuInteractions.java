@@ -3,6 +3,7 @@ package com.incrementalqol.common.utils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
 import net.minecraft.item.ItemStack;
+import net.minecraft.screen.slot.SlotActionType;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.concurrent.CompletableFuture;
@@ -24,13 +25,11 @@ public class MenuInteractions {
         CompletableFuture<Boolean> future = new CompletableFuture<>();
         if (screen != client.currentScreen){
             future.complete(false);
-            return future;
         }
         else if (screen.getScreenHandler().getInventory().isEmpty()){
             client.execute(() -> {
                 TryWaitInventoryLoad(client, screen).thenAccept(future::complete);
             });
-            return future;
         }
         else{
             future.complete(true);
@@ -58,5 +57,28 @@ public class MenuInteractions {
             }
         });
         return future;
+    }
+
+    public static void ClickSlot(MinecraftClient client, GenericContainerScreen screen, int slotId, Button button, SlotActionType slotActionType){
+        if (client.interactionManager == null){
+            return;
+        }
+
+        client.interactionManager.clickSlot(screen.getScreenHandler().syncId, slotId, button.numVal, slotActionType, client.player);
+    }
+
+    public enum Button{
+        Left(0),
+        Right(1);
+
+        private int numVal;
+
+        Button(int numVal) {
+            this.numVal = numVal;
+        }
+
+        public int getNumVal() {
+            return numVal;
+        }
     }
 }

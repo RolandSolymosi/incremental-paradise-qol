@@ -81,7 +81,7 @@ public class DepositHotkeyModule implements ClientModInitializer {
 			autoDepositOngoing = false;
 			return;
 		}
-		client.interactionManager.clickSlot(screen.getScreenHandler().syncId, 21, 0, SlotActionType.PICKUP, client.player);
+		MenuInteractions.ClickSlot(client, screen, 21, MenuInteractions.Button.Left, SlotActionType.PICKUP);
 		MenuInteractions.Hide(client);
 	}
 
@@ -100,7 +100,7 @@ public class DepositHotkeyModule implements ClientModInitializer {
 				}
 				var nothingToDeposit = loreComponent.lines().getLast().getString().equals("You have no items to deposit");
 				if (!nothingToDeposit){
-					client.interactionManager.clickSlot(screen.getScreenHandler().syncId, 23, 0, SlotActionType.PICKUP, client.player);
+					MenuInteractions.ClickSlot(client, screen, 23, MenuInteractions.Button.Left, SlotActionType.PICKUP);
 					MenuInteractions.Hide(client);
 				}
 				else {
