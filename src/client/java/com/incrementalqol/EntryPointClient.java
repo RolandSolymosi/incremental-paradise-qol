@@ -217,12 +217,21 @@ public class EntryPointClient implements ClientModInitializer {
             MinecraftClient.getInstance().setScreen(new ConfigScreen(MinecraftClient.getInstance().currentScreen));
         }
 
-        while (taskWarp.wasPressed()){
+        while (taskWarp.wasPressed()) {
             Optional<Task> firstIncompleteTask = taskList.stream()
                     .filter(task -> !task.isCompleted())
                     .findFirst();
-            assert MinecraftClient.getInstance().player != null;
-            MinecraftClient.getInstance().player.networkHandler.sendCommand(firstIncompleteTask.get().getWarp());
+
+            firstIncompleteTask.ifPresentOrElse(
+                    task -> {
+                        assert MinecraftClient.getInstance().player != null;
+                        MinecraftClient.getInstance().player.networkHandler.sendCommand(task.getWarp().replace(")", ""));
+                    },
+                    () -> {
+                        assert MinecraftClient.getInstance().player != null;
+                        MinecraftClient.getInstance().player.sendMessage(Text.literal("No incomplete tasks available."), false);
+                    }
+            );
         }
 
         while (autoBank.wasPressed()) {
@@ -480,7 +489,7 @@ public class EntryPointClient implements ClientModInitializer {
         String type = "";
 
         if (block.contains("World") || block.contains("Nightmare")) {
-            Pattern descriptorPattern = Pattern.compile("(?<world>World|Nightmare) #(?<number>\\d+)\\s*(?<type>.+)\\s*Task");
+            Pattern descriptorPattern = Pattern.compile("(?<world>World|Nightmare) #(?<number>\\d+)\\s*(?<type>.+?)\\s*Task");
             Matcher m = descriptorPattern.matcher(block);
             if (m.find()) {
                 world = m.group("world");
