@@ -1,9 +1,12 @@
 package com.incrementalqol.modules.TaskTracker;
 
+import com.incrementalqol.common.utils.MenuInteractions;
+import com.incrementalqol.common.utils.ScreenInteraction;
 import com.incrementalqol.config.Config;
 import com.incrementalqol.config.ConfigHandler;
 import com.incrementalqol.config.ConfigScreen;
 import com.incrementalqol.modules.CommandAliases.AliasStorage;
+import com.incrementalqol.modules.DepositHotkey.DepositHotkeyModule;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
@@ -11,6 +14,7 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
+import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.screen.Screen;
@@ -24,6 +28,7 @@ import net.minecraft.component.type.LoreComponent;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.ColorHelper;
 import org.lwjgl.glfw.GLFW;
@@ -40,14 +45,12 @@ public class TaskTrackerModule implements ClientModInitializer {
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
     public static List<Task> taskList = new ArrayList<>();
-    private static Screen previousScreen = null;
 
     private static KeyBinding taskWarp;
 
-
     private final Config config = ConfigHandler.getConfig();
 
-
+    private ScreenInteraction screenInteraction;
 
     @Override
     public void onInitializeClient() {
@@ -55,14 +58,22 @@ public class TaskTrackerModule implements ClientModInitializer {
 
         initializeKeybinds();
 
-        ClientTickEvents.END_CLIENT_TICK.register(TaskTrackerModule::loop);
+        screenInteraction = new ScreenInteraction.ScreenInteractionBuilder(
+                s -> s instanceof GenericContainerScreen containerScreen && containerScreen.getTitle().getString().equals("Tasks"),
+                s -> false,
+                TaskTrackerModule::parseInventory
+        )
+                .setAbortCondition(s -> !(s instanceof GenericContainerScreen containerScreen && containerScreen.getTitle().getString().equals("Tasks")))
+                .setAbortDelay(5)
+                .build();
 
-        MinecraftClient.getInstance().execute(() -> {
-            ClientTickEvents.END_CLIENT_TICK.register(client -> {
-
-                keybindCheck(MinecraftClient.getInstance());
-            });
+        ScreenEvents.AFTER_INIT.register((client, screen, w, h) -> {
+            if (screen instanceof GenericContainerScreen containerScreen && containerScreen.getTitle().getString().equals("Tasks")){
+                screenInteraction.startAsync();
+            }
         });
+
+        ClientTickEvents.END_CLIENT_TICK.register(TaskTrackerModule::keybindCheck);
 
         ClientReceiveMessageEvents.GAME.register((message, overlay) -> {
             if (message.getString().contains("Completed task")) {
@@ -82,8 +93,6 @@ public class TaskTrackerModule implements ClientModInitializer {
                 }
             }
         });
-
-        ClientTickEvents.END_CLIENT_TICK.register(TaskTrackerModule::keybindCheck);
 
         HudRenderCallback.EVENT.register(((drawContext, renderTickCounter) -> {
 
@@ -277,14 +286,5 @@ public class TaskTrackerModule implements ClientModInitializer {
         }
 
         return new String[] {world, number, type};
-    }
-
-    public static void loop(MinecraftClient client) {
-        Screen screen = client.currentScreen;
-        if (screen == null || screen.equals(previousScreen)) {
-            return;
-        }
-        previousScreen = screen;
-        parseInventory(screen);
     }
 }
