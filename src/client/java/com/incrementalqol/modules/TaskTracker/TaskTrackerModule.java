@@ -1,15 +1,8 @@
 package com.incrementalqol.modules.TaskTracker;
 
-import com.incrementalqol.common.utils.MenuInteractions;
 import com.incrementalqol.common.utils.ScreenInteraction;
 import com.incrementalqol.config.Config;
-import com.incrementalqol.config.ConfigHandler;
-import com.incrementalqol.config.ConfigScreen;
-import com.incrementalqol.modules.CommandAliases.AliasStorage;
-import com.incrementalqol.modules.DepositHotkey.DepositHotkeyModule;
-import com.mojang.brigadier.arguments.StringArgumentType;
 import net.fabricmc.api.ClientModInitializer;
-import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
@@ -19,7 +12,6 @@ import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
-import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.util.math.MatrixStack;
@@ -29,7 +21,6 @@ import net.minecraft.inventory.Inventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
-import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.ColorHelper;
 import org.lwjgl.glfw.GLFW;
@@ -48,8 +39,6 @@ public class TaskTrackerModule implements ClientModInitializer {
     public static List<Task> taskList = new ArrayList<>();
 
     private static KeyBinding taskWarp;
-
-    private static final Config config = ConfigHandler.getConfig();
 
     private ScreenInteraction screenInteraction;
 
@@ -100,6 +89,7 @@ public class TaskTrackerModule implements ClientModInitializer {
 
         HudRenderCallback.EVENT.register(((drawContext, renderTickCounter) -> {
 
+            var config = Config.HANDLER.instance();
             TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
 
             int color = ColorHelper.getArgb(80, 0, 0, 0);
@@ -157,13 +147,15 @@ public class TaskTrackerModule implements ClientModInitializer {
             firstIncompleteTask.ifPresentOrElse(
                     task -> {
                         assert MinecraftClient.getInstance().player != null;
-                        if (task.descriptor != null && config.getAutoSwapWardrobe()) {
+                        var config = Config.HANDLER.instance();
+                        if (task.descriptor != null && Config.HANDLER.instance().getAutoSwapWardrobe()) {
                             if (task.descriptor.getDefaultWardrobe() != null) {
-                                MinecraftClient.getInstance().player.networkHandler.sendCommand("wardrobe " + task.descriptor.getDefaultWardrobe());
+                                MinecraftClient.getInstance().player.networkHandler.sendCommand("wardrobe " + config.getWardrobeNameToDefault(task.descriptor.getDefaultWardrobe()));
                             }
                             if (task.descriptor.getDefaultHotBarSlot() != null){
-                                MinecraftClient.getInstance().player.getInventory().selectedSlot = task.descriptor.getDefaultHotBarSlot();
-                                MinecraftClient.getInstance().player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(task.descriptor.getDefaultHotBarSlot()));
+                                var slotId = config.getSlotToDefault(task.descriptor.getDefaultHotBarSlot());
+                                MinecraftClient.getInstance().player.getInventory().selectedSlot = slotId;
+                                MinecraftClient.getInstance().player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(slotId));
                             }
                         }
                         MinecraftClient.getInstance().player.networkHandler.sendCommand(task.getWarp().replace(")", ""));

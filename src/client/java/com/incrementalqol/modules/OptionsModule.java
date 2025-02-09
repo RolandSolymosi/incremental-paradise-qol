@@ -1,7 +1,8 @@
 package com.incrementalqol.modules;
 
-import com.incrementalqol.config.ConfigScreen;
+import com.incrementalqol.config.Config;
 import net.fabricmc.api.ClientModInitializer;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientLifecycleEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.MinecraftClient;
@@ -15,18 +16,17 @@ public class OptionsModule implements ClientModInitializer {
 
     private static KeyBinding optionsScreen;
 
-
-
     @Override
     public void onInitializeClient() {
         initializeKeybinds();
 
+        ClientLifecycleEvents.CLIENT_STARTED.register(t -> Config.HANDLER.load());
         ClientTickEvents.END_CLIENT_TICK.register(OptionsModule::keybindCheck);
     }
     private static void keybindCheck(MinecraftClient minecraftClient) {
 
         while (optionsScreen.wasPressed()) {
-            MinecraftClient.getInstance().setScreen(new ConfigScreen(MinecraftClient.getInstance().currentScreen));
+            minecraftClient.setScreen(Config.HANDLER.instance().createScreen(minecraftClient.currentScreen));
         }
     }
 

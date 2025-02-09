@@ -13,7 +13,7 @@ public class DraggableScreen extends Screen {
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
     private final Screen parent;
 
-    private final Config config = ConfigHandler.getConfig();
+    private final Config config = Config.HANDLER.instance();
 
     public DraggableScreen(Screen parent) {
         super(Text.literal("Incremental Paradise QOL Options"));
@@ -34,7 +34,7 @@ public class DraggableScreen extends Screen {
 
     @Override
     public void close() {
-        ConfigHandler.saveOptions();
+        Config.HANDLER.save();
         client.setScreen(parent);
     }
 

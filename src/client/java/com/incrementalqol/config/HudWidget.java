@@ -23,7 +23,7 @@ public class HudWidget extends ClickableWidget {
     private int dragOffsetY = 0;
     private boolean isDragging = false;
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
-    private final Config config = ConfigHandler.getConfig();
+    private final Config config = Config.HANDLER.instance();
 
     public HudWidget(int x, int y, int width, int height) {
         super(x,y,width,height, Text.empty());
