@@ -5,6 +5,8 @@ import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;
+import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
+import net.minecraft.screen.ScreenHandler;
 import net.minecraft.util.Pair;
 
 import java.util.ArrayList;
@@ -192,14 +194,14 @@ public class ScreenInteraction {
                             }
                             return;
                         } else {
-                            if (!nextInteraction.getLeft().shouldAbort(screen) || nextInteraction.getLeft().isFailedAtInit(screen)) {
+                            if (!nextInteraction.getLeft().shouldAbort(screen) && !nextInteraction.getLeft().isFailedAtInit(screen)) {
                                 if (!actualInteraction.compareAndSet(null, nextInteraction)) {
-                                    abort(nextInteraction);
+                                    handleScreenInit(client, screen, comeFromTick);
                                     return;
                                 }
                                 break;
                             } else {
-                                abort(nextInteraction);
+                                abort(nextInteraction, nextInteraction.getLeft().shouldAbort(screen));
                             }
                         }
                     }
@@ -209,14 +211,13 @@ public class ScreenInteraction {
                 if (actualInteraction.get() == null) {
                     return;
                 }
-
             }
 
             if (!actualInteraction.get().getLeft().isFinished()) {
                 if (!actualInteraction.get().getLeft().getCurrentStep().initPassed) {
                     while (!actualInteraction.get().getLeft().isFinished()) {
                         if (actualInteraction.get().getLeft().shouldAbort(screen) || actualInteraction.get().getLeft().isFailedAtInit(screen)) {
-                            abort(actualInteraction.get());
+                            abort(actualInteraction.get(), true);
                             handleScreenInit(client, screen, comeFromTick);
                             return;
                         }
@@ -302,7 +303,7 @@ public class ScreenInteraction {
                 if (actualInteraction.get().getLeft().shouldWaitAtTick(lastInitializedScreen)) {
                     abortTickCounter++;
                     if (abortTickCounter > actualInteraction.get().getLeft().abortTickDelay) {
-                        abort(actualInteraction.get());
+                        abort(actualInteraction.get(), false);
                     }
                     handlingTick.compareAndSet(true, false);
                     return;
@@ -318,9 +319,13 @@ public class ScreenInteraction {
             interaction.getLeft().isFinalizing = true;
         }
 
-        private static void abort(Pair<ScreenInteraction, CompletableFuture<Boolean>> interaction) {
+        private static void abort(Pair<ScreenInteraction, CompletableFuture<Boolean>> interaction, boolean forceClose) {
             interaction.getRight().complete(false);
             interaction.getLeft().isFinalizing = true;
+
+            if (forceClose){
+                close();
+            }
         }
 
         private static void close() {
@@ -330,11 +335,13 @@ public class ScreenInteraction {
 
             // TODO: These two can lead to a very unlikely race condition when the same task is put in the queue and it takes it to work on it right away before reset is done.
             var interaction = actualInteraction.get();
-            actualInteraction.set(null);
-            if (!interaction.getRight().isDone()){
-                interaction.getRight().complete(false);
+            if (interaction != null){
+                actualInteraction.set(null);
+                if (!interaction.getRight().isDone()){
+                    interaction.getRight().complete(false);
+                }
+                interaction.getLeft().reset();
             }
-            interaction.getLeft().reset();
         }
 
         static {

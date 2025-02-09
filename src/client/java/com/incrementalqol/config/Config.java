@@ -12,9 +12,10 @@ public class Config {
     private double hudScale;
     private boolean autoGZ;
     private boolean isSortedByType;
+    private boolean autoSwapWardrobe;
 
 
-    Config(boolean hudBackground, int hudPosX, int hudPosY, boolean autoGZ, double hudScale, int hudSize, boolean isSortedByType) {
+    Config(boolean hudBackground, int hudPosX, int hudPosY, boolean autoGZ, double hudScale, int hudSize, boolean isSortedByType, boolean autoSwapWardrobe) {
         this.hudBackground = hudBackground;
         this.hudPosX = hudPosX;
         this.hudPosY = hudPosY;
@@ -22,6 +23,7 @@ public class Config {
         this.autoGZ = autoGZ;
         this.hudSize = hudSize;
         this.isSortedByType = isSortedByType;
+        this.autoSwapWardrobe = autoSwapWardrobe;
     }
 
     public int getHudPosX() {
@@ -46,6 +48,8 @@ public class Config {
 
     public boolean getSortedByType() {return isSortedByType;}
 
+    public boolean getAutoSwapWardrobe() {return autoSwapWardrobe;}
+
 
     public void setAutoGZ(boolean autoGZ) {
         this.autoGZ = autoGZ;
@@ -68,6 +72,7 @@ public class Config {
     public void setHudSize(int hudSize) {this.hudSize = hudSize;}
 
     public void setSortedByType(boolean sortedByType) {this.isSortedByType = sortedByType;}
+    public void setAutoSwapWardrobe(boolean isAutoSwap) {this.autoSwapWardrobe = isAutoSwap;}
 
     public static final Codec<Config> CODEC = RecordCodecBuilder.create(optionsInstance -> optionsInstance.group(
             Codec.BOOL.fieldOf("hudBackground").forGetter(Config::getHudBackground),
@@ -76,7 +81,8 @@ public class Config {
             Codec.BOOL.fieldOf("autoGZ").forGetter(Config::getAutoGZ),
             Codec.DOUBLE.fieldOf("hudScale").forGetter(Config::getHudScale),
             Codec.INT.fieldOf("hudSize").forGetter(Config::getHudSize),
-            Codec.BOOL.fieldOf("isSortedByType").forGetter(Config::getSortedByType)
+            Codec.BOOL.fieldOf("isSortedByType").forGetter(Config::getSortedByType),
+            Codec.BOOL.fieldOf("autoSwapWardrobe").forGetter(Config::getAutoSwapWardrobe)
 
             ).apply(optionsInstance, Config::new));
 

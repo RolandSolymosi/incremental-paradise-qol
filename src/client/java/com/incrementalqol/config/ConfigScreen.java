@@ -26,6 +26,7 @@ public class ConfigScreen extends Screen {
     public ButtonWidget button1;
     public CheckboxWidget button2;
     public CheckboxWidget button3;
+    public CheckboxWidget button4;
 
     public SliderWidget scaleSlider;
 
@@ -70,10 +71,18 @@ public class ConfigScreen extends Screen {
                 }).build();
         button3.setPosition(15,140);
 
+        button4 = CheckboxWidget.builder(Text.literal("Auto swap wardrobe"),textRenderer)
+                .checked(config.getAutoSwapWardrobe())
+                .callback((button4,checked) -> {
+                    config.setAutoSwapWardrobe(checked);
+                }).build();
+        button4.setPosition(15,160);
+
         addDrawableChild(button1);
         addDrawableChild(button2);
         addDrawableChild(scaleSlider);
         addDrawableChild(button3);
+        addDrawableChild(button4);
 
     }
     @Override

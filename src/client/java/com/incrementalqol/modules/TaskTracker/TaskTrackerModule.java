@@ -28,6 +28,7 @@ import net.minecraft.component.type.LoreComponent;
 import net.minecraft.inventory.Inventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.ColorHelper;
@@ -48,7 +49,7 @@ public class TaskTrackerModule implements ClientModInitializer {
 
     private static KeyBinding taskWarp;
 
-    private final Config config = ConfigHandler.getConfig();
+    private static final Config config = ConfigHandler.getConfig();
 
     private ScreenInteraction screenInteraction;
 
@@ -61,6 +62,8 @@ public class TaskTrackerModule implements ClientModInitializer {
         screenInteraction = new ScreenInteraction.ScreenInteractionBuilder(
                 s -> s instanceof GenericContainerScreen containerScreen && containerScreen.getTitle().getString().equals("Tasks"),
                 s -> false,
+                s -> s instanceof GenericContainerScreen containerScreen && !containerScreen.getScreenHandler().getInventory().isEmpty(),
+                s -> false,
                 TaskTrackerModule::parseInventory
         )
                 .setAbortCondition(s -> !(s instanceof GenericContainerScreen containerScreen && containerScreen.getTitle().getString().equals("Tasks")))
@@ -68,10 +71,11 @@ public class TaskTrackerModule implements ClientModInitializer {
                 .build();
 
         ScreenEvents.AFTER_INIT.register((client, screen, w, h) -> {
-            if (screen instanceof GenericContainerScreen containerScreen && containerScreen.getTitle().getString().equals("Tasks")){
+            if (screen instanceof GenericContainerScreen containerScreen && containerScreen.getTitle().getString().equals("Tasks")) {
                 screenInteraction.startAsync();
             }
         });
+
 
         ClientTickEvents.END_CLIENT_TICK.register(TaskTrackerModule::keybindCheck);
 
@@ -113,7 +117,7 @@ public class TaskTrackerModule implements ClientModInitializer {
                     }
                 }
 
-                if(config.getSortedByType()){
+                if (config.getSortedByType()) {
                     taskList.sort(Comparator.comparing(Task::getTaskType));
                 }
 
@@ -125,8 +129,8 @@ public class TaskTrackerModule implements ClientModInitializer {
                 matrixStack.scale(scaleFactor, scaleFactor, scaleFactor);
 
 
-                if(config.getHudBackground()) {
-                    drawContext.fill(config.getHudPosX(), config.getHudPosY(), config.getHudPosX() + ((size+1) * 5), config.getHudPosY() + 5 + (15 * taskList.size()), color);
+                if (config.getHudBackground()) {
+                    drawContext.fill(config.getHudPosX(), config.getHudPosY(), config.getHudPosX() + ((size + 1) * 5), config.getHudPosY() + 5 + (15 * taskList.size()), color);
                 }
                 for (int i = 0; i < taskList.size(); i++) {
 
@@ -142,14 +146,33 @@ public class TaskTrackerModule implements ClientModInitializer {
             }
         }));
     }
+
     private static void keybindCheck(MinecraftClient minecraftClient) {
 
-        while (taskWarp.wasPressed()){
+        while (taskWarp.wasPressed()) {
             Optional<Task> firstIncompleteTask = taskList.stream()
                     .filter(task -> !task.isCompleted())
                     .findFirst();
             assert MinecraftClient.getInstance().player != null;
-            MinecraftClient.getInstance().player.networkHandler.sendCommand(firstIncompleteTask.get().getWarp());
+            firstIncompleteTask.ifPresentOrElse(
+                    task -> {
+                        assert MinecraftClient.getInstance().player != null;
+                        if (task.descriptor != null && config.getAutoSwapWardrobe()) {
+                            if (task.descriptor.getDefaultWardrobe() != null) {
+                                MinecraftClient.getInstance().player.networkHandler.sendCommand("wardrobe " + task.descriptor.getDefaultWardrobe());
+                            }
+                            if (task.descriptor.getDefaultHotBarSlot() != null){
+                                MinecraftClient.getInstance().player.getInventory().selectedSlot = task.descriptor.getDefaultHotBarSlot();
+                                MinecraftClient.getInstance().player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(task.descriptor.getDefaultHotBarSlot()));
+                            }
+                        }
+                        MinecraftClient.getInstance().player.networkHandler.sendCommand(task.getWarp().replace(")", ""));
+                    },
+                    () -> {
+                        assert MinecraftClient.getInstance().player != null;
+                        MinecraftClient.getInstance().player.sendMessage(Text.literal("No incomplete tasks available."), false);
+                    }
+            );
         }
     }
 
@@ -182,8 +205,7 @@ public class TaskTrackerModule implements ClientModInitializer {
                 ItemStack stack = inventory.getStack(i);
                 if (isTaskBook(stack)) {
                     processTaskBook(stack);
-                }
-                else if(isPlayerHead(stack)){
+                } else if (isPlayerHead(stack)) {
                     processTicketTask(stack);
                 }
             }
@@ -216,7 +238,7 @@ public class TaskTrackerModule implements ClientModInitializer {
             String number = taskDetails[1];
             String type = taskDetails[2];
 
-            Task newTask = new Task(stack.getName().getString(), description, "/warp ", 1, false, world, number, type,true);
+            Task newTask = new Task(stack.getName().getString(), description, "/warp ", 1, false, world, number, type, true);
             if (stack.getItem().getName().getString().contains("Written")) {
                 newTask.setCompleted();
             }
@@ -236,9 +258,7 @@ public class TaskTrackerModule implements ClientModInitializer {
         String number = taskDetails[1];
         String type = taskDetails[2];
 
-        LOGGER.warn(type + " xDDDDDD");
-
-        Task newTask = new Task(stack.getName().getString(), description, "/warp ", 1, false, world, number, type,false);
+        Task newTask = new Task(stack.getName().getString(), description, "/warp ", 1, false, world, number, type, false);
         if (stack.getItem().getName().getString().contains("Written")) {
             newTask.setCompleted();
         }
@@ -269,7 +289,7 @@ public class TaskTrackerModule implements ClientModInitializer {
         String type = "";
 
         if (block.contains("World") || block.contains("Nightmare")) {
-            Pattern descriptorPattern = Pattern.compile("(?<world>World|Nightmare) #(?<number>\\d+)\\s*(?<type>.+)\\s*Task");
+            Pattern descriptorPattern = Pattern.compile("(?<world>World|Nightmare) #(?<number>\\d+)\\s*(?<type>.+?)\\s*Task");
             Matcher m = descriptorPattern.matcher(block);
             if (m.find()) {
                 world = m.group("world");
@@ -285,6 +305,6 @@ public class TaskTrackerModule implements ClientModInitializer {
             }
         }
 
-        return new String[] {world, number, type};
+        return new String[]{world, number, type};
     }
 }

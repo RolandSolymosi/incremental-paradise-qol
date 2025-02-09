@@ -17,6 +17,7 @@
 	"entrypoints": {
 		"client": [
 			"com.incrementalqol.modules.DepositHotkey.DepositHotkeyModule",
+			"com.incrementalqol.modules.DepositHotkey.SellAllHotkeyModule",
 			"com.incrementalqol.modules.TaskTracker.TaskTrackerModule",
 			"com.incrementalqol.modules.CommandAliases.CommandAliasModule",
 			"com.incrementalqol.modules.Loadouts.LoadoutsModule",

@@ -1,11 +1,14 @@
 package com.incrementalqol.modules.TaskTracker;
 
+import com.incrementalqol.common.data.TaskCollection;
 import net.minecraft.client.gui.hud.ClientBossBar;
+
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class Task {
+    public final TaskCollection.TaskDescriptor descriptor;
     private final String name;
     private final String description;
     private String warp;
@@ -13,6 +16,9 @@ public class Task {
     private final String number;
     private boolean completed;
     private boolean isShiny = false;
+    private boolean isLarge = false;
+    private String color = null;
+    private String constraint = null;
     private boolean isTicket = false;
     private boolean isSocialite = false;
     private String taskType = "";
@@ -29,56 +35,70 @@ public class Task {
 
 
     private static final List<Pattern> MISC_PATTERNS = List.of(
-            Pattern.compile("Clean (?<amount>\\d+[km]?) (?<type>.+) \\(?(?<progress>\\d+[km]?)"),
-            Pattern.compile("Repair (?<amount>\\d+[km]?) (?<type>.+) in .+\\((?<progress>\\d+[km]?)"),
-            Pattern.compile("Sell (?<amount>\\d+[.,]?\\d*[km]?) (?<type>.+) \\((?<progress>\\d+[.,]?\\d*[km]?)"),
-            Pattern.compile("Gain (?<amount>\\d+[.,]?\\d*[km]?) (?<type>.+) from selling.+ \\(?(?<progress>\\d+[.,]?\\d*[km]?)")
+            Pattern.compile("Clean (?<amount>[0-9.,]+[km]?) (?<type>.+) \\(?(?<progress>[0-9.,]+[km]?)"),
+            Pattern.compile("Repair (?<amount>[0-9.,]+[km]?) (?<type>.+) in .+\\((?<progress>[0-9.,]+[km]?)"),
+            Pattern.compile("Sell (?<amount>[0-9.,]+[km]?) (?<type>.+) \\((?<progress>[0-9.,]+[km]?)"),
+            Pattern.compile("Gain (?<amount>[0-9.,]+[km]?) (?<type>.+) \\(?(?<progress>[0-9.,]+[km]?)")
     );
 
     private static final List<Pattern> GAMES_PATTERNS = List.of(
-            Pattern.compile("Play (?<amount>\\d+[km]?) (?<opt>.+) of (?<type>.+) \\(?(?<progress>\\d+[km]?)"),
-            Pattern.compile("Earn (?<amount>\\d+[km]?) (?<opt>.+) in (?<type>.+) \\(?(?<progress>\\d+[km]?)"),
-            Pattern.compile("Earn (?<amount>\\d+[km]?)\\s+(?<opt>.+) playing (?<type>.+) \\(?(?<progress>\\d+[km]?)"),
-            Pattern.compile("Find (?<amount>\\d+[km]?) (?<opt>.+) while playing (?<type>.+) \\((?<progress>\\d+[km]?)")
+            Pattern.compile("Play (?<amount>[0-9.,]+[km]?) (?<opt>.+) of (?<type>.+) \\(?(?<progress>[0-9.,]+[km]?)"),
+            Pattern.compile("Earn (?<amount>[0-9.,]+[km]?) (?<opt>.+) in (?<type>.+) \\(?(?<progress>[0-9.,]+[km]?)"),
+            Pattern.compile("Earn (?<amount>[0-9.,]+[km]?)\\s+(?<opt>.+) playing (?<type>.+) \\(?(?<progress>[0-9.,]+[km]?)"),
+            Pattern.compile("Find (?<amount>[0-9.,]+[km]?) (?<opt>.+) while playing (?<type>.+) \\((?<progress>[0-9.,]+[km]?)")
     );
 
     private static final List<Pattern> FORAGING_PATTERNS = List.of(
-            Pattern.compile("Collect (?<amount>\\d+[.,]?\\d*[km]?) (?<type>.+) \\(?(?<progress>\\d+[.,]?\\d*[km]?)")
+            Pattern.compile("Collect (?<amount>[0-9.,]+[km]?) (?<large>Large )?(?<type>.+) with (?<constraint>\\.+) \\(?(?<progress>[0-9.,]+[km]?)"),
+            Pattern.compile("Collect (?<amount>[0-9.,]+[km]?) (?<large>Large )?(?<type>.+) \\(?(?<progress>[0-9.,]+[km]?)")
     );
 
     private static final List<Pattern> COMBAT_PATTERNS = List.of(
-            Pattern.compile("Slay ?(?:the)?(?<type>.+) \\((?<progress>\\d+[km]?)if /(?<amount>\\d+[km]?)"),
-            Pattern.compile("Collect (?<amount>\\d+[.,]?\\d*[km]?) drops from (?<type>.+) \\(?(?<progress>\\d+[.,]?\\d*[km]?)")
+            Pattern.compile("Slay ?(?:the)?(?<type>.+) \\((?<progress>[0-9.,]+[km]?)/(?<amount>[0-9.,]+[km]?)"),
+            Pattern.compile("Collect (?<amount>[0-9.,]+[km]?) drops from (?<type>.+) with (?<constraint>\\.+) \\(?(?<progress>[0-9.,]+[km]?)"),
+            Pattern.compile("Collect (?<amount>[0-9.,]+[km]?) drops from (?<type>.+) \\(?(?<progress>[0-9.,]+[km]?)")
     );
 
     private static final List<Pattern> FISHING_PATTERNS = List.of(
-            Pattern.compile("Spear (?<type>.+) without missing (?<amount>\\d+[km]?).+\\((?<progress>\\d+[km]?)"),
-            Pattern.compile("Collect (?<amount>\\d+[.,]?\\d*[km]?) (?<type>.+) \\(?(?<progress>\\d+[.,]?\\d*[km]?)")
+            Pattern.compile("Spear [0-9.,]+ (?<type>.+) (?<constraint>in a row without missing) (?<amount>[0-9.,]+[km]?).+\\((?<progress>[0-9.,]+[km]?)"),
+            Pattern.compile("Collect (?<amount>[0-9.,]+[km]?) (?<color>.+) colored (?<type>.+) using a Fishing Spear \\(?(?<progress>[0-9.,]+[km]?)"),
+            Pattern.compile("Collect (?<amount>[0-9.,]+[km]?) (?<type>.+) using a Fishing Spear \\(?(?<progress>[0-9.,]+[km]?)"),
+            Pattern.compile("Collect (?<amount>[0-9.,]+[km]?) drops from (?<type>.+) with (?<constraint>\\.+) \\(?(?<progress>[0-9.,]+[km]?)"),
+            Pattern.compile("Collect (?<amount>[0-9.,]+[km]?) drops from (?<type>.+) \\(?(?<progress>[0-9.,]+[km]?)"),
+            Pattern.compile("Collect (?<amount>[0-9.,]+[km]?) (?<type>.+) \\(?(?<progress>[0-9.,]+[km]?)")
     );
 
     private static final List<Pattern> MINING_PATTERNS = List.of(
-            Pattern.compile("Collect (?<amount>\\d+[.,]?\\d*[km]?) (?<type>.+) \\(?(?<progress>\\d+[.,]?\\d*[km]?)")
+            Pattern.compile("Collect (?<amount>[0-9.,]+[km]?) (?<type>.+) from (?<shiny>Shiny) Ores \\(?(?<progress>[0-9.,]+[km]?)"),
+            Pattern.compile("Collect (?<amount>[0-9.,]+[km]?) (?<shiny>Shiny) (?<type>.+) \\(?(?<progress>[0-9.,]+[km]?)"),
+            Pattern.compile("Collect (?<amount>[0-9.,]+[km]?) (?<type>.+) with (?<constraint>\\.+) \\(?(?<progress>[0-9.,]+[km]?)"),
+            Pattern.compile("Collect (?<amount>[0-9.,]+[km]?) (?<type>.+) \\(?(?<progress>[0-9.,]+[km]?)")
     );
 
     private static final List<Pattern> FARMING_PATTERNS = List.of(
-            Pattern.compile("Harvest (?<amount>\\d+[,.]?\\d*[km]?) (?<type>.+) \\(?(?<progress>\\d+[,.]?\\d*[km]?)")
+            Pattern.compile("Harvest (?<amount>[0-9.,]+[km]?) (?<type>.+) with (?<constraint>\\.+) \\(?(?<progress>[0-9.,]+[km]?)"),
+            Pattern.compile("Harvest (?<amount>[0-9.,]+[km]?) (?<type>.+) \\(?(?<progress>[0-9.,]+[km]?)")
     );
 
+    //private static final Pattern PATTERN = Pattern.compile("^\\w+ (?:the|\\d+) (?<shiny>Shiny)?(?<type>[^(]+?)(?: with (?<constraint>[^(]+))? \\((?<progress>[0-9.,]+[km]?)/(?<amount>[0-9.,]+[km]?)\\)$");
 
-
-    public Task(String name, String description, String warp, int strWidth, boolean completed, String world,String number, String type,boolean isTicket) {
+    public Task(String name, String description, String warp, int strWidth, boolean completed, String world, String number, String type, boolean isTicket) {
         this.name = name;
         this.description = description;
         this.warp = warp;
         this.strWidth = strWidth;
         this.completed = completed;
-        this.generalProgressPattern = Pattern.compile(this.name + " \\(?(?<progress>\\d+[.,]?\\d*[km]?)");
+        this.generalProgressPattern = Pattern.compile(this.name + " \\(?(?<progress>[0-9.,]+[km]?)");
         this.world = world;
         this.number = number;
         this.taskType = type.trim();
         this.isTicket = isTicket;
 
         determineTaskAttributes();
+        this.descriptor = TaskCollection.TryGetDescriptor(this.taskTarget);
+        if (this.descriptor == null) {
+            System.out.println("UNIDENTIFIED TASK: " + this.description);
+        }
     }
 
     private void determineTaskAttributes() {
@@ -112,6 +132,10 @@ public class Task {
         this.taskTarget = getGroupValue(matcher, "type"); //drops from Abyssal Crabs
         this.progress = getGroupValue(matcher, "progress");
         this.targetAmount = getGroupValue(matcher, "amount");
+        this.isShiny = !getGroupValue(matcher, "shiny").equals("");
+        this.isLarge = !getGroupValue(matcher, "large").equals("");
+        this.color = getGroupValue(matcher, "color");
+        this.constraint = getGroupValue(matcher, "constraint");
     }
 
     private String getGroupValue(Matcher matcher, String groupName) {
@@ -135,10 +159,16 @@ public class Task {
     }
 
     public String getWarp() {
-        return warp;
+        if (this.descriptor != null) {
+            return this.descriptor.getCommand();
+        } else {
+            return this.warp;
+        }
     }
 
-    public String getTaskType(){ return taskType; }
+    public String getTaskType() {
+        return taskType;
+    }
 
     private String getSubLocation() {
         if (this.world.equals("1")) return "";
@@ -150,9 +180,9 @@ public class Task {
             List<String> abyss = List.of("Wicks", "Glow Squids", "Slinkers", "Aurorium", "Twine", "Zephyr", "Abyssal Crabs", "Lampposts");
 
             if (lush.contains(normalizedTaskTarget())) return "§2Lush";
-            else if(veil.contains(normalizedTaskTarget())) return "§3Veil";
-            else if(infernal.contains(normalizedTaskTarget())) return "§4Infernal";
-            else if(abyss.contains(normalizedTaskTarget())) return "§5Abyss";
+            else if (veil.contains(normalizedTaskTarget())) return "§3Veil";
+            else if (infernal.contains(normalizedTaskTarget())) return "§4Infernal";
+            else if (abyss.contains(normalizedTaskTarget())) return "§5Abyss";
             else return "";
         }
     }
@@ -186,9 +216,11 @@ public class Task {
         if (this.applicablePattern == null) return;
 
 
-        Pattern warpPattern = Pattern.compile("/warp\\s+\\S+");
+        Pattern warpPattern = Pattern.compile("/warp\\s+[^)]+");
         Matcher warpMatcher = warpPattern.matcher(data);
-        if(warpMatcher.find()) {this.warp = warpMatcher.group().replace("/","");}
+        if (warpMatcher.find()) {
+            this.warp = warpMatcher.group().replace("/", "");
+        }
 
 
         Matcher m = generalProgressPattern.matcher(data);
@@ -209,31 +241,51 @@ public class Task {
                 }
                 matched = true;
             }
-        }
-        else {
+        } else {
             this.progress = m.group("progress") == null ? "" : m.group("progress");
             matched = true;
-        }    }
+        }
+    }
 
     private String normalizedTaskTarget() {
         if (taskTarget.isEmpty()) {
             return taskTarget;
         }
 
-        if (taskTarget.contains("Shiny Ores")) {
-            isShiny = true; // We already know it contains "Shiny Ores"
-            return taskTarget.replace(" from Shiny Ores", "");
+        if (this.isShiny) {
+            return "Shiny " + taskTarget;
         }
 
-        if (taskTarget.contains("colored Riverfish") || taskTarget.contains("using a Fishing Spear")) {
-            return taskTarget.replace(" colored Riverfish", " Riverfish")
-                    .replace(" using a Fishing Spear", "")
-                    .replace(" drops from", "");
+        if (this.isLarge) {
+            return "Large " + taskTarget;
         }
 
-        if (taskTarget.contains("drops from")) {
-            return taskTarget.replace(" drops from", "");
+        if (this.taskTarget.equals("fish")){
+            return "2 Riverfish in a row without missing";
         }
+
+        if (!this.color.equals("")) {
+            return this.color + " colored " + taskTarget;
+        }
+
+        if (!this.constraint.equals("")) {
+            return taskTarget + " with " + this.constraint;
+        }
+
+        //if (taskTarget.contains("Shiny Ores")) {
+        //    isShiny = true; // We already know it contains "Shiny Ores"
+        //    return taskTarget.replace(" from Shiny Ores", "");
+        //}
+
+        //if (taskTarget.contains("colored Riverfish") || taskTarget.contains("using a Fishing Spear")) {
+        //    return taskTarget.replace(" colored Riverfish", " Riverfish")
+        //            .replace(" using a Fishing Spear", "")
+        //            .replace(" drops from", "");
+        //}
+//
+        //if (taskTarget.contains("drops from")) {
+        //    return taskTarget.replace(" drops from", "");
+        //}
 
         return taskTarget;
     }
@@ -263,7 +315,7 @@ public class Task {
 
         calculateDisplayLength(renderedString);
 
-        if (isTicket){
+        if (isTicket) {
             return renderedString.replaceAll("§[0-9a-fA-F]", "§5");
         }
         return renderedString;
@@ -272,6 +324,6 @@ public class Task {
     private void calculateDisplayLength(String input) {
         // Remove color codes and return the length of the cleaned string
         String cleanedInput = COLOR_CODE_PATTERN.matcher(input).replaceAll("");
-        this.strWidth=  cleanedInput.length();
+        this.strWidth = cleanedInput.length();
     }
 }
