@@ -1,60 +1,29 @@
 package com.incrementalqol.modules.CommandAliases;
 
-import com.incrementalqol.config.Config;
-import com.incrementalqol.config.ConfigHandler;
-import com.incrementalqol.config.ConfigScreen;
-import com.incrementalqol.modules.TaskTracker.Task;
+import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
-import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
-import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
+import net.fabricmc.fabric.api.client.command.v2.ClientCommandRegistrationCallback;
+import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
 import net.minecraft.client.network.ClientPlayerEntity;
-import net.minecraft.client.option.KeyBinding;
-import net.minecraft.client.util.InputUtil;
-import net.minecraft.client.util.math.MatrixStack;
-import net.minecraft.component.DataComponentTypes;
-import net.minecraft.component.type.LoreComponent;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
-import net.minecraft.util.math.ColorHelper;
-import org.lwjgl.glfw.GLFW;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 
 public class CommandAliasModule implements ClientModInitializer {
-    private boolean commandsRegistered = false;
 
     @Override
     public void onInitializeClient() {
-        MinecraftClient.getInstance().execute(() -> {
-            ClientTickEvents.END_CLIENT_TICK.register(client -> {
-
-                if (ClientCommandManager.getActiveDispatcher() != null && !commandsRegistered) {
-                    System.out.println("Registering commands....");
-                    AliasStorage.load();
-                    setupCommands();
-                    commandsRegistered = true;
-                }
-            });
-        });
+        ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> setupCommands(dispatcher));
     }
 
-    private void setupCommands() {
-        ClientCommandManager.getActiveDispatcher().register(
+    private void setupCommands(CommandDispatcher<FabricClientCommandSource> dispatcher) {
+        System.out.println("Registering commands....");
+        AliasStorage.load();
+        dispatcher.register(
                 ClientCommandManager.literal("a")
                         .then(ClientCommandManager.literal("list")
                                 .executes(context -> {
