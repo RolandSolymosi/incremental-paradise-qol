@@ -2,7 +2,6 @@ package com.incrementalqol.common.data;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 public class TaskCollection {
 
@@ -47,9 +46,9 @@ public class TaskCollection {
         TaskDescriptors.put(TaskTarget.Aurorium, new TaskDescriptor(TaskType.Mining, "abyss", "w2", "2", 1));
         TaskDescriptors.put(TaskTarget.Bonsai, new TaskDescriptor(TaskType.Foraging, "w2", "w2", "3", 2));
         TaskDescriptors.put(TaskTarget.Pomegranate, new TaskDescriptor(TaskType.Foraging, "w2", "w2", "3", 2));
-        TaskDescriptors.put(TaskTarget.Pine, new TaskDescriptor(TaskType.Foraging, "w2", "w2", "3", 2));
-        TaskDescriptors.put(TaskTarget.Pinecone, new TaskDescriptor(TaskType.Foraging, "w2", "w2", "3", 2));
-        TaskDescriptors.put(TaskTarget.Deadwood, new TaskDescriptor(TaskType.Foraging, "w2", "w2", "3", 2));
+        TaskDescriptors.put(TaskTarget.Pine, new TaskDescriptor(TaskType.Foraging, "shimmer", "w2", "3", 2));
+        TaskDescriptors.put(TaskTarget.Pinecone, new TaskDescriptor(TaskType.Foraging, "shimmer", "w2", "3", 2));
+        TaskDescriptors.put(TaskTarget.Deadwood, new TaskDescriptor(TaskType.Foraging, "shimmer", "w2", "3", 2));
         TaskDescriptors.put(TaskTarget.Zephyr, new TaskDescriptor(TaskType.Foraging, "abyss", "w2", "3", 2));
         TaskDescriptors.put(TaskTarget.SkyBeetle, new TaskDescriptor(TaskType.Foraging, "w2", "w2", "3", 2));
         TaskDescriptors.put(TaskTarget.Panda, new TaskDescriptor(TaskType.Combat, "sky", "w2", "1", 0));
@@ -59,7 +58,7 @@ public class TaskCollection {
         TaskDescriptors.put(TaskTarget.PoisonSlime, new TaskDescriptor(TaskType.Combat, "lush", "w2", "1", 0));
         TaskDescriptors.put(TaskTarget.Spotter, new TaskDescriptor(TaskType.Combat, "veil", "w2", "1", 0));
         TaskDescriptors.put(TaskTarget.Verdemite, new TaskDescriptor(TaskType.Combat, "veil", "w2", "1", 0));
-        TaskDescriptors.put(TaskTarget.Enderman, new TaskDescriptor(TaskType.Combat, "veil", "w2", "1", 0));
+        TaskDescriptors.put(TaskTarget.Endermen, new TaskDescriptor(TaskType.Combat, "veil", "w2", "1", 0));
         TaskDescriptors.put(TaskTarget.Ghast, new TaskDescriptor(TaskType.Combat, "infernal", "w2", "1", 0));
         TaskDescriptors.put(TaskTarget.GhastSoul, new TaskDescriptor(TaskType.Combat, "infernal", "w2", "1", 0));
         TaskDescriptors.put(TaskTarget.Blaze, new TaskDescriptor(TaskType.Combat, "infernal", "w2", "1", 0));
@@ -83,7 +82,7 @@ public class TaskCollection {
         TaskDescriptors.put(TaskTarget.Axolotl, new TaskDescriptor(TaskType.Fishing, "w2", "w2", "5", 4));
         TaskDescriptors.put(TaskTarget.MagmaFish, new TaskDescriptor(TaskType.Fishing, "infernal", "w2", "5", 4));
         TaskDescriptors.put(TaskTarget.MoltenJellyfish, new TaskDescriptor(TaskType.Fishing, "infernal", "w2", "5", 4));
-        TaskDescriptors.put(TaskTarget.Blubber, new TaskDescriptor(TaskType.Fishing, "infernal", "w2", "5", 4));
+        TaskDescriptors.put(TaskTarget.Bubbler, new TaskDescriptor(TaskType.Fishing, "infernal", "w2", "5", 4));
         TaskDescriptors.put(TaskTarget.AbyssalCrab, new TaskDescriptor(TaskType.Fishing, "abyss", "w2", "5", 4));
         TaskDescriptors.put(TaskTarget.Blackjack, new TaskDescriptor(TaskType.Gaming, "21", "w2", null, null));
         TaskDescriptors.put(TaskTarget.Silver_Money, new TaskDescriptor(TaskType.Misc, "infernal", "w2", "2", 1));
@@ -164,11 +163,11 @@ public class TaskCollection {
         TaskMap.put("apples", TaskTarget.Apple);
         TaskMap.put("palm", TaskTarget.Palm);
         TaskMap.put("coconuts", TaskTarget.Coconut);
-        TaskMap.put("ladybugs", TaskTarget.Ladybug); // ?
+        TaskMap.put("ladybugs", TaskTarget.Ladybug);
         TaskMap.put("scared hogs", TaskTarget.ScaredHog);
         TaskMap.put("wild boars", TaskTarget.WildBoar);
         TaskMap.put("mountain goats", TaskTarget.MountainGoat);
-        TaskMap.put("hoglin", TaskTarget.Hoglin);// ?
+        TaskMap.put("hoglin", TaskTarget.Hoglin);
         TaskMap.put("elite mobs in world #1", TaskTarget.W1_Elite);
         TaskMap.put("wheat", TaskTarget.Wheat);
         TaskMap.put("carrots", TaskTarget.Carrot);
@@ -205,7 +204,7 @@ public class TaskCollection {
         TaskMap.put("poison slimes", TaskTarget.PoisonSlime);
         TaskMap.put("spotters", TaskTarget.Spotter);
         TaskMap.put("verdemites", TaskTarget.Verdemite);
-        TaskMap.put("enderman", TaskTarget.Enderman);
+        TaskMap.put("endermen", TaskTarget.Endermen);
         TaskMap.put("ghasts", TaskTarget.Ghast);
         TaskMap.put("ghast souls", TaskTarget.GhastSoul);
         TaskMap.put("blazes", TaskTarget.Blaze);
@@ -229,7 +228,7 @@ public class TaskCollection {
         TaskMap.put("axolotl", TaskTarget.Axolotl);
         TaskMap.put("magmafish", TaskTarget.MagmaFish);
         TaskMap.put("molten jellyfish", TaskTarget.MoltenJellyfish);
-        TaskMap.put("blubber", TaskTarget.Blubber);
+        TaskMap.put("bubbler", TaskTarget.Bubbler);
         TaskMap.put("abyssal crabs", TaskTarget.AbyssalCrab);
         TaskMap.put("21", TaskTarget.Blackjack);
         TaskMap.put("silver from selling items", TaskTarget.Silver_Money);
@@ -279,7 +278,7 @@ public class TaskCollection {
         TaskMap.put("winkles", TaskTarget.Winkle);
         TaskMap.put("piglins", TaskTarget.Piglin);
         TaskMap.put("bamboodles", TaskTarget.Bamboodle);
-        TaskMap.put("firefoxes", TaskTarget.Firefox); // ???????????
+        TaskMap.put("firefoxes", TaskTarget.Firefox);
         TaskMap.put("marshmallows", TaskTarget.Marshmallow);
         TaskMap.put("elite mobs in nightmare #1", TaskTarget.WN1_Elite);
         TaskMap.put("decay", TaskTarget.Decay);
@@ -376,7 +375,7 @@ public class TaskCollection {
         Bonsai, Pomegranate, Pine, Pinecone, Deadwood, Zephyr, SkyBeetle,
 
         // Combat
-        Panda, Sniffer, Lurker, CaveCrawler, PoisonSlime, Spotter, Verdemite, Enderman, Ghast, GhastSoul, Blaze, Nrub, InfernalImp, Wick, GlowSquid, Slinker, Rodrick, SkyBeetleQueen,
+        Panda, Sniffer, Lurker, CaveCrawler, PoisonSlime, Spotter, Verdemite, Endermen, Ghast, GhastSoul, Blaze, Nrub, InfernalImp, Wick, GlowSquid, Slinker, Rodrick, SkyBeetleQueen,
         W2_Elite,
 
         // Farming
@@ -384,7 +383,7 @@ public class TaskCollection {
         AdvancedCrops,
 
         // Fishing
-        Salmon, Koi, Axolotl, MagmaFish, MoltenJellyfish, Blubber, AbyssalCrab,
+        Salmon, Koi, Axolotl, MagmaFish, MoltenJellyfish, Bubbler, AbyssalCrab,
 
         // Gaming
         Blackjack,

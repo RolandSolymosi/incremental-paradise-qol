@@ -54,7 +54,7 @@ public class Task {
     );
 
     private static final List<Pattern> COMBAT_PATTERNS = List.of(
-            Pattern.compile("Slay ?(?:the)?(?<type>.+) \\((?<progress>[0-9.,]+[km]?)/(?<amount>[0-9.,]+[km]?)"),
+            Pattern.compile("Slay (?:the )?(?<type>.+) \\((?<progress>[0-9.,]+[km]?)/(?<amount>[0-9.,]+[km]?)"),
             Pattern.compile("Collect (?<amount>[0-9.,]+[km]?) drops from (?<type>.+) with (?<constraint>\\.+) \\(?(?<progress>[0-9.,]+[km]?)"),
             Pattern.compile("Collect (?<amount>[0-9.,]+[km]?) drops from (?<type>.+) \\(?(?<progress>[0-9.,]+[km]?)")
     );
