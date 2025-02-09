@@ -252,10 +252,6 @@ public class Task {
             return taskTarget;
         }
 
-        if (this.isShiny) {
-            return "Shiny " + taskTarget;
-        }
-
         if (this.isLarge) {
             return "Large " + taskTarget;
         }
