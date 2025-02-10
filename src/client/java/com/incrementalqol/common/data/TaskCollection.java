@@ -117,7 +117,7 @@ public class TaskCollection {
         TaskDescriptors.put(TaskTarget.Bettafly, new TaskDescriptor(TaskType.Fishing, "sty", new ArrayList<>(List.of("w3")), TaskType.Fishing, ToolType.FishingRod));
         TaskDescriptors.put(TaskTarget.Soarfish, new TaskDescriptor(TaskType.Fishing, "beach", new ArrayList<>(List.of("w3")), TaskType.Fishing, ToolType.FishingRod));
         TaskDescriptors.put(TaskTarget.Guardian, new TaskDescriptor(TaskType.Fishing, "underside", new ArrayList<>(List.of("w3")), TaskType.Fishing, ToolType.FishingRod));
-        TaskDescriptors.put(TaskTarget.Matcher, new TaskDescriptor(TaskType.Gaming, "matcher", new ArrayList<>(List.of("w3")), null, null));
+        TaskDescriptors.put(TaskTarget.Matcher, new TaskDescriptor(TaskType.Gaming, "matcher", new ArrayList<>(List.of("matcher")), null, null));
 
         // World Nightmare 1
         TaskDescriptors.put(TaskTarget.Quartz, new TaskDescriptor(TaskType.Mining, "quartz", new ArrayList<>(List.of("n1")), TaskType.Mining, ToolType.Pickaxe));
@@ -141,7 +141,7 @@ public class TaskCollection {
         TaskDescriptors.put(TaskTarget.Charred, new TaskDescriptor(TaskType.Fishing, "n1", new ArrayList<>(List.of("n1")), TaskType.Fishing, ToolType.FishingRod));
         TaskDescriptors.put(TaskTarget.SmokedSalmon, new TaskDescriptor(TaskType.Fishing, "n1", new ArrayList<>(List.of("n1")), TaskType.Fishing, ToolType.FishingRod));
         TaskDescriptors.put(TaskTarget.Strider, new TaskDescriptor(TaskType.Fishing, "n1", new ArrayList<>(List.of("n1")), TaskType.Fishing, ToolType.FishingRod));
-        TaskDescriptors.put(TaskTarget.Dice, new TaskDescriptor(TaskType.Gaming, "n1", new ArrayList<>(List.of("n1")), null, null));
+        TaskDescriptors.put(TaskTarget.Dice, new TaskDescriptor(TaskType.Gaming, "dice", new ArrayList<>(List.of("dice")), null, null));
         TaskDescriptors.put(TaskTarget.Shiver_Money, new TaskDescriptor(TaskType.Misc, "quartz", new ArrayList<>(List.of("n1")), TaskType.Mining, ToolType.Pickaxe));
     }
 
