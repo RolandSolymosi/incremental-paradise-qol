@@ -29,8 +29,8 @@ public class TaskCollection {
         TaskDescriptors.put(TaskTarget.Beetroot, new TaskDescriptor(TaskType.Farming, "beetroot", new ArrayList<>(List.of("w1")), TaskType.Farming, ToolType.Hoe));
         TaskDescriptors.put(TaskTarget.Honeycomb, new TaskDescriptor(TaskType.Farming, "w1", new ArrayList<>(List.of("w1")), TaskType.Farming, ToolType.Hoe));
         TaskDescriptors.put(TaskTarget.Riverfish, new TaskDescriptor(TaskType.Fishing, "carrot", new ArrayList<>(List.of("w1")), TaskType.Fishing, ToolType.FishingRod));
-        TaskDescriptors.put(TaskTarget.Crab, new TaskDescriptor(TaskType.Fishing, "wheat", new ArrayList<>(List.of("w1")), TaskType.Fishing, ToolType.FishingRod));
-        TaskDescriptors.put(TaskTarget.HermitCrab, new TaskDescriptor(TaskType.Fishing, "crab", new ArrayList<>(List.of("w1")), TaskType.Fishing, ToolType.FishingRod));
+        TaskDescriptors.put(TaskTarget.Crab, new TaskDescriptor(TaskType.Fishing, "wheat", new ArrayList<>(List.of("w1")), TaskType.CombatFishing, ToolType.FishingRod));
+        TaskDescriptors.put(TaskTarget.HermitCrab, new TaskDescriptor(TaskType.Fishing, "crab", new ArrayList<>(List.of("w1")), TaskType.CombatFishing, ToolType.FishingRod));
         TaskDescriptors.put(TaskTarget.Rps, new TaskDescriptor(TaskType.Gaming, "rps", new ArrayList<>(List.of("rps")), null, null));
         TaskDescriptors.put(TaskTarget.Coinflip, new TaskDescriptor(TaskType.Gaming, "cf", new ArrayList<>(List.of("cf")), null, null));
         TaskDescriptors.put(TaskTarget.Pixelpop, new TaskDescriptor(TaskType.Gaming, "pixelpop", new ArrayList<>(List.of("pixelpop")), null, null));
@@ -82,7 +82,7 @@ public class TaskCollection {
         TaskDescriptors.put(TaskTarget.MagmaFish, new TaskDescriptor(TaskType.Fishing, "infernal", new ArrayList<>(List.of("veil", "lush", "w2")), TaskType.Fishing, ToolType.FishingRod));
         TaskDescriptors.put(TaskTarget.MoltenJellyfish, new TaskDescriptor(TaskType.Fishing, "infernal", new ArrayList<>(List.of("veil", "lush", "w2")), TaskType.Fishing, ToolType.FishingRod));
         TaskDescriptors.put(TaskTarget.Bubbler, new TaskDescriptor(TaskType.Fishing, "infernal", new ArrayList<>(List.of("veil", "lush", "w2")), TaskType.Fishing, ToolType.FishingRod));
-        TaskDescriptors.put(TaskTarget.AbyssalCrab, new TaskDescriptor(TaskType.Fishing, "abyss", new ArrayList<>(List.of("infernal", "veil", "lush", "w2")), TaskType.Fishing, ToolType.FishingRod));
+        TaskDescriptors.put(TaskTarget.AbyssalCrab, new TaskDescriptor(TaskType.Fishing, "abyss", new ArrayList<>(List.of("infernal", "veil", "lush", "w2")), TaskType.CombatFishing, ToolType.FishingRod));
         TaskDescriptors.put(TaskTarget.Blackjack, new TaskDescriptor(TaskType.Gaming, "21", new ArrayList<>(List.of("21")), null, null));
         TaskDescriptors.put(TaskTarget.Silver_Money, new TaskDescriptor(TaskType.Misc, "infernal", new ArrayList<>(List.of("veil", "lush", "w2")), TaskType.Mining, ToolType.Pickaxe));
         TaskDescriptors.put(TaskTarget.AbyssLamp, new TaskDescriptor(TaskType.Misc, "abyss", new ArrayList<>(List.of("infernal", "veil", "lush", "w2")), null, null));
@@ -116,7 +116,7 @@ public class TaskCollection {
         TaskDescriptors.put(TaskTarget.GoldfishRetriever, new TaskDescriptor(TaskType.Fishing, "canine", new ArrayList<>(List.of("w3")), TaskType.Fishing, ToolType.FishingRod));
         TaskDescriptors.put(TaskTarget.Bettafly, new TaskDescriptor(TaskType.Fishing, "sty", new ArrayList<>(List.of("w3")), TaskType.Fishing, ToolType.FishingRod));
         TaskDescriptors.put(TaskTarget.Soarfish, new TaskDescriptor(TaskType.Fishing, "beach", new ArrayList<>(List.of("w3")), TaskType.Fishing, ToolType.FishingRod));
-        TaskDescriptors.put(TaskTarget.Guardian, new TaskDescriptor(TaskType.Fishing, "underside", new ArrayList<>(List.of("w3")), TaskType.Fishing, ToolType.FishingRod));
+        TaskDescriptors.put(TaskTarget.Guardian, new TaskDescriptor(TaskType.Fishing, "underside", new ArrayList<>(List.of("w3")), TaskType.CombatFishing, ToolType.FishingRod));
         TaskDescriptors.put(TaskTarget.Matcher, new TaskDescriptor(TaskType.Gaming, "matcher", new ArrayList<>(List.of("matcher")), null, null));
 
         // World Nightmare 1
@@ -140,7 +140,7 @@ public class TaskCollection {
         TaskDescriptors.put(TaskTarget.Splinterseed, new TaskDescriptor(TaskType.Farming, "n1", new ArrayList<>(List.of("n1")), TaskType.Farming, ToolType.Hoe));
         TaskDescriptors.put(TaskTarget.Charred, new TaskDescriptor(TaskType.Fishing, "n1", new ArrayList<>(List.of("n1")), TaskType.Fishing, ToolType.FishingRod));
         TaskDescriptors.put(TaskTarget.SmokedSalmon, new TaskDescriptor(TaskType.Fishing, "n1", new ArrayList<>(List.of("n1")), TaskType.Fishing, ToolType.FishingRod));
-        TaskDescriptors.put(TaskTarget.Strider, new TaskDescriptor(TaskType.Fishing, "n1", new ArrayList<>(List.of("n1")), TaskType.Fishing, ToolType.FishingRod));
+        TaskDescriptors.put(TaskTarget.Strider, new TaskDescriptor(TaskType.Fishing, "n1", new ArrayList<>(List.of("n1")), TaskType.CombatFishing, ToolType.FishingRod));
         TaskDescriptors.put(TaskTarget.Dice, new TaskDescriptor(TaskType.Gaming, "dice", new ArrayList<>(List.of("dice")), null, null));
         TaskDescriptors.put(TaskTarget.Shiver_Money, new TaskDescriptor(TaskType.Misc, "quartz", new ArrayList<>(List.of("n1")), TaskType.Mining, ToolType.Pickaxe));
     }
@@ -342,6 +342,7 @@ public class TaskCollection {
         Foraging("3"),
         Farming("4"),
         Fishing("5"),
+        CombatFishing("6"),
         Misc(null),
         Gaming(null);
 
