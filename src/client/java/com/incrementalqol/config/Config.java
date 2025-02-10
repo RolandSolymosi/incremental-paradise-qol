@@ -1,12 +1,10 @@
 package com.incrementalqol.config;
 
+import com.incrementalqol.common.data.TaskCollection;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import dev.isxander.yacl3.api.*;
-import dev.isxander.yacl3.api.controller.BooleanControllerBuilder;
-import dev.isxander.yacl3.api.controller.IntegerFieldControllerBuilder;
-import dev.isxander.yacl3.api.controller.StringControllerBuilder;
-import dev.isxander.yacl3.api.controller.TickBoxControllerBuilder;
+import dev.isxander.yacl3.api.controller.*;
 import dev.isxander.yacl3.config.v2.api.ConfigClassHandler;
 import dev.isxander.yacl3.config.v2.api.SerialEntry;
 import dev.isxander.yacl3.config.v2.api.serializer.GsonConfigSerializerBuilder;
@@ -36,49 +34,48 @@ public class Config {
     private boolean autoSwapWardrobe;
 
     @SerialEntry
-    private String combatWardrobeName = "Combat";
+    private String combatWardrobeName = "1";
     @SerialEntry
-    private int meleeWeaponSlot;
+    private int meleeWeaponSlot = 0;
     @SerialEntry
-    private int rangedWeaponSlot;
+    private int rangedWeaponSlot = 5;
 
     @SerialEntry
-    private String miningWardrobeName = "Mining";
+    private String miningWardrobeName = "2";
     @SerialEntry
-    private int miningWeaponSlot;
+    private int miningWeaponSlot = 1;
     @SerialEntry
-    private String foragingWardrobeName = "Foraging";
+    private String foragingWardrobeName = "3";
     @SerialEntry
-    private int foragingWeaponSlot;
+    private int foragingWeaponSlot = 2;
     @SerialEntry
-    private String farmingWardrobeName = "Farming";
+    private String farmingWardrobeName = "4";
     @SerialEntry
-    private int farmingWeaponSlot;
+    private int farmingWeaponSlot = 3;
     @SerialEntry
-    private String fishingWardrobeName = "Fishing";
+    private String fishingWardrobeName = "5";
     @SerialEntry
-    private int fishingWeaponSlot;
+    private int fishingWeaponSlot = 4;
 
-    public String getWardrobeNameToDefault(String defaultName){
-        return switch (defaultName){
-            case "Combat" -> combatWardrobeName;
-            case "Mining" -> miningWardrobeName;
-            case "Foraging" -> foragingWardrobeName;
-            case "Farming" -> farmingWardrobeName;
-            case "Fishing" -> fishingWardrobeName;
-            default -> defaultName;
+    public String getWardrobeNameToDefault(TaskCollection.TaskType defaultWardrobe) {
+        return switch (defaultWardrobe) {
+            case TaskCollection.TaskType.Combat -> combatWardrobeName;
+            case TaskCollection.TaskType.Mining -> miningWardrobeName;
+            case TaskCollection.TaskType.Foraging -> foragingWardrobeName;
+            case TaskCollection.TaskType.Farming -> farmingWardrobeName;
+            case TaskCollection.TaskType.Fishing -> fishingWardrobeName;
+            default -> defaultWardrobe.getString();
         };
     }
 
-    public int getSlotToDefault(int defaultSlot){
-        return switch (defaultSlot){
-            case 0 -> meleeWeaponSlot;
-            case 1 -> miningWeaponSlot;
-            case 2 -> foragingWeaponSlot;
-            case 3 -> farmingWeaponSlot;
-            case 4 -> fishingWeaponSlot;
-            case 5 -> rangedWeaponSlot;
-            default -> defaultSlot;
+    public int getSlotToDefault(TaskCollection.ToolType defaultToolType) {
+        return switch (defaultToolType) {
+            case TaskCollection.ToolType.Melee -> meleeWeaponSlot;
+            case TaskCollection.ToolType.Pickaxe -> miningWeaponSlot;
+            case TaskCollection.ToolType.Axe -> foragingWeaponSlot;
+            case TaskCollection.ToolType.Hoe -> farmingWeaponSlot;
+            case TaskCollection.ToolType.FishingRod -> fishingWeaponSlot;
+            case TaskCollection.ToolType.Bow -> rangedWeaponSlot;
         };
     }
 
@@ -119,32 +116,12 @@ public class Config {
         this.autoGZ = autoGZ;
     }
 
-    public void setHudBackground(boolean hudBackground) {
-        this.hudBackground = hudBackground;
-    }
-
     public void setHudPosX(int hudPosX) {
         this.hudPosX = hudPosX;
     }
 
     public void setHudPosY(int hudPosY) {
         this.hudPosY = hudPosY;
-    }
-
-    public void setHudScale(double hudScale) {
-        this.hudScale = hudScale;
-    }
-
-    public void setHudSize(int hudSize) {
-        this.hudSize = hudSize;
-    }
-
-    public void setSortedByType(boolean sortedByType) {
-        this.isSortedByType = sortedByType;
-    }
-
-    public void setAutoSwapWardrobe(boolean isAutoSwap) {
-        this.autoSwapWardrobe = isAutoSwap;
     }
 
     public Screen createScreen(Screen parent) {
@@ -157,6 +134,12 @@ public class Config {
                         .group(OptionGroup.createBuilder()
                                 .name(Text.of("Task HUD configuration"))
                                 .description(OptionDescription.of(Text.of("These are the basic overrides of task categories.")))
+                                .option(Option.<Boolean>createBuilder()
+                                        .name(Text.of("Toggle HUD background"))
+                                        .description(OptionDescription.of(Text.of("Turn on and off the gray background of the task HUD.")))
+                                        .binding(true, () -> this.hudBackground, newVal -> this.hudBackground = newVal)
+                                        .controller(BooleanControllerBuilder::create)
+                                        .build())
                                 .option(Option.<Boolean>createBuilder()
                                         .name(Text.of("Order Tasks by Type"))
                                         .description(OptionDescription.of(Text.of("Order Tasks on Hud by Type, not by default order.")))
@@ -172,71 +155,77 @@ public class Config {
                         .group(OptionGroup.createBuilder()
                                 .name(Text.of("Task Category Auto Swap"))
                                 .description(OptionDescription.of(Text.of("These are the basic overrides of task categories.")))
+                                .option(Option.<Boolean>createBuilder()
+                                        .name(Text.of("Toggle the Auto Swap feature"))
+                                        .description(OptionDescription.of(Text.of("Turning on/off the auto swap functionality")))
+                                        .binding(true, () -> this.autoSwapWardrobe, newVal -> this.autoSwapWardrobe = newVal)
+                                        .controller(BooleanControllerBuilder::create)
+                                        .build())
                                 .option(Option.<String>createBuilder()
                                         .name(Text.of("Combat Wardrobe Name"))
                                         .description(OptionDescription.of(Text.of("The name of your wardrobe slot for Combat tasks")))
-                                        .binding("Combat", () -> this.combatWardrobeName, newVal -> this.combatWardrobeName = newVal)
+                                        .binding("1", () -> this.combatWardrobeName, newVal -> this.combatWardrobeName = newVal)
                                         .controller(StringControllerBuilder::create)
                                         .build())
                                 .option(Option.<Integer>createBuilder()
                                         .name(Text.of("Melee Weapon HotBar Slot"))
-                                        .description(OptionDescription.of(Text.of("The slot on the HotBar for your melee weapon. (0-8)")))
-                                        .binding(0, () -> this.meleeWeaponSlot, newVal -> this.meleeWeaponSlot = newVal)
-                                        .controller(o -> IntegerFieldControllerBuilder.create(o).min(0).max(8))
+                                        .description(OptionDescription.of(Text.of("The slot on the HotBar for your melee weapon. (1-8)")))
+                                        .binding(1, () -> this.meleeWeaponSlot + 1, newVal -> this.meleeWeaponSlot = newVal - 1)
+                                        .controller(o -> IntegerSliderControllerBuilder.create(o).step(1).range(1, 8))
                                         .build())
                                 .option(Option.<Integer>createBuilder()
                                         .name(Text.of("Ranged Weapon HotBar Slot"))
-                                        .description(OptionDescription.of(Text.of("The slot on the HotBar for your ranged weapon. (0-8)")))
-                                        .binding(5, () -> this.rangedWeaponSlot, newVal -> this.rangedWeaponSlot = newVal)
-                                        .controller(o -> IntegerFieldControllerBuilder.create(o).min(0).max(8))
+                                        .description(OptionDescription.of(Text.of("The slot on the HotBar for your ranged weapon. (1-8)")))
+                                        .binding(6, () -> this.rangedWeaponSlot + 1, newVal -> this.rangedWeaponSlot = newVal - 1)
+                                        .controller(o -> IntegerSliderControllerBuilder.create(o).step(1).range(1, 8))
                                         .build())
                                 .option(Option.<String>createBuilder()
                                         .name(Text.of("Mining Wardrobe Name"))
                                         .description(OptionDescription.of(Text.of("The name of your wardrobe slot for Mining tasks")))
-                                        .binding("Mining", () -> this.miningWardrobeName, newVal -> this.miningWardrobeName = newVal)
+                                        .binding("2", () -> this.miningWardrobeName, newVal -> this.miningWardrobeName = newVal)
                                         .controller(StringControllerBuilder::create)
                                         .build())
                                 .option(Option.<Integer>createBuilder()
                                         .name(Text.of("Pickaxe HotBar Slot"))
-                                        .description(OptionDescription.of(Text.of("The slot on the HotBar for your pickaxe. (0-8)")))
-                                        .binding(1, () -> this.miningWeaponSlot, newVal -> this.miningWeaponSlot = newVal)
-                                        .controller(o -> IntegerFieldControllerBuilder.create(o).min(0).max(8))
+                                        .description(OptionDescription.of(Text.of("The slot on the HotBar for your pickaxe. (1-8)")))
+                                        .binding(2, () -> this.miningWeaponSlot + 1, newVal -> this.miningWeaponSlot = newVal - 1)
+                                        .controller(o -> IntegerSliderControllerBuilder.create(o).step(1).range(1, 8))
                                         .build())
                                 .option(Option.<String>createBuilder()
                                         .name(Text.of("Foraging Wardrobe Name"))
                                         .description(OptionDescription.of(Text.of("The name of your wardrobe slot for Foraging tasks")))
-                                        .binding("Foraging", () -> this.foragingWardrobeName, newVal -> this.foragingWardrobeName = newVal)
+                                        .binding("3", () -> this.foragingWardrobeName, newVal -> this.foragingWardrobeName = newVal)
                                         .controller(StringControllerBuilder::create)
                                         .build())
                                 .option(Option.<Integer>createBuilder()
                                         .name(Text.of("Axe HotBar Slot"))
-                                        .description(OptionDescription.of(Text.of("The slot on the HotBar for your axe. (0-8)")))
-                                        .binding(2, () -> this.foragingWeaponSlot, newVal -> this.foragingWeaponSlot = newVal)
-                                        .controller(o -> IntegerFieldControllerBuilder.create(o).min(0).max(8))
+                                        .description(OptionDescription.of(Text.of("The slot on the HotBar for your axe. (1-8)")))
+                                        .binding(3, () -> this.foragingWeaponSlot + 1, newVal -> this.foragingWeaponSlot = newVal - 1)
+                                        .controller(o -> IntegerSliderControllerBuilder.create(o).step(1).range(1, 8))
                                         .build())
                                 .option(Option.<String>createBuilder()
                                         .name(Text.of("Farming Wardrobe Name"))
                                         .description(OptionDescription.of(Text.of("The name of your wardrobe slot for Farming tasks")))
-                                        .binding("Farming", () -> this.farmingWardrobeName, newVal -> this.farmingWardrobeName = newVal)
+                                        .binding("4", () -> this.farmingWardrobeName, newVal -> this.farmingWardrobeName = newVal)
                                         .controller(StringControllerBuilder::create)
                                         .build())
                                 .option(Option.<Integer>createBuilder()
                                         .name(Text.of("Hoe HotBar Slot"))
-                                        .description(OptionDescription.of(Text.of("The slot on the HotBar for your hoe. (0-8)")))
-                                        .binding(3, () -> this.farmingWeaponSlot, newVal -> this.farmingWeaponSlot = newVal)
-                                        .controller(o -> IntegerFieldControllerBuilder.create(o).min(0).max(8))
+                                        .description(OptionDescription.of(Text.of("The slot on the HotBar for your hoe. (1-8)")))
+                                        .binding(4, () -> this.farmingWeaponSlot + 1, newVal -> this.farmingWeaponSlot = newVal - 1)
+                                        .controller(o -> IntegerSliderControllerBuilder.create(o).step(1).range(1, 8))
                                         .build())
                                 .option(Option.<String>createBuilder()
                                         .name(Text.of("Fishing Wardrobe Name"))
                                         .description(OptionDescription.of(Text.of("The name of your wardrobe slot for Mining tasks")))
-                                        .binding("Fishing", () -> this.fishingWardrobeName, newVal -> this.fishingWardrobeName = newVal)
+                                        .binding("5", () -> this.fishingWardrobeName, newVal -> this.fishingWardrobeName = newVal)
                                         .controller(StringControllerBuilder::create)
                                         .build())
                                 .option(Option.<Integer>createBuilder()
                                         .name(Text.of("Fishing Rod HotBar Slot"))
-                                        .description(OptionDescription.of(Text.of("The slot on the HotBar for your fishing rod. (0-8)")))
-                                        .binding(4, () -> this.fishingWeaponSlot, newVal -> this.fishingWeaponSlot = newVal)
-                                        .controller(o -> IntegerFieldControllerBuilder.create(o).min(0).max(8))
+                                        .description(OptionDescription.of(Text.of("The slot on the HotBar for your fishing rod. (1-8)")))
+                                        .binding(5, () -> this.fishingWeaponSlot + 1, newVal -> this.fishingWeaponSlot = newVal - 1)
+                                        .controller(o -> IntegerSliderControllerBuilder.create(o).step(1).range(1, 8))
                                         .build())
                                 .build())
                         .build())
