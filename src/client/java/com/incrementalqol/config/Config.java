@@ -51,6 +51,8 @@ public class Config {
     @SerialEntry
     private String fishingWardrobeName = "5";
     @SerialEntry
+    private String combatFishingWardrobeName = "6";
+    @SerialEntry
     private int fishingWeaponSlot = 4;
 
     @SerialEntry
@@ -67,6 +69,7 @@ public class Config {
             case TaskCollection.TaskType.Foraging -> foragingWardrobeName;
             case TaskCollection.TaskType.Farming -> farmingWardrobeName;
             case TaskCollection.TaskType.Fishing -> fishingWardrobeName;
+            case TaskCollection.TaskType.CombatFishing -> combatFishingWardrobeName;
             default -> defaultWardrobe.getString();
         };
     }
@@ -165,32 +168,38 @@ public class Config {
                                         .build())
                                 .option(Option.<String>createBuilder()
                                         .name(Text.of("Combat Wardrobe Name"))
-                                        .description(OptionDescription.of(Text.of("The name of your wardrobe slot for Combat tasks")))
+                                        .description(OptionDescription.of(Text.of("The name of your wardrobe slot for Combat tasks.")))
                                         .binding("1", () -> this.combatWardrobeName, newVal -> this.combatWardrobeName = newVal)
                                         .controller(StringControllerBuilder::create)
                                         .build())
                                 .option(Option.<String>createBuilder()
                                         .name(Text.of("Mining Wardrobe Name"))
-                                        .description(OptionDescription.of(Text.of("The name of your wardrobe slot for Mining tasks")))
+                                        .description(OptionDescription.of(Text.of("The name of your wardrobe slot for Mining tasks.")))
                                         .binding("2", () -> this.miningWardrobeName, newVal -> this.miningWardrobeName = newVal)
                                         .controller(StringControllerBuilder::create)
                                         .build())
                                 .option(Option.<String>createBuilder()
                                         .name(Text.of("Foraging Wardrobe Name"))
-                                        .description(OptionDescription.of(Text.of("The name of your wardrobe slot for Foraging tasks")))
+                                        .description(OptionDescription.of(Text.of("The name of your wardrobe slot for Foraging tasks.")))
                                         .binding("3", () -> this.foragingWardrobeName, newVal -> this.foragingWardrobeName = newVal)
                                         .controller(StringControllerBuilder::create)
                                         .build())
                                 .option(Option.<String>createBuilder()
                                         .name(Text.of("Farming Wardrobe Name"))
-                                        .description(OptionDescription.of(Text.of("The name of your wardrobe slot for Farming tasks")))
+                                        .description(OptionDescription.of(Text.of("The name of your wardrobe slot for Farming tasks.")))
                                         .binding("4", () -> this.farmingWardrobeName, newVal -> this.farmingWardrobeName = newVal)
                                         .controller(StringControllerBuilder::create)
                                         .build())
                                 .option(Option.<String>createBuilder()
                                         .name(Text.of("Fishing Wardrobe Name"))
-                                        .description(OptionDescription.of(Text.of("The name of your wardrobe slot for Mining tasks")))
+                                        .description(OptionDescription.of(Text.of("The name of your wardrobe slot for Fishing tasks.")))
                                         .binding("5", () -> this.fishingWardrobeName, newVal -> this.fishingWardrobeName = newVal)
+                                        .controller(StringControllerBuilder::create)
+                                        .build())
+                                .option(Option.<String>createBuilder()
+                                        .name(Text.of("Combat Fishing Wardrobe Name"))
+                                        .description(OptionDescription.of(Text.of("The name of your wardrobe slot for Combat fishing tasks (e.g.: Crabs)")))
+                                        .binding("6", () -> this.combatFishingWardrobeName, newVal -> this.combatFishingWardrobeName = newVal)
                                         .controller(StringControllerBuilder::create)
                                         .build())
                                 .build())
