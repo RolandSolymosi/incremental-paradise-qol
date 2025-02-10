@@ -135,14 +135,15 @@ public class TaskCollection {
         TaskDescriptors.put(TaskTarget.Firefox, new TaskDescriptor(TaskType.Combat, "n1", "n1", TaskType.Combat, ToolType.Bow));
         TaskDescriptors.put(TaskTarget.Marshmallow, new TaskDescriptor(TaskType.Combat, "n1", "n1", TaskType.Combat, ToolType.Bow));
         TaskDescriptors.put(TaskTarget.WN1_Elite, new TaskDescriptor(TaskType.Combat, "n1", "n1", TaskType.Combat, ToolType.Pickaxe));
-        TaskDescriptors.put(TaskTarget.Decay, new TaskDescriptor(TaskType.Combat, "n1", "n1", TaskType.Farming, ToolType.Hoe));
-        TaskDescriptors.put(TaskTarget.IcebergLettuce_Or_TorchFlower, new TaskDescriptor(TaskType.Combat, "n1", "n1", TaskType.Farming, ToolType.Hoe));
-        TaskDescriptors.put(TaskTarget.Mandrake, new TaskDescriptor(TaskType.Combat, "n1", "n1", TaskType.Farming, ToolType.Hoe));
-        TaskDescriptors.put(TaskTarget.Splinterseed, new TaskDescriptor(TaskType.Combat, "n1", "n1", TaskType.Farming, ToolType.Hoe));
-        TaskDescriptors.put(TaskTarget.Charred, new TaskDescriptor(TaskType.Combat, "n1", "n1", TaskType.Fishing, ToolType.FishingRod));
-        TaskDescriptors.put(TaskTarget.SmokedSalmon, new TaskDescriptor(TaskType.Combat, "n1", "n1", TaskType.Fishing, ToolType.FishingRod));
-        TaskDescriptors.put(TaskTarget.Dice, new TaskDescriptor(TaskType.Combat, "n1", "n1", null, null));
-        TaskDescriptors.put(TaskTarget.Shiver_Money, new TaskDescriptor(TaskType.Combat, "n1", "n1", TaskType.Mining, ToolType.Pickaxe));
+        TaskDescriptors.put(TaskTarget.Decay, new TaskDescriptor(TaskType.Farming, "n1", "n1", TaskType.Farming, ToolType.Hoe));
+        TaskDescriptors.put(TaskTarget.IcebergLettuce_Or_TorchFlower, new TaskDescriptor(TaskType.Farming, "n1", "n1", TaskType.Farming, ToolType.Hoe));
+        TaskDescriptors.put(TaskTarget.Mandrake, new TaskDescriptor(TaskType.Farming, "n1", "n1", TaskType.Farming, ToolType.Hoe));
+        TaskDescriptors.put(TaskTarget.Splinterseed, new TaskDescriptor(TaskType.Farming, "n1", "n1", TaskType.Farming, ToolType.Hoe));
+        TaskDescriptors.put(TaskTarget.Charred, new TaskDescriptor(TaskType.Fishing, "n1", "n1", TaskType.Fishing, ToolType.FishingRod));
+        TaskDescriptors.put(TaskTarget.SmokedSalmon, new TaskDescriptor(TaskType.Fishing, "n1", "n1", TaskType.Fishing, ToolType.FishingRod));
+        TaskDescriptors.put(TaskTarget.Strider, new TaskDescriptor(TaskType.Fishing, "n1", "n1", TaskType.Fishing, ToolType.FishingRod));
+        TaskDescriptors.put(TaskTarget.Dice, new TaskDescriptor(TaskType.Gaming, "n1", "n1", null, null));
+        TaskDescriptors.put(TaskTarget.Shiver_Money, new TaskDescriptor(TaskType.Misc, "n1", "n1", TaskType.Mining, ToolType.Pickaxe));
     }
 
     private static final Map<String, TaskTarget> TaskMap = new HashMap<>();
