@@ -161,9 +161,15 @@ public class Task {
     public String getWarp() {
         if (this.descriptor != null) {
             return this.descriptor.getCommand();
-        } else {
-            return this.warp;
         }
+        return null;
+    }
+
+    public String getFallbackWarp(int index) {
+        if (this.descriptor != null) {
+            return this.descriptor.getFallbackCommand(index);
+        }
+        return null;
     }
 
     public String getTaskType() {

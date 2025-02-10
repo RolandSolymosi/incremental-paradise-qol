@@ -1,11 +1,14 @@
 package com.incrementalqol.modules.TaskTracker;
 
+import com.incrementalqol.common.data.TaskCollection;
 import com.incrementalqol.common.utils.ScreenInteraction;
 import com.incrementalqol.config.Config;
+import com.incrementalqol.modules.OptionsModule;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
+import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.client.MinecraftClient;
@@ -28,6 +31,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -41,6 +46,11 @@ public class TaskTrackerModule implements ClientModInitializer {
     private static KeyBinding taskWarp;
 
     private ScreenInteraction screenInteraction;
+
+    private static final AtomicReference<Task> activeWarp = new AtomicReference<>(null);
+    private static int fallbackIndex = 0;
+    private static int tickCounter = 0;
+    private static final AtomicBoolean warpTickOngoing = new AtomicBoolean(false);
 
     @Override
     public void onInitializeClient() {
@@ -67,6 +77,8 @@ public class TaskTrackerModule implements ClientModInitializer {
 
 
         ClientTickEvents.END_CLIENT_TICK.register(TaskTrackerModule::keybindCheck);
+        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> resetWarp());
+        ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> resetWarp());
 
         ClientReceiveMessageEvents.GAME.register((message, overlay) -> {
             if (message.getString().contains("Completed task")) {
@@ -84,6 +96,33 @@ public class TaskTrackerModule implements ClientModInitializer {
                         }
                     }
                 }
+            }
+        });
+        ClientReceiveMessageEvents.GAME.register((message, overlay) -> {
+            if (MinecraftClient.getInstance().player == null){
+                return;
+            }
+            if (message.getString().contains("You don't have access to this warp.")) {
+                if (activeWarp.get() != null) {
+                    var command = activeWarp.get().getFallbackWarp(fallbackIndex);
+                    if (command == null){
+                        return;
+                    }
+                    MinecraftClient.getInstance().player.networkHandler.sendCommand(command);
+                    tickCounter = 0;
+                    fallbackIndex++;
+                }
+            }
+        });
+        ClientTickEvents.END_CLIENT_TICK.register((client) -> {
+            if (warpTickOngoing.compareAndSet(false, true)){
+                if (activeWarp.get() != null) {
+                    tickCounter++;
+                    if (tickCounter > 5) {
+                        resetWarp();
+                    }
+                }
+                warpTickOngoing.set(false);
             }
         });
 
@@ -137,6 +176,13 @@ public class TaskTrackerModule implements ClientModInitializer {
         }));
     }
 
+    private static void resetWarp(){
+        activeWarp.set(null);
+        fallbackIndex = 0;
+        tickCounter = 0;
+        warpTickOngoing.set(false);
+    }
+
     private static void keybindCheck(MinecraftClient minecraftClient) {
 
         while (taskWarp.wasPressed()) {
@@ -148,17 +194,21 @@ public class TaskTrackerModule implements ClientModInitializer {
                     task -> {
                         assert MinecraftClient.getInstance().player != null;
                         var config = Config.HANDLER.instance();
-                        if (task.descriptor != null && Config.HANDLER.instance().getAutoSwapWardrobe()) {
-                            if (task.descriptor.getDefaultWardrobe() != null) {
-                                MinecraftClient.getInstance().player.networkHandler.sendCommand("wardrobe " + config.getWardrobeNameToDefault(task.descriptor.getDefaultWardrobe()));
+                        tickCounter = 0;
+                        if (activeWarp.compareAndSet(null, task)) {
+                            if (task.descriptor != null) {
+                                if (Config.HANDLER.instance().getAutoSwapWardrobe() && task.descriptor.getDefaultWardrobe() != null) {
+                                    MinecraftClient.getInstance().player.networkHandler.sendCommand("wardrobe " + config.getWardrobeNameToDefault(task.descriptor.getDefaultWardrobe()));
+                                }
+                                if (Config.HANDLER.instance().getAutoSwapTools() && task.descriptor.getDefaultHotBarSlot() != null) {
+                                    var slotId = config.getSlotToDefault(task.descriptor.getDefaultHotBarSlot());
+                                    MinecraftClient.getInstance().player.getInventory().selectedSlot = slotId;
+                                    MinecraftClient.getInstance().player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(slotId));
+                                }
                             }
-                            if (task.descriptor.getDefaultHotBarSlot() != null){
-                                var slotId = config.getSlotToDefault(task.descriptor.getDefaultHotBarSlot());
-                                MinecraftClient.getInstance().player.getInventory().selectedSlot = slotId;
-                                MinecraftClient.getInstance().player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(slotId));
-                            }
+
+                            MinecraftClient.getInstance().player.networkHandler.sendCommand(task.getWarp().replace(")", ""));
                         }
-                        MinecraftClient.getInstance().player.networkHandler.sendCommand(task.getWarp().replace(")", ""));
                     },
                     () -> {
                         assert MinecraftClient.getInstance().player != null;
