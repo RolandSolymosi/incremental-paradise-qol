@@ -4,6 +4,8 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.item.ItemStack;
+import net.minecraft.network.listener.ClientPlayPacketListener;
+import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.c2s.play.ClickSlotC2SPacket;
 import net.minecraft.network.packet.s2c.play.InventoryS2CPacket;
 import net.minecraft.network.packet.s2c.play.OpenScreenS2CPacket;
@@ -36,6 +38,7 @@ public class ScreenInteraction {
     private int currentStepIndex = 0;
     private Integer actualSyncId = null;
     private Pair<Integer, List<ItemStack>> actualContent = null;
+    private boolean executing = false;
 
     public CompletionStage<Boolean> startAsync(boolean continuousExecution) {
         var status = new CompletableFuture<Boolean>();
@@ -78,77 +81,74 @@ public class ScreenInteraction {
         return ScreenInteractionManager.registeredInteractions.remove(this);
     }
 
-    private boolean listenScreen(OpenScreenS2CPacket packet) {
-        if (isActive.get() && (this.actualSyncId == null || this.actualSyncId != packet.getSyncId())) {
-            var currentStep = this.getCurrentStep();
-            if (currentStep.screenTitleCondition.test(packet.getName().getString())) {
-                actualSyncId = packet.getSyncId();
-                executeStep();
-                return shouldHide;
-            } else {
-                reset(false);
-            }
-        }
-        return false;
-    }
-
-    private void listenContent(InventoryS2CPacket content) {
+    private synchronized boolean listen(Packet<ClientPlayPacketListener> packet) {
+        var shouldHide = false;
         if (isActive.get()) {
-            if (this.actualContent == null || this.actualContent.getLeft() != content.getSyncId()) {
+            if (packet instanceof OpenScreenS2CPacket screenPacket) {
+                if (this.actualSyncId == null || this.actualSyncId != screenPacket.getSyncId()) {
+                    if (this.getCurrentStep().screenTitleCondition.test(screenPacket.getName().getString())) {
+                        actualSyncId = screenPacket.getSyncId();
+                        shouldHide = this.shouldHide;
+                    } else {
+                        reset(false);
+                    }
+                }
+            } else {
+                InventoryS2CPacket inventoryPacket = (InventoryS2CPacket) packet;
+                if (this.actualContent == null || this.actualContent.getLeft() != inventoryPacket.getSyncId()) {
+                    var actual = this.actualContent == null ? -1 : this.actualContent.getLeft();
+                    LOGGER.info("Read inventory, actual: " + actual + " new: " + inventoryPacket.getSyncId());
+                    if (this.getCurrentStep().contentCondition.test(inventoryPacket.getContents())) {
+                        this.actualContent = new Pair<>(inventoryPacket.getSyncId(), inventoryPacket.getContents());
+                    } else {
+                        reset(false);
+                    }
+                }
+            }
 
-                var actual = this.actualContent == null ? -1 : this.actualContent.getLeft();
-                LOGGER.debug("Read inventory, actual: " + actual + " new: " + content.getSyncId());
-
-                var currentStep = this.getCurrentStep();
-                if (currentStep.contentCondition.test(content.getContents())) {
-                    this.actualContent = new Pair<>(content.getSyncId(), content.getContents());
-                    executeStep();
+            if (this.actualSyncId != null && this.actualContent != null) {
+                if (!this.isFinished()) {
+                    if (!executing){
+                        if (actualSyncId.equals(actualContent.getLeft())) {
+                            LOGGER.info("Execute Interaction on: " + this.actualContent.getLeft() + " as step: " + currentStepIndex);
+                            executing = true;
+                            var step = this.getCurrentStep();
+                            next();
+                            step.interaction.accept(this.actualContent.getLeft(), this.actualContent.getRight());
+                        } else {
+                            LOGGER.info("No match in syncID: " + actualSyncId + " vs. " + actualContent.getLeft());
+                        }
+                    }
+                    else{
+                        executing = false;
+                    }
                 } else {
+                    status.complete(true);
                     reset(false);
                 }
-            } else if (this.actualContent.getLeft() == content.getSyncId()) {
-                next();
-                executeStep();
             }
         }
-    }
-
-    private synchronized void executeStep() {
-        if (this.actualSyncId != null && this.actualContent != null) {
-            if (isFinished()) {
-                status.complete(true);
-                reset(false);
-            } else {
-                if (actualSyncId.equals(actualContent.getLeft())) {
-                    var currentStep = this.getCurrentStep();
-                    var content = this.actualContent.getRight();
-                    var syncId = this.actualContent.getLeft();
-                    LOGGER.debug("Execute Interaction on: " + syncId + " as step: " + (currentStepIndex));
-                    currentStep.interaction.accept(syncId, content);
-                } else {
-                    LOGGER.debug("No match in syncID: " + actualSyncId + " vs. " + actualContent.getLeft());
-                }
-            }
-
-        }
+        return shouldHide;
     }
 
     private synchronized void next() {
         currentStepIndex++;
+        LOGGER.info("NEXT: " + currentStepIndex);
     }
 
     private synchronized void reset(boolean forced) {
         if (!this.continuousExecution || forced) {
             isActive.set(false);
-            if (status != null){
+            if (status != null) {
                 status.complete(false);
+                status = null;
             }
-            status = null;
         }
         currentStepIndex = 0;
         actualSyncId = null;
         actualContent = null;
-        LOGGER.debug("RESET");
+        executing = false;
+        LOGGER.info("RESET");
     }
 
     private void executeStarting(MinecraftClient client) {
@@ -175,10 +175,10 @@ public class ScreenInteraction {
         }
 
         public static void OpenScreen(OpenScreenS2CPacket packet, CallbackInfo ci) {
-            LOGGER.debug("SyncId of OpenScreen: " + packet.getSyncId() + " with title: '" + packet.getName().getString() + "'");
+            LOGGER.info("SyncId of OpenScreen: " + packet.getSyncId() + " with title: '" + packet.getName().getString() + "'");
             var shouldHide = false;
             for (var listener : registeredInteractions) {
-                shouldHide = shouldHide || listener.listenScreen(packet);
+                shouldHide = shouldHide || listener.listen(packet);
             }
             if (shouldHide) {
                 ci.cancel();
@@ -186,14 +186,17 @@ public class ScreenInteraction {
         }
 
         public static void InventoryPackage(InventoryS2CPacket packet) {
-            LOGGER.debug("SyncId of Inventory: " + packet.getSyncId());
+            LOGGER.info("SyncId of Inventory: " + packet.getSyncId());
             for (var listener : registeredInteractions) {
-                listener.listenContent(packet);
+                listener.listen(packet);
             }
         }
 
         static {
             ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
+                reset();
+            });
+            ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
                 reset();
             });
         }

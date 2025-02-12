@@ -46,6 +46,11 @@ public class TaskTrackerModule implements ClientModInitializer {
     private static int tickCounter = 0;
     private static final AtomicBoolean warpTickOngoing = new AtomicBoolean(false);
 
+    private void startTaskTracker(){
+        resetWarp();
+        screenInteraction.startAsync(true);
+    }
+
     @Override
     public void onInitializeClient() {
         System.out.println("------- LOADING ---------");
@@ -66,10 +71,7 @@ public class TaskTrackerModule implements ClientModInitializer {
             resetWarp();
             screenInteraction.stop();
         });
-        ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
-            resetWarp();
-            screenInteraction.startAsync(true);
-        });
+        ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> startTaskTracker());
 
         ClientReceiveMessageEvents.GAME.register((message, overlay) -> {
             if (message.getString().contains("Completed task")) {
