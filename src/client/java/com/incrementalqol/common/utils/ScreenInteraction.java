@@ -1,131 +1,160 @@
 package com.incrementalqol.common.utils;
 
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
-import net.minecraft.screen.ScreenHandler;
+import net.minecraft.item.ItemStack;
+import net.minecraft.network.packet.c2s.play.ClickSlotC2SPacket;
+import net.minecraft.network.packet.s2c.play.InventoryS2CPacket;
+import net.minecraft.network.packet.s2c.play.OpenScreenS2CPacket;
+import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.util.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 public class ScreenInteraction {
+    public static final Logger LOGGER = LoggerFactory.getLogger("incremental-qol: ScreenInteraction");
+
     private final List<InteractionStep> steps;
     private final Consumer<MinecraftClient> startingAction;
-    private boolean hasStartingAction = false;
     private final boolean shouldHide;
-    private final Consumer<Screen> finalizingAction;
-    private final int finalizingTickDelay;
-    private final Predicate<Screen> abortCondition;
-    private final int abortTickDelay;
-    private int currentStepIndex = 0;
-    private boolean isFinalizing = false;
 
-    public CompletionStage<Boolean> startAsync() {
-        return ScreenInteractionManager.enqueue(this);
+    private boolean continuousExecution = false;
+    private final AtomicBoolean isActive = new AtomicBoolean();
+    private CompletableFuture<Boolean> status;
+    private int currentStepIndex = 0;
+    private Integer actualSyncId = null;
+    private Pair<Integer, List<ItemStack>> actualContent = null;
+
+    public CompletionStage<Boolean> startAsync(boolean continuousExecution) {
+        var status = new CompletableFuture<Boolean>();
+        if (!isActive.compareAndSet(false, true)) {
+            status.complete(false);
+            return status;
+        }
+        this.continuousExecution = continuousExecution;
+        this.status = status;
+        this.executeStarting(MinecraftClient.getInstance());
+        return status;
     }
 
-    /**
-     * @deprecated Enforced interaction without thread safe queueing is not yet tested, use startAsync() instead to put interaction on the queue
-     */
-    @Deprecated
-    public Pair<Boolean, CompletionStage<Boolean>> start() {
-        var tryStart = ScreenInteractionManager.tryStart(this);
-        return new Pair<>(tryStart.getLeft(), tryStart.getRight());
+    public boolean stop() {
+        if (isActive.get()) {
+            reset(true);
+            return true;
+
+        }
+        return false;
     }
 
     private ScreenInteraction(
             List<InteractionStep> interactionSteps,
             Consumer<MinecraftClient> startingAction,
-            boolean shouldHide,
-            Consumer<Screen> finalizingAction,
-            int finalizingTickDelay,
-            Predicate<Screen> abortCondition,
-            int abortTickDelay
+            boolean shouldHide
     ) {
         this.steps = interactionSteps;
         this.startingAction = startingAction;
-        if (this.startingAction != null){
-            this.hasStartingAction = true;
-        }
         this.shouldHide = shouldHide;
-        this.finalizingAction = finalizingAction;
-        this.finalizingTickDelay = finalizingTickDelay;
-        this.abortCondition = abortCondition;
-        this.abortTickDelay = abortTickDelay;
+
+        register();
     }
 
-    private void next() {
+    public boolean register() {
+        return ScreenInteractionManager.registeredInteractions.add(this);
+    }
+
+    public boolean unregister() {
+        return ScreenInteractionManager.registeredInteractions.remove(this);
+    }
+
+    private boolean listenScreen(OpenScreenS2CPacket packet) {
+        if (isActive.get() && (this.actualSyncId == null || this.actualSyncId != packet.getSyncId())) {
+            var currentStep = this.getCurrentStep();
+            if (currentStep.screenTitleCondition.test(packet.getName().getString())) {
+                actualSyncId = packet.getSyncId();
+                executeStep();
+                return shouldHide;
+            } else {
+                reset(false);
+            }
+        }
+        return false;
+    }
+
+    private void listenContent(InventoryS2CPacket content) {
+        if (isActive.get()) {
+            if (this.actualContent == null || this.actualContent.getLeft() != content.getSyncId()) {
+
+                var actual = this.actualContent == null ? -1 : this.actualContent.getLeft();
+                LOGGER.debug("Read inventory, actual: " + actual + " new: " + content.getSyncId());
+
+                var currentStep = this.getCurrentStep();
+                if (currentStep.contentCondition.test(content.getContents())) {
+                    this.actualContent = new Pair<>(content.getSyncId(), content.getContents());
+                    executeStep();
+                } else {
+                    reset(false);
+                }
+            } else if (this.actualContent.getLeft() == content.getSyncId()) {
+                next();
+                executeStep();
+            }
+        }
+    }
+
+    private synchronized void executeStep() {
+        if (this.actualSyncId != null && this.actualContent != null) {
+            if (isFinished()) {
+                status.complete(true);
+                reset(false);
+            } else {
+                if (actualSyncId.equals(actualContent.getLeft())) {
+                    var currentStep = this.getCurrentStep();
+                    var content = this.actualContent.getRight();
+                    var syncId = this.actualContent.getLeft();
+                    LOGGER.debug("Execute Interaction on: " + syncId + " as step: " + (currentStepIndex));
+                    currentStep.interaction.accept(syncId, content);
+                } else {
+                    LOGGER.debug("No match in syncID: " + actualSyncId + " vs. " + actualContent.getLeft());
+                }
+            }
+
+        }
+    }
+
+    private synchronized void next() {
         currentStepIndex++;
     }
 
-    private void reset() {
-        this.steps.forEach(i -> {
-            i.initPassed = i.initCondition == null;
-            i.executionDone = false;
-        });
-        this.currentStepIndex = 0;
-        this.isFinalizing = false;
-    }
-
-    private boolean shouldWaitAtTick(Screen screen) {
-        var currentStep = this.getCurrentStep();
-        return currentStep.tickCondition != null && !currentStep.tickCondition.test(screen);
-    }
-
-    private boolean trySkipAtTick(Screen screen) {
-        var currentStep = this.getCurrentStep();
-        var shouldSkip = currentStep.tickSkipCondition == null || currentStep.tickSkipCondition.test(screen);
-
-        if (shouldSkip) {
-            next();
+    private synchronized void reset(boolean forced) {
+        if (!this.continuousExecution || forced) {
+            isActive.set(false);
+            if (status != null){
+                status.complete(false);
+            }
+            status = null;
         }
-
-        return shouldSkip;
-    }
-
-    private boolean isFailedAtInit(Screen screen) {
-        var currentStep = this.getCurrentStep();
-        return currentStep.initCondition != null && !currentStep.initCondition.test(screen);
-    }
-
-    private boolean trySkipAtInit(Screen screen) {
-        var currentStep = this.getCurrentStep();
-        var shouldSkip = currentStep.initSkipCondition == null || currentStep.initSkipCondition.test(screen);
-
-        if (shouldSkip) {
-            next();
-        }
-
-        return shouldSkip;
+        currentStepIndex = 0;
+        actualSyncId = null;
+        actualContent = null;
+        LOGGER.debug("RESET");
     }
 
     private void executeStarting(MinecraftClient client) {
-        this.startingAction.accept(client);
-    }
-
-    private void executeInteraction(Screen screen) {
-        var currentStep = this.getCurrentStep();
-        currentStep.interaction.accept(screen);
-        currentStep.executionDone = true;
-    }
-
-    private void executeFinalization(Screen screen) {
-        this.finalizingAction.accept(screen);
-    }
-
-    private boolean shouldAbort(Screen screen) {
-        return this.abortCondition != null && this.abortCondition.test(screen);
+        if (this.startingAction != null) {
+            this.startingAction.accept(client);
+        }
     }
 
     private InteractionStep getCurrentStep() {
@@ -133,220 +162,37 @@ public class ScreenInteraction {
     }
 
     private boolean isFinished() {
-        return this.isFinalizing || this.currentStepIndex >= this.steps.size();
+        return this.currentStepIndex >= this.steps.size();
     }
 
-    private static class ScreenInteractionManager {
-        public static Screen lastInitializedScreen = null;
-        private static final ConcurrentLinkedQueue<Pair<ScreenInteraction, CompletableFuture<Boolean>>> queuedInteractions = new ConcurrentLinkedQueue<>();
-        private static final AtomicReference<Pair<ScreenInteraction, CompletableFuture<Boolean>>> actualInteraction = new AtomicReference<>();
-        private static int abortTickCounter = 0;
-        private static int finalizeTickCounter = 0;
-        private static int waitTickForStuckExecution = 0;
-        private static final AtomicBoolean handlingTick = new AtomicBoolean(false);
+    public static class ScreenInteractionManager {
+        private static final HashSet<ScreenInteraction> registeredInteractions = new HashSet<>();
 
-        public static void reset() {
-            while (!queuedInteractions.isEmpty()) {
-                var nextInteraction = queuedInteractions.poll();
-                if (nextInteraction != null){
-                    nextInteraction.getLeft().reset();
-                    nextInteraction.getRight().complete(false);
-                }
-            }
-
-            handlingTick.set(false);
-
-            if (actualInteraction.get() != null){
-                close();
+        private static void reset() {
+            for (var listener : registeredInteractions) {
+                listener.reset(false);
             }
         }
 
-        private static CompletableFuture<Boolean> enqueue(ScreenInteraction interaction) {
-            var newInteraction = new Pair<>(interaction, new CompletableFuture<Boolean>());
-            queuedInteractions.add(newInteraction);
-            return newInteraction.getRight();
-        }
-
-        private static Pair<Boolean, CompletableFuture<Boolean>> tryStart(ScreenInteraction interaction) {
-            var newInteraction = new Pair<>(interaction, new CompletableFuture<Boolean>());
-            var successfullyStarted = true;
-            if (!actualInteraction.compareAndSet(null, newInteraction)) {
-                newInteraction.getRight().complete(false);
-                successfullyStarted = false;
-
+        public static void OpenScreen(OpenScreenS2CPacket packet, CallbackInfo ci) {
+            LOGGER.debug("SyncId of OpenScreen: " + packet.getSyncId() + " with title: '" + packet.getName().getString() + "'");
+            var shouldHide = false;
+            for (var listener : registeredInteractions) {
+                shouldHide = shouldHide || listener.listenScreen(packet);
             }
-            return new Pair<>(successfullyStarted, newInteraction.getRight());
-        }
-
-        private static void handleScreenInit(MinecraftClient client, Screen screen, boolean comeFromTick) {
-            if (screen == null && !comeFromTick) {
-                return;
-            }
-
-            // Find next non aborting interaction
-            if (actualInteraction.get() == null) {
-                while (!queuedInteractions.isEmpty()) {
-                    var nextInteraction = queuedInteractions.poll();
-                    if (nextInteraction != null) {
-                        if (comeFromTick && nextInteraction.getLeft().hasStartingAction) {
-                            if (actualInteraction.compareAndSet(null, nextInteraction)) {
-                                actualInteraction.get().getLeft().executeStarting(client);
-                            }
-                            return;
-                        } else {
-                            if (!nextInteraction.getLeft().shouldAbort(screen) && !nextInteraction.getLeft().isFailedAtInit(screen)) {
-                                if (!actualInteraction.compareAndSet(null, nextInteraction)) {
-                                    handleScreenInit(client, screen, comeFromTick);
-                                    return;
-                                }
-                                break;
-                            } else {
-                                abort(nextInteraction, nextInteraction.getLeft().shouldAbort(screen));
-                            }
-                        }
-                    }
-                }
-
-                // If no interaction then leave
-                if (actualInteraction.get() == null) {
-                    return;
-                }
-            }
-
-            if (!actualInteraction.get().getLeft().isFinished()) {
-                if (!actualInteraction.get().getLeft().getCurrentStep().initPassed) {
-                    while (!actualInteraction.get().getLeft().isFinished()) {
-                        if (actualInteraction.get().getLeft().shouldAbort(screen) || actualInteraction.get().getLeft().isFailedAtInit(screen)) {
-                            abort(actualInteraction.get(), true);
-                            handleScreenInit(client, screen, comeFromTick);
-                            return;
-                        }
-
-                        actualInteraction.get().getLeft().getCurrentStep().initPassed = true;
-                        if (!actualInteraction.get().getLeft().trySkipAtInit(screen)) {
-                            break;
-                        }
-                    }
-
-                    if (actualInteraction.get().getLeft().isFinished()) {
-                        complete(actualInteraction.get());
-                        handleScreenInit(client, screen, comeFromTick);
-                        return;
-                    }
-                }
-
-                lastInitializedScreen = screen;
-                abortTickCounter = 0;
-            } else if (!actualInteraction.get().getLeft().isFinalizing) {
-                actualInteraction.get().getLeft().isFinalizing = true;
-            }
-
-            if (actualInteraction.get().getLeft().shouldHide) {
-                client.setScreen(null);
+            if (shouldHide) {
+                ci.cancel();
             }
         }
 
-        private static void handleTicks(MinecraftClient client) {
-            if (handlingTick.compareAndSet(false, true)) {
-                if (actualInteraction.get() == null) {
-                    if (!queuedInteractions.isEmpty()) {
-                        handleScreenInit(client, client.currentScreen, true);
-                    }
-                    handlingTick.compareAndSet(true, false);
-                    return;
-                }
-
-                //TODO: Maybe need to handle a special abort when screen changes from the init matched one
-                //if (actualScreen != client.currentScreen){
-                //    handleScreenInit(client, client.currentScreen, true);
-                //    return;
-                //}
-
-                if (actualInteraction.get().getLeft().isFinalizing) {
-                    actualInteraction.get().getLeft().executeFinalization(lastInitializedScreen);
-                    finalizeTickCounter++;
-                    if (finalizeTickCounter > actualInteraction.get().getLeft().finalizingTickDelay) {
-                        close();
-                        handleScreenInit(client, client.currentScreen, true);
-                    }
-                    handlingTick.compareAndSet(true, false);
-                    return;
-                }
-
-                if (actualInteraction.get().getLeft().isFinished()){
-                    handlingTick.compareAndSet(true, false);
-                    return;
-                }
-
-                if (actualInteraction.get().getLeft().getCurrentStep().executionDone) {
-                    waitTickForStuckExecution++;
-                    if(waitTickForStuckExecution >= 3){
-                        actualInteraction.get().getLeft().next();
-                        waitTickForStuckExecution = 0;
-                        handleScreenInit(client, lastInitializedScreen, true);
-                    }
-                    handlingTick.compareAndSet(true, false);
-                    return;
-                }
-
-                if (!actualInteraction.get().getLeft().getCurrentStep().initPassed) {
-                    handlingTick.compareAndSet(true, false);
-                    return;
-                }
-
-                if (actualInteraction.get().getLeft().trySkipAtTick(lastInitializedScreen)) {
-                    handleScreenInit(client, lastInitializedScreen, true);
-                    handlingTick.compareAndSet(true, false);
-                    return;
-                }
-
-                if (actualInteraction.get().getLeft().shouldWaitAtTick(lastInitializedScreen)) {
-                    abortTickCounter++;
-                    if (abortTickCounter > actualInteraction.get().getLeft().abortTickDelay) {
-                        abort(actualInteraction.get(), false);
-                    }
-                    handlingTick.compareAndSet(true, false);
-                    return;
-                }
-
-                actualInteraction.get().getLeft().executeInteraction(lastInitializedScreen);
-                handlingTick.compareAndSet(true, false);
-            }
-        }
-
-        private static void complete(Pair<ScreenInteraction, CompletableFuture<Boolean>> interaction) {
-            interaction.getRight().complete(true);
-            interaction.getLeft().isFinalizing = true;
-        }
-
-        private static void abort(Pair<ScreenInteraction, CompletableFuture<Boolean>> interaction, boolean forceClose) {
-            interaction.getRight().complete(false);
-            interaction.getLeft().isFinalizing = true;
-
-            if (forceClose){
-                close();
-            }
-        }
-
-        private static void close() {
-            lastInitializedScreen = null;
-            finalizeTickCounter = 0;
-            abortTickCounter = 0;
-
-            // TODO: These two can lead to a very unlikely race condition when the same task is put in the queue and it takes it to work on it right away before reset is done.
-            var interaction = actualInteraction.get();
-            if (interaction != null){
-                actualInteraction.set(null);
-                if (!interaction.getRight().isDone()){
-                    interaction.getRight().complete(false);
-                }
-                interaction.getLeft().reset();
+        public static void InventoryPackage(InventoryS2CPacket packet) {
+            LOGGER.debug("SyncId of Inventory: " + packet.getSyncId());
+            for (var listener : registeredInteractions) {
+                listener.listenContent(packet);
             }
         }
 
         static {
-            ScreenEvents.AFTER_INIT.register((client, screen, width, height) -> handleScreenInit(client, screen, false));
-            ClientTickEvents.END_CLIENT_TICK.register(ScreenInteractionManager::handleTicks);
             ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
                 reset();
             });
@@ -357,95 +203,32 @@ public class ScreenInteraction {
         private final List<InteractionStep> configuredQueue = new ArrayList<>();
         private Consumer<MinecraftClient> startingAction;
         private boolean shouldHide = false;
-        private Predicate<Screen> abortCondition;
-        private int abortTickDelay = 1;
-        private Consumer<Screen> finalizingAction;
-        private Integer finalizingTickDelay;
 
         /**
          * Start the interaction with the no screen open
          *
-         * @param initCondition Condition to must match on screen init phase, otherwise abort the interaction
-         * @param initSkipCondition Condition to skip interaction if matched on screen init phase
-         * @param tickCondition Conditions to match on tick phase before the abort delay run out, otherwise abort the interaction
-         * @param tickSkipCondition Condition to skip interaction if matched during tick phase
-         * @param interaction The interaction to run if all rules are matched
+         * @param screenNameCondition Condition to match screen name on for syncId identification
+         * @param slotCondition       Condition to check content on the syncId screen of the screen name matched
+         * @param interaction         The interaction to run if all rules are matched
          */
         public ScreenInteractionBuilder(
-                Predicate<Screen> initCondition,
-                Predicate<Screen> initSkipCondition,
-                Predicate<Screen> tickCondition,
-                Predicate<Screen> tickSkipCondition,
-                Consumer<Screen> interaction
+                Predicate<String> screenNameCondition,
+                Predicate<List<ItemStack>> slotCondition,
+                BiConsumer<Integer, List<ItemStack>> interaction
         ) {
-            addInteraction(initCondition, initSkipCondition, tickCondition, tickSkipCondition, interaction);
-        }
-
-        /**
-         * Start the interaction with the screen already open.
-         *
-         * @param tickCondition Condition to must match on screen init phase, otherwise abort the interaction
-         * @param tickSkipCondition Condition to skip interaction if matched on screen init phase
-         * @param interaction The interaction to run if all rules are matched
-         */
-        public ScreenInteractionBuilder(
-                Predicate<Screen> tickCondition,
-                Predicate<Screen> tickSkipCondition,
-                Consumer<Screen> interaction
-        ) {
-            addInteraction(s -> true, s -> false, tickCondition, tickSkipCondition, interaction);
+            addInteraction(screenNameCondition, slotCondition, interaction);
         }
 
         public ScreenInteraction build() {
             return new ScreenInteraction(
                     configuredQueue,
                     startingAction,
-                    shouldHide,
-                    finalizingAction != null
-                            ? finalizingAction
-                            : s -> {},
-                    finalizingTickDelay != null
-                            ? finalizingTickDelay
-                            : 2,
-                    abortCondition != null
-                            ? abortCondition
-                            : s -> false,
-                    abortTickDelay
+                    shouldHide
             );
-        }
-
-        public ScreenInteractionBuilder setAbortDelay(int tickCount) {
-            this.abortTickDelay = tickCount;
-            return this;
         }
 
         public ScreenInteractionBuilder setKeepScreenHidden(boolean shouldHide) {
             this.shouldHide = shouldHide;
-            return this;
-        }
-
-        public ScreenInteractionBuilder setAbortCondition(Predicate<Screen> abortCondition) {
-            this.abortCondition = abortCondition;
-            return this;
-        }
-
-        public ScreenInteractionBuilder setFinalizingAction(Consumer<Screen> finalizingAction) {
-            this.finalizingAction = finalizingAction;
-            return this;
-        }
-
-        public ScreenInteractionBuilder setFinalizingActionToCloseScreen() {
-            return setFinalizingAction(s -> {
-                MinecraftClient.getInstance().setScreen(null);
-                if (MinecraftClient.getInstance().player != null) {
-                    MinecraftClient.getInstance().player.currentScreenHandler = MinecraftClient.getInstance().player.playerScreenHandler;
-                }
-            });
-        }
-
-
-        public ScreenInteractionBuilder setFinalizingWait(int tickCount) {
-            this.finalizingTickDelay = tickCount;
             return this;
         }
 
@@ -455,65 +238,49 @@ public class ScreenInteraction {
         }
 
         public ScreenInteractionBuilder addInteraction(
-                Predicate<Screen> initCondition,
-                Predicate<Screen> initSkipCondition,
-                Predicate<Screen> tickCondition,
-                Predicate<Screen> tickSkipCondition,
-                Consumer<Screen> interaction
+                Predicate<String> screenNameCondition,
+                Predicate<List<ItemStack>> contentCondition,
+                BiConsumer<Integer, List<ItemStack>> interaction
         ) {
-            this.configuredQueue.add(new InteractionStep(initCondition, initSkipCondition, tickCondition, tickSkipCondition, interaction));
-            return this;
-        }
-
-        public ScreenInteractionBuilder addInteraction(
-                Predicate<Screen> initCondition,
-                Consumer<Screen> interaction
-        ) {
-            addInteraction(initCondition, s -> false, s -> true, s -> false, interaction);
-            return this;
-        }
-
-        public ScreenInteractionBuilder addInteraction(
-                Predicate<Screen> initCondition,
-                Predicate<Screen> initSkipCondition,
-                Consumer<Screen> interaction
-        ) {
-            addInteraction(initCondition, initSkipCondition, s -> true, s -> false, interaction);
-            return this;
-        }
-
-        public ScreenInteractionBuilder addInteraction(
-                Predicate<Screen> initCondition,
-                Predicate<Screen> initSkipCondition,
-                Predicate<Screen> tickCondition,
-                Consumer<Screen> interaction
-        ) {
-            addInteraction(initCondition, initSkipCondition, tickCondition, s -> false, interaction);
+            this.configuredQueue.add(new InteractionStep(screenNameCondition, contentCondition, interaction));
             return this;
         }
     }
 
-    private static class InteractionStep {
-        private final Predicate<Screen> initCondition;
-        private final Predicate<Screen> initSkipCondition;
-        private final Predicate<Screen> tickCondition;
-        private final Predicate<Screen> tickSkipCondition;
-        private final Consumer<Screen> interaction;
-        private boolean initPassed = false;
-        private boolean executionDone = false;
+    private record InteractionStep(Predicate<String> screenTitleCondition, Predicate<List<ItemStack>> contentCondition,
+                                   BiConsumer<Integer, List<ItemStack>> interaction) {
+    }
 
-        public InteractionStep(
-                Predicate<Screen> initCondition,
-                Predicate<Screen> initSkipCondition,
-                Predicate<Screen> tickCondition,
-                Predicate<Screen> tickSkipCondition,
-                Consumer<Screen> interaction
-        ) {
-            this.initCondition = initCondition;
-            this.initSkipCondition = initSkipCondition;
-            this.tickCondition = tickCondition;
-            this.tickSkipCondition = tickSkipCondition;
-            this.interaction = interaction;
+    public static class WellKnownInteractions {
+        private static final MinecraftClient client = MinecraftClient.getInstance();
+
+        public static void ClickSlot(int syncId, int slotId, Button button, SlotActionType slotActionType) {
+            if (client.getNetworkHandler() != null) {
+                client.getNetworkHandler().sendPacket(new ClickSlotC2SPacket(
+                        syncId,
+                        0,
+                        slotId,
+                        button.getNumVal(),
+                        slotActionType,
+                        ItemStack.EMPTY,
+                        new Int2ObjectOpenHashMap<>()
+                ));
+            }
+        }
+
+        public enum Button {
+            Left(0),
+            Right(1);
+
+            private final int numVal;
+
+            Button(int numVal) {
+                this.numVal = numVal;
+            }
+
+            public int getNumVal() {
+                return numVal;
+            }
         }
     }
 }

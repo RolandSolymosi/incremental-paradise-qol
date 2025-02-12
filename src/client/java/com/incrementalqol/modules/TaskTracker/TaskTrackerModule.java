@@ -1,26 +1,20 @@
 package com.incrementalqol.modules.TaskTracker;
 
-import com.incrementalqol.common.data.TaskCollection;
 import com.incrementalqol.common.utils.ScreenInteraction;
 import com.incrementalqol.config.Config;
-import com.incrementalqol.modules.OptionsModule;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
-import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.screen.ingame.GenericContainerScreen;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.LoreComponent;
-import net.minecraft.inventory.Inventory;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
@@ -59,26 +53,23 @@ public class TaskTrackerModule implements ClientModInitializer {
         initializeKeybinds();
 
         screenInteraction = new ScreenInteraction.ScreenInteractionBuilder(
-                s -> s instanceof GenericContainerScreen containerScreen && containerScreen.getTitle().getString().equals("Tasks"),
-                s -> false,
-                s -> s instanceof GenericContainerScreen containerScreen && !containerScreen.getScreenHandler().getInventory().isEmpty(),
-                s -> false,
-                TaskTrackerModule::parseInventory
+                s -> s.equals("Tasks"),
+                s -> !s.isEmpty(),
+                (syncId, content) -> parseInventory(content)
         )
-                .setAbortCondition(s -> !(s instanceof GenericContainerScreen containerScreen && containerScreen.getTitle().getString().equals("Tasks")))
-                .setAbortDelay(5)
+                .setKeepScreenHidden(false)
                 .build();
-
-        ScreenEvents.AFTER_INIT.register((client, screen, w, h) -> {
-            if (screen instanceof GenericContainerScreen containerScreen && containerScreen.getTitle().getString().equals("Tasks")) {
-                screenInteraction.startAsync();
-            }
-        });
 
 
         ClientTickEvents.END_CLIENT_TICK.register(TaskTrackerModule::keybindCheck);
-        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> resetWarp());
-        ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> resetWarp());
+        ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
+            resetWarp();
+            screenInteraction.stop();
+        });
+        ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
+            resetWarp();
+            screenInteraction.startAsync(true);
+        });
 
         ClientReceiveMessageEvents.GAME.register((message, overlay) -> {
             if (message.getString().contains("Completed task")) {
@@ -99,13 +90,13 @@ public class TaskTrackerModule implements ClientModInitializer {
             }
         });
         ClientReceiveMessageEvents.GAME.register((message, overlay) -> {
-            if (MinecraftClient.getInstance().player == null){
+            if (MinecraftClient.getInstance().player == null) {
                 return;
             }
             if (message.getString().contains("You don't have access to this warp.")) {
                 if (activeWarp.get() != null) {
                     var command = activeWarp.get().getFallbackWarp(fallbackIndex);
-                    if (command == null){
+                    if (command == null) {
                         return;
                     }
                     MinecraftClient.getInstance().player.networkHandler.sendCommand(command);
@@ -115,7 +106,7 @@ public class TaskTrackerModule implements ClientModInitializer {
             }
         });
         ClientTickEvents.END_CLIENT_TICK.register((client) -> {
-            if (warpTickOngoing.compareAndSet(false, true)){
+            if (warpTickOngoing.compareAndSet(false, true)) {
                 if (activeWarp.get() != null) {
                     tickCounter++;
                     if (tickCounter > 5) {
@@ -176,7 +167,7 @@ public class TaskTrackerModule implements ClientModInitializer {
         }));
     }
 
-    private static void resetWarp(){
+    private static void resetWarp() {
         activeWarp.set(null);
         fallbackIndex = 0;
         tickCounter = 0;
@@ -229,27 +220,14 @@ public class TaskTrackerModule implements ClientModInitializer {
 
     }
 
-    public static void parseInventory(Screen screen) {
-        if (!(screen instanceof GenericContainerScreen containerScreen)) {
-            return;
-        }
+    public static void parseInventory(List<ItemStack> content) {
+        taskList.clear();
 
-        Inventory inventory = containerScreen.getScreenHandler().getInventory();
-        if (inventory.isEmpty()) {
-            return;
-        }
-
-        if (Objects.equals(containerScreen.getTitle().getString(), "Tasks")) {
-            int inventorySize = inventory.size();
-            taskList.clear();
-
-            for (int i = 0; i < inventorySize; i++) {
-                ItemStack stack = inventory.getStack(i);
-                if (isTaskBook(stack)) {
-                    processTaskBook(stack);
-                } else if (isPlayerHead(stack)) {
-                    processTicketTask(stack);
-                }
+        for (ItemStack stack : content) {
+            if (isTaskBook(stack)) {
+                processTaskBook(stack);
+            } else if (isPlayerHead(stack)) {
+                processTicketTask(stack);
             }
         }
     }

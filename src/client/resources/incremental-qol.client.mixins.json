@@ -3,7 +3,8 @@
 	"package": "com.incrementalqol.mixins",
 	"compatibilityLevel": "JAVA_21",
 	"client": [
-		"TaskProgressMixin"
+		"TaskProgressMixin",
+		"ScreenInteractionManagerMixin"
 	],
 	"injectors": {
 		"defaultRequire": 1
