@@ -159,7 +159,7 @@ public class AutoSkillModule implements ClientModInitializer {
         if (!levelUpQueue.isEmpty()) {
             if (ongoingLeveling.compareAndSet(false, true)) {
                 actualSkillType = levelUpQueue.peek();
-                if (Config.HANDLER.instance().getAutoSwapTools()){
+                if (Config.HANDLER.instance().getAutoSkillLeveling()){
                     screenInteraction.startAsync(false).thenAccept(result -> {
                         actualSkillType = null;
                         levelUpQueue.poll();

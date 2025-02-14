@@ -36,6 +36,8 @@ public class Config {
     private boolean autoSwapWardrobe;
     @SerialEntry
     private boolean autoSwapTools;
+    @SerialEntry
+    private boolean autoLevelUp;
 
     @SerialEntry
     private String combatWardrobeName = "1";
@@ -150,6 +152,10 @@ public class Config {
         return autoSkillLeveling;
     }
 
+    public boolean getAutoLevelUp() {
+        return autoLevelUp;
+    }
+
     public void setHudPosX(int hudPosX) {
         this.hudPosX = hudPosX;
     }
@@ -208,6 +214,16 @@ public class Config {
                                 .name(Text.of("Task HUD Position"))
                                 .description(OptionDescription.of(Text.of("Activate the function to move the task HUD. Press ESC to return here.")))
                                 .action((t, o) -> MinecraftClient.getInstance().setScreen(new DraggableScreen(t)))
+                                .build())
+                        .build())
+                .group(OptionGroup.createBuilder()
+                        .name(Text.of("Task Warp extras"))
+                        .description(OptionDescription.of(Text.of("These are some extra functions for Task Warp.")))
+                        .option(Option.<Boolean>createBuilder()
+                                .name(Text.of("Toggle Auto LevelUp"))
+                                .description(OptionDescription.of(Text.of("Turn on and off auo LevelUp when no task remained when using Next Warp.")))
+                                .binding(false, () -> this.autoLevelUp, newVal -> this.autoLevelUp = newVal)
+                                .controller(BooleanControllerBuilder::create)
                                 .build())
                         .build())
                 .group(OptionGroup.createBuilder()
@@ -308,7 +324,7 @@ public class Config {
     public ConfigCategory SkillLeveling() {
         return ConfigCategory.createBuilder()
                 .name(Text.of("Skill Auto Leveling"))
-                .tooltip(Text.of("This category is about configuring the order in which the skills should auto unlock on level up."))
+                .tooltip(Text.of("This category is about configuring the order in which the skills should auto unlock on level up. The skills will expected to be leveled to the level of the number of their appearance from top to bottom."))
                 .option(Option.<Boolean>createBuilder()
                         .name(Text.of("Toggle Auto Skill Leveling"))
                         .description(OptionDescription.of(Text.of("Turn on and off the auto leveling function.")))

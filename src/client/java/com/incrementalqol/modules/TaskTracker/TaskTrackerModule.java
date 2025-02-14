@@ -21,6 +21,7 @@ import net.minecraft.component.type.LoreComponent;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
+import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.text.Text;
 import net.minecraft.util.Pair;
 import net.minecraft.util.math.ColorHelper;
@@ -38,7 +39,7 @@ import java.util.regex.Pattern;
 
 
 public class TaskTrackerModule implements ClientModInitializer {
-    public static final String MOD_ID = "incremental-qol";
+    public static final String MOD_ID = "incremental-qol" ;
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
     public static final List<Task> taskList = new CopyOnWriteArrayList<>();
@@ -47,23 +48,23 @@ public class TaskTrackerModule implements ClientModInitializer {
 
     private static ScreenInteraction screenInteraction;
     private static ScreenInteraction enforceTaskRefreshScreenInteraction;
+    private static ScreenInteraction levelUpScreenInteraction;
 
     private static final AtomicReference<Task> activeWarp = new AtomicReference<>(null);
     private static int fallbackIndex = 0;
     private static int tickCounter = 0;
     private static final AtomicBoolean warpTickOngoing = new AtomicBoolean(false);
 
-    private void startTaskTracker(){
+    private void startTaskTracker() {
         resetWarp();
         screenInteraction.startAsync(true);
     }
 
-    private static CompletableFuture<Boolean> worldHasChanged(Pair<World, Boolean> input){
+    private static CompletableFuture<Boolean> worldHasChanged(Pair<World, Boolean> input) {
         var future = new CompletableFuture<Boolean>();
-        if (input.getRight()){
+        if (input.getRight()) {
             enforceTaskRefreshScreenInteraction.startAsync(false).thenAccept(future::complete);
-        }
-        else{
+        } else {
             future.complete(true);
         }
         return future;
@@ -89,12 +90,32 @@ public class TaskTrackerModule implements ClientModInitializer {
                 .build();
         screenInteraction.startAsync(true);
 
+        levelUpScreenInteraction = new ScreenInteraction.ScreenInteractionBuilder(
+                "NextWarpLevelUp",
+                s -> s.equals("Tasks"),
+                s -> !s.isEmpty(),
+                (input) ->
+                {
+                    var lore = input.getRight().get(31).get(DataComponentTypes.LORE);
+                    if (lore != null && lore.lines().getLast().getString().contains("Click to claim rewards")) {
+                        ScreenInteraction.WellKnownInteractions.ClickSlot(input.getLeft(), 31, ScreenInteraction.WellKnownInteractions.Button.Left, SlotActionType.PICKUP);
+                        return false;
+                    }
+                    return true;
+                }
+        )
+                .setStartingAction((c) ->
+                        c.player.networkHandler.sendChatCommand("tasks")
+                )
+                .setKeepScreenHidden(true)
+                .build();
+
         enforceTaskRefreshScreenInteraction = new ScreenInteraction.ScreenInteractionBuilder(
                 "TaskTrackerWorldChange",
                 s -> s.equals("Tasks"),
                 s -> true,
                 (input) -> {
-                    if (!input.getRight().isEmpty()){
+                    if (!input.getRight().isEmpty()) {
                         parseInventory(input.getRight());
                         return true;
                     }
@@ -121,7 +142,7 @@ public class TaskTrackerModule implements ClientModInitializer {
         ClientReceiveMessageEvents.GAME.register((message, overlay) -> {
             if (message.getString().contains("Completed task")) {
 
-                String pattern = "(?<=^Completed task\\s).*";
+                String pattern = "(?<=^Completed task\\s).*" ;
 
                 Pattern regex = Pattern.compile(pattern);
                 Matcher matcher = regex.matcher(message.getString());
@@ -254,15 +275,20 @@ public class TaskTrackerModule implements ClientModInitializer {
                                 }
 
                                 MinecraftClient.getInstance().player.networkHandler.sendCommand(task.getWarp());
-                            }
-                            else{
+                            } else {
                                 MinecraftClient.getInstance().player.sendMessage(Text.literal("The task was not correctly identified, send task description to Devs (QoL channel)."), false);
                             }
                         }
                     },
                     () -> {
                         assert MinecraftClient.getInstance().player != null;
-                        MinecraftClient.getInstance().player.sendMessage(Text.literal("No incomplete tasks available."), false);
+                        if (Config.HANDLER.instance().getAutoLevelUp()) {
+                            levelUpScreenInteraction.startAsync(false).thenAccept(r -> {
+                                enforceTaskRefreshScreenInteraction.startAsync(false);
+                            });
+                        } else {
+                            MinecraftClient.getInstance().player.sendMessage(Text.literal("No incomplete tasks available."), false);
+                        }
                     }
             );
         }
@@ -311,7 +337,7 @@ public class TaskTrackerModule implements ClientModInitializer {
         if (blocks.get(0).contains("Ticket Task")) {
             String[] taskDetails = extractTaskDetails(blocks.get(0));
 
-            String description = blocks.size() > 1 ? blocks.get(1) : "";
+            String description = blocks.size() > 1 ? blocks.get(1) : "" ;
 
             String world = taskDetails[0];
             String number = taskDetails[1];
@@ -331,7 +357,7 @@ public class TaskTrackerModule implements ClientModInitializer {
         List<String> blocks = parseLoreLines(text);
 
         String[] taskDetails = extractTaskDetails(blocks.get(0));
-        String description = blocks.size() > 1 ? blocks.get(1) : "";
+        String description = blocks.size() > 1 ? blocks.get(1) : "" ;
 
         String world = taskDetails[0];
         String number = taskDetails[1];
@@ -363,9 +389,9 @@ public class TaskTrackerModule implements ClientModInitializer {
 
 
     private static String[] extractTaskDetails(String block) {
-        String world = "";
-        String number = "";
-        String type = "";
+        String world = "" ;
+        String number = "" ;
+        String type = "" ;
 
         if (block.contains("World") || block.contains("Nightmare")) {
             Pattern descriptorPattern = Pattern.compile("(?<world>World|Nightmare) #(?<number>\\d+)\\s*(?<type>.+?)\\s*Task");
@@ -379,7 +405,7 @@ public class TaskTrackerModule implements ClientModInitializer {
             Pattern questPattern = Pattern.compile("(?<type>.+) Task");
             Matcher m = questPattern.matcher(block);
             if (m.find()) {
-                world = "-";
+                world = "-" ;
                 type = m.group("type");
             }
         }
