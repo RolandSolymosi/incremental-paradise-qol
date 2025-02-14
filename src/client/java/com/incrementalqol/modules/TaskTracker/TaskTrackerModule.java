@@ -1,5 +1,6 @@
 package com.incrementalqol.modules.TaskTracker;
 
+import com.incrementalqol.common.data.World;
 import com.incrementalqol.common.utils.ConfiguredLogger;
 import com.incrementalqol.common.utils.ScreenInteraction;
 import com.incrementalqol.common.utils.WorldChangeNotifier;
@@ -21,7 +22,6 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
 import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
 import net.minecraft.util.math.ColorHelper;
 import org.lwjgl.glfw.GLFW;
@@ -58,9 +58,14 @@ public class TaskTrackerModule implements ClientModInitializer {
         screenInteraction.startAsync(true);
     }
 
-    private static CompletableFuture<Boolean> worldHasChanged(Pair<Identifier, Boolean> input){
+    private static CompletableFuture<Boolean> worldHasChanged(Pair<World, Boolean> input){
         var future = new CompletableFuture<Boolean>();
-        enforceTaskRefreshScreenInteraction.startAsync(false).thenAccept(future::complete);
+        if (input.getRight()){
+            enforceTaskRefreshScreenInteraction.startAsync(false).thenAccept(future::complete);
+        }
+        else{
+            future.complete(true);
+        }
         return future;
     }
 
@@ -82,12 +87,19 @@ public class TaskTrackerModule implements ClientModInitializer {
         )
                 .setKeepScreenHidden(false)
                 .build();
+        screenInteraction.startAsync(true);
 
         enforceTaskRefreshScreenInteraction = new ScreenInteraction.ScreenInteractionBuilder(
                 "TaskTrackerWorldChange",
                 s -> s.equals("Tasks"),
-                s -> !s.isEmpty(),
-                (input) -> true
+                s -> true,
+                (input) -> {
+                    if (!input.getRight().isEmpty()){
+                        parseInventory(input.getRight());
+                        return true;
+                    }
+                    return false;
+                }
         )
                 .setStartingAction((c) ->
                         c.player.networkHandler.sendChatCommand("tasks")
@@ -100,6 +112,7 @@ public class TaskTrackerModule implements ClientModInitializer {
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
             resetWarp();
             screenInteraction.stop();
+            enforceTaskRefreshScreenInteraction.stop();
         });
         ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> startTaskTracker());
 
@@ -305,7 +318,7 @@ public class TaskTrackerModule implements ClientModInitializer {
             String type = taskDetails[2];
 
             Task newTask = new Task(stack.getName().getString(), description, "/warp ", 1, false, world, number, type, true);
-            if (stack.getItem().getName().getString().contains("Written")) {
+            if (newTask.getCompletedStatus()) {
                 newTask.setCompleted();
             }
             taskList.add(newTask);

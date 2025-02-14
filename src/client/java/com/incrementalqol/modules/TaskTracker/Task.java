@@ -27,10 +27,10 @@ public class Task {
     private String constraint = null;
     private boolean isTicket = false;
     private boolean isSocialite = false;
-    private String taskType = "";
-    private String targetAmount = "";
-    private String taskTarget = "";
-    private String progress = "";
+    private String taskType = "" ;
+    private String targetAmount = "" ;
+    private String taskTarget = "" ;
+    private String progress = "" ;
     private String world;
     private String subLocation;
 
@@ -148,7 +148,7 @@ public class Task {
         try {
             return matcher.group(groupName) == null ? "" : matcher.group(groupName);
         } catch (IllegalArgumentException e) {
-            return "";
+            return "" ;
         }
     }
 
@@ -182,8 +182,12 @@ public class Task {
         return taskType;
     }
 
+    public boolean getCompletedStatus() {
+        return this.progress.equals(this.targetAmount);
+    }
+
     private String getSubLocation() {
-        if (this.world.equals("1")) return "";
+        if (this.world.equals("1")) return "" ;
         else {
             List<String> lush = List.of("Poison Slimes", "Cave Crawlers", "Lurkers", "Ancient Lurkers", "Crimsonite");
             List<String> veil = List.of("Spotters", "Verdemites", "Endermen", "Verdelith", "Shy");
@@ -191,11 +195,11 @@ public class Task {
                     , "Molten Jellyfish", "Lavafruit");
             List<String> abyss = List.of("Wicks", "Glow Squids", "Slinkers", "Aurorium", "Twine", "Zephyr", "Abyssal Crabs", "Lampposts");
 
-            if (lush.contains(normalizedTaskTarget())) return "§2Lush";
-            else if (veil.contains(normalizedTaskTarget())) return "§3Veil";
-            else if (infernal.contains(normalizedTaskTarget())) return "§4Infernal";
-            else if (abyss.contains(normalizedTaskTarget())) return "§5Abyss";
-            else return "";
+            if (lush.contains(normalizedTaskTarget())) return "§2Lush" ;
+            else if (veil.contains(normalizedTaskTarget())) return "§3Veil" ;
+            else if (infernal.contains(normalizedTaskTarget())) return "§4Infernal" ;
+            else if (abyss.contains(normalizedTaskTarget())) return "§5Abyss" ;
+            else return "" ;
         }
     }
 
@@ -204,11 +208,11 @@ public class Task {
         return switch (this.world) {
             case "World" -> (completed) ?
                     "§2[w" + number + (getSubLocation().isEmpty() ? "" : "-" + getSubLocation()).replaceAll("\\d", "2") + "]" :
-                    "[§8w" + number + "§f" + (getSubLocation().isEmpty() ? "" : "-§d" + getSubLocation()) + "§f]";
+                    "[§8w" + number + "§f" + (getSubLocation().isEmpty() ? "" : "-§d" + getSubLocation()) + "§f]" ;
             case "Nightmare" -> (completed) ?
                     "§2[nm" + number + (getSubLocation().isEmpty() ? "" : "-" + getSubLocation()).replaceAll("\\d", "2") + "]" :
-                    "[§8nm" + number + "§f" + (getSubLocation().isEmpty() ? "" : "-§d" + getSubLocation()) + "§f]";
-            default -> "";
+                    "[§8nm" + number + "§f" + (getSubLocation().isEmpty() ? "" : "-§d" + getSubLocation()) + "§f]" ;
+            default -> "" ;
         };
 
 
@@ -246,7 +250,7 @@ public class Task {
                 try {
                     this.taskTarget = m.group("type") == null ? "" : m.group("type");
                 } catch (IllegalArgumentException e) {
-                    taskTarget = "";
+                    taskTarget = "" ;
                 }
                 if (!taskTarget.isEmpty()) {
 
@@ -268,8 +272,8 @@ public class Task {
             return "Large " + taskTarget;
         }
 
-        if (this.taskTarget.equals("fish")){
-            return "2 Riverfish in a row without missing";
+        if (this.taskTarget.equals("fish")) {
+            return "2 Riverfish in a row without missing" ;
         }
 
         if (!this.color.equals("")) {
@@ -304,19 +308,19 @@ public class Task {
 
         if (taskType.equals("Quest")) {
             if (completed) {
-                renderedString = "§2[" + world + "]" + this.taskType + ": §2" + name + ")§f";
+                renderedString = "§2[" + world + "]" + this.taskType + ": §2" + name + ")§f" ;
             } else {
-                renderedString = "[§8" + world + "§f]" + this.taskType + ": §6§n" + name + ")§f";
+                renderedString = "[§8" + world + "§f]" + this.taskType + ": §6§n" + name + ")§f" ;
             }
         } else {
             if (completed) {
                 renderedString = getLocation(true) + " " +
                         this.taskType + ": §2" + (isShiny ? "Shiny " : "") + normalizedTaskTarget() +
-                        " (" + this.progress + "/" + this.targetAmount + ")§f";
+                        " (" + this.progress + "/" + this.targetAmount + ")§f" ;
             } else {
                 renderedString = getLocation(false) + " " +
                         this.taskType + ": §6§n" + (isShiny ? "Shiny " : "") + normalizedTaskTarget() +
-                        "§r (§9" + this.progress + "§f/§c" + this.targetAmount + "§f)";
+                        "§r (§9" + this.progress + "§f/§c" + this.targetAmount + "§f)" ;
             }
         }
 

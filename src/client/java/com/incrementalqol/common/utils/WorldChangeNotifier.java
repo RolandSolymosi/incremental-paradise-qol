@@ -1,13 +1,10 @@
 package com.incrementalqol.common.utils;
 
-import com.incrementalqol.common.data.Worlds;
+import com.incrementalqol.common.data.World;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientWorldEvents;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.world.ClientWorld;
-import net.minecraft.registry.RegistryKey;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
-import net.minecraft.world.World;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,39 +15,44 @@ import java.util.function.Function;
 
 public class WorldChangeNotifier {
     public static final Logger LOGGER = LoggerFactory.getLogger(WorldChangeNotifier.class);
-    private static RegistryKey<World> lastWorldKey = null;
+    private static World lastWorld = null;
 
-    private static final List<Function<Pair<Identifier, Boolean>, CompletableFuture<Boolean>>> listeners = new CopyOnWriteArrayList<>();
+    private static final List<Function<Pair<World, Boolean>, CompletableFuture<Boolean>>> listeners = new CopyOnWriteArrayList<>();
 
     /**
      * Register a listener to world change
      *
-     * @param listener Callback when a world changes. The return value is the World Identifier and a Boolean parameter which is True of Nightmare World, otherwise False.
+     * @param listener Callback when a world changes. The return value is the World Identifier, a Boolean parameter which is True if there were change between Nightmare and Normal world
      */
-    public static boolean Register(Function<Pair<Identifier, Boolean>, CompletableFuture<Boolean>> listener) {
+    public static boolean Register(Function<Pair<World, Boolean>, CompletableFuture<Boolean>> listener) {
         return listeners.add(listener);
     }
 
     public static boolean IsActualWorldNightmare() {
-        return lastWorldKey != null && lastWorldKey.getValue().equals(Worlds.WorldNightmare);
+        return lastWorld != null && lastWorld.getRealm() == World.Realm.Nightmare;
     }
 
     private static synchronized void afterWorldChange(MinecraftClient client, ClientWorld world) {
         ConfiguredLogger.LogInfo(LOGGER, "Client switched to world: " + world.getRegistryKey().getValue());
         var worldId = world.getRegistryKey().getValue();
-        if (!worldId.equals(Worlds.WorldHub)){
+        var worldDefinition = World.findById(worldId);
+        if (worldDefinition.isPresent() && (worldDefinition.get().getRealm() == World.Realm.Nightmare || worldDefinition.get().getRealm() == World.Realm.Normal)){
             if (!listeners.isEmpty()){
-                callListenerCore(0, worldId);
+                var isNightmare = worldDefinition.get().getRealm() == World.Realm.Nightmare;
+                callListenerCore(0, worldDefinition.get(), lastWorld == null || (isNightmare && lastWorld.getRealm() != World.Realm.Nightmare) || (!isNightmare && lastWorld.getRealm() == World.Realm.Nightmare));
             }
-            lastWorldKey = world.getRegistryKey();
+            lastWorld = worldDefinition.get();
         }
     }
 
-    private static synchronized void callListenerCore(int index, Identifier world) {
+    private static synchronized void callListenerCore(int index, World world, boolean isChangedRealm) {
         if (listeners.size() > index) {
-            listeners.get(index).apply(new Pair<>(world, world.equals(Worlds.WorldNightmare))).thenAccept(o -> {
+            listeners.get(index).apply(new Pair<>(
+                    world,
+                    isChangedRealm
+            )).thenAccept(o -> {
                 if (listeners.size() > index + 1) {
-                    callListenerCore(index + 1, world);
+                    callListenerCore(index + 1, world, isChangedRealm);
                 }
             });
         }

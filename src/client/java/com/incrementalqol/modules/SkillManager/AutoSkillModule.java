@@ -2,6 +2,7 @@ package com.incrementalqol.modules.SkillManager;
 
 import com.incrementalqol.common.data.SkillType;
 import com.incrementalqol.common.data.Skills.*;
+import com.incrementalqol.common.data.World;
 import com.incrementalqol.common.utils.ConfiguredLogger;
 import com.incrementalqol.common.utils.ScreenInteraction;
 import com.incrementalqol.common.utils.WorldChangeNotifier;
@@ -19,7 +20,6 @@ import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.ItemStack;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.text.Text;
-import net.minecraft.util.Identifier;
 import net.minecraft.util.Pair;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
@@ -46,16 +46,22 @@ public class AutoSkillModule implements ClientModInitializer {
 
     private static final Pattern regex = Pattern.compile("^(?<Type>\\w+) LEVEL UP!$");
 
-    private static CompletableFuture<Boolean> afterWorldChange(Pair<Identifier, Boolean> input) {
+    private static CompletableFuture<Boolean> afterWorldChange(Pair<World, Boolean> input) {
         var future = new CompletableFuture<Boolean>();
-        reset();
-        levelUpQueue.add(SkillType.Combat);
-        levelUpQueue.add(SkillType.Mining);
-        levelUpQueue.add(SkillType.Foraging);
-        levelUpQueue.add(SkillType.Farming);
-        levelUpQueue.add(SkillType.SpearFishing);
-        levelUpQueue.add(SkillType.Sharpshooting);
-        executeLevelUp(future);
+        if (input.getRight()){
+            reset();
+            levelUpQueue.add(SkillType.Combat);
+            levelUpQueue.add(SkillType.Mining);
+            levelUpQueue.add(SkillType.Foraging);
+            levelUpQueue.add(SkillType.Farming);
+            levelUpQueue.add(SkillType.SpearFishing);
+            levelUpQueue.add(SkillType.Sharpshooting);
+            executeLevelUp(future);
+        }
+        else{
+            future.complete(true);
+        }
+
         return future;
     }
 
