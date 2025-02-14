@@ -7,6 +7,7 @@ import net.minecraft.item.ItemStack;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.c2s.play.ClickSlotC2SPacket;
+import net.minecraft.network.packet.c2s.play.CloseHandledScreenC2SPacket;
 import net.minecraft.network.packet.s2c.play.InventoryS2CPacket;
 import net.minecraft.network.packet.s2c.play.OpenScreenS2CPacket;
 import net.minecraft.screen.slot.SlotActionType;
@@ -16,18 +17,20 @@ import org.slf4j.LoggerFactory;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Function;
 import java.util.function.Predicate;
 
 public class ScreenInteraction {
-    public static final Logger LOGGER = LoggerFactory.getLogger("incremental-qol: ScreenInteraction");
+    public static final Logger LOGGER = LoggerFactory.getLogger(ScreenInteraction.class);
 
+    private final String name;
     private final List<InteractionStep> steps;
     private final Consumer<MinecraftClient> startingAction;
     private final boolean shouldHide;
@@ -46,6 +49,7 @@ public class ScreenInteraction {
             status.complete(false);
             return status;
         }
+        register();
         this.continuousExecution = continuousExecution;
         this.status = status;
         this.executeStarting(MinecraftClient.getInstance());
@@ -54,23 +58,23 @@ public class ScreenInteraction {
 
     public boolean stop() {
         if (isActive.get()) {
-            reset(true);
+            reset(false, true);
             return true;
-
         }
+        unregister();
         return false;
     }
 
     private ScreenInteraction(
+            String name,
             List<InteractionStep> interactionSteps,
             Consumer<MinecraftClient> startingAction,
             boolean shouldHide
     ) {
+        this.name = name;
         this.steps = interactionSteps;
         this.startingAction = startingAction;
         this.shouldHide = shouldHide;
-
-        register();
     }
 
     public boolean register() {
@@ -83,77 +87,91 @@ public class ScreenInteraction {
 
     private synchronized boolean listen(Packet<ClientPlayPacketListener> packet) {
         var shouldHide = false;
-        if (isActive.get()) {
-            if (packet instanceof OpenScreenS2CPacket screenPacket) {
-                if (this.actualSyncId == null || this.actualSyncId != screenPacket.getSyncId()) {
-                    if (this.getCurrentStep().screenTitleCondition.test(screenPacket.getName().getString())) {
-                        actualSyncId = screenPacket.getSyncId();
-                        shouldHide = this.shouldHide;
-                    } else {
-                        reset(false);
-                    }
-                }
-            } else {
-                InventoryS2CPacket inventoryPacket = (InventoryS2CPacket) packet;
-                if (this.actualContent == null || this.actualContent.getLeft() != inventoryPacket.getSyncId()) {
-                    var actual = this.actualContent == null ? -1 : this.actualContent.getLeft();
-                    LOGGER.info("Read inventory, actual: " + actual + " new: " + inventoryPacket.getSyncId());
-                    if (this.getCurrentStep().contentCondition.test(inventoryPacket.getContents())) {
-                        this.actualContent = new Pair<>(inventoryPacket.getSyncId(), inventoryPacket.getContents());
-                    } else {
-                        reset(false);
-                    }
-                }
-            }
-
-            if (this.actualSyncId != null && this.actualContent != null) {
-                if (!this.isFinished()) {
-                    if (!executing){
-                        if (actualSyncId.equals(actualContent.getLeft())) {
-                            LOGGER.info("Execute Interaction on: " + this.actualContent.getLeft() + " as step: " + currentStepIndex);
-                            executing = true;
-                            var step = this.getCurrentStep();
-                            next();
-                            step.interaction.accept(this.actualContent.getLeft(), this.actualContent.getRight());
+        try {
+            if (isActive.get()) {
+                if (packet instanceof OpenScreenS2CPacket screenPacket) {
+                    if (this.actualSyncId == null || this.actualSyncId != screenPacket.getSyncId()) {
+                        ConfiguredLogger.LogInfo(LOGGER, "[" + name + "]: Read open screen, actual: " + actualSyncId + " new: " + screenPacket.getSyncId());
+                        if (this.getCurrentStep().screenTitleCondition.test(screenPacket.getName().getString())) {
+                            actualSyncId = screenPacket.getSyncId();
+                            shouldHide = this.shouldHide;
                         } else {
-                            LOGGER.info("No match in syncID: " + actualSyncId + " vs. " + actualContent.getLeft());
+                            reset(false, false);
                         }
                     }
-                    else{
-                        executing = false;
-                    }
                 } else {
-                    status.complete(true);
-                    reset(false);
+                    InventoryS2CPacket inventoryPacket = (InventoryS2CPacket) packet;
+                    if (this.actualContent == null || this.actualContent.getLeft() != inventoryPacket.getSyncId()) {
+                        var actual = this.actualContent == null ? -1 : this.actualContent.getLeft();
+                        ConfiguredLogger.LogInfo(LOGGER, "[" + name + "]: Read inventory, actual: " + actual + " new: " + inventoryPacket.getSyncId());
+                        if (this.getCurrentStep().contentCondition.test(inventoryPacket.getContents())) {
+                            this.actualContent = new Pair<>(inventoryPacket.getSyncId(), inventoryPacket.getContents());
+                        } else {
+                            reset(false, false);
+                        }
+                    }
+                }
+
+                if (this.actualSyncId != null && this.actualContent != null) {
+                    if (!this.isFinished()) {
+                        if (!executing) {
+                            if (actualSyncId.equals(actualContent.getLeft())) {
+                                ConfiguredLogger.LogInfo(LOGGER, "[" + name + "]: Execute Interaction on: " + this.actualContent.getLeft() + " as step: " + currentStepIndex);
+                                executing = true;
+                                var step = this.getCurrentStep();
+                                if (step.interaction.apply(new Pair<>(this.actualContent.getLeft(), this.actualContent.getRight()))) {
+                                    next();
+                                }
+                            } else {
+                                ConfiguredLogger.LogInfo(LOGGER, "[" + name + "]: No match in syncID: " + actualSyncId + " vs. " + actualContent.getLeft());
+                            }
+                        } else {
+                            executing = false;
+                        }
+                    } else {
+                        reset(true, false);
+                    }
                 }
             }
+        }
+        catch (Exception e){
+            reset(false, true);
         }
         return shouldHide;
     }
 
     private synchronized void next() {
         currentStepIndex++;
-        LOGGER.info("NEXT: " + currentStepIndex);
+        ConfiguredLogger.LogInfo(LOGGER, "[" + name + "]: NEXT: " + currentStepIndex);
     }
 
-    private synchronized void reset(boolean forced) {
-        if (!this.continuousExecution || forced) {
-            isActive.set(false);
-            if (status != null) {
-                status.complete(false);
-                status = null;
-            }
-        }
+    private synchronized void reset(boolean resultStatus, boolean forced) {
+        //if (shouldHide && actualContent != null){
+        //    MinecraftClient.getInstance().getNetworkHandler().sendPacket(new CloseHandledScreenC2SPacket(actualContent.getLeft()));
+        //}
         currentStepIndex = 0;
         actualSyncId = null;
         actualContent = null;
         executing = false;
-        LOGGER.info("RESET");
+        if (!this.continuousExecution || forced) {
+            unregister();
+            isActive.set(false);
+            if (status != null) {
+                var actualStatus = status;
+                status = null;
+                actualStatus.complete(resultStatus);
+            }
+        }
+        ConfiguredLogger.LogInfo(LOGGER, "[" + name + "]: RESET");
     }
 
     private void executeStarting(MinecraftClient client) {
         if (this.startingAction != null) {
-            this.startingAction.accept(client);
+            try {
+                this.startingAction.accept(client);
+            }catch (Exception e){
+                reset(false, true);
+            }
         }
     }
 
@@ -166,16 +184,16 @@ public class ScreenInteraction {
     }
 
     public static class ScreenInteractionManager {
-        private static final HashSet<ScreenInteraction> registeredInteractions = new HashSet<>();
+        private static final Set<ScreenInteraction> registeredInteractions = ConcurrentHashMap.newKeySet();
 
         private static void reset() {
             for (var listener : registeredInteractions) {
-                listener.reset(false);
+                listener.reset(false, false);
             }
         }
 
         public static void OpenScreen(OpenScreenS2CPacket packet, CallbackInfo ci) {
-            LOGGER.info("SyncId of OpenScreen: " + packet.getSyncId() + " with title: '" + packet.getName().getString() + "'");
+            ConfiguredLogger.LogInfo(LOGGER, "[SHARED]: SyncId of OpenScreen: " + packet.getSyncId() + " with title: '" + packet.getName().getString() + "'");
             var shouldHide = false;
             for (var listener : registeredInteractions) {
                 shouldHide = shouldHide || listener.listen(packet);
@@ -186,7 +204,7 @@ public class ScreenInteraction {
         }
 
         public static void InventoryPackage(InventoryS2CPacket packet) {
-            LOGGER.info("SyncId of Inventory: " + packet.getSyncId());
+            ConfiguredLogger.LogInfo(LOGGER, "[SHARED]: SyncId of Inventory: " + packet.getSyncId());
             for (var listener : registeredInteractions) {
                 listener.listen(packet);
             }
@@ -195,6 +213,7 @@ public class ScreenInteraction {
         static {
             ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
                 reset();
+                registeredInteractions.clear();
             });
             ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
                 reset();
@@ -204,6 +223,7 @@ public class ScreenInteraction {
 
     public static class ScreenInteractionBuilder {
         private final List<InteractionStep> configuredQueue = new ArrayList<>();
+        private final String name;
         private Consumer<MinecraftClient> startingAction;
         private boolean shouldHide = false;
 
@@ -215,15 +235,18 @@ public class ScreenInteraction {
          * @param interaction         The interaction to run if all rules are matched
          */
         public ScreenInteractionBuilder(
+                String name,
                 Predicate<String> screenNameCondition,
                 Predicate<List<ItemStack>> slotCondition,
-                BiConsumer<Integer, List<ItemStack>> interaction
+                Function<Pair<Integer, List<ItemStack>>, Boolean> interaction
         ) {
+            this.name = name;
             addInteraction(screenNameCondition, slotCondition, interaction);
         }
 
         public ScreenInteraction build() {
             return new ScreenInteraction(
+                    name,
                     configuredQueue,
                     startingAction,
                     shouldHide
@@ -243,7 +266,7 @@ public class ScreenInteraction {
         public ScreenInteractionBuilder addInteraction(
                 Predicate<String> screenNameCondition,
                 Predicate<List<ItemStack>> contentCondition,
-                BiConsumer<Integer, List<ItemStack>> interaction
+                Function<Pair<Integer, List<ItemStack>>, Boolean> interaction
         ) {
             this.configuredQueue.add(new InteractionStep(screenNameCondition, contentCondition, interaction));
             return this;
@@ -251,7 +274,7 @@ public class ScreenInteraction {
     }
 
     private record InteractionStep(Predicate<String> screenTitleCondition, Predicate<List<ItemStack>> contentCondition,
-                                   BiConsumer<Integer, List<ItemStack>> interaction) {
+                                   Function<Pair<Integer, List<ItemStack>>, Boolean> interaction) {
     }
 
     public static class WellKnownInteractions {

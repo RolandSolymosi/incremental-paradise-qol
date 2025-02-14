@@ -38,7 +38,6 @@ public class DepositHotkeyModule implements ClientModInitializer {
     }
 
     private void initializeKeybinding() {
-
         depositHotkey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
                 "Auto Deposit",
                 InputUtil.Type.KEYSYM,
@@ -51,27 +50,34 @@ public class DepositHotkeyModule implements ClientModInitializer {
     public void onInitializeClient() {
         initializeKeybinding();
         screenInteraction = new ScreenInteraction.ScreenInteractionBuilder(
+                "DepositHotkey",
                 s -> s.contains("Bank"),
                 s -> true,
-                (syncId, content) -> ScreenInteraction.WellKnownInteractions.ClickSlot(syncId, 21, ScreenInteraction.WellKnownInteractions.Button.Left, SlotActionType.PICKUP)
+                (input) -> {
+                    ScreenInteraction.WellKnownInteractions.ClickSlot(input.getLeft(), 21, ScreenInteraction.WellKnownInteractions.Button.Left, SlotActionType.PICKUP);
+                    return true;
+                }
         )
                 .addInteraction(
                         s -> s.equals("Safe"),
                         s -> {
-                            if (!s.isEmpty()){
+                            if (!s.isEmpty()) {
                                 var lore = s.get(23).get(DataComponentTypes.LORE);
-                                if (lore != null){
+                                if (lore != null) {
                                     return !lore.lines().getLast().getString().contains("You have no items to deposit");
                                 }
                             }
                             return false;
                         },
-                        (syncId, content) -> ScreenInteraction.WellKnownInteractions.ClickSlot(syncId, 23, ScreenInteraction.WellKnownInteractions.Button.Left, SlotActionType.PICKUP)
+                        (input) -> {
+                            ScreenInteraction.WellKnownInteractions.ClickSlot(input.getLeft(), 23, ScreenInteraction.WellKnownInteractions.Button.Left, SlotActionType.PICKUP);
+                            return true;
+                        }
                 )
                 .addInteraction(
                         s -> s.contains("Safe"),
                         s -> true,
-                        (syncId, content) -> {}
+                        (input) -> true
                 )
                 .setStartingAction(c ->
                         c.player.networkHandler.sendChatCommand("bank")

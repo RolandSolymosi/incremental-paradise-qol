@@ -16,6 +16,7 @@
 	"environment": "client",
 	"entrypoints": {
 		"client": [
+			"com.incrementalqol.modules.SkillManager.AutoSkillModule",
 			"com.incrementalqol.modules.DepositHotkey.DepositHotkeyModule",
 			"com.incrementalqol.modules.DepositHotkey.SellAllHotkeyModule",
 			"com.incrementalqol.modules.TaskTracker.TaskTrackerModule",

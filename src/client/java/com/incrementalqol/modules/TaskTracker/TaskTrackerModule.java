@@ -1,6 +1,8 @@
 package com.incrementalqol.modules.TaskTracker;
 
+import com.incrementalqol.common.utils.ConfiguredLogger;
 import com.incrementalqol.common.utils.ScreenInteraction;
+import com.incrementalqol.common.utils.WorldChangeNotifier;
 import com.incrementalqol.config.Config;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
@@ -19,12 +21,16 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
 import net.minecraft.text.Text;
+import net.minecraft.util.Identifier;
+import net.minecraft.util.Pair;
 import net.minecraft.util.math.ColorHelper;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
@@ -35,11 +41,12 @@ public class TaskTrackerModule implements ClientModInitializer {
     public static final String MOD_ID = "incremental-qol";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
-    public static List<Task> taskList = new ArrayList<>();
+    public static final List<Task> taskList = new CopyOnWriteArrayList<>();
 
     private static KeyBinding taskWarp;
 
-    private ScreenInteraction screenInteraction;
+    private static ScreenInteraction screenInteraction;
+    private static ScreenInteraction enforceTaskRefreshScreenInteraction;
 
     private static final AtomicReference<Task> activeWarp = new AtomicReference<>(null);
     private static int fallbackIndex = 0;
@@ -51,18 +58,41 @@ public class TaskTrackerModule implements ClientModInitializer {
         screenInteraction.startAsync(true);
     }
 
+    private static CompletableFuture<Boolean> worldHasChanged(Pair<Identifier, Boolean> input){
+        var future = new CompletableFuture<Boolean>();
+        enforceTaskRefreshScreenInteraction.startAsync(false).thenAccept(future::complete);
+        return future;
+    }
+
     @Override
     public void onInitializeClient() {
-        System.out.println("------- LOADING ---------");
+        ConfiguredLogger.LogInfo(LOGGER, "------- LOADING ---------");
 
         initializeKeybinds();
 
         screenInteraction = new ScreenInteraction.ScreenInteractionBuilder(
+                "TaskTracker",
                 s -> s.equals("Tasks"),
                 s -> !s.isEmpty(),
-                (syncId, content) -> parseInventory(content)
+                (input) ->
+                {
+                    parseInventory(input.getRight());
+                    return false;
+                }
         )
                 .setKeepScreenHidden(false)
+                .build();
+
+        enforceTaskRefreshScreenInteraction = new ScreenInteraction.ScreenInteractionBuilder(
+                "TaskTrackerWorldChange",
+                s -> s.equals("Tasks"),
+                s -> !s.isEmpty(),
+                (input) -> true
+        )
+                .setStartingAction((c) ->
+                        c.player.networkHandler.sendChatCommand("tasks")
+                )
+                .setKeepScreenHidden(true)
                 .build();
 
 
@@ -72,6 +102,8 @@ public class TaskTrackerModule implements ClientModInitializer {
             screenInteraction.stop();
         });
         ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> startTaskTracker());
+
+        WorldChangeNotifier.Register(TaskTrackerModule::worldHasChanged);
 
         ClientReceiveMessageEvents.GAME.register((message, overlay) -> {
             if (message.getString().contains("Completed task")) {
@@ -107,6 +139,15 @@ public class TaskTrackerModule implements ClientModInitializer {
                 }
             }
         });
+        ClientReceiveMessageEvents.GAME.register((message, overlay) -> {
+            if (MinecraftClient.getInstance().player == null) {
+                return;
+            }
+            if (message.getString().contains("You are now Prestige ") || message.getString().contains("You are now Nightmare Prestige ")) {
+                enforceTaskRefreshScreenInteraction.startAsync(false);
+            }
+        });
+
         ClientTickEvents.END_CLIENT_TICK.register((client) -> {
             if (warpTickOngoing.compareAndSet(false, true)) {
                 if (activeWarp.get() != null) {
@@ -198,9 +239,12 @@ public class TaskTrackerModule implements ClientModInitializer {
                                     MinecraftClient.getInstance().player.getInventory().selectedSlot = slotId;
                                     MinecraftClient.getInstance().player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(slotId));
                                 }
-                            }
 
-                            MinecraftClient.getInstance().player.networkHandler.sendCommand(task.getWarp().replace(")", ""));
+                                MinecraftClient.getInstance().player.networkHandler.sendCommand(task.getWarp());
+                            }
+                            else{
+                                MinecraftClient.getInstance().player.sendMessage(Text.literal("The task was not correctly identified, send task description to Devs (QoL channel)."), false);
+                            }
                         }
                     },
                     () -> {
