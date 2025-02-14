@@ -48,7 +48,7 @@ public class AutoSkillModule implements ClientModInitializer {
 
     private static CompletableFuture<Boolean> afterWorldChange(Pair<World, Boolean> input) {
         var future = new CompletableFuture<Boolean>();
-        if (input.getRight()){
+        if (input.getRight()) {
             reset();
             levelUpQueue.add(SkillType.Combat);
             levelUpQueue.add(SkillType.Mining);
@@ -57,8 +57,7 @@ public class AutoSkillModule implements ClientModInitializer {
             levelUpQueue.add(SkillType.SpearFishing);
             levelUpQueue.add(SkillType.Sharpshooting);
             executeLevelUp(future);
-        }
-        else{
+        } else {
             future.complete(true);
         }
 
@@ -95,7 +94,7 @@ public class AutoSkillModule implements ClientModInitializer {
                         s -> s.equals(actualSkillType.getName()),
                         s -> true,
                         (input) -> {
-                            ScreenInteraction.WellKnownInteractions.ClickSlot(input.getLeft(), 22, ScreenInteraction.WellKnownInteractions.Button.Left, SlotActionType.PICKUP);
+                            ScreenInteraction.WellKnownInteractions.ClickSlot(input.getLeft(), actualSkillType == SkillType.Sharpshooting ? 21 : 22, ScreenInteraction.WellKnownInteractions.Button.Left, SlotActionType.PICKUP);
                             return true;
                         }
                 )
@@ -159,23 +158,21 @@ public class AutoSkillModule implements ClientModInitializer {
         if (!levelUpQueue.isEmpty()) {
             if (ongoingLeveling.compareAndSet(false, true)) {
                 actualSkillType = levelUpQueue.peek();
-                if (Config.HANDLER.instance().getAutoSkillLeveling()){
+                if (Config.HANDLER.instance().getAutoSkillLeveling()) {
                     screenInteraction.startAsync(false).thenAccept(result -> {
                         actualSkillType = null;
                         levelUpQueue.poll();
                         ongoingLeveling.compareAndSet(true, false);
                         executeLevelUp(future);
                     });
-                }
-                else{
+                } else {
                     actualSkillType = null;
                     levelUpQueue.poll();
                     ongoingLeveling.compareAndSet(true, false);
                     executeLevelUp(future);
                 }
             }
-        }
-        else{
+        } else {
             future.complete(true);
         }
     }
@@ -206,13 +203,12 @@ public class AutoSkillModule implements ClientModInitializer {
                 var level = Integer.parseInt(String.valueOf(lore.lines().get(1).getString().substring(7).split("/")[0]));
                 if (level < expectedLevel) {
                     if (lore.lines().getLast().getString().contains("Can't afford")) {
-                        ConfiguredLogger.LogInfo(LOGGER, "Can't afford: "+nextSkill+" [Level "+expectedLevel+"]");
+                        ConfiguredLogger.LogInfo(LOGGER, "Can't afford: " + nextSkill + " [Level " + expectedLevel + "]");
                         return true;
                     }
                     if (lore.lines().getLast().getString().contains("MAX LEVEL")) {
-                        ConfiguredLogger.LogInfo(LOGGER, "Already max level: "+nextSkill+ " (Expected: "+expectedLevel+")");
-                    }
-                    else{
+                        ConfiguredLogger.LogInfo(LOGGER, "Already max level: " + nextSkill + " (Expected: " + expectedLevel + ")");
+                    } else {
                         ScreenInteraction.WellKnownInteractions.ClickSlot(content.getLeft(), slotId, ScreenInteraction.WellKnownInteractions.Button.Left, SlotActionType.PICKUP);
                         return false;
                     }
@@ -223,7 +219,7 @@ public class AutoSkillModule implements ClientModInitializer {
     }
 
     private static List<String> SkillNameListInOrderForSkill(SkillType toolType) {
-        if (WorldChangeNotifier.IsActualWorldNightmare()){
+        if (WorldChangeNotifier.IsActualWorldNightmare()) {
             return switch (toolType) {
                 case SkillType.Combat ->
                         Config.HANDLER.instance().nightmareCombatSkills.stream().map(NightmareCombatSkill::getName).toList();
@@ -238,8 +234,7 @@ public class AutoSkillModule implements ClientModInitializer {
                 case SkillType.Sharpshooting ->
                         Config.HANDLER.instance().nightmareSharpshootingSkills.stream().map(NightmareSharpshootingSkill::getName).toList();
             };
-        }
-        else{
+        } else {
             return switch (toolType) {
                 case SkillType.Combat ->
                         Config.HANDLER.instance().normalCombatSkills.stream().map(NormalCombatSkill::getName).toList();
