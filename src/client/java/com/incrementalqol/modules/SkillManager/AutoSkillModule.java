@@ -44,7 +44,7 @@ public class AutoSkillModule implements ClientModInitializer {
     private static SkillType actualSkillType = null;
     private static final AtomicBoolean ongoingLeveling = new AtomicBoolean();
 
-    private static final Pattern regex = Pattern.compile("^(?<Type>\\w+) LEVEL UP!$");
+    private static final Pattern regex = Pattern.compile("^(?<Type>[a-zA-Z ]+) LEVEL UP!$");
 
     private static CompletableFuture<Boolean> afterWorldChange(Pair<World, Boolean> input) {
         var future = new CompletableFuture<Boolean>();
@@ -129,11 +129,13 @@ public class AutoSkillModule implements ClientModInitializer {
 
     private static void keybindingCheck(MinecraftClient client) {
         while (testKeyBind.wasPressed()) {
+            reset();
             levelUpQueue.add(SkillType.Combat);
-            levelUpQueue.add(SkillType.Combat);
-            levelUpQueue.add(SkillType.Combat);
-            levelUpQueue.add(SkillType.Combat);
-            screenInteraction.stop();
+            levelUpQueue.add(SkillType.Mining);
+            levelUpQueue.add(SkillType.Foraging);
+            levelUpQueue.add(SkillType.Farming);
+            levelUpQueue.add(SkillType.SpearFishing);
+            levelUpQueue.add(SkillType.Sharpshooting);
             executeLevelUp(new CompletableFuture<>());
         }
     }
