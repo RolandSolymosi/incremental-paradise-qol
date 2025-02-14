@@ -254,44 +254,52 @@ public class TaskTrackerModule implements ClientModInitializer {
     private static void keybindCheck(MinecraftClient minecraftClient) {
 
         while (taskWarp.wasPressed()) {
-            Optional<Task> firstIncompleteTask = taskList.stream()
-                    .filter(task -> !task.isCompleted())
-                    .findFirst();
-            assert MinecraftClient.getInstance().player != null;
-            firstIncompleteTask.ifPresentOrElse(
-                    task -> {
-                        assert MinecraftClient.getInstance().player != null;
-                        var config = Config.HANDLER.instance();
-                        tickCounter = 0;
-                        if (activeWarp.compareAndSet(null, task)) {
-                            if (task.descriptor != null) {
-                                if (Config.HANDLER.instance().getAutoSwapWardrobe() && task.descriptor.getDefaultWardrobe() != null) {
-                                    MinecraftClient.getInstance().player.networkHandler.sendCommand("wardrobe " + config.getWardrobeNameToDefault(task.descriptor.getDefaultWardrobe()));
-                                }
-                                if (Config.HANDLER.instance().getAutoSwapTools() && task.descriptor.getDefaultHotBarSlot() != null) {
-                                    var slotId = config.getSlotToDefault(task.descriptor.getDefaultHotBarSlot());
-                                    MinecraftClient.getInstance().player.getInventory().selectedSlot = slotId;
-                                    MinecraftClient.getInstance().player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(slotId));
-                                }
+            WarpNext();
+        }
+    }
 
-                                MinecraftClient.getInstance().player.networkHandler.sendCommand(task.getWarp());
-                            } else {
-                                MinecraftClient.getInstance().player.sendMessage(Text.literal("The task was not correctly identified, send task description to Devs (QoL channel)."), false);
+    private static void WarpNext() {
+        Optional<Task> firstIncompleteTask = taskList.stream()
+                .filter(task -> !task.isCompleted())
+                .findFirst();
+        assert MinecraftClient.getInstance().player != null;
+        firstIncompleteTask.ifPresentOrElse(
+                task -> {
+                    assert MinecraftClient.getInstance().player != null;
+                    var config = Config.HANDLER.instance();
+                    tickCounter = 0;
+                    if (activeWarp.compareAndSet(null, task)) {
+                        if (task.descriptor != null) {
+                            if (Config.HANDLER.instance().getAutoSwapWardrobe() && task.descriptor.getDefaultWardrobe() != null) {
+                                MinecraftClient.getInstance().player.networkHandler.sendCommand("wardrobe " + config.getWardrobeNameToDefault(task.descriptor.getDefaultWardrobe()));
                             }
-                        }
-                    },
-                    () -> {
-                        assert MinecraftClient.getInstance().player != null;
-                        if (Config.HANDLER.instance().getAutoLevelUp()) {
-                            levelUpScreenInteraction.startAsync(false).thenAccept(r -> {
-                                enforceTaskRefreshScreenInteraction.startAsync(false);
-                            });
+                            if (Config.HANDLER.instance().getAutoSwapTools() && task.descriptor.getDefaultHotBarSlot() != null) {
+                                var slotId = config.getSlotToDefault(task.descriptor.getDefaultHotBarSlot());
+                                MinecraftClient.getInstance().player.getInventory().selectedSlot = slotId;
+                                MinecraftClient.getInstance().player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(slotId));
+                            }
+
+                            MinecraftClient.getInstance().player.networkHandler.sendCommand(task.getWarp());
                         } else {
-                            MinecraftClient.getInstance().player.sendMessage(Text.literal("No incomplete tasks available."), false);
+                            MinecraftClient.getInstance().player.sendMessage(Text.literal("The task was not correctly identified, send task description to Devs (QoL channel)."), false);
                         }
                     }
-            );
-        }
+                },
+                () -> {
+                    assert MinecraftClient.getInstance().player != null;
+                    if (Config.HANDLER.instance().getAutoLevelUp()) {
+                        levelUpScreenInteraction.startAsync(false).thenAccept(r -> {
+                            enforceTaskRefreshScreenInteraction.startAsync(false).thenAccept(r2 -> {
+                                if (r2) {
+                                    WarpNext();
+                                }
+                            });
+                        });
+                    } else {
+                        MinecraftClient.getInstance().player.sendMessage(Text.literal("No incomplete tasks available."), false);
+                    }
+                }
+        );
     }
 
     private void initializeKeybinds() {
