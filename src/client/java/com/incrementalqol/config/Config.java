@@ -29,7 +29,7 @@ public class Config {
     @SerialEntry
     private int hudPosY;
     @SerialEntry
-    private double hudScale;
+    private double hudScale = 1.0;
     @SerialEntry
     private boolean isSortedByType;
     @SerialEntry
