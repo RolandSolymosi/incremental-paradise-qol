@@ -203,7 +203,7 @@ public class AutoSkillModule implements ClientModInitializer {
             } else {
                 var slotId = slotIdCache.get(nextSkill);
                 var lore = content.getRight().get(slotId).get(DataComponentTypes.LORE);
-                var level = Integer.parseInt(String.valueOf(lore.lines().get(1).getString().charAt(7)));
+                var level = Integer.parseInt(String.valueOf(lore.lines().get(1).getString().substring(7).split("/")[0]));
                 if (level < expectedLevel) {
                     if (lore.lines().getLast().getString().contains("Can't afford")) {
                         ConfiguredLogger.LogInfo(LOGGER, "Can't afford: "+nextSkill+" [Level "+expectedLevel+"]");
