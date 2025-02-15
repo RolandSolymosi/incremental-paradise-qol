@@ -27,7 +27,6 @@ public class LoadoutsModule implements ClientModInitializer {
             while (keyBinding.wasPressed()){
                 assert MinecraftClient.getInstance().player != null;
                 MinecraftClient.getInstance().player.networkHandler.sendCommand("wardrobe " + loadout);
-                MinecraftClient.getInstance().player.networkHandler.sendCommand("pets " + loadout);
             }
         } ));
     }

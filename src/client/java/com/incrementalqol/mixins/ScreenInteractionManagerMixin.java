@@ -19,18 +19,18 @@ public class ScreenInteractionManagerMixin {
     private void onInventory(InventoryS2CPacket packet, CallbackInfo ci) {
         ScreenInteraction.ScreenInteractionManager.InventoryPackage(packet);
     }
-    /*
+
     @Inject(method = "onScreenHandlerSlotUpdate", at = @At("HEAD"))
     private void onSlotUpdate(ScreenHandlerSlotUpdateS2CPacket packet, CallbackInfo ci) {
-        AutoSkillModule.UpdatePackage(packet);
+
     }
     @Inject(method = "onSetPlayerInventory", at = @At("HEAD"))
     private void onSlotUpdate(SetPlayerInventoryS2CPacket packet, CallbackInfo ci) {
-        AutoSkillModule.SetInventoryPackage(packet);
+
     }
     @Inject(method = "onScreenHandlerPropertyUpdate", at = @At("HEAD"))
     private void onScreenHandlerPropertyUpdate(ScreenHandlerPropertyUpdateS2CPacket packet, CallbackInfo ci) {
-        AutoSkillModule.PropertyUpdate(packet);
+
     }
-    */
+
 }

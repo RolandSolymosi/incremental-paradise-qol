@@ -96,10 +96,22 @@ public class TaskTrackerModule implements ClientModInitializer {
                 s -> !s.isEmpty(),
                 (input) ->
                 {
-                    var lore = input.getRight().get(31).get(DataComponentTypes.LORE);
-                    if (lore != null && lore.lines().getLast().getString().contains("Click to claim rewards")) {
-                        ScreenInteraction.WellKnownInteractions.ClickSlot(input.getLeft(), 31, ScreenInteraction.WellKnownInteractions.Button.Left, SlotActionType.PICKUP);
-                        return false;
+                    ItemStack levelUpSlot = null;
+                    var levelUpSlotId = 0;
+                    for (var slot : input.getRight()) {
+                        var customName = slot.get(DataComponentTypes.CUSTOM_NAME);
+                        if (customName != null && customName.getString().equals("Claim Rewards")) {
+                            levelUpSlot = slot;
+                            break;
+                        }
+                        levelUpSlotId++;
+                    }
+                    if (levelUpSlot != null){
+                        var lore = levelUpSlot.get(DataComponentTypes.LORE);
+                        if (lore != null && lore.lines().getLast().getString().contains("Click to claim rewards")) {
+                            ScreenInteraction.WellKnownInteractions.ClickSlot(input.getLeft(), levelUpSlotId, ScreenInteraction.WellKnownInteractions.Button.Left, SlotActionType.PICKUP);
+                            return false;
+                        }
                     }
                     return true;
                 }
@@ -345,17 +357,19 @@ public class TaskTrackerModule implements ClientModInitializer {
         if (blocks.get(0).contains("Ticket Task")) {
             String[] taskDetails = extractTaskDetails(blocks.get(0));
 
-            String description = blocks.size() > 1 ? blocks.get(1) : "" ;
+            if (taskDetails != null){
+                String description = blocks.size() > 1 ? blocks.get(1) : "" ;
 
-            String world = taskDetails[0];
-            String number = taskDetails[1];
-            String type = taskDetails[2];
+                String world = taskDetails[0];
+                String number = taskDetails[1];
+                String type = taskDetails[2];
 
-            Task newTask = new Task(stack.getName().getString(), description, "/warp ", 1, false, world, number, type, true);
-            if (newTask.getCompletedStatus()) {
-                newTask.setCompleted();
+                Task newTask = new Task(stack.getName().getString(), description, "/warp ", 1, false, world, number, type, true);
+                if (newTask.getCompletedStatus()) {
+                    newTask.setCompleted();
+                }
+                taskList.add(newTask);
             }
-            taskList.add(newTask);
         }
     }
 
@@ -365,17 +379,20 @@ public class TaskTrackerModule implements ClientModInitializer {
         List<String> blocks = parseLoreLines(text);
 
         String[] taskDetails = extractTaskDetails(blocks.get(0));
-        String description = blocks.size() > 1 ? blocks.get(1) : "" ;
 
-        String world = taskDetails[0];
-        String number = taskDetails[1];
-        String type = taskDetails[2];
+        if (taskDetails != null){
+            String description = blocks.size() > 1 ? blocks.get(1) : "" ;
 
-        Task newTask = new Task(stack.getName().getString(), description, "/warp ", 1, false, world, number, type, false);
-        if (stack.getItem().getName().getString().contains("Written")) {
-            newTask.setCompleted();
+            String world = taskDetails[0];
+            String number = taskDetails[1];
+            String type = taskDetails[2];
+
+            Task newTask = new Task(stack.getName().getString(), description, "/warp ", 1, false, world, number, type, false);
+            if (stack.getItem().getName().getString().contains("Written")) {
+                newTask.setCompleted();
+            }
+            taskList.add(newTask);
         }
-        taskList.add(newTask);
     }
 
     private static List<String> parseLoreLines(List<Text> text) {
@@ -416,6 +433,10 @@ public class TaskTrackerModule implements ClientModInitializer {
                 world = "-" ;
                 type = m.group("type");
             }
+        }
+
+        if (type.isEmpty()){
+            return null;
         }
 
         return new String[]{world, number, type};

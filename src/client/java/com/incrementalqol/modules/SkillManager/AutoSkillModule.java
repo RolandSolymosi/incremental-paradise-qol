@@ -49,6 +49,7 @@ public class AutoSkillModule implements ClientModInitializer {
     private static CompletableFuture<Boolean> afterWorldChange(Pair<World, Boolean> input) {
         var future = new CompletableFuture<Boolean>();
         if (input.getRight()) {
+            ConfiguredLogger.LogInfo(LOGGER, "Start a full level up because of World change.");
             reset();
             levelUpQueue.add(SkillType.Combat);
             levelUpQueue.add(SkillType.Mining);
@@ -128,6 +129,7 @@ public class AutoSkillModule implements ClientModInitializer {
 
     private static void keybindingCheck(MinecraftClient client) {
         while (testKeyBind.wasPressed()) {
+            ConfiguredLogger.LogInfo(LOGGER, "Start a full level up manually.");
             reset();
             levelUpQueue.add(SkillType.Combat);
             levelUpQueue.add(SkillType.Mining);

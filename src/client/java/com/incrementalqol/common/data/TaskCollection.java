@@ -19,7 +19,7 @@ public class TaskCollection {
         TaskDescriptors.put(TaskTarget.Coconut, new TaskDescriptor(TaskType.Foraging, "crab", new ArrayList<>(List.of("w1")), TaskType.Foraging, ToolType.Axe));
         TaskDescriptors.put(TaskTarget.Ladybug, new TaskDescriptor(TaskType.Foraging, "beetroot", new ArrayList<>(List.of("w1")), TaskType.Foraging, ToolType.Axe));
         TaskDescriptors.put(TaskTarget.ScaredHog, new TaskDescriptor(TaskType.Combat, "w1", new ArrayList<>(List.of("w1")), TaskType.Combat, ToolType.Melee));
-        TaskDescriptors.put(TaskTarget.WildBoar, new TaskDescriptor(TaskType.Combat, "carrot", new ArrayList<>(List.of("w1")), TaskType.Combat, ToolType.Melee));
+        TaskDescriptors.put(TaskTarget.WildBoar, new TaskDescriptor(TaskType.Combat, "hoglin", new ArrayList<>(List.of("carrot")), TaskType.Combat, ToolType.Melee));
         TaskDescriptors.put(TaskTarget.MountainGoat, new TaskDescriptor(TaskType.Combat, "w1", new ArrayList<>(List.of("w1")), TaskType.Combat, ToolType.Melee));
         TaskDescriptors.put(TaskTarget.Hoglin, new TaskDescriptor(TaskType.Combat, "hoglin", new ArrayList<>(List.of("carrot")), TaskType.Combat, ToolType.Melee));
         TaskDescriptors.put(TaskTarget.W1_Elite, new TaskDescriptor(TaskType.Combat, "hoglin", new ArrayList<>(List.of("carrot")), TaskType.Combat, ToolType.Melee));
@@ -121,25 +121,26 @@ public class TaskCollection {
 
         // World Nightmare 1
         TaskDescriptors.put(TaskTarget.Quartz, new TaskDescriptor(TaskType.Mining, "quartz", new ArrayList<>(List.of("n1")), TaskType.Mining, ToolType.Pickaxe));
-        TaskDescriptors.put(TaskTarget.Lapis, new TaskDescriptor(TaskType.Mining, "quartz", new ArrayList<>(List.of("n1")), TaskType.Mining, ToolType.Pickaxe));
-        TaskDescriptors.put(TaskTarget.NetherGold, new TaskDescriptor(TaskType.Mining, "quartz", new ArrayList<>(List.of("n1")), TaskType.Mining, ToolType.Pickaxe));
-        TaskDescriptors.put(TaskTarget.AncientDebris, new TaskDescriptor(TaskType.Mining, "quartz", new ArrayList<>(List.of("n1")), TaskType.Mining, ToolType.Pickaxe));
+        TaskDescriptors.put(TaskTarget.Lapis, new TaskDescriptor(TaskType.Mining, "lapis", new ArrayList<>(List.of("quartz", "n1")), TaskType.Mining, ToolType.Pickaxe));
+        TaskDescriptors.put(TaskTarget.NetherGold, new TaskDescriptor(TaskType.Mining, "ngold", new ArrayList<>(List.of("lapis", "quartz", "n1")), TaskType.Mining, ToolType.Pickaxe));
+        TaskDescriptors.put(TaskTarget.AncientDebris, new TaskDescriptor(TaskType.Mining, "netherite", new ArrayList<>(List.of("netherite", "lapis", "quartz", "n1")), TaskType.Mining, ToolType.Pickaxe));
         TaskDescriptors.put(TaskTarget.Crimson, new TaskDescriptor(TaskType.Foraging, "n1", new ArrayList<>(List.of("n1")), TaskType.Foraging, ToolType.Axe));
         TaskDescriptors.put(TaskTarget.Toquoi, new TaskDescriptor(TaskType.Foraging, "n1", new ArrayList<>(List.of("n1")), TaskType.Foraging, ToolType.Axe));
-        TaskDescriptors.put(TaskTarget.Aqua, new TaskDescriptor(TaskType.Foraging, "n1", new ArrayList<>(List.of("n1")), TaskType.Foraging, ToolType.Axe));
-        TaskDescriptors.put(TaskTarget.Cheruza, new TaskDescriptor(TaskType.Foraging, "n1", new ArrayList<>(List.of("n1")), TaskType.Foraging, ToolType.Axe));
-        TaskDescriptors.put(TaskTarget.Winkle, new TaskDescriptor(TaskType.Foraging, "n1", new ArrayList<>(List.of("n1")), TaskType.Foraging, ToolType.Axe));
-        TaskDescriptors.put(TaskTarget.Piglin, new TaskDescriptor(TaskType.Combat, "n1", new ArrayList<>(List.of("n1")), TaskType.Combat, ToolType.Pickaxe));
-        TaskDescriptors.put(TaskTarget.Bamboodle, new TaskDescriptor(TaskType.Combat, "n1", new ArrayList<>(List.of("n1")), TaskType.Combat, ToolType.Bow));
-        TaskDescriptors.put(TaskTarget.Firefox, new TaskDescriptor(TaskType.Combat, "n1", new ArrayList<>(List.of("n1")), TaskType.Combat, ToolType.Bow));
-        TaskDescriptors.put(TaskTarget.Marshmallow, new TaskDescriptor(TaskType.Combat, "n1", new ArrayList<>(List.of("n1")), TaskType.Combat, ToolType.Bow));
-        TaskDescriptors.put(TaskTarget.WN1_Elite, new TaskDescriptor(TaskType.Combat, "n1", new ArrayList<>(List.of("n1")), TaskType.Combat, ToolType.Pickaxe));
-        TaskDescriptors.put(TaskTarget.Decay, new TaskDescriptor(TaskType.Farming, "n1", new ArrayList<>(List.of("n1")), TaskType.Farming, ToolType.Hoe));
-        TaskDescriptors.put(TaskTarget.IcebergLettuce_Or_TorchFlower, new TaskDescriptor(TaskType.Farming, "n1", new ArrayList<>(List.of("n1")), TaskType.Farming, ToolType.Hoe));
-        TaskDescriptors.put(TaskTarget.Mandrake, new TaskDescriptor(TaskType.Farming, "n1", new ArrayList<>(List.of("n1")), TaskType.Farming, ToolType.Hoe));
-        TaskDescriptors.put(TaskTarget.Splinterseed, new TaskDescriptor(TaskType.Farming, "n1", new ArrayList<>(List.of("n1")), TaskType.Farming, ToolType.Hoe));
-        TaskDescriptors.put(TaskTarget.Charred, new TaskDescriptor(TaskType.Fishing, "n1", new ArrayList<>(List.of("n1")), TaskType.Fishing, ToolType.FishingRod));
-        TaskDescriptors.put(TaskTarget.SmokedSalmon, new TaskDescriptor(TaskType.Fishing, "n1", new ArrayList<>(List.of("n1")), TaskType.Fishing, ToolType.FishingRod));
+        TaskDescriptors.put(TaskTarget.Aqua, new TaskDescriptor(TaskType.Foraging, "decay", new ArrayList<>(List.of("n1")), TaskType.Foraging, ToolType.Axe));
+        TaskDescriptors.put(TaskTarget.Cheruza, new TaskDescriptor(TaskType.Foraging, "decay", new ArrayList<>(List.of("n1")), TaskType.Foraging, ToolType.Axe));
+        TaskDescriptors.put(TaskTarget.Winkle, new TaskDescriptor(TaskType.Foraging, "decay", new ArrayList<>(List.of("n1")), TaskType.Foraging, ToolType.Axe));
+        TaskDescriptors.put(TaskTarget.Piglin, new TaskDescriptor(TaskType.Combat, "n1", new ArrayList<>(List.of("n1")), TaskType.Combat, ToolType.Melee));
+        TaskDescriptors.put(TaskTarget.Bamboodle, new TaskDescriptor(TaskType.Combat, "bamboodle", new ArrayList<>(List.of("zoglin","n1")), TaskType.Combat, ToolType.Bow));
+        TaskDescriptors.put(TaskTarget.Firefox, new TaskDescriptor(TaskType.Combat, "firefox", new ArrayList<>(List.of("n1")), TaskType.Combat, ToolType.Bow));
+        TaskDescriptors.put(TaskTarget.Marshmallow, new TaskDescriptor(TaskType.Combat, "zoglin", new ArrayList<>(List.of("decay","n1")), TaskType.Combat, ToolType.Bow));
+        TaskDescriptors.put(TaskTarget.WN1_Elite, new TaskDescriptor(TaskType.Combat, "decay", new ArrayList<>(List.of("n1")), TaskType.Combat, ToolType.Melee));
+        TaskDescriptors.put(TaskTarget.Zoglin, new TaskDescriptor(TaskType.Combat, "zoglin", new ArrayList<>(List.of("bamboodle","n1")), TaskType.Combat, ToolType.Melee));
+        TaskDescriptors.put(TaskTarget.Decay, new TaskDescriptor(TaskType.Farming, "decay", new ArrayList<>(List.of("n1")), TaskType.Farming, ToolType.Hoe));
+        TaskDescriptors.put(TaskTarget.IcebergLettuce_Or_TorchFlower, new TaskDescriptor(TaskType.Farming, "torch", new ArrayList<>(List.of("n1")), TaskType.Farming, ToolType.Hoe));
+        TaskDescriptors.put(TaskTarget.Mandrake, new TaskDescriptor(TaskType.Farming, "mandrake", new ArrayList<>(List.of("n1")), TaskType.Farming, ToolType.Hoe));
+        TaskDescriptors.put(TaskTarget.Splinterseed, new TaskDescriptor(TaskType.Farming, "splinter", new ArrayList<>(List.of("n1")), TaskType.Farming, ToolType.Hoe));
+        TaskDescriptors.put(TaskTarget.Charred, new TaskDescriptor(TaskType.Fishing, "decay", new ArrayList<>(List.of("n1")), TaskType.Fishing, ToolType.FishingRod));
+        TaskDescriptors.put(TaskTarget.SmokedSalmon, new TaskDescriptor(TaskType.Fishing, "decay", new ArrayList<>(List.of("n1")), TaskType.Fishing, ToolType.FishingRod));
         TaskDescriptors.put(TaskTarget.Strider, new TaskDescriptor(TaskType.Fishing, "n1", new ArrayList<>(List.of("n1")), TaskType.CombatFishing, ToolType.FishingRod));
         TaskDescriptors.put(TaskTarget.Dice, new TaskDescriptor(TaskType.Gaming, "dice", new ArrayList<>(List.of("dice")), null, null));
         TaskDescriptors.put(TaskTarget.Shiver_Money, new TaskDescriptor(TaskType.Misc, "quartz", new ArrayList<>(List.of("n1")), TaskType.Mining, ToolType.Pickaxe));
@@ -281,6 +282,7 @@ public class TaskCollection {
         TaskMap.put("firefoxes", TaskTarget.Firefox);
         TaskMap.put("marshmallows", TaskTarget.Marshmallow);
         TaskMap.put("elite mobs in nightmare #1", TaskTarget.WN1_Elite);
+        TaskMap.put("zoglin", TaskTarget.Zoglin);
         TaskMap.put("decay", TaskTarget.Decay);
         TaskMap.put("torchflowers or iceberg lettuce", TaskTarget.IcebergLettuce_Or_TorchFlower);
         TaskMap.put("mandrakes", TaskTarget.Mandrake);
@@ -434,7 +436,7 @@ public class TaskCollection {
 
         // Combat
         Piglin, Bamboodle, Firefox, Marshmallow,
-        WN1_Elite,
+        WN1_Elite, Zoglin,
 
         // Farming
         Decay, IcebergLettuce_Or_TorchFlower, Mandrake, Splinterseed,
