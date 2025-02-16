@@ -94,7 +94,7 @@ public class Task {
         this.warp = warp;
         this.strWidth = strWidth;
         this.completed = completed;
-        this.generalProgressPattern = Pattern.compile(this.name + " \\(?(?<progress>[0-9.,]+[km]?)");
+        this.generalProgressPattern = Pattern.compile(Pattern.quote(this.name) + " \\(?(?<progress>[0-9.,]+[km]?)");
         this.world = world;
         this.number = number;
         this.taskType = type.trim();
