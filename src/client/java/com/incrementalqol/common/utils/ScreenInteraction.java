@@ -2,11 +2,14 @@ package com.incrementalqol.common.utils;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
+import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.c2s.play.ClickSlotC2SPacket;
+import net.minecraft.network.packet.c2s.play.CloseHandledScreenC2SPacket;
 import net.minecraft.network.packet.s2c.play.InventoryS2CPacket;
 import net.minecraft.network.packet.s2c.play.OpenScreenS2CPacket;
 import net.minecraft.screen.slot.SlotActionType;
@@ -188,6 +191,7 @@ public class ScreenInteraction {
 
     public static class ScreenInteractionManager {
         private static final Set<ScreenInteraction> registeredInteractions = ConcurrentHashMap.newKeySet();
+        private static AtomicBoolean hadInteraction = new AtomicBoolean();
 
         private static void reset() {
             for (var listener : registeredInteractions) {
@@ -205,6 +209,7 @@ public class ScreenInteraction {
             MinecraftClient.getInstance().execute(ScreenInteractionManager::ProtectInteraction);
             for (var listener : registeredInteractions) {
                 shouldHide = shouldHide || listener.listen(packet);
+                hadInteraction.compareAndSet(false, true);
             }
             if (shouldHide) {
                 ci.cancel();
@@ -216,6 +221,7 @@ public class ScreenInteraction {
             MinecraftClient.getInstance().execute(ScreenInteractionManager::ProtectInteraction);
             for (var listener : registeredInteractions) {
                 listener.listen(packet);
+                hadInteraction.compareAndSet(false, true);
             }
         }
 
@@ -234,11 +240,18 @@ public class ScreenInteraction {
             ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
                 reset();
             });
-            //ScreenEvents.AFTER_INIT.register((client, screen, scaledWidth, scaledHeight) -> {
-            //    if (anyActiveInteractionOngoing()) {
-            //        client.setScreen(null); // Immediately hide the screen if it reopens
-            //    }
-            //});
+            ScreenEvents.AFTER_INIT.register((client, screen, scaledWidth, scaledHeight) -> {
+                if (screen instanceof InventoryScreen) {
+                    if (client.player != null){
+                        if (hadInteraction.get()){
+                            hadInteraction.set(false);
+                            ConfiguredLogger.LogInfo(LOGGER, "[SHARED]: Inventory Opened, reset handler to inventory.");
+                            client.player.networkHandler.sendPacket(new CloseHandledScreenC2SPacket(0));
+                        }
+                    }
+                }
+            });
+
             //ClientTickEvents.END_CLIENT_TICK.register(client -> ProtectInteraction());
         }
     }
