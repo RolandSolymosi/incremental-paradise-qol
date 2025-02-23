@@ -8,6 +8,7 @@ import java.util.Optional;
 public enum World {
     Hub(Identifier.of("minecraft", "worldhub"), Realm.Hub),
     Overworld(Identifier.of("minecraft", "overworld"), Realm.Unknown),
+    BossArenas(Identifier.of("minecraft", "bossarenas"), Realm.Normal),
     World1(Identifier.of("minecraft", "world1"), Realm.Normal),
     World2(Identifier.of("minecraft", "world2"), Realm.Normal),
     World3(Identifier.of("minecraft", "world3"), Realm.Normal),

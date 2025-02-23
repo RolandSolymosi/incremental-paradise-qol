@@ -1,17 +1,17 @@
 package com.incrementalqol.common.utils;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.listener.ClientPlayPacketListener;
 import net.minecraft.network.packet.Packet;
-import net.minecraft.network.packet.c2s.play.ClickSlotC2SPacket;
-import net.minecraft.network.packet.c2s.play.CloseHandledScreenC2SPacket;
-import net.minecraft.network.packet.s2c.play.InventoryS2CPacket;
-import net.minecraft.network.packet.s2c.play.OpenScreenS2CPacket;
+import net.minecraft.network.packet.c2s.play.*;
+import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.util.Pair;
 import org.slf4j.Logger;
@@ -151,9 +151,22 @@ public class ScreenInteraction {
     }
 
     private synchronized void reset(boolean resultStatus, boolean forced) {
-        //if (shouldHide && (actualContent != null || actualSyncId != null) && forced) {
-        //    MinecraftClient.getInstance().getNetworkHandler().sendPacket(new CloseHandledScreenC2SPacket(actualContent.getLeft()));
-        //}
+        if (shouldHide && steps.stream().anyMatch(s ->  s.alreadyConsumedSyncId != -1)) {
+            // TODO: Move this to the concurrent interaction handler
+            // Close window to reset handler
+            MinecraftClient.getInstance().getNetworkHandler().sendPacket(new CloseHandledScreenC2SPacket(actualContent.getLeft()));
+
+            // Enforce update of the special slot of the potion
+            MinecraftClient.getInstance().getNetworkHandler().sendPacket(new ClickSlotC2SPacket(
+                    0,
+                    0,
+                    45,
+                    0,
+                    SlotActionType.PICKUP,
+                    ItemStack.EMPTY,
+                    new Int2ObjectOpenHashMap<>()
+            ));
+        }
         currentStepIndex = 0;
         actualSyncId = null;
         actualContent = null;
@@ -197,6 +210,7 @@ public class ScreenInteraction {
             for (var listener : registeredInteractions) {
                 listener.reset(false, false);
             }
+            hadInteraction.set(false);
         }
 
         public static boolean anyActiveInteractionOngoing() {
@@ -216,13 +230,37 @@ public class ScreenInteraction {
             }
         }
 
-        public static void InventoryPackage(InventoryS2CPacket packet) {
-            ConfiguredLogger.LogInfo(LOGGER, "[SHARED]: SyncId of Inventory: " + packet.getSyncId());
+        public static void InventoryPackage(InventoryS2CPacket packet, CallbackInfo ci) {
+            ConfiguredLogger.LogInfo(LOGGER, "[SHARED]: SyncId of Inventory: " + packet.getSyncId());// + " revision: "+packet.getRevision());
             MinecraftClient.getInstance().execute(ScreenInteractionManager::ProtectInteraction);
             for (var listener : registeredInteractions) {
                 listener.listen(packet);
                 hadInteraction.compareAndSet(false, true);
             }
+        }
+
+        public static void SlotUpdate(ScreenHandlerSlotUpdateS2CPacket packet, CallbackInfo ci) {
+            //ConfiguredLogger.LogInfo(LOGGER, "[SHARED]: SyncId of SlotUpdate: " + packet.getSyncId() + " slotId: "+packet.getSlot() + " revision: "+packet.getRevision());
+        }
+
+        public static void SetInventory(SetPlayerInventoryS2CPacket packet, CallbackInfo ci) {
+            //ConfiguredLogger.LogInfo(LOGGER, "[SHARED]: Set Inventory slotId: "+packet.slot());
+        }
+
+        public static void ScreenPropertyUpdate(ScreenHandlerPropertyUpdateS2CPacket packet, CallbackInfo ci) {
+            //ConfiguredLogger.LogInfo(LOGGER, "[SHARED]: SyncId of ScreenPropertyUpdate: " + packet.getSyncId() + " propertyId: "+packet.getPropertyId());
+        }
+
+        public static void EntityStatus(EntityStatusS2CPacket packet, CallbackInfo ci) {
+            //ConfiguredLogger.LogInfo(LOGGER, "[SHARED] EntityStatusUpdate: " + packet.getStatus());
+        }
+
+        public static void Respawn(PlayerRespawnS2CPacket packet, CallbackInfo ci) {
+            //ConfiguredLogger.LogInfo(LOGGER, "[SHARED] Respawn: " + packet.commonPlayerSpawnInfo().dimension().getValue().toShortTranslationKey());
+        }
+
+        public static void GameStateChange(GameStateChangeS2CPacket packet, CallbackInfo ci) {
+            //ConfiguredLogger.LogInfo(LOGGER, "[SHARED] GameStateChange: " + packet.getValue());
         }
 
         private static void ProtectInteraction() {
@@ -252,7 +290,9 @@ public class ScreenInteraction {
                 }
             });
 
-            //ClientTickEvents.END_CLIENT_TICK.register(client -> ProtectInteraction());
+            ClientTickEvents.END_CLIENT_TICK.register(client -> {
+
+            });
         }
     }
 
