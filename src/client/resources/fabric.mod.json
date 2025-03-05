@@ -15,7 +15,15 @@
 	"icon": "template-mod/icon.png",
 	"environment": "client",
 	"entrypoints": {
-		"client": ["com.incrementalqol.EntryPointClient", "com.incrementalqol.AutoBank"]
+		"client": [
+			"com.incrementalqol.modules.SkillManager.AutoSkillModule",
+			"com.incrementalqol.modules.DepositHotkey.DepositHotkeyModule",
+			"com.incrementalqol.modules.DepositHotkey.SellAllHotkeyModule",
+			"com.incrementalqol.modules.TaskTracker.TaskTrackerModule",
+			"com.incrementalqol.modules.CommandAliases.CommandAliasModule",
+			"com.incrementalqol.modules.Loadouts.LoadoutsModule",
+			"com.incrementalqol.modules.OptionsModule"
+		]
 	},
 	"mixins": [
 		"incremental-qol.client.mixins.json"

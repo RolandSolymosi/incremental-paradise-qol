@@ -1,11 +1,14 @@
 {
-	"required": true,
-	"package": "com.incrementalqol.mixins",
-	"compatibilityLevel": "JAVA_21",
-	"client": [
-		"TaskProgressMixin"
-	],
-	"injectors": {
-		"defaultRequire": 1
-	}
+  "required": true,
+  "package": "com.incrementalqol.mixins",
+  "compatibilityLevel": "JAVA_21",
+  "client": [
+    "NoLeashOrBalloonMixin",
+    "ScreenInteractionManagerMixin",
+    "ScreenInteractionProtectionMixin",
+    "TaskProgressMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
 }
