@@ -23,6 +23,9 @@ public class Config {
     private boolean loggingEnabled;
 
     @SerialEntry
+    private boolean balloonRopeEnabled;
+
+    @SerialEntry
     private boolean hudBackground;
     @SerialEntry
     private int hudPosX;
@@ -116,6 +119,10 @@ public class Config {
         };
     }
 
+    public boolean getBalloonRopeEnabled() {
+        return balloonRopeEnabled;
+    }
+
     public boolean getLoggingEnabled() {
         return loggingEnabled;
     }
@@ -179,6 +186,7 @@ public class Config {
                 .categories(Arrays.asList(
                         TaskCategory(),
                         SkillLeveling(),
+                        Others(),
                         Debug())
                 )
                 .build()
@@ -221,7 +229,7 @@ public class Config {
                         .description(OptionDescription.of(Text.of("These are some extra functions for Task Warp.")))
                         .option(Option.<Boolean>createBuilder()
                                 .name(Text.of("Toggle Auto LevelUp"))
-                                .description(OptionDescription.of(Text.of("Turn on and off auo LevelUp when no task remained when using Next Warp.")))
+                                .description(OptionDescription.of(Text.of("Turn on and off auto LevelUp when no task remained when using Next Warp.")))
                                 .binding(false, () -> this.autoLevelUp, newVal -> this.autoLevelUp = newVal)
                                 .controller(BooleanControllerBuilder::create)
                                 .build())
@@ -468,10 +476,23 @@ public class Config {
                 .build();
     }
 
+    public ConfigCategory Others() {
+        return ConfigCategory.createBuilder()
+                .name(Text.of("Others"))
+                .tooltip(Text.of("This category is smaller extra options not connected to any big category."))
+                .option(Option.<Boolean>createBuilder()
+                        .name(Text.of("Toggle balloon ropes for self."))
+                        .description(OptionDescription.of(Text.of("Turn on and off the balloon rope attached to the player.")))
+                        .binding(false, () -> this.balloonRopeEnabled, newVal -> this.balloonRopeEnabled = newVal)
+                        .controller(BooleanControllerBuilder::create)
+                        .build())
+                .build();
+    }
+
     public ConfigCategory Debug() {
         return ConfigCategory.createBuilder()
                 .name(Text.of("Development"))
-                .tooltip(Text.of("This category is about configuring the to help development and debug."))
+                .tooltip(Text.of("This category is about configurations to help development and debug."))
                 .group(OptionGroup.createBuilder()
                         .name(Text.of("Logging settings"))
                         .description(OptionDescription.of(Text.of("These are the Logging related settings.")))

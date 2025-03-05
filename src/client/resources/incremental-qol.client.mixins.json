@@ -3,11 +3,12 @@
   "package": "com.incrementalqol.mixins",
   "compatibilityLevel": "JAVA_21",
   "client": [
+    "NoLeashOrBalloonMixin",
     "ScreenInteractionManagerMixin",
     "ScreenInteractionProtectionMixin",
     "TaskProgressMixin"
   ],
   "injectors": {
     "defaultRequire": 1
-	}
+  }
 }
