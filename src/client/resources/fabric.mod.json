@@ -5,6 +5,8 @@
 	"name": "Incremental Paradise QoL",
 	"description": "A bunch of handy tweaks and additions for the Incremental Paradise server. Client-side only.",
 	"authors": [
+		"AlvinTheFox",
+		"Jeremyrab",
 		"Johulk",
 		"Razorspined"
 	],
@@ -22,12 +24,12 @@
 			"com.incrementalqol.modules.TaskTracker.TaskTrackerModule",
 			"com.incrementalqol.modules.CommandAliases.CommandAliasModule",
 			"com.incrementalqol.modules.Loadouts.LoadoutsModule",
-			"com.incrementalqol.modules.OptionsModule"
+			"com.incrementalqol.modules.OptionsModule",
+			"com.incrementalqol.modules.Glowing"
 		]
 	},
 	"mixins": [
 		"incremental-qol.client.mixins.json"
-
 	],
 	"depends": {
 		"fabricloader": ">=0.16.9",

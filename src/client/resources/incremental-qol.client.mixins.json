@@ -3,10 +3,12 @@
   "package": "com.incrementalqol.mixins",
   "compatibilityLevel": "JAVA_21",
   "client": [
-    "NoLeashOrBalloonMixin",
-    "ScreenInteractionManagerMixin",
-    "ScreenInteractionProtectionMixin",
-    "TaskProgressMixin"
+    "EntityRenderer",
+    "ClientPlayNetworkHandler",
+    "HandledScreen",
+    "BossBarHud",
+    "Entity",
+    "ParticleManager"
   ],
   "injectors": {
     "defaultRequire": 1

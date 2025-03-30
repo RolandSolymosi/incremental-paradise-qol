@@ -26,6 +26,13 @@ public class Config {
     private boolean balloonRopeEnabled;
 
     @SerialEntry
+    private int interactionTimeout = 5;
+
+    @SerialEntry
+    private boolean interactionIsPriority = true;
+
+
+    @SerialEntry
     private boolean hudBackground;
     @SerialEntry
     private int hudPosX;
@@ -117,58 +124,6 @@ public class Config {
             case ToolType.FishingRod -> fishingWeaponSlot;
             case ToolType.Bow -> rangedWeaponSlot;
         };
-    }
-
-    public boolean getBalloonRopeEnabled() {
-        return balloonRopeEnabled;
-    }
-
-    public boolean getLoggingEnabled() {
-        return loggingEnabled;
-    }
-
-    public int getHudPosX() {
-        return hudPosX;
-    }
-
-    public int getHudPosY() {
-        return hudPosY;
-    }
-
-    public boolean getHudBackground() {
-        return hudBackground;
-    }
-
-    public double getHudScale() {
-        return hudScale;
-    }
-
-    public boolean getSortedByType() {
-        return isSortedByType;
-    }
-
-    public boolean getAutoSwapWardrobe() {
-        return autoSwapWardrobe;
-    }
-
-    public boolean getAutoSwapTools() {
-        return autoSwapTools;
-    }
-
-    public boolean getAutoSkillLeveling() {
-        return autoSkillLeveling;
-    }
-
-    public boolean getAutoLevelUp() {
-        return autoLevelUp;
-    }
-
-    public void setHudPosX(int hudPosX) {
-        this.hudPosX = hudPosX;
-    }
-
-    public void setHudPosY(int hudPosY) {
-        this.hudPosY = hudPosY;
     }
 
     public static ConfigClassHandler<Config> HANDLER = ConfigClassHandler.createBuilder(Config.class)
@@ -504,5 +459,65 @@ public class Config {
                                 .build())
                         .build())
                 .build();
+    }
+
+    public boolean getBalloonRopeEnabled() {
+        return balloonRopeEnabled;
+    }
+
+    public boolean getLoggingEnabled() {
+        return loggingEnabled;
+    }
+
+    public int getHudPosX() {
+        return hudPosX;
+    }
+
+    public int getHudPosY() {
+        return hudPosY;
+    }
+
+    public boolean getHudBackground() {
+        return hudBackground;
+    }
+
+    public double getHudScale() {
+        return hudScale;
+    }
+
+    public boolean getSortedByType() {
+        return isSortedByType;
+    }
+
+    public boolean getAutoSwapWardrobe() {
+        return autoSwapWardrobe;
+    }
+
+    public boolean getAutoSwapTools() {
+        return autoSwapTools;
+    }
+
+    public boolean getAutoSkillLeveling() {
+        return autoSkillLeveling;
+    }
+
+    public boolean getAutoLevelUp() {
+        return autoLevelUp;
+    }
+
+    public void setHudPosX(int hudPosX) {
+        this.hudPosX = hudPosX;
+    }
+
+    public void setHudPosY(int hudPosY) {
+        this.hudPosY = hudPosY;
+    }
+
+    public int getInteractionTimeout() {
+        return interactionTimeout;
+    }
+
+    public boolean isInteractionIsPriority() {
+        return interactionIsPriority;
     }
 }

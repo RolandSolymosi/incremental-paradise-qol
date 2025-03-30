@@ -1,32 +1,20 @@
-package com.incrementalqol.mixins;
+package com.incrementalqol.mixinWrappers;
 
 import com.incrementalqol.modules.TaskTracker.TaskTrackerModule;
-import org.spongepowered.asm.mixin.*;
-import org.spongepowered.asm.mixin.injection.*;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.gui.hud.BossBarHud;
 import net.minecraft.client.gui.hud.ClientBossBar;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicBoolean;
 
+public class BossBarHud {
 
-@Mixin(BossBarHud.class)
-public class TaskProgressMixin {
+    private static final AtomicBoolean ongoing = new AtomicBoolean();
 
-    @Final
-    @Shadow
-    private Map<UUID, ClientBossBar> bossBars;
-
-    private static AtomicBoolean ongoing = new AtomicBoolean();
-
-    @Inject(at=@At("HEAD"), method="render(Lnet/minecraft/client/gui/DrawContext;)V")
-    private void onRender(DrawContext ctx, CallbackInfo ci) {
+    public static void render(Map<UUID, ClientBossBar> bossBars,  DrawContext ctx, CallbackInfo ci) {
         if (ongoing.compareAndSet(false, true)){
             if (bossBars != null && !bossBars.isEmpty()) {
                 var keys = new ArrayList<>(bossBars.keySet());
