@@ -79,7 +79,7 @@ public class AutoSkillModule implements ClientModInitializer {
                 s -> s.contains("Skills"),
                 s -> true,
                 (input) -> {
-                    var slotId = switch (actualSkillType) {
+                    short slotId = switch (actualSkillType) {
                         case SkillType.Combat -> 21;
                         case SkillType.Mining -> 19;
                         case SkillType.Foraging -> 20;
@@ -95,7 +95,7 @@ public class AutoSkillModule implements ClientModInitializer {
                         s -> s.equals(actualSkillType.getName()),
                         s -> true,
                         (input) -> {
-                            ScreenInteraction.WellKnownInteractions.ClickSlot(input.getLeft(), actualSkillType == SkillType.Sharpshooting ? 21 : 22, ScreenInteraction.WellKnownInteractions.Button.Left, SlotActionType.PICKUP);
+                            ScreenInteraction.WellKnownInteractions.ClickSlot(input.getLeft(), (short)(actualSkillType == SkillType.Sharpshooting ? 21 : 22), ScreenInteraction.WellKnownInteractions.Button.Left, SlotActionType.PICKUP);
                             return true;
                         }
                 )
@@ -182,12 +182,12 @@ public class AutoSkillModule implements ClientModInitializer {
     private static boolean LevelUp(Pair<Integer, List<ItemStack>> content, SkillType toolType) {
         var skillLevelUps = SkillNameListInOrderForSkill(toolType);
         var levels = new HashMap<String, Integer>();
-        var slotIdCache = new HashMap<String, Integer>();
+        var slotIdCache = new HashMap<String, Short>();
         for (var nextSkill : skillLevelUps) {
             levels.merge(nextSkill, 1, (actual, ignore) -> actual + 1);
             var expectedLevel = levels.get(nextSkill);
             if (!slotIdCache.containsKey(nextSkill)) {
-                var index = 0;
+                short index = 0;
                 for (var slot : content.getRight()) {
                     var customName = slot.get(DataComponentTypes.CUSTOM_NAME);
                     if (customName != null && customName.getString().equals(nextSkill)) {
@@ -200,7 +200,7 @@ public class AutoSkillModule implements ClientModInitializer {
             if (!slotIdCache.containsKey(nextSkill)) {
                 break;
             } else {
-                var slotId = slotIdCache.get(nextSkill);
+                short slotId = slotIdCache.get(nextSkill);
                 var lore = content.getRight().get(slotId).get(DataComponentTypes.LORE);
                 var level = Integer.parseInt(String.valueOf(lore.lines().get(1).getString().substring(7).split("/")[0]));
                 if (level < expectedLevel) {

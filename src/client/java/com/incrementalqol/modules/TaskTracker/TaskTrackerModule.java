@@ -97,7 +97,7 @@ public class TaskTrackerModule implements ClientModInitializer {
                 (input) ->
                 {
                     ItemStack levelUpSlot = null;
-                    var levelUpSlotId = 0;
+                    short levelUpSlotId = 0;
                     for (var slot : input.getRight()) {
                         var customName = slot.get(DataComponentTypes.CUSTOM_NAME);
                         if (customName != null && customName.getString().equals("Claim Rewards")) {
@@ -287,7 +287,7 @@ public class TaskTrackerModule implements ClientModInitializer {
                             }
                             if (Config.HANDLER.instance().getAutoSwapTools() && task.descriptor.getDefaultHotBarSlot() != null) {
                                 var slotId = config.getSlotToDefault(task.descriptor.getDefaultHotBarSlot());
-                                MinecraftClient.getInstance().player.getInventory().selectedSlot = slotId;
+                                MinecraftClient.getInstance().player.getInventory().setSelectedSlot(slotId);
                                 MinecraftClient.getInstance().player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(slotId));
                             }
 

@@ -54,7 +54,7 @@ public class DepositHotkeyModule implements ClientModInitializer {
                 s -> s.contains("Bank"),
                 s -> true,
                 (input) -> {
-                    ScreenInteraction.WellKnownInteractions.ClickSlot(input.getLeft(), 21, ScreenInteraction.WellKnownInteractions.Button.Left, SlotActionType.PICKUP);
+                    ScreenInteraction.WellKnownInteractions.ClickSlot(input.getLeft(), (short)21, ScreenInteraction.WellKnownInteractions.Button.Left, SlotActionType.PICKUP);
                     return true;
                 }
         )
@@ -70,7 +70,7 @@ public class DepositHotkeyModule implements ClientModInitializer {
                             return false;
                         },
                         (input) -> {
-                            ScreenInteraction.WellKnownInteractions.ClickSlot(input.getLeft(), 23, ScreenInteraction.WellKnownInteractions.Button.Left, SlotActionType.PICKUP);
+                            ScreenInteraction.WellKnownInteractions.ClickSlot(input.getLeft(), (short)23, ScreenInteraction.WellKnownInteractions.Button.Left, SlotActionType.PICKUP);
                             return true;
                         }
                 )

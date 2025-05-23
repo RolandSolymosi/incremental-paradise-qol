@@ -24,16 +24,15 @@
 			"com.incrementalqol.modules.TaskTracker.TaskTrackerModule",
 			"com.incrementalqol.modules.CommandAliases.CommandAliasModule",
 			"com.incrementalqol.modules.Loadouts.LoadoutsModule",
-			"com.incrementalqol.modules.OptionsModule",
-			"com.incrementalqol.modules.Glowing"
+			"com.incrementalqol.modules.OptionsModule"
 		]
 	},
 	"mixins": [
 		"incremental-qol.client.mixins.json"
 	],
 	"depends": {
-		"fabricloader": ">=0.16.9",
-		"minecraft": "~1.21.4",
+		"fabricloader": ">=0.16.14",
+		"minecraft": "~1.21.5",
 		"java": ">=21",
 		"fabric-api": "*"
 	},

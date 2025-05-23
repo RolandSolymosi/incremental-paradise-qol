@@ -54,7 +54,7 @@ public class ScreenManager implements ClientModInitializer {
                 }
             }
             case InventoryS2CPacket x -> {
-                if (actualScreen == null || actualScreen.GetSyncId() != x.getSyncId()) {
+                if (actualScreen == null || actualScreen.GetSyncId() != x.syncId()) {
                     screen = new TrackedScreen(x);
                 }
                 else {
@@ -109,7 +109,7 @@ public class ScreenManager implements ClientModInitializer {
     }
 
     public static void InventoryPacket(InventoryS2CPacket packet, CallbackInfo ci) {
-        ConfiguredLogger.LogInfo(LOGGER, "SyncId of InventoryContent: " + packet.getSyncId() + " revision: " + packet.getRevision());
+        ConfiguredLogger.LogInfo(LOGGER, "SyncId of InventoryContent: " + packet.syncId() + " revision: " + packet.revision());
         HandlePackets(packet, ci);
 
         //for (var listener : registeredInteractions) {

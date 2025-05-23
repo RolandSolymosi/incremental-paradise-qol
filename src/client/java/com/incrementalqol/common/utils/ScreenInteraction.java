@@ -5,7 +5,6 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.screen.v1.ScreenEvents;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.ingame.InventoryScreen;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.listener.ClientPlayPacketListener;
@@ -13,6 +12,7 @@ import net.minecraft.network.packet.Packet;
 import net.minecraft.network.packet.c2s.play.*;
 import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.screen.slot.SlotActionType;
+import net.minecraft.screen.sync.ItemStackHash;
 import net.minecraft.util.Pair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -103,11 +103,11 @@ public class ScreenInteraction {
                     }
                 } else {
                     InventoryS2CPacket inventoryPacket = (InventoryS2CPacket) packet;
-                    if (this.actualContent == null || this.actualContent.getLeft() != inventoryPacket.getSyncId()) {
+                    if (this.actualContent == null || this.actualContent.getLeft() != inventoryPacket.syncId()) {
                         var actual = this.actualContent == null ? -1 : this.actualContent.getLeft();
-                        ConfiguredLogger.LogInfo(LOGGER, "[" + name + "]: Read inventory, actual: " + actual + " new: " + inventoryPacket.getSyncId());
-                        if (this.getCurrentStep().contentCondition.test(inventoryPacket.getContents())) {
-                            this.actualContent = new Pair<>(inventoryPacket.getSyncId(), inventoryPacket.getContents());
+                        ConfiguredLogger.LogInfo(LOGGER, "[" + name + "]: Read inventory, actual: " + actual + " new: " + inventoryPacket.syncId());
+                        if (this.getCurrentStep().contentCondition.test(inventoryPacket.contents())) {
+                            this.actualContent = new Pair<>(inventoryPacket.syncId(), inventoryPacket.contents());
                         } else {
                             reset(false, false);
                         }
@@ -160,11 +160,11 @@ public class ScreenInteraction {
             MinecraftClient.getInstance().getNetworkHandler().sendPacket(new ClickSlotC2SPacket(
                     0,
                     0,
-                    45,
-                    0,
+                    (short)45,
+                    (byte)0,
                     SlotActionType.PICKUP,
-                    ItemStack.EMPTY,
-                    new Int2ObjectOpenHashMap<>()
+                    new Int2ObjectOpenHashMap<>(),
+                    ItemStackHash.EMPTY
             ));
         }
         currentStepIndex = 0;
@@ -231,7 +231,7 @@ public class ScreenInteraction {
         }
 
         public static void InventoryPackage(InventoryS2CPacket packet, CallbackInfo ci) {
-            ConfiguredLogger.LogInfo(LOGGER, "[SHARED]: SyncId of Inventory: " + packet.getSyncId());// + " revision: "+packet.getRevision());
+            ConfiguredLogger.LogInfo(LOGGER, "[SHARED]: SyncId of Inventory: " + packet.syncId());// + " revision: "+packet.getRevision());
             MinecraftClient.getInstance().execute(ScreenInteractionManager::ProtectInteraction);
             for (var listener : registeredInteractions) {
                 listener.listen(packet);
@@ -366,7 +366,7 @@ public class ScreenInteraction {
     public static class WellKnownInteractions {
         private static final MinecraftClient client = MinecraftClient.getInstance();
 
-        public static void ClickSlot(int syncId, int slotId, Button button, SlotActionType slotActionType) {
+        public static void ClickSlot(int syncId, short slotId, Button button, SlotActionType slotActionType) {
             if (client.getNetworkHandler() != null) {
                 client.getNetworkHandler().sendPacket(new ClickSlotC2SPacket(
                         syncId,
@@ -374,23 +374,23 @@ public class ScreenInteraction {
                         slotId,
                         button.getNumVal(),
                         slotActionType,
-                        ItemStack.EMPTY,
-                        new Int2ObjectOpenHashMap<>()
+                        new Int2ObjectOpenHashMap<>(),
+                        ItemStackHash.EMPTY
                 ));
             }
         }
 
         public enum Button {
-            Left(0),
-            Right(1);
+            Left((byte)0),
+            Right((byte)1);
 
-            private final int numVal;
+            private final byte numVal;
 
-            Button(int numVal) {
+            Button(byte numVal) {
                 this.numVal = numVal;
             }
 
-            public int getNumVal() {
+            public byte getNumVal() {
                 return numVal;
             }
         }

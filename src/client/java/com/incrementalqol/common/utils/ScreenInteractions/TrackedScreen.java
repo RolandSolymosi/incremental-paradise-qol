@@ -8,6 +8,7 @@ import net.minecraft.network.packet.c2s.play.ClickSlotC2SPacket;
 import net.minecraft.network.packet.s2c.play.InventoryS2CPacket;
 import net.minecraft.network.packet.s2c.play.OpenScreenS2CPacket;
 import net.minecraft.screen.slot.SlotActionType;
+import net.minecraft.screen.sync.ItemStackHash;
 
 import java.util.List;
 
@@ -24,7 +25,7 @@ public class TrackedScreen {
     }
 
     TrackedScreen(InventoryS2CPacket packet){
-        this.syncId = packet.getSyncId();
+        this.syncId = packet.syncId();
         UpdateContent(packet);
     }
 
@@ -33,8 +34,8 @@ public class TrackedScreen {
     }
 
     void UpdateContent(InventoryS2CPacket packet){
-        this.content = packet.getContents();
-        this.revisionId = packet.getRevision();
+        this.content = packet.contents();
+        this.revisionId = packet.revision();
     }
 
     boolean IsComplete() {
@@ -45,7 +46,7 @@ public class TrackedScreen {
         return syncId;
     }
 
-    public void Click(int slotId, Button button){
+    public void Click(short slotId, Button button){
         if (client.getNetworkHandler() != null) {
             client.getNetworkHandler().sendPacket(new ClickSlotC2SPacket(
                     syncId,
@@ -53,23 +54,23 @@ public class TrackedScreen {
                     slotId,
                     button.getNumVal(),
                     SlotActionType.PICKUP,
-                    ItemStack.EMPTY,
-                    new Int2ObjectOpenHashMap<>()
+                    new Int2ObjectOpenHashMap<>(),
+                    ItemStackHash.EMPTY
             ));
         }
     }
 
     public enum Button {
-        Left(0),
-        Right(1);
+        Left((byte)0),
+        Right((byte)1);
 
-        private final int numVal;
+        private final byte numVal;
 
-        Button(int numVal) {
+        Button(byte numVal) {
             this.numVal = numVal;
         }
 
-        public int getNumVal() {
+        public byte getNumVal() {
             return numVal;
         }
     }
