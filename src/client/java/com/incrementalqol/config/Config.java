@@ -16,6 +16,7 @@ import net.minecraft.util.Identifier;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 
 public class Config {
@@ -103,27 +104,92 @@ public class Config {
     @SerialEntry
     public List<NightmareSharpshootingSkill> nightmareSharpshootingSkills = new ArrayList<>();
 
+    public static class Overrides {
+        @SerialEntry
+        private String warp;
+        @SerialEntry
+        private String wardrobe;
+        @SerialEntry
+        private String pet;
+
+        public Overrides() {
+            this.warp = "";
+            this.wardrobe = "";
+            this.pet = "";
+        }
+
+        public String getWarp() {
+            return warp;
+        }
+
+        public void setWarp(String warp) {
+            this.warp = warp;
+        }
+
+        public String getWardrobe() {
+            return wardrobe;
+        }
+
+        public void setWardrobe(String wardrobe) {
+            this.wardrobe = wardrobe;
+        }
+
+        public String getPet() {
+            return pet;
+        }
+
+        public void setPet(String pet) {
+            this.pet = pet;
+        }
+    }
+
+    @SerialEntry
+    public HashMap<TaskCollection.TaskTarget, Overrides> taskOverrides = new HashMap<>();
+
     public String getWardrobeNameToDefault(TaskCollection.TaskType defaultWardrobe) {
         return switch (defaultWardrobe) {
-            case TaskCollection.TaskType.Combat -> combatWardrobeName;
-            case TaskCollection.TaskType.Mining -> miningWardrobeName;
-            case TaskCollection.TaskType.Foraging -> foragingWardrobeName;
-            case TaskCollection.TaskType.Farming -> farmingWardrobeName;
-            case TaskCollection.TaskType.Fishing -> fishingWardrobeName;
-            case TaskCollection.TaskType.CombatFishing -> combatFishingWardrobeName;
+            case Combat -> combatWardrobeName;
+            case Mining -> miningWardrobeName;
+            case Foraging -> foragingWardrobeName;
+            case Farming -> farmingWardrobeName;
+            case Fishing -> fishingWardrobeName;
+            case CombatFishing -> combatFishingWardrobeName;
             default -> defaultWardrobe.getString();
         };
     }
 
     public int getSlotToDefault(ToolType defaultToolType) {
         return switch (defaultToolType) {
-            case ToolType.Melee -> meleeWeaponSlot;
-            case ToolType.Pickaxe -> miningWeaponSlot;
-            case ToolType.Axe -> foragingWeaponSlot;
-            case ToolType.Hoe -> farmingWeaponSlot;
-            case ToolType.FishingRod -> fishingWeaponSlot;
-            case ToolType.Bow -> rangedWeaponSlot;
+            case Melee -> meleeWeaponSlot;
+            case Pickaxe -> miningWeaponSlot;
+            case Axe -> foragingWeaponSlot;
+            case Hoe -> farmingWeaponSlot;
+            case FishingRod -> fishingWeaponSlot;
+            case Bow -> rangedWeaponSlot;
         };
+    }
+
+    public String getTaskOverrideWarp(TaskCollection.TaskTarget taskTarget) {
+        return taskOverrides.computeIfAbsent(taskTarget, k -> new Overrides()).getWarp();
+    }
+    public void setTaskOverrideWarp(TaskCollection.TaskTarget taskTarget, String warp) {
+        taskOverrides.computeIfAbsent(taskTarget, k -> new Overrides()).setWarp(warp);
+    }
+
+    public String getTaskOverrideWardrobe(TaskCollection.TaskTarget taskTarget) {
+        return taskOverrides.computeIfAbsent(taskTarget, k -> new Overrides()).getWardrobe();
+    }
+
+    public void setTaskOverrideWardrobe(TaskCollection.TaskTarget taskTarget, String wardrobe) {
+        taskOverrides.computeIfAbsent(taskTarget, k -> new Overrides()).setWardrobe(wardrobe);
+    }
+
+    public String getTaskOverridePet(TaskCollection.TaskTarget taskTarget) {
+        return taskOverrides.computeIfAbsent(taskTarget, k -> new Overrides()).getPet();
+    }
+
+    public void setTaskOverridePet(TaskCollection.TaskTarget taskTarget, String pet) {
+        taskOverrides.computeIfAbsent(taskTarget, k -> new Overrides()).setPet(pet);
     }
 
     public static ConfigClassHandler<Config> HANDLER = ConfigClassHandler.createBuilder(Config.class)
@@ -141,6 +207,7 @@ public class Config {
                 .categories(Arrays.asList(
                         TaskCategory(),
                         SkillLeveling(),
+                        TaskOverride(),
                         Others(),
                         Debug())
                 )
@@ -428,6 +495,44 @@ public class Config {
                         .initial(NightmareSharpshootingSkill.PeaShooter)
                         .collapsed(true)
                         .build())
+                .build();
+    }
+
+    public ConfigCategory TaskOverride() {
+        var builder = ConfigCategory.createBuilder()
+                .name(Text.of("Task override"))
+                .tooltip(Text.of("This category allows you to override warps and wardrobes for tasks"));
+
+        for (TaskCollection.TaskTarget taskTarget : TaskCollection.TaskTarget.values())
+        {
+            builder.group(GetTaskTargetGroup(taskTarget));
+        }
+        return builder.build();
+    }
+
+    public OptionGroup GetTaskTargetGroup(TaskCollection.TaskTarget taskTarget) {
+        String enumName = String.join(" ", taskTarget.name().split("(?<=[a-z])(?=[A-Z0-9])|(?<=[A-Z])(?=[A-Z][a-z])|(?<=[0-9])(?=[A-Za-z])"));
+        return OptionGroup.createBuilder()
+                .name(Text.of(enumName + " task override"))
+                .option(Option.<String>createBuilder()
+                        .name(Text.of(enumName + " warp override"))
+                        .description(OptionDescription.of(Text.of("Which warp to go to instead")))
+                        .binding("", () -> this.getTaskOverrideWarp(taskTarget), newVal -> this.setTaskOverrideWarp(taskTarget, newVal))
+                        .controller(StringControllerBuilder::create)
+                        .build())
+                .option(Option.<String>createBuilder()
+                        .name(Text.of(enumName + " wardrobe override"))
+                        .description(OptionDescription.of(Text.of("Which wardrobe to use instead")))
+                        .binding("", () -> this.getTaskOverrideWardrobe(taskTarget), newVal -> this.setTaskOverrideWardrobe(taskTarget, newVal))
+                        .controller(StringControllerBuilder::create)
+                        .build())
+                .option(Option.<String>createBuilder()
+                        .name(Text.of(enumName + " pet override"))
+                        .description(OptionDescription.of(Text.of("Which pet to use")))
+                        .binding("", () -> this.getTaskOverridePet(taskTarget), newVal -> this.setTaskOverridePet(taskTarget, newVal))
+                        .controller(StringControllerBuilder::create)
+                        .build())
+                .collapsed(true)
                 .build();
     }
 

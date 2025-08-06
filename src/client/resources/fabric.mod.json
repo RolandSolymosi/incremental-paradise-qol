@@ -1,20 +1,22 @@
 {
 	"schemaVersion": 1,
 	"id": "incremental-paradise-qol",
-	"version": "${version}",
+	"version": "2.2.1",
 	"name": "Incremental Paradise QoL",
 	"description": "A bunch of handy tweaks and additions for the Incremental Paradise server. Client-side only.",
 	"authors": [
 		"AlvinTheFox",
 		"Jeremyrab",
 		"Johulk",
-		"Razorspined"
+		"Razorspined",
+		"AlvinTheFox",
+		"Jeremyrab"
 	],
 	"contact": {
 		"sources": "https://github.com/quadro313/incremental-paradise-qol"
 	},
 	"license": "CC0-1.0",
-	"icon": "template-mod/icon.png",
+	"icon": "icon/pack.png",
 	"environment": "client",
 	"entrypoints": {
 		"client": [

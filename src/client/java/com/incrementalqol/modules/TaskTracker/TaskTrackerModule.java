@@ -283,7 +283,12 @@ public class TaskTrackerModule implements ClientModInitializer {
                     if (activeWarp.compareAndSet(null, task)) {
                         if (task.descriptor != null) {
                             if (Config.HANDLER.instance().getAutoSwapWardrobe() && task.descriptor.getDefaultWardrobe() != null) {
-                                MinecraftClient.getInstance().player.networkHandler.sendCommand("wardrobe " + config.getWardrobeNameToDefault(task.descriptor.getDefaultWardrobe()));
+                                ConfiguredLogger.LogInfo(LOGGER, "wardrobe " + task.getWardrobe());
+                                MinecraftClient.getInstance().player.networkHandler.sendCommand("wardrobe " + task.getWardrobe());
+                                String petOverride = task.getPet();
+                                if (!Objects.equals(petOverride, "")) {
+                                    MinecraftClient.getInstance().player.networkHandler.sendCommand("pet " + petOverride);
+                                }
                             }
                             if (Config.HANDLER.instance().getAutoSwapTools() && task.descriptor.getDefaultHotBarSlot() != null) {
                                 var slotId = config.getSlotToDefault(task.descriptor.getDefaultHotBarSlot());

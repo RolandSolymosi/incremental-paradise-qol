@@ -2,14 +2,17 @@ package com.incrementalqol.modules.TaskTracker;
 
 import com.incrementalqol.common.data.TaskCollection;
 import com.incrementalqol.common.utils.ConfiguredLogger;
-import com.incrementalqol.modules.SkillManager.AutoSkillModule;
+import com.incrementalqol.config.Config;
 import net.minecraft.client.gui.hud.ClientBossBar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import static com.incrementalqol.common.data.TaskCollection.TryGetTaskTarget;
 
 public class Task {
     public static final Logger LOGGER = LoggerFactory.getLogger(Task.class);
@@ -165,10 +168,22 @@ public class Task {
     }
 
     public String getWarp() {
-        if (this.descriptor != null) {
+        String result = Config.HANDLER.instance().getTaskOverrideWarp(TryGetTaskTarget(this.taskTarget));
+        if (!Objects.equals(result, "")) {
+            return "warp " + result;
+        } else if (this.descriptor != null) {
             return this.descriptor.getCommand();
         }
         return null;
+    }
+
+    public String getWardrobe() {
+        String result = Config.HANDLER.instance().getTaskOverrideWardrobe(TryGetTaskTarget(this.taskTarget));
+        return !Objects.equals(result, "") ? result : Config.HANDLER.instance().getWardrobeNameToDefault(this.descriptor.getDefaultWardrobe());
+    }
+
+    public String getPet() {
+        return Config.HANDLER.instance().getTaskOverridePet(TryGetTaskTarget(this.taskTarget));
     }
 
     public String getFallbackWarp(int index) {
