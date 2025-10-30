@@ -34,7 +34,11 @@ public class Config {
 
 
     @SerialEntry
-    private boolean hudBackground;
+    private boolean isHudEnabled = true;
+    @SerialEntry
+    private boolean isHudDisabledDuringBossFight;
+    @SerialEntry
+    private double hudBackgroundOpacity = 0.3;
     @SerialEntry
     private int hudPosX;
     @SerialEntry
@@ -49,6 +53,8 @@ public class Config {
     private boolean autoSwapTools;
     @SerialEntry
     private boolean autoLevelUp;
+    @SerialEntry
+    private boolean warpOnAutoLevelUp = true;
 
     @SerialEntry
     private String combatWardrobeName = "1";
@@ -89,7 +95,9 @@ public class Config {
     @SerialEntry
     public List<NormalSpearFishingSkill> normalSpearFishingSkills = new ArrayList<>();
     @SerialEntry
-    public List<NormalSharpshootingSkill> normalSharpshootingSkills = new ArrayList<>();
+    public List<NormalSharpshootingSkill>  normalSharpshootingSkills = new ArrayList<>();
+    @SerialEntry
+    public List<NormalExcavationSkill>  normalExcavationSkills = new ArrayList<>();
 
     @SerialEntry
     public List<NightmareCombatSkill> nightmareCombatSkills = new ArrayList<>();
@@ -223,10 +231,22 @@ public class Config {
                         .name(Text.of("Task HUD configuration"))
                         .description(OptionDescription.of(Text.of("These are the basic overrides of task categories.")))
                         .option(Option.<Boolean>createBuilder()
-                                .name(Text.of("Toggle HUD background"))
-                                .description(OptionDescription.of(Text.of("Turn on and off the gray background of the task HUD.")))
-                                .binding(true, () -> this.hudBackground, newVal -> this.hudBackground = newVal)
+                                .name(Text.of("Toggle HUD on and off"))
+                                .description(OptionDescription.of(Text.of("Turn on and off the task HUD.")))
+                                .binding(true, () -> this.isHudEnabled, newVal -> this.isHudEnabled = newVal)
                                 .controller(BooleanControllerBuilder::create)
+                                .build())
+                        .option(Option.<Boolean>createBuilder()
+                                .name(Text.of("Turn off HUD during boss fights"))
+                                .description(OptionDescription.of(Text.of("Hides the task HUD during boss fights.")))
+                                .binding(false, () -> this.isHudDisabledDuringBossFight, newVal -> this.isHudDisabledDuringBossFight = newVal)
+                                .controller(BooleanControllerBuilder::create)
+                                .build())
+                        .option(Option.<Double>createBuilder()
+                                .name(Text.of("Task HUD background opacity"))
+                                .description(OptionDescription.of(Text.of("Set the opacity of the HUD background.")))
+                                .binding(0.3, () -> this.hudBackgroundOpacity, newVal -> this.hudBackgroundOpacity = newVal)
+                                .controller(o -> DoubleSliderControllerBuilder.create(o).step(0.01).range(0.0, 1.0))
                                 .build())
                         .option(Option.<Boolean>createBuilder()
                                 .name(Text.of("Order Tasks by Type"))
@@ -247,12 +267,18 @@ public class Config {
                                 .build())
                         .build())
                 .group(OptionGroup.createBuilder()
-                        .name(Text.of("Task Warp extras"))
+                        .name(Text.of("Task Warp Extras"))
                         .description(OptionDescription.of(Text.of("These are some extra functions for Task Warp.")))
                         .option(Option.<Boolean>createBuilder()
                                 .name(Text.of("Toggle Auto LevelUp"))
                                 .description(OptionDescription.of(Text.of("Turn on and off auto LevelUp when no task remained when using Next Warp.")))
                                 .binding(false, () -> this.autoLevelUp, newVal -> this.autoLevelUp = newVal)
+                                .controller(BooleanControllerBuilder::create)
+                                .build())
+                        .option(Option.<Boolean>createBuilder()
+                                .name(Text.of("Warp On Auto LevelUp"))
+                                .description(OptionDescription.of(Text.of("Turn on and off if you warp on auto LevelUp")))
+                                .binding(true, () -> this.warpOnAutoLevelUp, newVal -> this.warpOnAutoLevelUp = newVal)
                                 .controller(BooleanControllerBuilder::create)
                                 .build())
                         .build())
@@ -262,7 +288,7 @@ public class Config {
                         .option(Option.<Boolean>createBuilder()
                                 .name(Text.of("Toggle the Auto Swap of Wardrobe"))
                                 .description(OptionDescription.of(Text.of("Turning on/off the auto swap of wardrobes functionality")))
-                                .binding(true, () -> this.autoSwapWardrobe, newVal -> this.autoSwapWardrobe = newVal)
+                                .binding(false, () -> this.autoSwapWardrobe, newVal -> this.autoSwapWardrobe = newVal)
                                 .controller(BooleanControllerBuilder::create)
                                 .build())
                         .option(Option.<String>createBuilder()
@@ -308,7 +334,7 @@ public class Config {
                         .option(Option.<Boolean>createBuilder()
                                 .name(Text.of("Toggle the Auto Swap of Tools"))
                                 .description(OptionDescription.of(Text.of("Turning on/off the auto swap of tools functionality")))
-                                .binding(true, () -> this.autoSwapTools, newVal -> this.autoSwapTools = newVal)
+                                .binding(false, () -> this.autoSwapTools, newVal -> this.autoSwapTools = newVal)
                                 .controller(BooleanControllerBuilder::create)
                                 .build())
                         .option(Option.<Integer>createBuilder()
@@ -426,6 +452,17 @@ public class Config {
                                 .formatValue(NormalSharpshootingSkill::getDisplayName)
                         )
                         .initial(NormalSharpshootingSkill.ExplosiveArrow)
+                        .collapsed(true)
+                        .build())
+                .group(ListOption.<NormalExcavationSkill>createBuilder()
+                        .name(Text.of("Excavation [Normal]"))
+                        .binding(this.normalExcavationSkills, () -> this.normalExcavationSkills, newVal -> this.normalExcavationSkills = newVal)
+                        .description(OptionDescription.of(Text.of("The sharpshooting skill level up order in Normal World.")))
+                        .insertEntriesAtEnd(true)
+                        .controller(o -> EnumDropdownControllerBuilder.create(o)
+                                .formatValue(NormalExcavationSkill::getDisplayName)
+                        )
+                        .initial(NormalExcavationSkill.SeismicResonance)
                         .collapsed(true)
                         .build())
                 // Nightmare section
@@ -559,7 +596,7 @@ public class Config {
                         .option(Option.<Boolean>createBuilder()
                                 .name(Text.of("Toggle global logging"))
                                 .description(OptionDescription.of(Text.of("Turn on and off the logging in the mod on all feature.")))
-                                .binding(true, () -> this.loggingEnabled, newVal -> this.loggingEnabled = newVal)
+                                .binding(false, () -> this.loggingEnabled, newVal -> this.loggingEnabled = newVal)
                                 .controller(BooleanControllerBuilder::create)
                                 .build())
                         .build())
@@ -574,6 +611,10 @@ public class Config {
         return loggingEnabled;
     }
 
+    public boolean getIsHudEnabled() { return isHudEnabled; }
+
+    public boolean getIsHudDisabledDuringBossFight() { return isHudDisabledDuringBossFight; }
+
     public int getHudPosX() {
         return hudPosX;
     }
@@ -582,8 +623,8 @@ public class Config {
         return hudPosY;
     }
 
-    public boolean getHudBackground() {
-        return hudBackground;
+    public int getHudBackgroundOpacity() {
+        return (int) (hudBackgroundOpacity * 255);
     }
 
     public double getHudScale() {
@@ -608,6 +649,10 @@ public class Config {
 
     public boolean getAutoLevelUp() {
         return autoLevelUp;
+    }
+
+    public boolean getWarpOnAutoLevelUp() {
+        return warpOnAutoLevelUp;
     }
 
     public void setHudPosX(int hudPosX) {

@@ -1,5 +1,7 @@
 package com.incrementalqol.common.data;
 
+import com.incrementalqol.modules.TaskTracker.Task;
+
 import java.util.*;
 
 public class TaskCollection {
@@ -28,6 +30,7 @@ public class TaskCollection {
         TaskDescriptors.put(TaskTarget.Potato, new TaskDescriptor(TaskType.Farming, "potato", new ArrayList<>(List.of("w1")), TaskType.Farming, ToolType.Hoe));
         TaskDescriptors.put(TaskTarget.Beetroot, new TaskDescriptor(TaskType.Farming, "beetroot", new ArrayList<>(List.of("w1")), TaskType.Farming, ToolType.Hoe));
         TaskDescriptors.put(TaskTarget.Honeycomb, new TaskDescriptor(TaskType.Farming, "w1", new ArrayList<>(List.of("w1")), TaskType.Farming, ToolType.Hoe));
+        TaskDescriptors.put(TaskTarget.Crops, new TaskDescriptor(TaskType.Farming, "carrot", new ArrayList<>(List.of("w1")), TaskType.Farming, ToolType.Hoe));
         TaskDescriptors.put(TaskTarget.Riverfish, new TaskDescriptor(TaskType.Fishing, "carrot", new ArrayList<>(List.of("w1")), TaskType.Fishing, ToolType.FishingRod));
         TaskDescriptors.put(TaskTarget.Crab, new TaskDescriptor(TaskType.Fishing, "wheat", new ArrayList<>(List.of("w1")), TaskType.CombatFishing, ToolType.FishingRod));
         TaskDescriptors.put(TaskTarget.HermitCrab, new TaskDescriptor(TaskType.Fishing, "crab", new ArrayList<>(List.of("w1")), TaskType.CombatFishing, ToolType.FishingRod));
@@ -57,10 +60,10 @@ public class TaskCollection {
         TaskDescriptors.put(TaskTarget.CaveCrawler, new TaskDescriptor(TaskType.Combat, "lush", new ArrayList<>(List.of("w2")), TaskType.Combat, ToolType.Bow));
         TaskDescriptors.put(TaskTarget.PoisonSlime, new TaskDescriptor(TaskType.Combat, "lush", new ArrayList<>(List.of("w2")), TaskType.Combat, ToolType.Melee));
         TaskDescriptors.put(TaskTarget.Spotter, new TaskDescriptor(TaskType.Combat, "veil", new ArrayList<>(List.of("lush", "w2")), TaskType.Combat, ToolType.Melee));
-        TaskDescriptors.put(TaskTarget.Verdemite, new TaskDescriptor(TaskType.Combat, "veil", new ArrayList<>(List.of("lush", "w2")), TaskType.Combat, ToolType.Melee));
+        TaskDescriptors.put(TaskTarget.Verdemite, new TaskDescriptor(TaskType.Combat, "veil", new ArrayList<>(List.of("lush", "w2")), TaskType.Combat, ToolType.Pickaxe));
         TaskDescriptors.put(TaskTarget.Endermen, new TaskDescriptor(TaskType.Combat, "veil", new ArrayList<>(List.of("lush", "w2")), TaskType.Combat, ToolType.Melee));
-        TaskDescriptors.put(TaskTarget.Ghast, new TaskDescriptor(TaskType.Combat, "infernal", new ArrayList<>(List.of("veil", "lush", "w2")), TaskType.Combat, ToolType.Melee));
-        TaskDescriptors.put(TaskTarget.GhastSoul, new TaskDescriptor(TaskType.Combat, "infernal", new ArrayList<>(List.of("veil", "lush", "w2")), TaskType.Combat, ToolType.Melee));
+        TaskDescriptors.put(TaskTarget.Ghast, new TaskDescriptor(TaskType.Combat, "infernal", new ArrayList<>(List.of("veil", "lush", "w2")), TaskType.Combat, ToolType.Bow));
+        TaskDescriptors.put(TaskTarget.GhastSoul, new TaskDescriptor(TaskType.Combat, "infernal", new ArrayList<>(List.of("veil", "lush", "w2")), TaskType.Combat, ToolType.Bow));
         TaskDescriptors.put(TaskTarget.Blaze, new TaskDescriptor(TaskType.Combat, "infernal", new ArrayList<>(List.of("veil", "lush", "w2")), TaskType.Combat, ToolType.Melee));
         TaskDescriptors.put(TaskTarget.Nrub, new TaskDescriptor(TaskType.Combat, "infernal", new ArrayList<>(List.of("veil", "lush", "w2")), TaskType.Combat, ToolType.Melee));
         TaskDescriptors.put(TaskTarget.InfernalImp, new TaskDescriptor(TaskType.Combat, "infernal", new ArrayList<>(List.of("veil", "lush", "w2")), TaskType.Combat, ToolType.Melee));
@@ -109,6 +112,7 @@ public class TaskCollection {
         TaskDescriptors.put(TaskTarget.RoyalGuard, new TaskDescriptor(TaskType.Combat, "topside", new ArrayList<>(List.of("w3")), TaskType.Combat, ToolType.Melee));
         TaskDescriptors.put(TaskTarget.Breeze, new TaskDescriptor(TaskType.Combat, "mines3", new ArrayList<>(List.of("w3")), TaskType.Combat, ToolType.Melee));
         TaskDescriptors.put(TaskTarget.DireWolf, new TaskDescriptor(TaskType.Combat, "canine", new ArrayList<>(List.of("w3")), TaskType.Combat, ToolType.Melee));
+        TaskDescriptors.put(TaskTarget.Dreadhorn, new TaskDescriptor(TaskType.Combat, "dreadhorn", new ArrayList<>(List.of("canine", "w3")), TaskType.Combat, ToolType.Melee));
         TaskDescriptors.put(TaskTarget.W3Elite, new TaskDescriptor(TaskType.Combat, "topside", new ArrayList<>(List.of("w3")), TaskType.Combat, ToolType.Melee));
         TaskDescriptors.put(TaskTarget.Oinky, new TaskDescriptor(TaskType.Farming, "sty", new ArrayList<>(List.of("w3")), TaskType.Farming, ToolType.Hoe));
         TaskDescriptors.put(TaskTarget.Cattail, new TaskDescriptor(TaskType.Farming, "beach", new ArrayList<>(List.of("w3")), TaskType.Farming, ToolType.Hoe));
@@ -119,6 +123,47 @@ public class TaskCollection {
         TaskDescriptors.put(TaskTarget.Soarfish, new TaskDescriptor(TaskType.Fishing, "beach", new ArrayList<>(List.of("w3")), TaskType.Fishing, ToolType.FishingRod));
         TaskDescriptors.put(TaskTarget.Guardian, new TaskDescriptor(TaskType.Fishing, "underside", new ArrayList<>(List.of("w3")), TaskType.CombatFishing, ToolType.FishingRod));
         TaskDescriptors.put(TaskTarget.Matcher, new TaskDescriptor(TaskType.Gaming, "matcher", new ArrayList<>(List.of("matcher")), null, null));
+
+        // World 4
+        TaskDescriptors.put(TaskTarget.Cheddore, new TaskDescriptor(TaskType.Mining, "w4", new ArrayList<>(List.of("w4")), TaskType.Mining, ToolType.Pickaxe));
+        TaskDescriptors.put(TaskTarget.BlueCheese, new TaskDescriptor(TaskType.Mining, "w4", new ArrayList<>(List.of("w4")), TaskType.Mining, ToolType.Pickaxe));
+        TaskDescriptors.put(TaskTarget.Glowdust, new TaskDescriptor(TaskType.Mining, "beta", new ArrayList<>(List.of("beta")), TaskType.Mining, ToolType.Pickaxe));
+        TaskDescriptors.put(TaskTarget.Slimecrust, new TaskDescriptor(TaskType.Mining, "beta", new ArrayList<>(List.of("beta")), TaskType.Mining, ToolType.Pickaxe));
+        TaskDescriptors.put(TaskTarget.Voidshard, new TaskDescriptor(TaskType.Mining, "beta", new ArrayList<>(List.of("beta")), TaskType.Mining, ToolType.Pickaxe));
+        TaskDescriptors.put(TaskTarget.NestingWood, new TaskDescriptor(TaskType.Foraging, "w4", new ArrayList<>(List.of("w4")), TaskType.Foraging, ToolType.Axe));
+        TaskDescriptors.put(TaskTarget.Passionfruit, new TaskDescriptor(TaskType.Foraging, "w4", new ArrayList<>(List.of("w4")), TaskType.Foraging, ToolType.Axe));
+        TaskDescriptors.put(TaskTarget.Cryoflora, new TaskDescriptor(TaskType.Foraging, "alpha", new ArrayList<>(List.of("alpha")), TaskType.Foraging, ToolType.Axe));
+        TaskDescriptors.put(TaskTarget.Chillfruit, new TaskDescriptor(TaskType.Foraging, "alpha", new ArrayList<>(List.of("alpha")), TaskType.Foraging, ToolType.Axe));
+        TaskDescriptors.put(TaskTarget.Sulphoroot, new TaskDescriptor(TaskType.Foraging, "alpha", new ArrayList<>(List.of("alpha")), TaskType.Foraging, ToolType.Axe));
+        TaskDescriptors.put(TaskTarget.Jackfruit, new TaskDescriptor(TaskType.Foraging, "alpha", new ArrayList<>(List.of("alpha")), TaskType.Foraging, ToolType.Axe));
+        TaskDescriptors.put(TaskTarget.Pyrospire, new TaskDescriptor(TaskType.Foraging, "alpha", new ArrayList<>(List.of("alpha")), TaskType.Foraging, ToolType.Axe));
+        TaskDescriptors.put(TaskTarget.Scorchberry, new TaskDescriptor(TaskType.Foraging, "alpha", new ArrayList<>(List.of("alpha")), TaskType.Foraging, ToolType.Axe));
+        TaskDescriptors.put(TaskTarget.ThornBeetle, new TaskDescriptor(TaskType.Foraging, "alpha", new ArrayList<>(List.of("alpha")), TaskType.Foraging, ToolType.Axe));
+        TaskDescriptors.put(TaskTarget.Worm, new TaskDescriptor(TaskType.Foraging, "alpha", new ArrayList<>(List.of("alpha")), TaskType.Foraging, ToolType.Axe));
+        TaskDescriptors.put(TaskTarget.Bat, new TaskDescriptor(TaskType.Combat, "w4", new ArrayList<>(List.of("w4")), TaskType.Combat, ToolType.Bow));
+        TaskDescriptors.put(TaskTarget.Rat, new TaskDescriptor(TaskType.Combat, "sewer", new ArrayList<>(List.of("w4")), TaskType.Combat, ToolType.Melee));
+        TaskDescriptors.put(TaskTarget.Rattus, new TaskDescriptor(TaskType.Combat, "rattus", new ArrayList<>(List.of("w4")), TaskType.Combat, ToolType.Melee));
+        TaskDescriptors.put(TaskTarget.Frog, new TaskDescriptor(TaskType.Combat, "alpha", new ArrayList<>(List.of("alpha")), TaskType.Combat, ToolType.Melee));
+        TaskDescriptors.put(TaskTarget.Sniper, new TaskDescriptor(TaskType.Combat, "beta", new ArrayList<>(List.of("beta")), TaskType.Combat, ToolType.Bow));
+        TaskDescriptors.put(TaskTarget.AngryMiner, new TaskDescriptor(TaskType.Combat, "beta", new ArrayList<>(List.of("beta")), TaskType.Combat, ToolType.Melee));
+        TaskDescriptors.put(TaskTarget.Ravager, new TaskDescriptor(TaskType.Combat, "beta", new ArrayList<>(List.of("beta")), TaskType.Combat, ToolType.Melee));
+        TaskDescriptors.put(TaskTarget.W4Elite, new TaskDescriptor(TaskType.Combat, "alpha", new ArrayList<>(List.of("w4")), TaskType.Combat, ToolType.Melee));
+        TaskDescriptors.put(TaskTarget.Grasshopper, new TaskDescriptor(TaskType.Farming, "w4", new ArrayList<>(List.of("w4")), TaskType.Farming, ToolType.Hoe));
+        TaskDescriptors.put(TaskTarget.Astromold, new TaskDescriptor(TaskType.Farming, "w4", new ArrayList<>(List.of("w4")), TaskType.Farming, ToolType.Hoe));
+        TaskDescriptors.put(TaskTarget.Astromite, new TaskDescriptor(TaskType.Farming, "w4", new ArrayList<>(List.of("w4")), TaskType.Farming, ToolType.Hoe));
+        TaskDescriptors.put(TaskTarget.Magmold, new TaskDescriptor(TaskType.Farming, "w4", new ArrayList<>(List.of("w4")), TaskType.Farming, ToolType.Hoe));
+        TaskDescriptors.put(TaskTarget.Algae, new TaskDescriptor(TaskType.Farming, "alpha", new ArrayList<>(List.of("alpha")), TaskType.Farming, ToolType.Hoe));
+        TaskDescriptors.put(TaskTarget.BoomShroom, new TaskDescriptor(TaskType.Farming, "alpha", new ArrayList<>(List.of("alpha")), TaskType.Farming, ToolType.Hoe));
+        TaskDescriptors.put(TaskTarget.Pearl, new TaskDescriptor(TaskType.Farming, "delta", new ArrayList<>(List.of("delta")), TaskType.Farming, ToolType.Hoe));
+        TaskDescriptors.put(TaskTarget.Cat, new TaskDescriptor(TaskType.Fishing, "sewer", new ArrayList<>(List.of("w4")), TaskType.CombatFishing, ToolType.FishingRod));
+        TaskDescriptors.put(TaskTarget.Catfish, new TaskDescriptor(TaskType.Fishing, "sewer", new ArrayList<>(List.of("w4")), TaskType.Fishing, ToolType.FishingRod));
+        TaskDescriptors.put(TaskTarget.Piranha, new TaskDescriptor(TaskType.Fishing, "alpha", new ArrayList<>(List.of("alpha")), TaskType.Fishing, ToolType.FishingRod));
+        TaskDescriptors.put(TaskTarget.Clownfish, new TaskDescriptor(TaskType.Fishing, "delta", new ArrayList<>(List.of("delta")), TaskType.Fishing, ToolType.FishingRod));
+        TaskDescriptors.put(TaskTarget.Cichild, new TaskDescriptor(TaskType.Fishing, "delta", new ArrayList<>(List.of("delta")), TaskType.Fishing, ToolType.FishingRod));
+        TaskDescriptors.put(TaskTarget.Parrotfish, new TaskDescriptor(TaskType.Fishing, "delta", new ArrayList<>(List.of("delta")), TaskType.Fishing, ToolType.FishingRod));
+        TaskDescriptors.put(TaskTarget.RedEmperor, new TaskDescriptor(TaskType.Fishing, "delta", new ArrayList<>(List.of("delta")), TaskType.Fishing, ToolType.FishingRod));
+        TaskDescriptors.put(TaskTarget.Pufferfish, new TaskDescriptor(TaskType.Fishing, "delta", new ArrayList<>(List.of("delta")), TaskType.CombatFishing, ToolType.FishingRod));
+        TaskDescriptors.put(TaskTarget.SewerChest, new TaskDescriptor(TaskType.Combat, "sewer", new ArrayList<>(List.of("w4")), null, null));
 
         // World Nightmare 1
         TaskDescriptors.put(TaskTarget.Quartz, new TaskDescriptor(TaskType.Mining, "quartz", new ArrayList<>(List.of("n1")), TaskType.Mining, ToolType.Pickaxe));
@@ -131,15 +176,15 @@ public class TaskCollection {
         TaskDescriptors.put(TaskTarget.Cheruza, new TaskDescriptor(TaskType.Foraging, "decay", new ArrayList<>(List.of("n1")), TaskType.Foraging, ToolType.Axe));
         TaskDescriptors.put(TaskTarget.Winkle, new TaskDescriptor(TaskType.Foraging, "decay", new ArrayList<>(List.of("n1")), TaskType.Foraging, ToolType.Axe));
         TaskDescriptors.put(TaskTarget.Piglin, new TaskDescriptor(TaskType.Combat, "n1", new ArrayList<>(List.of("n1")), TaskType.Combat, ToolType.Melee));
-        TaskDescriptors.put(TaskTarget.Bamboodle, new TaskDescriptor(TaskType.Combat, "bamboodle", new ArrayList<>(List.of("zoglin","n1")), TaskType.Combat, ToolType.Bow));
+        TaskDescriptors.put(TaskTarget.Bamboodle, new TaskDescriptor(TaskType.Combat, "bamboodle", new ArrayList<>(List.of("zoglin","decay","n1")), TaskType.Combat, ToolType.Bow));
         TaskDescriptors.put(TaskTarget.Firefox, new TaskDescriptor(TaskType.Combat, "firefox", new ArrayList<>(List.of("n1")), TaskType.Combat, ToolType.Bow));
         TaskDescriptors.put(TaskTarget.Marshmallow, new TaskDescriptor(TaskType.Combat, "zoglin", new ArrayList<>(List.of("decay","n1")), TaskType.Combat, ToolType.Bow));
         TaskDescriptors.put(TaskTarget.N1Elite, new TaskDescriptor(TaskType.Combat, "decay", new ArrayList<>(List.of("n1")), TaskType.Combat, ToolType.Melee));
-        TaskDescriptors.put(TaskTarget.Zoglin, new TaskDescriptor(TaskType.Combat, "zoglin", new ArrayList<>(List.of("bamboodle","n1")), TaskType.Combat, ToolType.Melee));
+        TaskDescriptors.put(TaskTarget.Zoglin, new TaskDescriptor(TaskType.Combat, "zoglin", new ArrayList<>(List.of("bamboodle","decay","n1")), TaskType.Combat, ToolType.Melee));
         TaskDescriptors.put(TaskTarget.Decay, new TaskDescriptor(TaskType.Farming, "decay", new ArrayList<>(List.of("n1")), TaskType.Farming, ToolType.Hoe));
         TaskDescriptors.put(TaskTarget.IcebergLettuceOrTorchFlower, new TaskDescriptor(TaskType.Farming, "torch", new ArrayList<>(List.of("n1")), TaskType.Farming, ToolType.Hoe));
         TaskDescriptors.put(TaskTarget.Mandrake, new TaskDescriptor(TaskType.Farming, "mandrake", new ArrayList<>(List.of("n1")), TaskType.Farming, ToolType.Hoe));
-        TaskDescriptors.put(TaskTarget.Splinterseed, new TaskDescriptor(TaskType.Farming, "splinter", new ArrayList<>(List.of("n1")), TaskType.Farming, ToolType.Hoe));
+        TaskDescriptors.put(TaskTarget.Splinterseed, new TaskDescriptor(TaskType.Farming, "splinter", new ArrayList<>(List.of("stable","n1")), TaskType.Farming, ToolType.Hoe));
         TaskDescriptors.put(TaskTarget.Charred, new TaskDescriptor(TaskType.Fishing, "decay", new ArrayList<>(List.of("n1")), TaskType.Fishing, ToolType.FishingRod));
         TaskDescriptors.put(TaskTarget.SmokedSalmon, new TaskDescriptor(TaskType.Fishing, "decay", new ArrayList<>(List.of("n1")), TaskType.Fishing, ToolType.FishingRod));
         TaskDescriptors.put(TaskTarget.Strider, new TaskDescriptor(TaskType.Fishing, "n1", new ArrayList<>(List.of("n1")), TaskType.CombatFishing, ToolType.FishingRod));
@@ -176,6 +221,7 @@ public class TaskCollection {
         TaskMap.put("potatoes", TaskTarget.Potato);
         TaskMap.put("beetroot", TaskTarget.Beetroot);
         TaskMap.put("honeycomb", TaskTarget.Honeycomb);
+        TaskMap.put("crops", TaskTarget.Crops);
         TaskMap.put("riverfish", TaskTarget.Riverfish);
         TaskMap.put("fish", TaskTarget.ConsecutiveFish);
         TaskMap.put("crabs", TaskTarget.Crab);
@@ -257,6 +303,7 @@ public class TaskCollection {
         TaskMap.put("royal guards", TaskTarget.RoyalGuard);
         TaskMap.put("breezes", TaskTarget.Breeze);
         TaskMap.put("dire wolves", TaskTarget.DireWolf);
+        TaskMap.put("dreadhorn", TaskTarget.Dreadhorn);
         TaskMap.put("elite mobs in world #3", TaskTarget.W3Elite);
         TaskMap.put("oinky", TaskTarget.Oinky);
         TaskMap.put("cattails", TaskTarget.Cattail);
@@ -267,6 +314,48 @@ public class TaskCollection {
         TaskMap.put("soarfish", TaskTarget.Soarfish);
         TaskMap.put("guardians", TaskTarget.Guardian);
         TaskMap.put("matcher", TaskTarget.Matcher);
+
+        // World 4
+        TaskMap.put("cheddore", TaskTarget.Cheddore);
+        TaskMap.put("blue cheese", TaskTarget.BlueCheese);
+        TaskMap.put("glowdust", TaskTarget.Glowdust);
+        TaskMap.put("slimecrust", TaskTarget.Slimecrust);
+        TaskMap.put("voidshard", TaskTarget.Voidshard);
+        TaskMap.put("nesting wood", TaskTarget.NestingWood);
+        TaskMap.put("passionfruit", TaskTarget.Passionfruit);
+        TaskMap.put("cryoflora", TaskTarget.Cryoflora);
+        TaskMap.put("chillfruit", TaskTarget.Chillfruit);
+        TaskMap.put("sulphoroot", TaskTarget.Sulphoroot);
+        TaskMap.put("jackfruit", TaskTarget.Jackfruit);
+        TaskMap.put("pyrospire", TaskTarget.Pyrospire);
+        TaskMap.put("scorchberries", TaskTarget.Scorchberry);
+        TaskMap.put("thorn beetles", TaskTarget.ThornBeetle);
+        TaskMap.put("worms", TaskTarget.Worm);
+        TaskMap.put("bats", TaskTarget.Bat);
+        TaskMap.put("rats", TaskTarget.Rat);
+        TaskMap.put("rattus", TaskTarget.Rattus);
+        TaskMap.put("frogs", TaskTarget.Frog);
+        TaskMap.put("snipers", TaskTarget.Sniper);
+        TaskMap.put("angry miners", TaskTarget.AngryMiner);
+        TaskMap.put("ravagers", TaskTarget.Ravager);
+        TaskMap.put("elite mobs in world #4", TaskTarget.W4Elite);
+        TaskMap.put("grasshoppers", TaskTarget.Grasshopper);
+        TaskMap.put("astromold", TaskTarget.Astromold);
+        TaskMap.put("astromites", TaskTarget.Astromite);
+        TaskMap.put("magmold", TaskTarget.Magmold);
+        TaskMap.put("algae", TaskTarget.Algae);
+        TaskMap.put("boom shrooms", TaskTarget.BoomShroom);
+        TaskMap.put("pearls", TaskTarget.Pearl);
+        TaskMap.put("cats", TaskTarget.Cat);
+        TaskMap.put("catfish", TaskTarget.Catfish);
+        TaskMap.put("piranhas", TaskTarget.Piranha);
+        TaskMap.put("clownfish", TaskTarget.Clownfish);
+        TaskMap.put("cichlid", TaskTarget.Cichild);
+        TaskMap.put("parrotfish", TaskTarget.Parrotfish);
+        TaskMap.put("red emperor", TaskTarget.RedEmperor);
+        TaskMap.put("pufferfish", TaskTarget.Pufferfish);
+        TaskMap.put("sewer chests", TaskTarget.SewerChest);
+
 
         // World Nightmare 1
         TaskMap.put("quartz", TaskTarget.Quartz);
@@ -376,7 +465,7 @@ public class TaskCollection {
         W1Elite,
 
         // Farming
-        Wheat, Carrot, Potato, Beetroot, Honeycomb,
+        Wheat, Carrot, Potato, Beetroot, Honeycomb, Crops,
 
         // Fishing
         Riverfish, Crab, HermitCrab, ConsecutiveFish,
@@ -419,7 +508,7 @@ public class TaskCollection {
         Gorespore, GoresporeSpore, DuneDweller, DuneDwellerSpore, HoneyShroom, HoneySpore, DreamShroom, DreamSpore, Barky, Pinepoodle, Capsnapper,
 
         // Combat
-        Baconwing, Camel, Bee, RoyalGuard, Breeze, DireWolf,
+        Baconwing, Camel, Bee, RoyalGuard, Breeze, DireWolf, Dreadhorn,
         W3Elite,
 
         // Farming
@@ -430,6 +519,28 @@ public class TaskCollection {
 
         // Gaming
         Matcher,
+
+        // WORLD 4
+        // Mining
+        Cheddore, BlueCheese, Glowdust, Slimecrust, Voidshard,
+
+        // Foraging
+        NestingWood, Passionfruit, Cryoflora, Chillfruit, Sulphoroot, Jackfruit, Pyrospire, Scorchberry, ThornBeetle, Worm,
+
+        // Combat
+        Bat, Rat, Rattus, Frog, Sniper, AngryMiner, Ravager,
+        W4Elite,
+
+        // Farming
+        Grasshopper, Astromold, Astromite, Magmold, Algae, BoomShroom, Pearl,
+
+        // Fishing
+        Cat, Catfish, Piranha, Clownfish, Cichild, Parrotfish, RedEmperor, Pufferfish,
+
+        // Gaming
+
+        // Misc
+        SewerChest,
 
         // WORLD Nightmare 1
         // Mining

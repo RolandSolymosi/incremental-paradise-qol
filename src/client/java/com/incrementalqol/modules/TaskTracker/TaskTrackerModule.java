@@ -1,5 +1,6 @@
 package com.incrementalqol.modules.TaskTracker;
 
+import com.incrementalqol.common.data.ToolType;
 import com.incrementalqol.common.data.World;
 import com.incrementalqol.common.utils.ConfiguredLogger;
 import com.incrementalqol.common.utils.ScreenInteraction;
@@ -189,7 +190,14 @@ public class TaskTrackerModule implements ClientModInitializer {
             if (MinecraftClient.getInstance().player == null) {
                 return;
             }
-            if (message.getString().contains("You are now Prestige ") || message.getString().contains("You are now Nightmare Prestige ")) {
+            if (
+                    message.getString().contains("You are now Prestige ") ||
+                    message.getString().contains("You are now Ascension ") ||
+                    message.getString().contains("You are now Nightmare Prestige ") ||
+                    message.getString().contains("You are now Transcendence ") ||
+                    message.getString().contains("You started the Tr") ||
+                    message.getString().contains("You completed Tr") ||
+                    message.getString().contains("Trial abandoned")) {
                 enforceTaskRefreshScreenInteraction.startAsync(false);
             }
         });
@@ -211,14 +219,14 @@ public class TaskTrackerModule implements ClientModInitializer {
             var config = Config.HANDLER.instance();
             TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
 
-            int color = ColorHelper.getArgb(80, 0, 0, 0);
+            int color = ColorHelper.getArgb(config.getHudBackgroundOpacity(), 0, 0, 0);
             int CompletedGreen = ColorHelper.getArgb(255, 0, 194, 32);
             int toComplete = ColorHelper.getArgb(255, 255, 255, 255);
             int rectangleX = 10;
             int rectangleY = 10;
             // x1, y1, x2, y2, color
 
-            if (!taskList.isEmpty()) {
+            if (!MinecraftClient.getInstance().options.hudHidden && config.getIsHudEnabled() && !taskList.isEmpty() && !(config.getIsHudDisabledDuringBossFight() && WorldChangeNotifier.getLastWorld() == World.BossArenas)) {
                 int size = taskList.getFirst().getStrWidth();
                 for (Task task : taskList) {
                     if (task.getStrWidth() > size) {
@@ -238,7 +246,7 @@ public class TaskTrackerModule implements ClientModInitializer {
                 matrixStack.scale(scaleFactor, scaleFactor, scaleFactor);
 
 
-                if (config.getHudBackground()) {
+                if (config.getHudBackgroundOpacity() != 0) {
                     drawContext.fill(config.getHudPosX(), config.getHudPosY(), config.getHudPosX() + ((size + 1) * 5), config.getHudPosY() + 5 + (15 * taskList.size()), color);
                 }
                 for (int i = 0; i < taskList.size(); i++) {
@@ -271,52 +279,63 @@ public class TaskTrackerModule implements ClientModInitializer {
     }
 
     private static void WarpNext() {
-        Optional<Task> firstIncompleteTask = taskList.stream()
-                .filter(task -> !task.isCompleted())
-                .findFirst();
         assert MinecraftClient.getInstance().player != null;
-        firstIncompleteTask.ifPresentOrElse(
-                task -> {
-                    assert MinecraftClient.getInstance().player != null;
-                    var config = Config.HANDLER.instance();
-                    tickCounter = 0;
-                    if (activeWarp.compareAndSet(null, task)) {
-                        if (task.descriptor != null) {
-                            if (Config.HANDLER.instance().getAutoSwapWardrobe() && task.descriptor.getDefaultWardrobe() != null) {
-                                ConfiguredLogger.LogInfo(LOGGER, "wardrobe " + task.getWardrobe());
-                                MinecraftClient.getInstance().player.networkHandler.sendCommand("wardrobe " + task.getWardrobe());
+        if (WorldChangeNotifier.getLastWorld() != World.BossArenas) {
+            Optional<Task> firstIncompleteTask = taskList.stream()
+                    .filter(task -> !task.isCompleted())
+                    .findFirst();
+            assert MinecraftClient.getInstance().player != null;
+            firstIncompleteTask.ifPresentOrElse(
+                    task -> {
+                        assert MinecraftClient.getInstance().player != null;
+                        var config = Config.HANDLER.instance();
+                        tickCounter = 0;
+                        if (activeWarp.compareAndSet(null, task)) {
+                            if (task.descriptor != null) {
+                                if (Config.HANDLER.instance().getAutoSwapWardrobe()) {
+                                    Optional<String> wardrobe = task.getWardrobe();
+                                    wardrobe.ifPresent(wardrobeName -> {
+                                        ConfiguredLogger.LogInfo(LOGGER, "wardrobe " + wardrobeName);
+                                        MinecraftClient.getInstance().player.networkHandler.sendCommand("wardrobe " + wardrobeName);
+                                    });
+                                }
                                 String petOverride = task.getPet();
                                 if (!Objects.equals(petOverride, "")) {
                                     MinecraftClient.getInstance().player.networkHandler.sendCommand("pet " + petOverride);
                                 }
-                            }
-                            if (Config.HANDLER.instance().getAutoSwapTools() && task.descriptor.getDefaultHotBarSlot() != null) {
-                                var slotId = config.getSlotToDefault(task.descriptor.getDefaultHotBarSlot());
-                                MinecraftClient.getInstance().player.getInventory().setSelectedSlot(slotId);
-                                MinecraftClient.getInstance().player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(slotId));
-                            }
+                                if (Config.HANDLER.instance().getAutoSwapTools() && task.descriptor.getDefaultHotBarSlot() != null) {
+                                    ToolType tool = task.getRequiredTool() == null ? task.descriptor.getDefaultHotBarSlot() : task.getRequiredTool();
+                                    var slotId = config.getSlotToDefault(tool);
+                                    MinecraftClient.getInstance().player.getInventory().setSelectedSlot(slotId);
+                                    MinecraftClient.getInstance().player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(slotId));
+                                }
 
-                            MinecraftClient.getInstance().player.networkHandler.sendCommand(task.getWarp());
+                                MinecraftClient.getInstance().player.networkHandler.sendCommand(task.getWarp());
+                            } else if (task.getTaskType().equals("Quest") | task.getTaskType().equals("Tutorial")) {
+                                MinecraftClient.getInstance().player.sendMessage(Text.literal("No being lazy with the quests and tutorials, go complete them!"), false);
+                            } else {
+                                MinecraftClient.getInstance().player.sendMessage(Text.literal("The task was not correctly identified, send task description to Devs (QoL channel)."), false);
+                            }
+                        }
+                    },
+                    () -> {
+                        assert MinecraftClient.getInstance().player != null;
+                        if (Config.HANDLER.instance().getAutoLevelUp()) {
+                            levelUpScreenInteraction.startAsync(false).thenAccept(r -> {
+                                enforceTaskRefreshScreenInteraction.startAsync(false).thenAccept(r2 -> {
+                                    if (r2 && Config.HANDLER.instance().getWarpOnAutoLevelUp()) {
+                                        WarpNext();
+                                    }
+                                });
+                            });
                         } else {
-                            MinecraftClient.getInstance().player.sendMessage(Text.literal("The task was not correctly identified, send task description to Devs (QoL channel)."), false);
+                            MinecraftClient.getInstance().player.sendMessage(Text.literal("No incomplete tasks available."), false);
                         }
                     }
-                },
-                () -> {
-                    assert MinecraftClient.getInstance().player != null;
-                    if (Config.HANDLER.instance().getAutoLevelUp()) {
-                        levelUpScreenInteraction.startAsync(false).thenAccept(r -> {
-                            enforceTaskRefreshScreenInteraction.startAsync(false).thenAccept(r2 -> {
-                                if (r2) {
-                                    WarpNext();
-                                }
-                            });
-                        });
-                    } else {
-                        MinecraftClient.getInstance().player.sendMessage(Text.literal("No incomplete tasks available."), false);
-                    }
-                }
-        );
+            );
+        } else {
+            MinecraftClient.getInstance().player.sendMessage(Text.literal("§4You're in the middle of a boss fight, I don't think it is time to task!"), false);
+        }
     }
 
     private void initializeKeybinds() {
@@ -369,7 +388,7 @@ public class TaskTrackerModule implements ClientModInitializer {
                 String number = taskDetails[1];
                 String type = taskDetails[2];
 
-                Task newTask = new Task(stack.getName().getString(), description, "/warp ", 1, false, world, number, type, true);
+                Task newTask = new Task(stack.getName().getString(), description, "/warp ", 1, false, world, number, type, true, isSocialiteTask(blocks.getFirst()), getRequiredToolType(blocks.get(1)));
                 if (newTask.getCompletedStatus()) {
                     newTask.setCompleted();
                 }
@@ -392,7 +411,7 @@ public class TaskTrackerModule implements ClientModInitializer {
             String number = taskDetails[1];
             String type = taskDetails[2];
 
-            Task newTask = new Task(stack.getName().getString(), description, "/warp ", 1, false, world, number, type, false);
+            Task newTask = new Task(stack.getName().getString(), description, "/warp ", 1, false, world, number, type, false, isSocialiteTask(blocks.getFirst()), getRequiredToolType(blocks.get(1)));
             if (stack.getItem().getName().getString().contains("Written")) {
                 newTask.setCompleted();
             }
@@ -445,5 +464,21 @@ public class TaskTrackerModule implements ClientModInitializer {
         }
 
         return new String[]{world, number, type};
+    }
+
+    // TODO: A ton of this stuff should probably be moved to task itself
+
+    private static boolean isSocialiteTask(String block) {
+        return block.contains("Socialite Spotlight");
+    }
+
+    private static ToolType getRequiredToolType(String block) {
+        if (block.contains("Pea Shooter")) {
+            return ToolType.Bow;
+        } else if (block.contains("Devil's Gambit")) {
+            return ToolType.Melee;
+        } else {
+            return null;
+        }
     }
 }

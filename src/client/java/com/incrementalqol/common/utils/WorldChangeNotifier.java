@@ -19,6 +19,10 @@ public class WorldChangeNotifier {
 
     private static final List<Function<Pair<World, Boolean>, CompletableFuture<Boolean>>> listeners = new CopyOnWriteArrayList<>();
 
+    public static World getLastWorld() {
+        return lastWorld;
+    }
+
     /**
      * Register a listener to world change
      *

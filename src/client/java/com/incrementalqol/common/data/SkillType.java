@@ -1,7 +1,5 @@
 package com.incrementalqol.common.data;
 
-import net.minecraft.util.Identifier;
-
 import java.util.Arrays;
 import java.util.Optional;
 
@@ -11,7 +9,8 @@ public enum SkillType {
     Foraging("Foraging"),
     Farming("Farming"),
     SpearFishing("Spear Fishing"),
-    Sharpshooting("Sharpshooting");
+    Sharpshooting("Sharpshooting"),
+    Excavation("Excavation");
 
     private final String name;
 

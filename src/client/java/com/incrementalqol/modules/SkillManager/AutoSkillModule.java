@@ -27,6 +27,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.Objects;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -79,15 +80,7 @@ public class AutoSkillModule implements ClientModInitializer {
                 s -> s.contains("Skills"),
                 s -> true,
                 (input) -> {
-                    short slotId = switch (actualSkillType) {
-                        case SkillType.Combat -> 21;
-                        case SkillType.Mining -> 19;
-                        case SkillType.Foraging -> 20;
-                        case SkillType.Farming -> 23;
-                        case SkillType.SpearFishing -> 24;
-                        case SkillType.Sharpshooting -> 25;
-                    };
-                    ScreenInteraction.WellKnownInteractions.ClickSlot(input.getLeft(), slotId, ScreenInteraction.WellKnownInteractions.Button.Left, SlotActionType.PICKUP);
+                    ScreenInteraction.WellKnownInteractions.ClickSlot(input.getLeft(), getSkillSlotId(input, actualSkillType), ScreenInteraction.WellKnownInteractions.Button.Left, SlotActionType.PICKUP);
                     return true;
                 }
         )
@@ -113,7 +106,8 @@ public class AutoSkillModule implements ClientModInitializer {
         ClientPlayConnectionEvents.DISCONNECT.register((ClientPlayNetworkHandler handler, MinecraftClient client) -> AutoSkillModule.reset());
 
         // When the client world loads (e.g., changing dimensions)
-        WorldChangeNotifier.Register(AutoSkillModule::afterWorldChange);
+        // Commented out as it is often unneeded and slows down task update when swapping between realms
+        // WorldChangeNotifier.Register(AutoSkillModule::afterWorldChange);
 
         ClientReceiveMessageEvents.GAME.register(AutoSkillModule::checkForLevelUpMessage);
 
@@ -137,6 +131,7 @@ public class AutoSkillModule implements ClientModInitializer {
             levelUpQueue.add(SkillType.Farming);
             levelUpQueue.add(SkillType.SpearFishing);
             levelUpQueue.add(SkillType.Sharpshooting);
+            levelUpQueue.add(SkillType.Excavation);
             executeLevelUp(new CompletableFuture<>());
         }
     }
@@ -197,9 +192,7 @@ public class AutoSkillModule implements ClientModInitializer {
                     index++;
                 }
             }
-            if (!slotIdCache.containsKey(nextSkill)) {
-                break;
-            } else {
+            if (slotIdCache.containsKey(nextSkill)) {
                 short slotId = slotIdCache.get(nextSkill);
                 var lore = content.getRight().get(slotId).get(DataComponentTypes.LORE);
                 var level = Integer.parseInt(String.valueOf(lore.lines().get(1).getString().substring(7).split("/")[0]));
@@ -220,7 +213,53 @@ public class AutoSkillModule implements ClientModInitializer {
         return true;
     }
 
-    private static List<String> SkillNameListInOrderForSkill(SkillType toolType) {
+    private static short getSkillSlotId(Pair<Integer, List<ItemStack>> content, SkillType skillType) {
+        // Current three variations (1. No Sharpshooting or Excavation, 2. Only Sharpshooting, 3. Sharpshooting and Excavation)
+        // These can be differentiated by the item in slot 25
+        short slotId = 0;
+        var customName = Objects.requireNonNull(content.getRight().get(25).getCustomName()).getString();
+        switch (customName) {
+            case "Excavation": {
+                slotId = switch (skillType) {
+                    case SkillType.Combat -> 21;
+                    case SkillType.Mining -> 19;
+                    case SkillType.Foraging -> 20;
+                    case SkillType.Farming -> 22;
+                    case SkillType.SpearFishing -> 23;
+                    case SkillType.Sharpshooting -> 24;
+                    case SkillType.Excavation -> 25;
+                };
+                break;
+            }
+            case "Sharpshooting": {
+                slotId = switch (skillType) {
+                    case SkillType.Combat -> 21;
+                    case SkillType.Mining -> 19;
+                    case SkillType.Foraging -> 20;
+                    case SkillType.Farming -> 23;
+                    case SkillType.SpearFishing -> 24;
+                    case SkillType.Sharpshooting -> 25;
+                    case Excavation -> 0;
+                };
+                break;
+            }
+            case " ": {
+                slotId = switch (skillType) {
+                    case SkillType.Combat -> 22;
+                    case SkillType.Mining -> 20;
+                    case SkillType.Foraging -> 21;
+                    case SkillType.Farming -> 23;
+                    case SkillType.SpearFishing -> 24;
+                    case Sharpshooting -> 0;
+                    case Excavation -> 0;
+                };
+                break;
+            }
+        }
+        return slotId;
+    }
+
+        private static List<String> SkillNameListInOrderForSkill(SkillType toolType) {
         if (WorldChangeNotifier.IsActualWorldNightmare()) {
             return switch (toolType) {
                 case SkillType.Combat ->
@@ -235,6 +274,7 @@ public class AutoSkillModule implements ClientModInitializer {
                         Config.HANDLER.instance().nightmareSpearFishingSkills.stream().map(NightmareSpearFishingSkill::getName).toList();
                 case SkillType.Sharpshooting ->
                         Config.HANDLER.instance().nightmareSharpshootingSkills.stream().map(NightmareSharpshootingSkill::getName).toList();
+                case Excavation -> null;
             };
         } else {
             return switch (toolType) {
@@ -250,6 +290,8 @@ public class AutoSkillModule implements ClientModInitializer {
                         Config.HANDLER.instance().normalSpearFishingSkills.stream().map(NormalSpearFishingSkill::getName).toList();
                 case SkillType.Sharpshooting ->
                         Config.HANDLER.instance().normalSharpshootingSkills.stream().map(NormalSharpshootingSkill::getName).toList();
+                case SkillType.Excavation ->
+                        Config.HANDLER.instance().normalExcavationSkills.stream().map(NormalExcavationSkill::getName).toList();
             };
         }
     }

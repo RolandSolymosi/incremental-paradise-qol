@@ -38,7 +38,11 @@ public class LoadoutsModule implements ClientModInitializer {
                 KeyBindingHelper.registerKeyBinding(new KeyBinding("Equip Loadout 2", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_KP_2, "Incremental QOL")), "2",
                 KeyBindingHelper.registerKeyBinding(new KeyBinding("Equip Loadout 3", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_KP_3, "Incremental QOL")), "3",
                 KeyBindingHelper.registerKeyBinding(new KeyBinding("Equip Loadout 4", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_KP_4, "Incremental QOL")), "4",
-                KeyBindingHelper.registerKeyBinding(new KeyBinding("Equip Loadout 5", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_KP_5, "Incremental QOL")), "5"
+                KeyBindingHelper.registerKeyBinding(new KeyBinding("Equip Loadout 5", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_KP_5, "Incremental QOL")), "5",
+                KeyBindingHelper.registerKeyBinding(new KeyBinding("Equip Loadout 6", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_KP_6, "Incremental QOL")), "6",
+                KeyBindingHelper.registerKeyBinding(new KeyBinding("Equip Loadout 7", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_KP_7, "Incremental QOL")), "7",
+                KeyBindingHelper.registerKeyBinding(new KeyBinding("Equip Loadout 8", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_KP_8, "Incremental QOL")), "8",
+                KeyBindingHelper.registerKeyBinding(new KeyBinding("Equip Loadout 9", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_KP_9, "Incremental QOL")), "9"
         );
     }
 }

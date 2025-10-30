@@ -1,6 +1,7 @@
 package com.incrementalqol.modules.TaskTracker;
 
 import com.incrementalqol.common.data.TaskCollection;
+import com.incrementalqol.common.data.ToolType;
 import com.incrementalqol.common.utils.ConfiguredLogger;
 import com.incrementalqol.config.Config;
 import net.minecraft.client.gui.hud.ClientBossBar;
@@ -9,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -36,6 +38,7 @@ public class Task {
     private String progress = "" ;
     private String world;
     private String subLocation;
+    private final ToolType requiredTool;
 
     private Pattern applicablePattern;
     private Pattern generalProgressPattern;
@@ -45,16 +48,17 @@ public class Task {
 
     private static final List<Pattern> MISC_PATTERNS = List.of(
             Pattern.compile("Clean (?<amount>[0-9.,]+[km]?) (?<type>.+) \\(?(?<progress>[0-9.,]+[km]?)"),
-            Pattern.compile("Repair (?<amount>[0-9.,]+[km]?) (?<type>.+) in .+\\((?<progress>[0-9.,]+[km]?)"),
-            Pattern.compile("Sell (?<amount>[0-9.,]+[km]?) (?<type>.+) \\((?<progress>[0-9.,]+[km]?)"),
-            Pattern.compile("Gain (?<amount>[0-9.,]+[km]?) (?<type>.+) \\(?(?<progress>[0-9.,]+[km]?)")
+            Pattern.compile("Repair (?<amount>[0-9.,]+[km]?) (?<type>.+) in .+\\(?(?<progress>[0-9.,]+[km]?)"),
+            Pattern.compile("Sell (?<amount>[0-9.,]+[km]?) (?<type>.+) \\(?(?<progress>[0-9.,]+[km]?)"),
+            Pattern.compile("Gain (?<amount>[0-9.,]+[km]?) (?<type>.+) \\(?(?<progress>[0-9.,]+[km]?)"),
+            Pattern.compile("Loot (?<amount>[0-9.,]+[km]?) (?<type>.+) \\(?(?<progress>[0-9.,]+[km]?)")
     );
 
     private static final List<Pattern> GAMES_PATTERNS = List.of(
             Pattern.compile("Play (?<amount>[0-9.,]+[km]?) (?<opt>.+) of (?<type>.+) \\(?(?<progress>[0-9.,]+[km]?)"),
             Pattern.compile("Earn (?<amount>[0-9.,]+[km]?) (?<opt>.+) in (?<type>.+) \\(?(?<progress>[0-9.,]+[km]?)"),
             Pattern.compile("Earn (?<amount>[0-9.,]+[km]?)\\s+(?<opt>.+) playing (?<type>.+) \\(?(?<progress>[0-9.,]+[km]?)"),
-            Pattern.compile("Find (?<amount>[0-9.,]+[km]?) (?<opt>.+) while playing (?<type>.+) \\((?<progress>[0-9.,]+[km]?)")
+            Pattern.compile("Find (?<amount>[0-9.,]+[km]?) (?<opt>.+) while playing (?<type>.+) \\(?(?<progress>[0-9.,]+[km]?)")
     );
 
     private static final List<Pattern> FORAGING_PATTERNS = List.of(
@@ -63,7 +67,8 @@ public class Task {
     );
 
     private static final List<Pattern> COMBAT_PATTERNS = List.of(
-            Pattern.compile("Slay (?:the )?(?<type>.+) \\((?<progress>[0-9.,]+[km]?)/(?<amount>[0-9.,]+[km]?)"),
+            Pattern.compile("Kill (?:the )?(?<type>.+) \\(?(?<progress>[0-9.,]+[km]?)/(?<amount>[0-9.,]+[km]?)"),
+            Pattern.compile("Slay (?:the )?(?<type>.+) \\(?(?<progress>[0-9.,]+[km]?)/(?<amount>[0-9.,]+[km]?)"),
             Pattern.compile("Collect (?<amount>[0-9.,]+[km]?) drops from (?<type>.+) with (?<constraint>.+) \\(?(?<progress>[0-9.,]+[km]?)"),
             Pattern.compile("Collect (?<amount>[0-9.,]+[km]?) drops from (?<type>.+) \\(?(?<progress>[0-9.,]+[km]?)")
     );
@@ -91,7 +96,7 @@ public class Task {
 
     //private static final Pattern PATTERN = Pattern.compile("^\\w+ (?:the|\\d+) (?<shiny>Shiny)?(?<type>[^(]+?)(?: with (?<constraint>[^(]+))? \\((?<progress>[0-9.,]+[km]?)/(?<amount>[0-9.,]+[km]?)\\)$");
 
-    public Task(String name, String description, String warp, int strWidth, boolean completed, String world, String number, String type, boolean isTicket) {
+    public Task(String name, String description, String warp, int strWidth, boolean completed, String world, String number, String type, boolean isTicket, boolean isSocialite, ToolType requiredTool) {
         this.name = name;
         this.description = description;
         this.warp = warp;
@@ -102,6 +107,8 @@ public class Task {
         this.number = number;
         this.taskType = type.trim();
         this.isTicket = isTicket;
+        this.isSocialite = isSocialite;
+        this.requiredTool = requiredTool;
 
         determineTaskAttributes();
         this.descriptor = TaskCollection.TryGetDescriptor(this.taskTarget);
@@ -177,9 +184,14 @@ public class Task {
         return null;
     }
 
-    public String getWardrobe() {
-        String result = Config.HANDLER.instance().getTaskOverrideWardrobe(TryGetTaskTarget(this.taskTarget));
-        return !Objects.equals(result, "") ? result : Config.HANDLER.instance().getWardrobeNameToDefault(this.descriptor.getDefaultWardrobe());
+    public Optional<String> getWardrobe() {
+        String overrideWardrobe = Config.HANDLER.instance().getTaskOverrideWardrobe(TryGetTaskTarget(this.taskTarget));
+        if (this.descriptor.getDefaultWardrobe() != null || !Objects.equals(overrideWardrobe, "")) {
+            return Optional.of(!Objects.equals(overrideWardrobe, "") ? overrideWardrobe : Config.HANDLER.instance().getWardrobeNameToDefault(this.descriptor.getDefaultWardrobe()));
+        } else {
+            return Optional.empty();
+        }
+
     }
 
     public String getPet() {
@@ -229,8 +241,10 @@ public class Task {
                     "[§8nm" + number + "§f" + (getSubLocation().isEmpty() ? "" : "-§d" + getSubLocation()) + "§f]" ;
             default -> "" ;
         };
+    }
 
-
+    public ToolType getRequiredTool() {
+        return requiredTool;
     }
 
     public int getStrWidth() {
@@ -321,11 +335,11 @@ public class Task {
         String renderedString;
 
 
-        if (taskType.equals("Quest")) {
+        if (taskType.equals("Quest") || taskType.equals("Tutorial")) {
             if (completed) {
-                renderedString = "§2[" + world + "]" + this.taskType + ": §2" + name + ")§f" ;
+                renderedString = "§2[" + world + "] " + this.taskType + ": §2" + name + "§f" ;
             } else {
-                renderedString = "[§8" + world + "§f]" + this.taskType + ": §6§n" + name + ")§f" ;
+                renderedString = "[§8" + world + "§f] " + this.taskType + ": §6§n" + name + "§f" ;
             }
         } else {
             if (completed) {
@@ -334,7 +348,7 @@ public class Task {
                         " (" + this.progress + "/" + this.targetAmount + ")§f" ;
             } else {
                 renderedString = getLocation(false) + " " +
-                        this.taskType + ": §6§n" + (isShiny ? "Shiny " : "") + normalizedTaskTarget() +
+                        this.taskType + ": " + (isSocialite ? "§b" : "§6") + "§n" + (isShiny ? "Shiny " : "") + normalizedTaskTarget() +
                         "§r (§9" + this.progress + "§f/§c" + this.targetAmount + "§f)" ;
             }
         }
