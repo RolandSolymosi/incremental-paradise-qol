@@ -40,7 +40,7 @@ import java.util.regex.Pattern;
 
 
 public class TaskTrackerModule implements ClientModInitializer {
-    public static final String MOD_ID = "incremental-qol" ;
+    public static final String MOD_ID = "incremental-qol";
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
     public static final List<Task> taskList = new CopyOnWriteArrayList<>();
@@ -107,7 +107,7 @@ public class TaskTrackerModule implements ClientModInitializer {
                         }
                         levelUpSlotId++;
                     }
-                    if (levelUpSlot != null){
+                    if (levelUpSlot != null) {
                         var lore = levelUpSlot.get(DataComponentTypes.LORE);
                         if (lore != null && lore.lines().getLast().getString().contains("Click to claim rewards")) {
                             ScreenInteraction.WellKnownInteractions.ClickSlot(input.getLeft(), levelUpSlotId, ScreenInteraction.WellKnownInteractions.Button.Left, SlotActionType.PICKUP);
@@ -155,7 +155,7 @@ public class TaskTrackerModule implements ClientModInitializer {
         ClientReceiveMessageEvents.GAME.register((message, overlay) -> {
             if (message.getString().contains("Completed task")) {
 
-                String pattern = "(?<=^Completed task\\s).*" ;
+                String pattern = "(?<=^Completed task\\s).*";
 
                 Pattern regex = Pattern.compile(pattern);
                 Matcher matcher = regex.matcher(message.getString());
@@ -192,12 +192,12 @@ public class TaskTrackerModule implements ClientModInitializer {
             }
             if (
                     message.getString().contains("You are now Prestige ") ||
-                    message.getString().contains("You are now Ascension ") ||
-                    message.getString().contains("You are now Nightmare Prestige ") ||
-                    message.getString().contains("You are now Transcendence ") ||
-                    message.getString().contains("You started the Tr") ||
-                    message.getString().contains("You completed Tr") ||
-                    message.getString().contains("Trial abandoned")) {
+                            message.getString().contains("You are now Ascension ") ||
+                            message.getString().contains("You are now Nightmare Prestige ") ||
+                            message.getString().contains("You are now Transcendence ") ||
+                            message.getString().contains("You started the Tr") ||
+                            message.getString().contains("You completed Tr") ||
+                            message.getString().contains("Trial abandoned")) {
                 enforceTaskRefreshScreenInteraction.startAsync(false);
             }
         });
@@ -310,6 +310,11 @@ public class TaskTrackerModule implements ClientModInitializer {
                                     MinecraftClient.getInstance().player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(slotId));
                                 }
 
+                                String warpOverride = task.getOverrideWarp();
+                                // Handles edge case of gaming tasks and wanting to warp
+                                if (!Objects.equals(warpOverride, "") && Objects.equals(task.getTaskType(), "Gaming")) {
+                                    MinecraftClient.getInstance().player.networkHandler.sendCommand(warpOverride);
+                                }
                                 MinecraftClient.getInstance().player.networkHandler.sendCommand(task.getWarp());
                             } else if (task.getTaskType().equals("Quest") | task.getTaskType().equals("Tutorial")) {
                                 MinecraftClient.getInstance().player.sendMessage(Text.literal("No being lazy with the quests and tutorials, go complete them!"), false);
@@ -356,7 +361,7 @@ public class TaskTrackerModule implements ClientModInitializer {
             if (isTaskBook(stack)) {
                 processTaskBook(stack);
             } else if (isPlayerHead(stack)) {
-                processTicketTask(stack);
+                processPlayerHeadTask(stack);
             }
         }
     }
@@ -372,23 +377,25 @@ public class TaskTrackerModule implements ClientModInitializer {
     }
 
 
-    private static void processTicketTask(ItemStack stack) {
+    private static void processPlayerHeadTask(ItemStack stack) {
         LoreComponent lore = stack.get(DataComponentTypes.LORE);
         List<Text> text = lore.lines();
         List<String> blocks = parseLoreLines(text);
 
 
-        if (blocks.get(0).contains("Ticket Task")) {
+        if (blocks.get(0).contains("Task")) {
             String[] taskDetails = extractTaskDetails(blocks.get(0));
 
-            if (taskDetails != null){
-                String description = blocks.size() > 1 ? blocks.get(1) : "" ;
+            if (taskDetails != null) {
+                String description = blocks.size() > 1 ? blocks.get(1) : "";
 
                 String world = taskDetails[0];
                 String number = taskDetails[1];
                 String type = taskDetails[2];
 
-                Task newTask = new Task(stack.getName().getString(), description, "/warp ", 1, false, world, number, type, true, isSocialiteTask(blocks.getFirst()), getRequiredToolType(blocks.get(1)));
+                // Strip emojis from name being the fire ones if they exist
+                String taskName = stack.getName().getString();
+                Task newTask = new Task(cleanTaskName(taskName), description, "/warp ", 1, false, world, number, type, isTicketTask(blocks.getFirst()), isSocialiteTask(blocks.getFirst()), getRequiredToolType(blocks.get(1)));
                 if (newTask.getCompletedStatus()) {
                     newTask.setCompleted();
                 }
@@ -404,8 +411,8 @@ public class TaskTrackerModule implements ClientModInitializer {
 
         String[] taskDetails = extractTaskDetails(blocks.get(0));
 
-        if (taskDetails != null){
-            String description = blocks.size() > 1 ? blocks.get(1) : "" ;
+        if (taskDetails != null) {
+            String description = blocks.size() > 1 ? blocks.get(1) : "";
 
             String world = taskDetails[0];
             String number = taskDetails[1];
@@ -438,9 +445,9 @@ public class TaskTrackerModule implements ClientModInitializer {
 
 
     private static String[] extractTaskDetails(String block) {
-        String world = "" ;
-        String number = "" ;
-        String type = "" ;
+        String world = "";
+        String number = "";
+        String type = "";
 
         if (block.contains("World") || block.contains("Nightmare")) {
             Pattern descriptorPattern = Pattern.compile("(?<world>World|Nightmare) #(?<number>\\d+)\\s*(?<type>.+?)\\s*Task");
@@ -454,12 +461,12 @@ public class TaskTrackerModule implements ClientModInitializer {
             Pattern questPattern = Pattern.compile("(?<type>.+) Task");
             Matcher m = questPattern.matcher(block);
             if (m.find()) {
-                world = "-" ;
+                world = "-";
                 type = m.group("type");
             }
         }
 
-        if (type.isEmpty()){
+        if (type.isEmpty()) {
             return null;
         }
 
@@ -472,6 +479,10 @@ public class TaskTrackerModule implements ClientModInitializer {
         return block.contains("Socialite Spotlight");
     }
 
+    private static boolean isTicketTask(String block) {
+        return block.contains("Ticket Task");
+    }
+
     private static ToolType getRequiredToolType(String block) {
         if (block.contains("Pea Shooter")) {
             return ToolType.Bow;
@@ -479,6 +490,14 @@ public class TaskTrackerModule implements ClientModInitializer {
             return ToolType.Melee;
         } else {
             return null;
+        }
+    }
+
+    private static String cleanTaskName(String taskName) {
+        if (taskName.contains("\uD83D\uDD25")) {
+            return taskName.substring(3, taskName.length() - 3);
+        } else {
+            return taskName;
         }
     }
 }

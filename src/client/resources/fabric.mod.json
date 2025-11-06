@@ -1,7 +1,7 @@
 {
 	"schemaVersion": 1,
 	"id": "incremental-paradise-qol",
-	"version": "2.2.1",
+	"version": "2.3.1",
 	"name": "Incremental Paradise QoL",
 	"description": "A bunch of handy tweaks and additions for the Incremental Paradise server. Client-side only.",
 	"authors": [

@@ -32,10 +32,10 @@ public class Task {
     private String constraint = null;
     private boolean isTicket = false;
     private boolean isSocialite = false;
-    private String taskType = "" ;
-    private String targetAmount = "" ;
-    private String taskTarget = "" ;
-    private String progress = "" ;
+    private String taskType = "";
+    private String targetAmount = "";
+    private String taskTarget = "";
+    private String progress = "";
     private String world;
     private String subLocation;
     private final ToolType requiredTool;
@@ -158,7 +158,7 @@ public class Task {
         try {
             return matcher.group(groupName) == null ? "" : matcher.group(groupName);
         } catch (IllegalArgumentException e) {
-            return "" ;
+            return "";
         }
     }
 
@@ -176,12 +176,16 @@ public class Task {
 
     public String getWarp() {
         String result = Config.HANDLER.instance().getTaskOverrideWarp(TryGetTaskTarget(this.taskTarget));
-        if (!Objects.equals(result, "")) {
+        if (!Objects.equals(result, "") && !Objects.equals(this.taskType, "Gaming")) {
             return "warp " + result;
         } else if (this.descriptor != null) {
             return this.descriptor.getCommand();
         }
         return null;
+    }
+
+    public String getOverrideWarp() {
+        return "warp " + Config.HANDLER.instance().getTaskOverrideWarp(TryGetTaskTarget(this.taskTarget));
     }
 
     public Optional<String> getWardrobe() {
@@ -214,19 +218,26 @@ public class Task {
     }
 
     private String getSubLocation() {
-        if (this.world.equals("1")) return "" ;
+        if (this.world.equals("1")) return "";
         else {
+            // TODO: These should be replaced to be using the TaskTargets
             List<String> lush = List.of("Poison Slimes", "Cave Crawlers", "Lurkers", "Ancient Lurkers", "Crimsonite");
             List<String> veil = List.of("Spotters", "Verdemites", "Endermen", "Verdelith", "Shy");
             List<String> infernal = List.of("Ghasts", "Ghast Souls", "Blazes", "Nrubs", "Infernal Imps", "Azuregem", "Bubbler", "Magmafish"
                     , "Molten Jellyfish", "Lavafruit");
             List<String> abyss = List.of("Wicks", "Glow Squids", "Slinkers", "Aurorium", "Twine", "Zephyr", "Abyssal Crabs", "Lampposts");
+            List<String> homestead = List.of("Cheddore", "Blue Cheese", "Nesting Wood", "Passionfruit", "Bats", "Rats", "Rattus", "Grasshoppers", "Astromold & Astromites", "Magmold", "Cats", "Catfish", "Sewer Chests");
+            List<String> alpha = List.of("Cryoflora", "Chillfruit", "Sulphoroot", "Jackfruit", "Pyrospire", "Scorchberries", "Thorn Beetles", "Worms", "Frogs", "Algae", "Boom Shrooms", "Piranhas");
+            List<String> beta = List.of("Glowdust", "Slimecrust", "Voidshard", "Snipers", "Angry Miners", "Ravagers");
 
-            if (lush.contains(normalizedTaskTarget())) return "§2Lush" ;
-            else if (veil.contains(normalizedTaskTarget())) return "§3Veil" ;
-            else if (infernal.contains(normalizedTaskTarget())) return "§4Infernal" ;
-            else if (abyss.contains(normalizedTaskTarget())) return "§5Abyss" ;
-            else return "" ;
+            if (lush.contains(this.taskTarget)) return "§2Lush" ;
+            else if (veil.contains(this.taskTarget)) return "§3Veil" ;
+            else if (infernal.contains(this.taskTarget)) return "§4Infernal" ;
+            else if (abyss.contains(this.taskTarget)) return "§5Abyss" ;
+            else if (homestead.contains(this.taskTarget)) return "§eHomestead" ; // TODO: Replace with the RGB text &#944a00 and use the fuel colour
+            else if (alpha.contains(this.taskTarget)) return "§2Alpha" ; // &#00a800
+            else if (beta.contains(this.taskTarget)) return "§5Beta" ; // &#a800a8
+            else return "";
         }
     }
 
@@ -234,12 +245,12 @@ public class Task {
 
         return switch (this.world) {
             case "World" -> (completed) ?
-                    "§2[w" + number + (getSubLocation().isEmpty() ? "" : "-" + getSubLocation()).replaceAll("\\d", "2") + "]" :
-                    "[§8w" + number + "§f" + (getSubLocation().isEmpty() ? "" : "-§d" + getSubLocation()) + "§f]" ;
+                    "§2[w" + number + (getSubLocation().isEmpty() ? "" : "-" + getSubLocation()).replaceAll("§[0-9a-fA-F]", "§2") + "]" :
+                    "[§8w" + number + "§f" + (getSubLocation().isEmpty() ? "" : "-§d" + getSubLocation()) + "§f]";
             case "Nightmare" -> (completed) ?
-                    "§2[nm" + number + (getSubLocation().isEmpty() ? "" : "-" + getSubLocation()).replaceAll("\\d", "2") + "]" :
-                    "[§8nm" + number + "§f" + (getSubLocation().isEmpty() ? "" : "-§d" + getSubLocation()) + "§f]" ;
-            default -> "" ;
+                    "§2[nm" + number + (getSubLocation().isEmpty() ? "" : "-" + getSubLocation()).replaceAll("§[0-9a-fA-F]", "§2") + "]" :
+                    "[§8nm" + number + "§f" + (getSubLocation().isEmpty() ? "" : "-§d" + getSubLocation()) + "§f]";
+            default -> "";
         };
     }
 
@@ -279,7 +290,7 @@ public class Task {
                 try {
                     this.taskTarget = m.group("type") == null ? "" : m.group("type");
                 } catch (IllegalArgumentException e) {
-                    taskTarget = "" ;
+                    taskTarget = "";
                 }
                 if (!taskTarget.isEmpty()) {
 
@@ -302,7 +313,7 @@ public class Task {
         }
 
         if (this.taskTarget.equals("fish")) {
-            return "2 Riverfish in a row without missing" ;
+            return "2 Riverfish in a row without missing";
         }
 
         if (!this.color.equals("")) {
@@ -337,19 +348,19 @@ public class Task {
 
         if (taskType.equals("Quest") || taskType.equals("Tutorial")) {
             if (completed) {
-                renderedString = "§2[" + world + "] " + this.taskType + ": §2" + name + "§f" ;
+                renderedString = "§2[" + world + "] " + this.taskType + ": §2" + name + "§f";
             } else {
-                renderedString = "[§8" + world + "§f] " + this.taskType + ": §6§n" + name + "§f" ;
+                renderedString = "[§8" + world + "§f] " + this.taskType + ": §6§n" + name + "§f";
             }
         } else {
             if (completed) {
                 renderedString = getLocation(true) + " " +
                         this.taskType + ": §2" + (isShiny ? "Shiny " : "") + normalizedTaskTarget() +
-                        " (" + this.progress + "/" + this.targetAmount + ")§f" ;
+                        " (" + this.progress + "/" + this.targetAmount + ")§f";
             } else {
                 renderedString = getLocation(false) + " " +
                         this.taskType + ": " + (isSocialite ? "§b" : "§6") + "§n" + (isShiny ? "Shiny " : "") + normalizedTaskTarget() +
-                        "§r (§9" + this.progress + "§f/§c" + this.targetAmount + "§f)" ;
+                        "§r (§9" + this.progress + "§f/§c" + this.targetAmount + "§f)";
             }
         }
 
