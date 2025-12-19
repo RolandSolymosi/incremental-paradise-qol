@@ -3,7 +3,9 @@ package com.incrementalqol.modules.TaskTracker;
 import com.incrementalqol.common.data.TaskCollection;
 import com.incrementalqol.common.data.ToolType;
 import com.incrementalqol.common.utils.ConfiguredLogger;
+import com.incrementalqol.common.utils.TextUtils;
 import com.incrementalqol.config.Config;
+import net.minecraft.text.*;
 import net.minecraft.client.gui.hud.ClientBossBar;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -217,45 +219,14 @@ public class Task {
         return this.progress.equals(this.targetAmount);
     }
 
-    private String getSubLocation() {
-        if (this.world.equals("1")) return "";
-        else {
-            // TODO: These should be replaced to be using the TaskTargets
-            List<String> lush = List.of("Poison Slimes", "Cave Crawlers", "Lurkers", "Ancient Lurkers", "Crimsonite");
-            List<String> veil = List.of("Spotters", "Verdemites", "Endermen", "Verdelith", "Shy");
-            List<String> infernal = List.of("Ghasts", "Ghast Souls", "Blazes", "Nrubs", "Infernal Imps", "Azuregem", "Bubbler", "Magmafish"
-                    , "Molten Jellyfish", "Lavafruit");
-            List<String> abyss = List.of("Wicks", "Glow Squids", "Slinkers", "Aurorium", "Twine", "Zephyr", "Abyssal Crabs", "Lampposts");
-            List<String> homestead = List.of("Cheddore", "Blue Cheese", "Nesting Wood", "Passionfruit", "Bats", "Rats", "Rattus", "Grasshoppers", "Astromold & Astromites", "Magmold", "Cats", "Catfish", "Sewer Chests");
-            List<String> alpha = List.of("Cryoflora", "Chillfruit", "Sulphoroot", "Jackfruit", "Pyrospire", "Scorchberries", "Thorn Beetles", "Worms", "Frogs", "Algae", "Boom Shrooms", "Piranhas");
-            List<String> beta = List.of("Glowdust", "Slimecrust", "Voidshard", "Snipers", "Angry Miners", "Ravagers");
-
-            if (lush.contains(this.taskTarget)) return "§2Lush" ;
-            else if (veil.contains(this.taskTarget)) return "§3Veil" ;
-            else if (infernal.contains(this.taskTarget)) return "§4Infernal" ;
-            else if (abyss.contains(this.taskTarget)) return "§5Abyss" ;
-            else if (homestead.contains(this.taskTarget)) return "§eHomestead" ; // TODO: Replace with the RGB text &#944a00 and use the fuel colour
-            else if (alpha.contains(this.taskTarget)) return "§2Alpha" ; // &#00a800
-            else if (beta.contains(this.taskTarget)) return "§5Beta" ; // &#a800a8
-            else return "";
-        }
-    }
-
-    private String getLocation(boolean completed) {
-
-        return switch (this.world) {
-            case "World" -> (completed) ?
-                    "§2[w" + number + (getSubLocation().isEmpty() ? "" : "-" + getSubLocation()).replaceAll("§[0-9a-fA-F]", "§2") + "]" :
-                    "[§8w" + number + "§f" + (getSubLocation().isEmpty() ? "" : "-§d" + getSubLocation()) + "§f]";
-            case "Nightmare" -> (completed) ?
-                    "§2[nm" + number + (getSubLocation().isEmpty() ? "" : "-" + getSubLocation()).replaceAll("§[0-9a-fA-F]", "§2") + "]" :
-                    "[§8nm" + number + "§f" + (getSubLocation().isEmpty() ? "" : "-§d" + getSubLocation()) + "§f]";
-            default -> "";
-        };
-    }
+    public boolean isTicketTask() { return this.isTicket; }
 
     public ToolType getRequiredTool() {
         return requiredTool;
+    }
+
+    public boolean getOverrideSkipTicketTask() {
+        return Config.HANDLER.instance().getTaskOverrideSkipTicketTask(TryGetTaskTarget(this.taskTarget));
     }
 
     public int getStrWidth() {
@@ -303,6 +274,65 @@ public class Task {
         }
     }
 
+    private Text getSublocation() {
+
+        int textColor = Config.HANDLER.instance().getTextColor().getRGB();
+
+        // TODO: These should be replaced to be using the TaskTargets, also probably make it static data and change data structur
+        List<String> lush = List.of("Poison Slimes", "Cave Crawlers", "Lurkers", "Ancient Lurkers", "Crimsonite");
+        List<String> veil = List.of("Spotters", "Verdemites", "Endermen", "Verdelith", "Shy");
+        List<String> infernal = List.of("Ghasts", "Ghast Souls", "Blazes", "Nrubs", "Infernal Imps", "Azuregem", "Bubbler", "Magmafish"
+                , "Molten Jellyfish", "Lavafruit");
+        List<String> abyss = List.of("Wicks", "Glow Squids", "Slinkers", "Aurorium", "Twine", "Zephyr", "Abyssal Crabs", "Lampposts");
+
+        List<String> sty = List.of("Gorespore", "Gorespore Spores", "Baconwings", "Oinky", "Bettafly");
+        List<String> beach = List.of("Dune Dweller", "Dune Dweller Spores", "Camels", "Cattails", "Soarfish");
+        List<String> underside = List.of("Gloom", "Guardians");
+        List<String> topside = List.of("Honey Shrooms", "Honey Shroom Spores", "Bees", "Royal Guards");
+        List<String> canine = List.of("Barky", "Pinepoodles", "Dire Wolves", "Collie-Flowers", "Goldfish Retrievers");
+        List<String> mines = List.of("Brightstone", "Diamonds", "Emeralds", "Breezes");
+
+        List<String> homestead = List.of("Cheddore", "Blue Cheese", "Nesting Wood", "Passionfruit", "Bats", "Rats", "Rattus", "Grasshoppers", "Astromold & Astromites", "Magmold", "Cats", "Catfish", "Sewer Chests");
+        List<String> alpha = List.of("Cryoflora", "Chillfruit", "Sulphoroot", "Jackfruit", "Pyrospire", "Scorchberries", "Thorn Beetles", "Worms", "Frogs", "Algae", "Boom Shrooms", "Piranhas");
+        List<String> beta = List.of("Glowdust", "Slimecrust", "Voidshard", "Snipers", "Angry Miners", "Ravagers");
+
+        if (lush.contains(this.taskTarget)) return Text.literal("").append(TextUtils.textColor("-", textColor)).append(TextUtils.textColor("Lush", 0x54fc54));
+        else if (veil.contains(this.taskTarget)) return Text.literal("").append(TextUtils.textColor("-", textColor)).append(TextUtils.textColor("Veil", 0xa800a8));
+        else if (infernal.contains(this.taskTarget)) return Text.literal("").append(TextUtils.textColor("-", textColor)).append(TextUtils.textColor("Infernal", 0xfc5454));
+        else if (abyss.contains(this.taskTarget)) return Text.literal("").append(TextUtils.textColor("-", textColor)).append(TextUtils.textColor("Abyss", 0x4b696d));
+
+        else if (sty.contains(this.taskTarget)) return Text.literal("").append(TextUtils.textColor("-", textColor)).append(TextUtils.textColor("Sty", 0xe9a3a2));
+        else if (beach.contains(this.taskTarget)) return Text.literal("").append(TextUtils.textColor("-", textColor)).append(TextUtils.textColor("Beach", 0xd6cba2));
+        else if (underside.contains(this.taskTarget)) return Text.literal("").append(TextUtils.textColor("-", textColor)).append(TextUtils.textColor("Underside", 0x74b0b0));
+        else if (topside.contains(this.taskTarget)) return Text.literal("").append(TextUtils.textColor("-", textColor)).append(TextUtils.textColor("Topside", 0xe58a08));
+        else if (canine.contains(this.taskTarget)) return Text.literal("").append(TextUtils.textColor("-", textColor)).append(TextUtils.textColor("Canine", 0x9c929f));
+        else if (mines.contains(this.taskTarget)) return Text.literal("").append(TextUtils.textColor("-", textColor)).append(TextUtils.textColor("Mines", 0xa3cbcb));
+
+        else if (homestead.contains(this.taskTarget)) return Text.literal("").append(TextUtils.textColor("-", textColor)).append(TextUtils.textColor("Homestead", 0x944a00));
+        else if (alpha.contains(this.taskTarget)) return Text.literal("").append(TextUtils.textColor("-", textColor)).append(TextUtils.textColor("Alpha", 0x00a800));
+        else if (beta.contains(this.taskTarget)) return Text.literal("").append(TextUtils.textColor("-", textColor)).append(TextUtils.textColor("Beta", 0xa800a8));
+
+        else return Text.of("");
+    }
+
+    private Text getLocation() {
+
+        int textColor = Config.HANDLER.instance().getTextColor().getRGB();
+        int worldColor = Config.HANDLER.instance().getWorldColor().getRGB();
+
+        String world = switch (this.world) {
+            case "World" -> "w" + number;
+            case "Nightmare" -> "nm" + number;
+            default -> "-";
+        };
+
+        return Text.literal("")
+                .append(TextUtils.textColor("[", textColor))
+                .append(TextUtils.textColor(world, worldColor))
+                .append(getSublocation())
+                .append(TextUtils.textColor("]", textColor));
+    }
+
     private String normalizedTaskTarget() {
         if (taskTarget.isEmpty()) {
             return taskTarget;
@@ -310,6 +340,10 @@ public class Task {
 
         if (this.isLarge) {
             return "Large " + taskTarget;
+        }
+
+        if (this.isShiny) {
+            return "Shiny " + taskTarget;
         }
 
         if (this.taskTarget.equals("fish")) {
@@ -342,40 +376,49 @@ public class Task {
         return taskTarget;
     }
 
-    public String render(boolean completed) {
-        String renderedString;
-
-
-        if (taskType.equals("Quest") || taskType.equals("Tutorial")) {
-            if (completed) {
-                renderedString = "§2[" + world + "] " + this.taskType + ": §2" + name + "§f";
-            } else {
-                renderedString = "[§8" + world + "§f] " + this.taskType + ": §6§n" + name + "§f";
-            }
-        } else {
-            if (completed) {
-                renderedString = getLocation(true) + " " +
-                        this.taskType + ": §2" + (isShiny ? "Shiny " : "") + normalizedTaskTarget() +
-                        " (" + this.progress + "/" + this.targetAmount + ")§f";
-            } else {
-                renderedString = getLocation(false) + " " +
-                        this.taskType + ": " + (isSocialite ? "§b" : "§6") + "§n" + (isShiny ? "Shiny " : "") + normalizedTaskTarget() +
-                        "§r (§9" + this.progress + "§f/§c" + this.targetAmount + "§f)";
-            }
-        }
-
-
-        calculateDisplayLength(renderedString);
-
-        if (isTicket && !completed) {
-            return renderedString.replaceAll("§[0-9a-fA-F]", "§5");
-        }
-        return renderedString;
+    private boolean isQuestOrTutorial() {
+        return (taskType.equals("Quest") || taskType.equals("Tutorial"));
     }
 
-    private void calculateDisplayLength(String input) {
-        // Remove color codes and return the length of the cleaned string
-        String cleanedInput = COLOR_CODE_PATTERN.matcher(input).replaceAll("");
-        this.strWidth = cleanedInput.length();
+    public Text render() {
+
+        int textColor = Config.HANDLER.instance().getTextColor().getRGB();
+        int taskColor = Config.HANDLER.instance().getTaskColor().getRGB();
+        int socialiteColor = Config.HANDLER.instance().getSocialiteColor().getRGB();
+        int progressColor = Config.HANDLER.instance().getProgressColor().getRGB();
+        int targetColor = Config.HANDLER.instance().getTargetColor().getRGB();
+        int completeColor = Config.HANDLER.instance().getCompleteColor().getRGB();
+        int ticketColor = Config.HANDLER.instance().getTicketColor().getRGB();
+
+        MutableText displayText = Text.literal("")
+                .append(getLocation())
+                .append(TextUtils.textColor(" " + this.taskType + ": ", textColor))
+                .append(TextUtils.textColorUnderline(isQuestOrTutorial() ? name : normalizedTaskTarget(), isSocialite ? socialiteColor : taskColor));
+
+
+        if (!isQuestOrTutorial()) {
+            displayText
+                    .append(TextUtils.textColor(" (", textColor))
+                    .append(TextUtils.textColor(completed ? targetAmount : progress, progressColor))
+                    .append(TextUtils.textColor("/", textColor))
+                    .append(TextUtils.textColor(targetAmount, targetColor))
+                    .append(TextUtils.textColor(")", textColor));
+        }
+
+        if (isTicket) {
+            displayText = TextUtils.mutableRecolor(displayText, ticketColor);
+        }
+
+        if (completed) {
+            displayText = TextUtils.mutableRecolor(displayText, completeColor);
+        }
+
+        calculateDisplayLength(displayText);
+
+        return displayText;
+    }
+
+    private void calculateDisplayLength(Text input) {
+        this.strWidth = input.getString().length();
     }
 }

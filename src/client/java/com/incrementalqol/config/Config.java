@@ -14,6 +14,7 @@ import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
+import java.awt.Color;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -55,6 +56,27 @@ public class Config {
     private boolean autoLevelUp;
     @SerialEntry
     private boolean warpOnAutoLevelUp = true;
+    @SerialEntry
+    private Color textColor = new Color(0xfcfcfc);
+    @SerialEntry
+    private Color worldColor = new Color(0x555555);
+    @SerialEntry
+    private Color taskColor = new Color(0xffaa00);
+    @SerialEntry
+    private Color socialiteColor = new Color(0x55ffff);
+    @SerialEntry
+    private Color progressColor = new Color(0x5555ff);
+    @SerialEntry
+    private Color targetColor = new Color(0xff5555);
+    @SerialEntry
+    private Color completeColor = new Color(0x00aa00);
+    @SerialEntry
+    private Color ticketColor = new Color(0x8845d1);
+
+    @SerialEntry
+    private int legendaryPxpValue = 75;
+    @SerialEntry
+    private int mythicPxpValue = 500;
 
     @SerialEntry
     private String combatWardrobeName = "1";
@@ -119,11 +141,14 @@ public class Config {
         private String wardrobe;
         @SerialEntry
         private String pet;
+        @SerialEntry
+        private Boolean skipTicketTask;
 
         public Overrides() {
             this.warp = "";
             this.wardrobe = "";
             this.pet = "";
+            this.skipTicketTask = false;
         }
 
         public String getWarp() {
@@ -149,6 +174,10 @@ public class Config {
         public void setPet(String pet) {
             this.pet = pet;
         }
+
+        public Boolean getSkipTicketTask() { return skipTicketTask; }
+
+        public void setSkipTicketTask(Boolean skipTicketTask) { this.skipTicketTask = skipTicketTask; }
     }
 
     @SerialEntry
@@ -198,6 +227,60 @@ public class Config {
 
     public void setTaskOverridePet(TaskCollection.TaskTarget taskTarget, String pet) {
         taskOverrides.computeIfAbsent(taskTarget, k -> new Overrides()).setPet(pet);
+    }
+
+    public Boolean getTaskOverrideSkipTicketTask(TaskCollection.TaskTarget taskTarget) {
+        return taskOverrides.computeIfAbsent(taskTarget, k -> new Overrides()).getSkipTicketTask();
+    }
+
+    public void setTaskOverrideSkipTicketTask(TaskCollection.TaskTarget taskTarget, Boolean val) {
+        taskOverrides.computeIfAbsent(taskTarget, k -> new Overrides()).setSkipTicketTask(val);
+    }
+
+    public void setAllTaskOverrideSkipTicketTask(Boolean val) {
+        for (TaskCollection.TaskTarget taskTarget : taskOverrides.keySet()) {
+            setTaskOverrideSkipTicketTask(taskTarget, val);
+        }
+    }
+
+    public int getLegendaryPxpValue() {
+        return legendaryPxpValue;
+    }
+
+    public int getMythicPxpValue() {
+        return mythicPxpValue;
+    }
+
+    public Color getTextColor() {
+        return textColor;
+    }
+
+    public Color getWorldColor() {
+        return worldColor;
+    }
+
+    public Color getTaskColor() {
+        return taskColor;
+    }
+
+    public Color getSocialiteColor() {
+        return socialiteColor;
+    }
+
+    public Color getProgressColor() {
+        return progressColor;
+    }
+
+    public Color getTargetColor() {
+        return targetColor;
+    }
+
+    public Color getCompleteColor() {
+        return completeColor;
+    }
+
+    public Color getTicketColor() {
+        return ticketColor;
     }
 
     public static ConfigClassHandler<Config> HANDLER = ConfigClassHandler.createBuilder(Config.class)
@@ -374,6 +457,59 @@ public class Config {
                                 .controller(o -> IntegerSliderControllerBuilder.create(o).step(1).range(1, 8))
                                 .build())
                         .build())
+                .group(OptionGroup.createBuilder()
+                        .name(Text.of("Task HUD Color configuration"))
+                        .description(OptionDescription.of(Text.of("These allow you to set the colors of your hud. Press enter or esc to exit the color selection.")))
+                        .option(Option.<Color>createBuilder()
+                                .name(Text.of("Color of the base text"))
+                                .description(OptionDescription.of(Text.of("The color of the base text.")))
+                                .binding(new Color(0xfcfcfc), () -> this.textColor, newVal -> this.textColor = newVal)
+                                .controller(ColorControllerBuilder::create)
+                                .build())
+                        .option(Option.<Color>createBuilder()
+                                .name(Text.of("Color of the world text"))
+                                .description(OptionDescription.of(Text.of("The color of the world text.")))
+                                .binding(new Color(0x555555), () -> this.worldColor, newVal -> this.worldColor = newVal)
+                                .controller(ColorControllerBuilder::create)
+                                .build())
+                        .option(Option.<Color>createBuilder()
+                                .name(Text.of("Color of the task text"))
+                                .description(OptionDescription.of(Text.of("The color of the task target.")))
+                                .binding(new Color(0xffaa00), () -> this.taskColor, newVal -> this.taskColor = newVal)
+                                .controller(ColorControllerBuilder::create)
+                                .build())
+                        .option(Option.<Color>createBuilder()
+                                .name(Text.of("Color of the socialite text"))
+                                .description(OptionDescription.of(Text.of("The highlight color used for socialite tasks.")))
+                                .binding(new Color(0x55ffff), () -> this.socialiteColor, newVal -> this.socialiteColor = newVal)
+                                .controller(ColorControllerBuilder::create)
+                                .build())
+                        .option(Option.<Color>createBuilder()
+                                .name(Text.of("Color of the progress text"))
+                                .description(OptionDescription.of(Text.of("The color used for the current task progress number.")))
+                                .binding(new Color(0x5555ff), () -> this.progressColor, newVal -> this.progressColor = newVal)
+                                .controller(ColorControllerBuilder::create)
+                                .build())
+                        .option(Option.<Color>createBuilder()
+                                .name(Text.of("Color of the target text"))
+                                .description(OptionDescription.of(Text.of("The color used for the target amount required.")))
+                                .binding(new Color(0xff5555), () -> this.targetColor, newVal -> this.targetColor = newVal)
+                                .controller(ColorControllerBuilder::create)
+                                .build())
+                        .option(Option.<Color>createBuilder()
+                                .name(Text.of("Color of the completed text"))
+                                .description(OptionDescription.of(Text.of("The text color used when a task is completed.")))
+                                .binding(new Color(0x00aa00), () -> this.completeColor, newVal -> this.completeColor = newVal)
+                                .controller(ColorControllerBuilder::create)
+                                .build())
+                        .option(Option.<Color>createBuilder()
+                                .name(Text.of("Color of the ticket text"))
+                                .description(OptionDescription.of(Text.of("The color used to highlight ticket tasks.")))
+                                .binding(new Color(0x8845d1), () -> this.ticketColor, newVal -> this.ticketColor = newVal)
+                                .controller(ColorControllerBuilder::create)
+                                .build())
+                        .collapsed(true)
+                        .build())
                 .build();
     }
 
@@ -544,6 +680,24 @@ public class Config {
         {
             builder.group(GetTaskTargetGroup(taskTarget));
         }
+
+        builder
+            .group(OptionGroup.createBuilder()
+                .name(Text.of("Ticket Task Skip Option"))
+                .description(OptionDescription.of(Text.of("Set all ticket tasks at once. These will not automatically update and require you to close the Options window and reopen for these to take effect.")))
+                .option(ButtonOption.createBuilder()
+                        .name(Text.of("Skip all ticket tasks"))
+                        .description(OptionDescription.of(Text.of("Sets all of the ticket tasks to be skipped.")))
+                        .action((t, o) -> setAllTaskOverrideSkipTicketTask(true))
+                        .build())
+                .option(ButtonOption.createBuilder()
+                        .name(Text.of("Do not skip all ticket tasks"))
+                        .description(OptionDescription.of(Text.of("Sets all of the ticket tasks to not be skipped.")))
+                        .action((t, o) -> setAllTaskOverrideSkipTicketTask(false))
+                        .build())
+                .collapsed(true)
+                .build());
+
         return builder.build();
     }
 
@@ -569,6 +723,13 @@ public class Config {
                         .binding("", () -> this.getTaskOverridePet(taskTarget), newVal -> this.setTaskOverridePet(taskTarget, newVal))
                         .controller(StringControllerBuilder::create)
                         .build())
+                .option(Option.<Boolean>createBuilder()
+                        .name(Text.of(enumName + " ticket task skip"))
+                        .description(OptionDescription.of(Text.of("Whether to skip this task if it is a ticket task")))
+                        .binding(false, () -> this.getTaskOverrideSkipTicketTask(taskTarget), newVal -> this.setTaskOverrideSkipTicketTask(taskTarget, newVal))
+                        .controller(opt -> BooleanControllerBuilder.create(opt)
+                                .valueFormatter(val -> val ? Text.of("Skipped") : Text.of("Not Skipped")))
+                        .build())
                 .collapsed(true)
                 .build();
     }
@@ -582,6 +743,24 @@ public class Config {
                         .description(OptionDescription.of(Text.of("Turn on and off the balloon rope attached to the player.")))
                         .binding(false, () -> this.balloonRopeEnabled, newVal -> this.balloonRopeEnabled = newVal)
                         .controller(BooleanControllerBuilder::create)
+                        .build())
+                .group(OptionGroup.createBuilder()
+                        .name(Text.of("PXP Calculator settings"))
+                        .description(OptionDescription.of(Text.of("These are the setting for the PXP Calculator.")))
+                        .option(Option.<Integer>createBuilder()
+                                .name(Text.of("Legendary Pet Value"))
+                                .description(OptionDescription.of(Text.of("The PXP value of a legendary pet")))
+                                .binding(75, () -> this.legendaryPxpValue, newVal -> this.legendaryPxpValue = newVal)
+                                .controller(opt -> IntegerFieldControllerBuilder.create(opt)
+                                        .min(50).max(500))
+                                .build())
+                        .option(Option.<Integer>createBuilder()
+                                .name(Text.of("Mythic Pet Value"))
+                                .description(OptionDescription.of(Text.of("The PXP value of a mythic pet")))
+                                .binding(500, () -> this.mythicPxpValue, newVal -> this.mythicPxpValue = newVal)
+                                .controller(opt -> IntegerFieldControllerBuilder.create(opt)
+                                        .min(500).max(10000))
+                                        .build())
                         .build())
                 .build();
     }

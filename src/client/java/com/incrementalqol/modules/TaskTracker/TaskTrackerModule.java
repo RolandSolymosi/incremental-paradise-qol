@@ -1,5 +1,7 @@
 package com.incrementalqol.modules.TaskTracker;
 
+import com.incrementalqol.common.utils.Utils;
+import com.incrementalqol.common.utils.TextUtils;
 import com.incrementalqol.common.data.ToolType;
 import com.incrementalqol.common.data.World;
 import com.incrementalqol.common.utils.ConfiguredLogger;
@@ -250,14 +252,7 @@ public class TaskTrackerModule implements ClientModInitializer {
                     drawContext.fill(config.getHudPosX(), config.getHudPosY(), config.getHudPosX() + ((size + 1) * 5), config.getHudPosY() + 5 + (15 * taskList.size()), color);
                 }
                 for (int i = 0; i < taskList.size(); i++) {
-
-                    if (taskList.get(i).isCompleted()) {
-
-                        drawContext.drawText(textRenderer, taskList.get(i).render(true), config.getHudPosX() + 2, config.getHudPosY() + 5 + (15 * i), CompletedGreen, true);
-                    } else {
-                        drawContext.drawText(textRenderer, taskList.get(i).render(false), config.getHudPosX() + 2, config.getHudPosY() + 5 + (15 * i), toComplete, true);
-
-                    }
+                    drawContext.drawText(textRenderer, taskList.get(i).render(), config.getHudPosX() + 2, config.getHudPosY() + 5 + (15 * i), toComplete, true);
                 }
                 matrixStack.pop();
             }
@@ -282,7 +277,7 @@ public class TaskTrackerModule implements ClientModInitializer {
         assert MinecraftClient.getInstance().player != null;
         if (WorldChangeNotifier.getLastWorld() != World.BossArenas) {
             Optional<Task> firstIncompleteTask = taskList.stream()
-                    .filter(task -> !task.isCompleted())
+                    .filter(task -> !task.isCompleted() && !(task.isTicketTask() && task.getOverrideSkipTicketTask()))
                     .findFirst();
             assert MinecraftClient.getInstance().player != null;
             firstIncompleteTask.ifPresentOrElse(
@@ -360,7 +355,7 @@ public class TaskTrackerModule implements ClientModInitializer {
         for (ItemStack stack : content) {
             if (isTaskBook(stack)) {
                 processTaskBook(stack);
-            } else if (isPlayerHead(stack)) {
+            } else if (Utils.isPlayerHead(stack)) {
                 processPlayerHeadTask(stack);
             }
         }
@@ -371,16 +366,11 @@ public class TaskTrackerModule implements ClientModInitializer {
         return currentItem.getName().getString().contains("Book");
     }
 
-    private static boolean isPlayerHead(ItemStack stack) {
-        Item currentItem = stack.getItem();
-        return currentItem.getName().getString().contains("Head");
-    }
-
 
     private static void processPlayerHeadTask(ItemStack stack) {
         LoreComponent lore = stack.get(DataComponentTypes.LORE);
         List<Text> text = lore.lines();
-        List<String> blocks = parseLoreLines(text);
+        List<String> blocks = Utils.parseLoreLines(text);
 
 
         if (blocks.get(0).contains("Task")) {
@@ -407,7 +397,7 @@ public class TaskTrackerModule implements ClientModInitializer {
     private static void processTaskBook(ItemStack stack) {
         LoreComponent lore = stack.get(DataComponentTypes.LORE);
         List<Text> text = lore.lines();
-        List<String> blocks = parseLoreLines(text);
+        List<String> blocks = Utils.parseLoreLines(text);
 
         String[] taskDetails = extractTaskDetails(blocks.get(0));
 
@@ -424,23 +414,6 @@ public class TaskTrackerModule implements ClientModInitializer {
             }
             taskList.add(newTask);
         }
-    }
-
-    private static List<String> parseLoreLines(List<Text> text) {
-        List<String> blocks = new ArrayList<>();
-        StringBuilder blockBuilder = new StringBuilder();
-        for (Text line : text) {
-            if (line.getString().equals(" ")) {
-                blocks.add(blockBuilder.toString());
-                blockBuilder.setLength(0);
-            } else {
-                blockBuilder.append(line.getString());
-            }
-        }
-        if (!blockBuilder.isEmpty()) {
-            blocks.add(blockBuilder.toString());
-        }
-        return blocks;
     }
 
 
