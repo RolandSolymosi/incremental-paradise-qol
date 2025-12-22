@@ -130,6 +130,7 @@ public class TaskCollection {
         TaskDescriptors.put(TaskTarget.Glowdust, new TaskDescriptor(TaskType.Mining, "beta", new ArrayList<>(List.of("beta")), TaskType.Mining, ToolType.Pickaxe));
         TaskDescriptors.put(TaskTarget.Slimecrust, new TaskDescriptor(TaskType.Mining, "beta", new ArrayList<>(List.of("beta")), TaskType.Mining, ToolType.Pickaxe));
         TaskDescriptors.put(TaskTarget.Voidshard, new TaskDescriptor(TaskType.Mining, "beta", new ArrayList<>(List.of("beta")), TaskType.Mining, ToolType.Pickaxe));
+        TaskDescriptors.put(TaskTarget.Petrafin, new TaskDescriptor(TaskType.Mining, "delta", new ArrayList<>(List.of("delta")), TaskType.Mining, ToolType.Pickaxe));
         TaskDescriptors.put(TaskTarget.NestingWood, new TaskDescriptor(TaskType.Foraging, "w4", new ArrayList<>(List.of("w4")), TaskType.Foraging, ToolType.Axe));
         TaskDescriptors.put(TaskTarget.Passionfruit, new TaskDescriptor(TaskType.Foraging, "w4", new ArrayList<>(List.of("w4")), TaskType.Foraging, ToolType.Axe));
         TaskDescriptors.put(TaskTarget.Cryoflora, new TaskDescriptor(TaskType.Foraging, "alpha", new ArrayList<>(List.of("alpha")), TaskType.Foraging, ToolType.Axe));
@@ -140,6 +141,7 @@ public class TaskCollection {
         TaskDescriptors.put(TaskTarget.Scorchberry, new TaskDescriptor(TaskType.Foraging, "alpha", new ArrayList<>(List.of("alpha")), TaskType.Foraging, ToolType.Axe));
         TaskDescriptors.put(TaskTarget.ThornBeetle, new TaskDescriptor(TaskType.Foraging, "alpha", new ArrayList<>(List.of("alpha")), TaskType.Foraging, ToolType.Axe));
         TaskDescriptors.put(TaskTarget.Worm, new TaskDescriptor(TaskType.Foraging, "alpha", new ArrayList<>(List.of("alpha")), TaskType.Foraging, ToolType.Axe));
+        TaskDescriptors.put(TaskTarget.Driftwood, new TaskDescriptor(TaskType.Foraging, "delta", new ArrayList<>(List.of("delta")), TaskType.Foraging, ToolType.Axe));
         TaskDescriptors.put(TaskTarget.Bat, new TaskDescriptor(TaskType.Combat, "w4", new ArrayList<>(List.of("w4")), TaskType.Combat, ToolType.Bow));
         TaskDescriptors.put(TaskTarget.Rat, new TaskDescriptor(TaskType.Combat, "sewer", new ArrayList<>(List.of("w4")), TaskType.Combat, ToolType.Melee));
         TaskDescriptors.put(TaskTarget.Rattus, new TaskDescriptor(TaskType.Combat, "rattus", new ArrayList<>(List.of("w4")), TaskType.Combat, ToolType.Melee));
@@ -320,6 +322,7 @@ public class TaskCollection {
         TaskMap.put("glowdust", TaskTarget.Glowdust);
         TaskMap.put("slimecrust", TaskTarget.Slimecrust);
         TaskMap.put("voidshard", TaskTarget.Voidshard);
+        TaskMap.put("petrafin", TaskTarget.Petrafin);
         TaskMap.put("nesting wood", TaskTarget.NestingWood);
         TaskMap.put("passionfruit", TaskTarget.Passionfruit);
         TaskMap.put("cryoflora", TaskTarget.Cryoflora);
@@ -330,6 +333,7 @@ public class TaskCollection {
         TaskMap.put("scorchberries", TaskTarget.Scorchberry);
         TaskMap.put("thorn beetles", TaskTarget.ThornBeetle);
         TaskMap.put("worms", TaskTarget.Worm);
+        TaskMap.put("driftwood", TaskTarget.Driftwood);
         TaskMap.put("bats", TaskTarget.Bat);
         TaskMap.put("rats", TaskTarget.Rat);
         TaskMap.put("rattus", TaskTarget.Rattus);
@@ -520,10 +524,10 @@ public class TaskCollection {
 
         // WORLD 4
         // Mining
-        Cheddore, BlueCheese, Glowdust, Slimecrust, Voidshard,
+        Cheddore, BlueCheese, Glowdust, Slimecrust, Voidshard, Petrafin,
 
         // Foraging
-        NestingWood, Passionfruit, Cryoflora, Chillfruit, Sulphoroot, Jackfruit, Pyrospire, Scorchberry, ThornBeetle, Worm,
+        NestingWood, Passionfruit, Cryoflora, Chillfruit, Sulphoroot, Jackfruit, Pyrospire, Scorchberry, ThornBeetle, Worm, Driftwood,
 
         // Combat
         Bat, Rat, Rattus, Frog, Sniper, AngryMiner, Ravager,

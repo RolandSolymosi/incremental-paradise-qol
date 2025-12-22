@@ -62,7 +62,7 @@ public class DepositHotkeyModule implements ClientModInitializer {
                         s -> s.equals("Safe"),
                         s -> {
                             if (!s.isEmpty()) {
-                                var lore = s.get(23).get(DataComponentTypes.LORE);
+                                var lore = s.get(22).get(DataComponentTypes.LORE);
                                 if (lore != null) {
                                     return !lore.lines().getLast().getString().contains("You have no items to deposit");
                                 }
@@ -70,7 +70,7 @@ public class DepositHotkeyModule implements ClientModInitializer {
                             return false;
                         },
                         (input) -> {
-                            ScreenInteraction.WellKnownInteractions.ClickSlot(input.getLeft(), (short)23, ScreenInteraction.WellKnownInteractions.Button.Left, SlotActionType.PICKUP);
+                            ScreenInteraction.WellKnownInteractions.ClickSlot(input.getLeft(), (short)22, ScreenInteraction.WellKnownInteractions.Button.Left, SlotActionType.PICKUP);
                             return true;
                         }
                 )

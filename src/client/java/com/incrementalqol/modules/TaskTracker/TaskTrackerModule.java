@@ -408,7 +408,8 @@ public class TaskTrackerModule implements ClientModInitializer {
             String number = taskDetails[1];
             String type = taskDetails[2];
 
-            Task newTask = new Task(stack.getName().getString(), description, "/warp ", 1, false, world, number, type, false, isSocialiteTask(blocks.getFirst()), getRequiredToolType(blocks.get(1)));
+            String taskName = stack.getName().getString();
+            Task newTask = new Task(cleanTaskName(taskName), description, "/warp ", 1, false, world, number, type, false, isSocialiteTask(blocks.getFirst()), getRequiredToolType(blocks.get(1)));
             if (stack.getItem().getName().getString().contains("Written")) {
                 newTask.setCompleted();
             }
@@ -467,10 +468,9 @@ public class TaskTrackerModule implements ClientModInitializer {
     }
 
     private static String cleanTaskName(String taskName) {
-        if (taskName.contains("\uD83D\uDD25")) {
-            return taskName.substring(3, taskName.length() - 3);
-        } else {
-            return taskName;
-        }
+        Pattern p = Pattern.compile("^≡ƒöÑ?\\s*(.+?)\\s*(?:≡ƒöÑ|EASY|MEDIUM|HARD)?$");
+        Matcher m = p.matcher(taskName);
+
+        return m.matches() ? m.group(1) : "";
     }
 }

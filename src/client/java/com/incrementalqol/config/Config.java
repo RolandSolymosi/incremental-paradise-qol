@@ -53,9 +53,9 @@ public class Config {
     @SerialEntry
     private boolean autoSwapTools;
     @SerialEntry
-    private boolean autoLevelUp;
+    private boolean autoLevelUp = true;
     @SerialEntry
-    private boolean warpOnAutoLevelUp = true;
+    private boolean warpOnAutoLevelUp = false;
     @SerialEntry
     private Color textColor = new Color(0xfcfcfc);
     @SerialEntry
@@ -355,13 +355,13 @@ public class Config {
                         .option(Option.<Boolean>createBuilder()
                                 .name(Text.of("Toggle Auto LevelUp"))
                                 .description(OptionDescription.of(Text.of("Turn on and off auto LevelUp when no task remained when using Next Warp.")))
-                                .binding(false, () -> this.autoLevelUp, newVal -> this.autoLevelUp = newVal)
+                                .binding(true, () -> this.autoLevelUp, newVal -> this.autoLevelUp = newVal)
                                 .controller(BooleanControllerBuilder::create)
                                 .build())
                         .option(Option.<Boolean>createBuilder()
                                 .name(Text.of("Warp On Auto LevelUp"))
                                 .description(OptionDescription.of(Text.of("Turn on and off if you warp on auto LevelUp")))
-                                .binding(true, () -> this.warpOnAutoLevelUp, newVal -> this.warpOnAutoLevelUp = newVal)
+                                .binding(false, () -> this.warpOnAutoLevelUp, newVal -> this.warpOnAutoLevelUp = newVal)
                                 .controller(BooleanControllerBuilder::create)
                                 .build())
                         .build())

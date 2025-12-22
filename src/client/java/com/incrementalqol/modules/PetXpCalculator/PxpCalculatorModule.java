@@ -52,7 +52,7 @@ public class PxpCalculatorModule implements ClientModInitializer {
         ClientCommandRegistrationCallback.EVENT.register((dispatcher, registryAccess) -> {
             dispatcher.register(
                     ClientCommandManager.literal("pxpcalc").executes(context -> {
-                        context.getSource().sendFeedback(Text.literal("§bCurrent pxp in inventory:§r " + sumPetXpValue()));
+                        MinecraftClient.getInstance().player.sendMessage(Text.literal("§bCurrent pxp in inventory:§r " + sumPetXpValue()), false);
                         return 0;
                     })
             );

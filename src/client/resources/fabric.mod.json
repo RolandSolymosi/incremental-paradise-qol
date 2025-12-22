@@ -1,7 +1,7 @@
 {
 	"schemaVersion": 1,
 	"id": "incremental-paradise-qol",
-	"version": "2.5.0",
+	"version": "2.5.1",
 	"name": "Incremental Paradise QoL",
 	"description": "A bunch of handy tweaks and additions for the Incremental Paradise server. Client-side only.",
 	"authors": [
@@ -27,7 +27,8 @@
 			"com.incrementalqol.modules.PetXpCalculator.PxpCalculatorModule",
 			"com.incrementalqol.modules.CommandAliases.CommandAliasModule",
 			"com.incrementalqol.modules.Loadouts.LoadoutsModule",
-			"com.incrementalqol.modules.OptionsModule"
+			"com.incrementalqol.modules.OptionsModule",
+			"com.incrementalqol.modules.LinkCommandModule"
 		]
 	},
 	"mixins": [

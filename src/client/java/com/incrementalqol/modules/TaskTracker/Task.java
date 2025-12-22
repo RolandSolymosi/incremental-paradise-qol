@@ -49,54 +49,54 @@ public class Task {
 
 
     private static final List<Pattern> MISC_PATTERNS = List.of(
-            Pattern.compile("Clean (?<amount>[0-9.,]+[km]?) (?<type>.+) \\(?(?<progress>[0-9.,]+[km]?)"),
-            Pattern.compile("Repair (?<amount>[0-9.,]+[km]?) (?<type>.+) in [^(]+\\(?(?<progress>[0-9.,]+[km]?)"),
-            Pattern.compile("Sell (?<amount>[0-9.,]+[km]?) (?<type>.+) \\(?(?<progress>[0-9.,]+[km]?)"),
-            Pattern.compile("Gain (?<amount>[0-9.,]+[km]?) (?<type>.+) \\(?(?<progress>[0-9.,]+[km]?)"),
-            Pattern.compile("Loot (?<amount>[0-9.,]+[km]?) (?<type>.+) \\(?(?<progress>[0-9.,]+[km]?)")
+            Pattern.compile("Clean (?<amount>[0-9.,]+[kmbt]?) (?<type>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)"),
+            Pattern.compile("Repair (?<amount>[0-9.,]+[kmbt]?) (?<type>.+) in .+\\(?(?<progress>[0-9.,]+[kmbt]?)"),
+            Pattern.compile("Sell (?<amount>[0-9.,]+[kmbt]?) (?<type>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)"),
+            Pattern.compile("Gain (?<amount>[0-9.,]+[kmbt]?) (?<type>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)"),
+            Pattern.compile("Loot (?<amount>[0-9.,]+[kmbt]?) (?<type>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)")
     );
 
     private static final List<Pattern> GAMES_PATTERNS = List.of(
-            Pattern.compile("Play (?<amount>[0-9.,]+[km]?) (?<constraint>.+) of (?<type>.+) \\(?(?<progress>[0-9.,]+[km]?)"),
-            Pattern.compile("Earn (?<amount>[0-9.,]+[km]?) (?<constraint>.+) in (?<type>.+) \\(?(?<progress>[0-9.,]+[km]?)"),
-            Pattern.compile("Earn (?<amount>[0-9.,]+[km]?)\\s+(?<constraint>.+) playing (?<type>.+) \\(?(?<progress>[0-9.,]+[km]?)"),
-            Pattern.compile("Find (?<amount>[0-9.,]+[km]?) (?<constraint>.+) while playing (?<type>.+) \\(?(?<progress>[0-9.,]+[km]?)")
+            Pattern.compile("Play (?<amount>[0-9.,]+[kmbt]?) (?<opt>.+) of (?<type>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)"),
+            Pattern.compile("Earn (?<amount>[0-9.,]+[kmbt]?) (?<opt>.+) in (?<type>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)"),
+            Pattern.compile("Earn (?<amount>[0-9.,]+[kmbt]?)\\s+(?<opt>.+) playing (?<type>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)"),
+            Pattern.compile("Find (?<amount>[0-9.,]+[kmbt]?) (?<opt>.+) while playing (?<type>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)")
     );
 
     private static final List<Pattern> FORAGING_PATTERNS = List.of(
-            Pattern.compile("Collect (?<amount>[0-9.,]+[km]?) (?<large>Large )?(?<type>.+) with (?<constraint>.+) \\(?(?<progress>[0-9.,]+[km]?)"),
-            Pattern.compile("Collect (?<amount>[0-9.,]+[km]?) (?<large>Large )?(?<type>.+) \\(?(?<progress>[0-9.,]+[km]?)")
+            Pattern.compile("Collect (?<amount>[0-9.,]+[kmbt]?) (?<large>Large )?(?<type>.+) with (?<constraint>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)"),
+            Pattern.compile("Collect (?<amount>[0-9.,]+[kmbt]?) (?<large>Large )?(?<type>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)")
     );
 
     private static final List<Pattern> COMBAT_PATTERNS = List.of(
-            Pattern.compile("Kill (?:the )?(?<type>.+) \\(?(?<progress>[0-9.,]+[km]?)/(?<amount>[0-9.,]+[km]?)"),
-            Pattern.compile("Slay (?:the )?(?<type>.+) \\(?(?<progress>[0-9.,]+[km]?)/(?<amount>[0-9.,]+[km]?)"),
-            Pattern.compile("Collect (?<amount>[0-9.,]+[km]?) drops from (?<type>.+) with (?<constraint>.+) \\(?(?<progress>[0-9.,]+[km]?)"),
-            Pattern.compile("Collect (?<amount>[0-9.,]+[km]?) drops from (?<type>.+) \\(?(?<progress>[0-9.,]+[km]?)")
+            Pattern.compile("Kill (?:the )?(?<type>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)/(?<amount>[0-9.,]+[kmbt]?)"),
+            Pattern.compile("Slay (?:the )?(?<type>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)/(?<amount>[0-9.,]+[kmbt]?)"),
+            Pattern.compile("Collect (?<amount>[0-9.,]+[kmbt]?) drops from (?<type>.+) with (?<constraint>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)"),
+            Pattern.compile("Collect (?<amount>[0-9.,]+[kmbt]?) drops from (?<type>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)")
     );
 
     private static final List<Pattern> FISHING_PATTERNS = List.of(
-            Pattern.compile("Spear [0-9.,]+ (?<type>.+) (?<constraint>in a row without missing) (?<amount>[0-9.,]+[km]?).+\\((?<progress>[0-9.,]+[km]?)"),
-            Pattern.compile("Collect (?<amount>[0-9.,]+[km]?) (?<color>.+) (?<constraint>colored) (?<type>.+) using a Fishing Spear \\(?(?<progress>[0-9.,]+[km]?)"),
-            Pattern.compile("Collect (?<amount>[0-9.,]+[km]?) (?<type>.+) using a Fishing Spear \\(?(?<progress>[0-9.,]+[km]?)"),
-            Pattern.compile("Collect (?<amount>[0-9.,]+[km]?) drops from (?<type>.+) with (?<constraint>.+) \\(?(?<progress>[0-9.,]+[km]?)"),
-            Pattern.compile("Collect (?<amount>[0-9.,]+[km]?) drops from (?<type>.+) \\(?(?<progress>[0-9.,]+[km]?)"),
-            Pattern.compile("Collect (?<amount>[0-9.,]+[km]?) (?<type>.+) \\(?(?<progress>[0-9.,]+[km]?)")
+            Pattern.compile("Spear [0-9.,]+ (?<type>.+) (?<constraint>in a row without missing) (?<amount>[0-9.,]+[kmbt]?).+\\((?<progress>[0-9.,]+[kmbt]?)"),
+            Pattern.compile("Collect (?<amount>[0-9.,]+[kmbt]?) (?<color>.+) colored (?<type>.+) using a Fishing Spear \\(?(?<progress>[0-9.,]+[kmbt]?)"),
+            Pattern.compile("Collect (?<amount>[0-9.,]+[kmbt]?) (?<type>.+) using a Fishing Spear \\(?(?<progress>[0-9.,]+[kmbt]?)"),
+            Pattern.compile("Collect (?<amount>[0-9.,]+[kmbt]?) drops from (?<type>.+) with (?<constraint>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)"),
+            Pattern.compile("Collect (?<amount>[0-9.,]+[kmbt]?) drops from (?<type>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)"),
+            Pattern.compile("Collect (?<amount>[0-9.,]+[kmbt]?) (?<type>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)")
     );
 
     private static final List<Pattern> MINING_PATTERNS = List.of(
-            Pattern.compile("Collect (?<amount>[0-9.,]+[km]?) (?<type>.+) from (?<shiny>Shiny) Ores \\(?(?<progress>[0-9.,]+[km]?)"),
-            Pattern.compile("Collect (?<amount>[0-9.,]+[km]?) (?<shiny>Shiny) (?<type>.+) \\(?(?<progress>[0-9.,]+[km]?)"),
-            Pattern.compile("Collect (?<amount>[0-9.,]+[km]?) (?<type>.+) with (?<constraint>.+) \\(?(?<progress>[0-9.,]+[km]?)"),
-            Pattern.compile("Collect (?<amount>[0-9.,]+[km]?) (?<type>.+) \\(?(?<progress>[0-9.,]+[km]?)")
+            Pattern.compile("Collect (?<amount>[0-9.,]+[kmbt]?) (?<type>.+) from (?<shiny>Shiny) Ores \\(?(?<progress>[0-9.,]+[kmbt]?)"),
+            Pattern.compile("Collect (?<amount>[0-9.,]+[kmbt]?) (?<shiny>Shiny) (?<type>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)"),
+            Pattern.compile("Collect (?<amount>[0-9.,]+[kmbt]?) (?<type>.+) with (?<constraint>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)"),
+            Pattern.compile("Collect (?<amount>[0-9.,]+[kmbt]?) (?<type>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)")
     );
 
     private static final List<Pattern> FARMING_PATTERNS = List.of(
-            Pattern.compile("Harvest (?<amount>[0-9.,]+[km]?) (?<type>.+) with (?<constraint>.+) \\(?(?<progress>[0-9.,]+[km]?)"),
-            Pattern.compile("Harvest (?<amount>[0-9.,]+[km]?) (?<type>.+) \\(?(?<progress>[0-9.,]+[km]?)")
+            Pattern.compile("Harvest (?<amount>[0-9.,]+[kmbt]?) (?<type>.+) with (?<constraint>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)"),
+            Pattern.compile("Harvest (?<amount>[0-9.,]+[kmbt]?) (?<type>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)")
     );
 
-    //private static final Pattern PATTERN = Pattern.compile("^\\w+ (?:the|\\d+) (?<shiny>Shiny)?(?<type>[^(]+?)(?: with (?<constraint>[^(]+))? \\((?<progress>[0-9.,]+[km]?)/(?<amount>[0-9.,]+[km]?)\\)$");
+    //private static final Pattern PATTERN = Pattern.compile("^\\w+ (?:the|\\d+) (?<shiny>Shiny)?(?<type>[^(]+?)(?: with (?<constraint>[^(]+))? \\((?<progress>[0-9.,]+[kmbt]?)/(?<amount>[0-9.,]+[kmbt]?)\\)$");
 
     public Task(String name, String description, String warp, int strWidth, boolean completed, String world, String number, String type, boolean isTicket, boolean isSocialite, ToolType requiredTool) {
         this.name = name;
@@ -104,7 +104,7 @@ public class Task {
         this.warp = warp;
         this.strWidth = strWidth;
         this.completed = completed;
-        this.generalProgressPattern = Pattern.compile(Pattern.quote(this.name) + " \\(?(?<progress>[0-9.,]+[km]?)");
+        this.generalProgressPattern = Pattern.compile(Pattern.quote(this.name) + " \\(?(?<progress>[0-9.,]+[kmbt]?)");
         this.world = world;
         this.number = number;
         this.taskType = type.trim();
