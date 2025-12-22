@@ -35,8 +35,7 @@ public class SellAllHotkeyModule implements ClientModInitializer {
                 "Auto Sell",
                 InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_COMMA,
-                "Incremental QOL"
-        ));
+                com.incrementalqol.modules.OptionsModule.CATEGORY));
     }
 
     @Override

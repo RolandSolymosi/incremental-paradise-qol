@@ -1,7 +1,6 @@
 package com.incrementalqol.modules.TaskTracker;
 
 import com.incrementalqol.common.utils.Utils;
-import com.incrementalqol.common.utils.TextUtils;
 import com.incrementalqol.common.data.ToolType;
 import com.incrementalqol.common.data.World;
 import com.incrementalqol.common.utils.ConfiguredLogger;
@@ -15,10 +14,19 @@ import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
+import net.minecraft.text.Text;
 import net.minecraft.client.font.TextRenderer;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.gui.DrawContext;
+import net.minecraft.text.Text;
+import net.minecraft.client.font.TextRenderer;
+import net.minecraft.util.Identifier;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
-import net.minecraft.client.util.math.MatrixStack;
+import org.joml.Matrix3x2fStack;
+import com.incrementalqol.modules.OptionsModule;
+import net.minecraft.util.Pair;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.LoreComponent;
 import net.minecraft.item.Item;
@@ -39,7 +47,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
 
 public class TaskTrackerModule implements ClientModInitializer {
     public static final String MOD_ID = "incremental-qol";
@@ -83,12 +90,10 @@ public class TaskTrackerModule implements ClientModInitializer {
                 "TaskTracker",
                 s -> s.equals("Tasks"),
                 s -> !s.isEmpty(),
-                (input) ->
-                {
+                (input) -> {
                     parseInventory(input.getRight());
                     return false;
-                }
-        )
+                })
                 .setKeepScreenHidden(false)
                 .build();
         screenInteraction.startAsync(true);
@@ -97,8 +102,7 @@ public class TaskTrackerModule implements ClientModInitializer {
                 "NextWarpLevelUp",
                 s -> s.equals("Tasks"),
                 s -> !s.isEmpty(),
-                (input) ->
-                {
+                (input) -> {
                     ItemStack levelUpSlot = null;
                     short levelUpSlotId = 0;
                     for (var slot : input.getRight()) {
@@ -112,16 +116,14 @@ public class TaskTrackerModule implements ClientModInitializer {
                     if (levelUpSlot != null) {
                         var lore = levelUpSlot.get(DataComponentTypes.LORE);
                         if (lore != null && lore.lines().getLast().getString().contains("Click to claim rewards")) {
-                            ScreenInteraction.WellKnownInteractions.ClickSlot(input.getLeft(), levelUpSlotId, ScreenInteraction.WellKnownInteractions.Button.Left, SlotActionType.PICKUP);
+                            ScreenInteraction.WellKnownInteractions.ClickSlot(input.getLeft(), levelUpSlotId,
+                                    ScreenInteraction.WellKnownInteractions.Button.Left, SlotActionType.PICKUP);
                             return false;
                         }
                     }
                     return true;
-                }
-        )
-                .setStartingAction((c) ->
-                        c.player.networkHandler.sendChatCommand("tasks")
-                )
+                })
+                .setStartingAction((c) -> c.player.networkHandler.sendChatCommand("tasks"))
                 .setKeepScreenHidden(true)
                 .build();
 
@@ -135,14 +137,10 @@ public class TaskTrackerModule implements ClientModInitializer {
                         return true;
                     }
                     return false;
-                }
-        )
-                .setStartingAction((c) ->
-                        c.player.networkHandler.sendChatCommand("tasks")
-                )
+                })
+                .setStartingAction((c) -> c.player.networkHandler.sendChatCommand("tasks"))
                 .setKeepScreenHidden(true)
                 .build();
-
 
         ClientTickEvents.END_CLIENT_TICK.register(TaskTrackerModule::keybindCheck);
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
@@ -182,7 +180,7 @@ public class TaskTrackerModule implements ClientModInitializer {
                     if (command == null) {
                         return;
                     }
-                    MinecraftClient.getInstance().player.networkHandler.sendCommand(command);
+                    MinecraftClient.getInstance().player.networkHandler.sendChatCommand(command);
                     tickCounter = 0;
                     fallbackIndex++;
                 }
@@ -192,14 +190,13 @@ public class TaskTrackerModule implements ClientModInitializer {
             if (MinecraftClient.getInstance().player == null) {
                 return;
             }
-            if (
-                    message.getString().contains("You are now Prestige ") ||
-                            message.getString().contains("You are now Ascension ") ||
-                            message.getString().contains("You are now Nightmare Prestige ") ||
-                            message.getString().contains("You are now Transcendence ") ||
-                            message.getString().contains("You started the Tr") ||
-                            message.getString().contains("You completed Tr") ||
-                            message.getString().contains("Trial abandoned")) {
+            if (message.getString().contains("You are now Prestige ") ||
+                    message.getString().contains("You are now Ascension ") ||
+                    message.getString().contains("You are now Nightmare Prestige ") ||
+                    message.getString().contains("You are now Transcendence ") ||
+                    message.getString().contains("You started the Tr") ||
+                    message.getString().contains("You completed Tr") ||
+                    message.getString().contains("Trial abandoned")) {
                 enforceTaskRefreshScreenInteraction.startAsync(false);
             }
         });
@@ -228,7 +225,9 @@ public class TaskTrackerModule implements ClientModInitializer {
             int rectangleY = 10;
             // x1, y1, x2, y2, color
 
-            if (!MinecraftClient.getInstance().options.hudHidden && config.getIsHudEnabled() && !taskList.isEmpty() && !(config.getIsHudDisabledDuringBossFight() && WorldChangeNotifier.getLastWorld() == World.BossArenas)) {
+            if (!MinecraftClient.getInstance().options.hudHidden && config.getIsHudEnabled() && !taskList.isEmpty()
+                    && !(config.getIsHudDisabledDuringBossFight()
+                            && WorldChangeNotifier.getLastWorld() == World.BossArenas)) {
                 int size = taskList.getFirst().getStrWidth();
                 for (Task task : taskList) {
                     if (task.getStrWidth() > size) {
@@ -240,23 +239,26 @@ public class TaskTrackerModule implements ClientModInitializer {
                     taskList.sort(Comparator.comparing(Task::getTaskType));
                 }
 
-
                 float scaleFactor = (float) config.getHudScale();
+                Matrix3x2fStack matrixStack = drawContext.getMatrices();
+                matrixStack.pushMatrix();
+                matrixStack.scale(scaleFactor, scaleFactor);
 
-                MatrixStack matrixStack = drawContext.getMatrices();
-                matrixStack.push();
-                matrixStack.scale(scaleFactor, scaleFactor, scaleFactor);
+                // Use the text renderer from the client to get the line height
+                var renderer = MinecraftClient.getInstance().textRenderer;
 
-
-                if (config.getHudBackgroundOpacity() != 0) {
-                    drawContext.fill(config.getHudPosX(), config.getHudPosY(), config.getHudPosX() + ((size + 1) * 5), config.getHudPosY() + 5 + (15 * taskList.size()), color);
+                // Draw each tracked task
+                int index = 0;
+                for (Task task : taskList) {
+                    var text = task.render();
+                    drawContext.drawTextWithShadow(renderer, text, (int) (config.getHudPosX() / scaleFactor),
+                            (int) ((config.getHudPosY() / scaleFactor) + (index * 10)), 0xFFFFFFFF);
+                    index++;
                 }
-                for (int i = 0; i < taskList.size(); i++) {
-                    drawContext.drawText(textRenderer, taskList.get(i).render(), config.getHudPosX() + 2, config.getHudPosY() + 5 + (15 * i), toComplete, true);
-                }
-                matrixStack.pop();
+                matrixStack.popMatrix();
             }
         }));
+
     }
 
     private static void resetWarp() {
@@ -291,30 +293,40 @@ public class TaskTrackerModule implements ClientModInitializer {
                                     Optional<String> wardrobe = task.getWardrobe();
                                     wardrobe.ifPresent(wardrobeName -> {
                                         ConfiguredLogger.LogInfo(LOGGER, "wardrobe " + wardrobeName);
-                                        MinecraftClient.getInstance().player.networkHandler.sendCommand("wardrobe " + wardrobeName);
+                                        MinecraftClient.getInstance().player.networkHandler
+                                                .sendChatCommand("wardrobe " + wardrobeName);
                                     });
                                 }
                                 String petOverride = task.getPet();
                                 if (!Objects.equals(petOverride, "")) {
-                                    MinecraftClient.getInstance().player.networkHandler.sendCommand("pet " + petOverride);
+                                    MinecraftClient.getInstance().player.networkHandler
+                                            .sendChatCommand("pet " + petOverride);
                                 }
-                                if (Config.HANDLER.instance().getAutoSwapTools() && task.descriptor.getDefaultHotBarSlot() != null) {
-                                    ToolType tool = task.getRequiredTool() == null ? task.descriptor.getDefaultHotBarSlot() : task.getRequiredTool();
+                                if (Config.HANDLER.instance().getAutoSwapTools()
+                                        && task.descriptor.getDefaultHotBarSlot() != null) {
+                                    ToolType tool = task.getRequiredTool() == null
+                                            ? task.descriptor.getDefaultHotBarSlot()
+                                            : task.getRequiredTool();
                                     var slotId = config.getSlotToDefault(tool);
                                     MinecraftClient.getInstance().player.getInventory().setSelectedSlot(slotId);
-                                    MinecraftClient.getInstance().player.networkHandler.sendPacket(new UpdateSelectedSlotC2SPacket(slotId));
+                                    MinecraftClient.getInstance().player.networkHandler
+                                            .sendPacket(new UpdateSelectedSlotC2SPacket(slotId));
                                 }
 
                                 String warpOverride = task.getOverrideWarp();
                                 // Handles edge case of gaming tasks and wanting to warp
                                 if (!Objects.equals(warpOverride, "") && Objects.equals(task.getTaskType(), "Gaming")) {
-                                    MinecraftClient.getInstance().player.networkHandler.sendCommand(warpOverride);
+                                    MinecraftClient.getInstance().player.networkHandler.sendChatCommand(warpOverride);
                                 }
-                                MinecraftClient.getInstance().player.networkHandler.sendCommand(task.getWarp());
-                            } else if (task.getTaskType().equals("Quest") | task.getTaskType().equals("Tutorial")) {
-                                MinecraftClient.getInstance().player.sendMessage(Text.literal("No being lazy with the quests and tutorials, go complete them!"), false);
+                                MinecraftClient.getInstance().player.networkHandler.sendChatCommand(task.getWarp());
+                            } else if (task.getTaskType().equals("Quest") || task.getTaskType().equals("Tutorial")) {
+                                MinecraftClient.getInstance().player.sendMessage(
+                                        Text.literal("No being lazy with the quests and tutorials, go complete them!"),
+                                        false);
                             } else {
-                                MinecraftClient.getInstance().player.sendMessage(Text.literal("The task was not correctly identified, send task description to Devs (QoL channel)."), false);
+                                MinecraftClient.getInstance().player.sendMessage(Text.literal(
+                                        "The task was not correctly identified, send task description to Devs (QoL channel)."),
+                                        false);
                             }
                         }
                     },
@@ -329,24 +341,22 @@ public class TaskTrackerModule implements ClientModInitializer {
                                 });
                             });
                         } else {
-                            MinecraftClient.getInstance().player.sendMessage(Text.literal("No incomplete tasks available."), false);
+                            MinecraftClient.getInstance().player
+                                    .sendMessage(Text.literal("No incomplete tasks available."), false);
                         }
-                    }
-            );
+                    });
         } else {
-            MinecraftClient.getInstance().player.sendMessage(Text.literal("§4You're in the middle of a boss fight, I don't think it is time to task!"), false);
+            MinecraftClient.getInstance().player.sendMessage(
+                    Text.literal("§4You're in the middle of a boss fight, I don't think it is time to task!"), false);
         }
     }
 
     private void initializeKeybinds() {
-
         taskWarp = KeyBindingHelper.registerKeyBinding(new KeyBinding(
-                "Warp to Task Location",
+                "Task Warp",
                 InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_R,
-                "Incremental QOL"
-        ));
-
+                OptionsModule.CATEGORY));
     }
 
     public static void parseInventory(List<ItemStack> content) {
@@ -366,12 +376,10 @@ public class TaskTrackerModule implements ClientModInitializer {
         return currentItem.getName().getString().contains("Book");
     }
 
-
     private static void processPlayerHeadTask(ItemStack stack) {
         LoreComponent lore = stack.get(DataComponentTypes.LORE);
         List<Text> text = lore.lines();
         List<String> blocks = Utils.parseLoreLines(text);
-
 
         if (blocks.get(0).contains("Task")) {
             String[] taskDetails = extractTaskDetails(blocks.get(0));
@@ -385,7 +393,9 @@ public class TaskTrackerModule implements ClientModInitializer {
 
                 // Strip emojis from name being the fire ones if they exist
                 String taskName = stack.getName().getString();
-                Task newTask = new Task(cleanTaskName(taskName), description, "/warp ", 1, false, world, number, type, isTicketTask(blocks.getFirst()), isSocialiteTask(blocks.getFirst()), getRequiredToolType(blocks.get(1)));
+                Task newTask = new Task(cleanTaskName(taskName), description, "/warp ", 1, false, world, number, type,
+                        isTicketTask(blocks.getFirst()), isSocialiteTask(blocks.getFirst()),
+                        getRequiredToolType(blocks.get(1)));
                 if (newTask.getCompletedStatus()) {
                     newTask.setCompleted();
                 }
@@ -408,7 +418,8 @@ public class TaskTrackerModule implements ClientModInitializer {
             String number = taskDetails[1];
             String type = taskDetails[2];
 
-            Task newTask = new Task(stack.getName().getString(), description, "/warp ", 1, false, world, number, type, false, isSocialiteTask(blocks.getFirst()), getRequiredToolType(blocks.get(1)));
+            Task newTask = new Task(stack.getName().getString(), description, "/warp ", 1, false, world, number, type,
+                    false, isSocialiteTask(blocks.getFirst()), getRequiredToolType(blocks.get(1)));
             if (stack.getItem().getName().getString().contains("Written")) {
                 newTask.setCompleted();
             }
@@ -416,14 +427,14 @@ public class TaskTrackerModule implements ClientModInitializer {
         }
     }
 
-
     private static String[] extractTaskDetails(String block) {
         String world = "";
         String number = "";
         String type = "";
 
         if (block.contains("World") || block.contains("Nightmare")) {
-            Pattern descriptorPattern = Pattern.compile("(?<world>World|Nightmare) #(?<number>\\d+)\\s*(?<type>.+?)\\s*Task");
+            Pattern descriptorPattern = Pattern
+                    .compile("(?<world>World|Nightmare) #(?<number>\\d+)\\s*(?<type>.+?)\\s*Task");
             Matcher m = descriptorPattern.matcher(block);
             if (m.find()) {
                 world = m.group("world");
@@ -443,7 +454,7 @@ public class TaskTrackerModule implements ClientModInitializer {
             return null;
         }
 
-        return new String[]{world, number, type};
+        return new String[] { world, number, type };
     }
 
     // TODO: A ton of this stuff should probably be moved to task itself

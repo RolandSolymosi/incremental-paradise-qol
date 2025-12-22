@@ -42,8 +42,7 @@ public class DepositHotkeyModule implements ClientModInitializer {
                 "Auto Deposit",
                 InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_B,
-                "Incremental QOL"
-        ));
+                com.incrementalqol.modules.OptionsModule.CATEGORY));
     }
 
     @Override
@@ -54,10 +53,10 @@ public class DepositHotkeyModule implements ClientModInitializer {
                 s -> s.contains("Bank"),
                 s -> true,
                 (input) -> {
-                    ScreenInteraction.WellKnownInteractions.ClickSlot(input.getLeft(), (short)21, ScreenInteraction.WellKnownInteractions.Button.Left, SlotActionType.PICKUP);
+                    ScreenInteraction.WellKnownInteractions.ClickSlot(input.getLeft(), (short) 21,
+                            ScreenInteraction.WellKnownInteractions.Button.Left, SlotActionType.PICKUP);
                     return true;
-                }
-        )
+                })
                 .addInteraction(
                         s -> s.equals("Safe"),
                         s -> {
@@ -70,18 +69,15 @@ public class DepositHotkeyModule implements ClientModInitializer {
                             return false;
                         },
                         (input) -> {
-                            ScreenInteraction.WellKnownInteractions.ClickSlot(input.getLeft(), (short)23, ScreenInteraction.WellKnownInteractions.Button.Left, SlotActionType.PICKUP);
+                            ScreenInteraction.WellKnownInteractions.ClickSlot(input.getLeft(), (short) 23,
+                                    ScreenInteraction.WellKnownInteractions.Button.Left, SlotActionType.PICKUP);
                             return true;
-                        }
-                )
+                        })
                 .addInteraction(
                         s -> s.contains("Safe"),
                         s -> true,
-                        (input) -> true
-                )
-                .setStartingAction(c ->
-                        c.player.networkHandler.sendChatCommand("bank")
-                )
+                        (input) -> true)
+                .setStartingAction(c -> c.player.networkHandler.sendChatCommand("bank"))
                 .setKeepScreenHidden(true)
                 .build();
 

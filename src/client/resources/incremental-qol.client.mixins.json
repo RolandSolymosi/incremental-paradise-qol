@@ -3,7 +3,7 @@
   "package": "com.incrementalqol.mixins",
   "compatibilityLevel": "JAVA_21",
   "client": [
-    "EntityRenderer",
+    "MixinEntityRenderer",
     "ClientPlayNetworkHandler",
     "HandledScreen",
     "BossBarHud",

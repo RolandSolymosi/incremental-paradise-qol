@@ -22,7 +22,13 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.*;
 import net.minecraft.entity.damage.DamageSource;
 import net.minecraft.entity.data.DataTracker;
+import net.minecraft.client.render.command.OrderedRenderCommandQueue;
+import net.minecraft.client.render.state.CameraRenderState;
+import net.minecraft.client.render.RenderLayers;
+import net.minecraft.storage.ReadView;
+import net.minecraft.storage.WriteView;
 import net.minecraft.nbt.NbtCompound;
+import net.minecraft.server.world.ServerWorld;
 import net.minecraft.network.packet.s2c.play.ParticleS2CPacket;
 import net.minecraft.particle.ParticleEffect;
 import net.minecraft.particle.SimpleParticleType;
@@ -43,7 +49,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.concurrent.ConcurrentHashMap;
 
-
 public class Glowing implements ClientModInitializer {
     private static final double PROXIMITY_THRESHOLD = 0.1f;
     private static final double TOLERANCE = 0.001f; // Allow for slight floating point errors
@@ -56,7 +61,8 @@ public class Glowing implements ClientModInitializer {
     private static final ConcurrentHashMap<BlockPos, HighlightEntity> attachedEntities = new ConcurrentHashMap<>();
 
     // Create the RegistryKey for the entity type
-    RegistryKey<EntityType<?>> entityKey = RegistryKey.of(RegistryKeys.ENTITY_TYPE, Identifier.of("incrementalqol", "highlight_entity"));
+    RegistryKey<EntityType<?>> entityKey = RegistryKey.of(RegistryKeys.ENTITY_TYPE,
+            Identifier.of("incrementalqol", "highlight_entity"));
 
     @Override
     public void onInitializeClient() {
@@ -67,23 +73,24 @@ public class Glowing implements ClientModInitializer {
                         .dimensions(2.0F, 2.0F) // Use the size defined in getDimensions
                         .maxTrackingRange(10)
                         .trackingTickInterval(20)
-                        .build(entityKey)
-        );
-        EntityRendererRegistry.register((EntityType<HighlightEntity>) Registries.ENTITY_TYPE.get(Identifier.of("incrementalqol", "highlight_entity")), HighlightEntityRenderer::new);
+                        .build(entityKey));
+        EntityRendererRegistry
+                .register(
+                        (EntityType<HighlightEntity>) Registries.ENTITY_TYPE
+                                .get(Identifier.of("incrementalqol", "highlight_entity")),
+                        HighlightEntityRenderer::new);
 
         glowKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
                 "Select Target to Glow",
                 InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_G, // Default key for enabling glow
-                "Incremental QOL"
-        ));
+                OptionsModule.CATEGORY));
 
         disableGlowKey = KeyBindingHelper.registerKeyBinding(new KeyBinding(
                 "Disable Glow Selection",
                 InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_H, // Default key for disabling glow
-                "Incremental QOL"
-        ));
+                OptionsModule.CATEGORY));
 
         ClientTickEvents.END_CLIENT_TICK.register(client -> {
             if (glowKey.wasPressed()) {
@@ -108,8 +115,10 @@ public class Glowing implements ClientModInitializer {
     }
 
     private void updateGlowingTarget(MinecraftClient client) {
-        if (client.player == null) return;
-        if (client.world == null) return;
+        if (client.player == null)
+            return;
+        if (client.world == null)
+            return;
 
         HitResult hit = client.crosshairTarget;
         if (hit instanceof EntityHitResult entityHit) {
@@ -136,7 +145,8 @@ public class Glowing implements ClientModInitializer {
         return false;
     }
 
-    public static void onAddParticle(ParticleEffect parameters, double x, double y, double z, double velocityX, double velocityY, double velocityZ, CallbackInfoReturnable<Particle> cir) {
+    public static void onAddParticle(ParticleEffect parameters, double x, double y, double z, double velocityX,
+            double velocityY, double velocityZ, CallbackInfoReturnable<Particle> cir) {
         MinecraftClient client = MinecraftClient.getInstance();
 
         if (client.world != null) {
@@ -144,19 +154,23 @@ public class Glowing implements ClientModInitializer {
             var particleType = parameters.getType();
             var particle = Registries.PARTICLE_TYPE.getId(particleType);
 
-            if (particle != null && (particle.equals(Identifier.ofVanilla("electric_spark")) || particle.equals(Identifier.ofVanilla("scrape")))) {
+            if (particle != null && (particle.equals(Identifier.ofVanilla("electric_spark"))
+                    || particle.equals(Identifier.ofVanilla("scrape")))) {
                 var xDistance = x - Math.floor(x);
                 var yDistance = y - Math.floor(y);
                 var zDistance = z - Math.floor(z);
                 var sparkSurfaceBlock = Math.abs(xDistance - PROXIMITY_THRESHOLD) < TOLERANCE ? particlePos.west()
-                        : Math.abs(xDistance - (1.0f -PROXIMITY_THRESHOLD)) < TOLERANCE ? particlePos.east()
-                        : Math.abs(yDistance - PROXIMITY_THRESHOLD) < TOLERANCE ? particlePos.down()
-                        : Math.abs(yDistance - (1.0f -PROXIMITY_THRESHOLD)) < TOLERANCE ? particlePos.up()
-                        : Math.abs(zDistance - PROXIMITY_THRESHOLD) < TOLERANCE ? particlePos.north()
-                        : Math.abs(zDistance - (1.0f -PROXIMITY_THRESHOLD)) < TOLERANCE ? particlePos.south()
-                        : null;
+                        : Math.abs(xDistance - (1.0f - PROXIMITY_THRESHOLD)) < TOLERANCE ? particlePos.east()
+                                : Math.abs(yDistance - PROXIMITY_THRESHOLD) < TOLERANCE ? particlePos.down()
+                                        : Math.abs(yDistance - (1.0f - PROXIMITY_THRESHOLD)) < TOLERANCE
+                                                ? particlePos.up()
+                                                : Math.abs(zDistance - PROXIMITY_THRESHOLD) < TOLERANCE
+                                                        ? particlePos.north()
+                                                        : Math.abs(zDistance - (1.0f - PROXIMITY_THRESHOLD)) < TOLERANCE
+                                                                ? particlePos.south()
+                                                                : null;
 
-                //sparkSurfaceBlock = particlePos;
+                // sparkSurfaceBlock = particlePos;
                 if (sparkSurfaceBlock != null) {
                     if (x < 0) {
                         sparkSurfaceBlock = sparkSurfaceBlock.west();
@@ -173,11 +187,15 @@ public class Glowing implements ClientModInitializer {
                         if (parameters instanceof SimpleParticleType) {
                             var current = attachedEntities.get(sparkSurfaceBlock);
                             if (current == null) {
-                                var entity = Registries.ENTITY_TYPE.get(Identifier.of("incrementalqol", "highlight_entity")).create(client.world, SpawnReason.TRIGGERED);
+                                var entity = Registries.ENTITY_TYPE
+                                        .get(Identifier.of("incrementalqol", "highlight_entity"))
+                                        .create(client.world, SpawnReason.TRIGGERED);
                                 if (entity instanceof HighlightEntity highlightEntity) {
                                     entity.setSneaking(!particle.equals(Identifier.ofVanilla("electric_spark")));
                                     // Set the position of the entity to the target block position
-                                    highlightEntity.refreshPositionAndAngles(sparkSurfaceBlock.getX(), sparkSurfaceBlock.getY(), sparkSurfaceBlock.getZ(), highlightEntity.getYaw(), highlightEntity.getPitch());
+                                    highlightEntity.refreshPositionAndAngles(sparkSurfaceBlock.getX(),
+                                            sparkSurfaceBlock.getY(), sparkSurfaceBlock.getZ(),
+                                            highlightEntity.getYaw(), highlightEntity.getPitch());
                                     client.world.addEntity(highlightEntity);
                                     if (client.world.getEntityById(highlightEntity.getId()) != null) {
                                         attachedEntities.put(sparkSurfaceBlock, highlightEntity);
@@ -212,7 +230,9 @@ public class Glowing implements ClientModInitializer {
             super.tick();
             var world = MinecraftClient.getInstance().world;
             if (world != null) {
-                if (this.getEntityWorld() != world || !Glowing.shouldGlow(world.getBlockState(this.getBlockPos()).getBlock()) || attachedEntities.getOrDefault(this.getBlockPos(), null) != this) {
+                if (this.getEntityWorld() != world
+                        || !Glowing.shouldGlow(world.getBlockState(this.getBlockPos()).getBlock())
+                        || attachedEntities.getOrDefault(this.getBlockPos(), null) != this) {
                     world.removeEntity(this.getId(), RemovalReason.DISCARDED);
                     attachedEntities.remove(this.getBlockPos());
                 }
@@ -225,12 +245,12 @@ public class Glowing implements ClientModInitializer {
         }
 
         @Override
-        protected void readCustomDataFromNbt(NbtCompound nbt) {
+        public void readCustomData(ReadView view) {
 
         }
 
         @Override
-        protected void writeCustomDataToNbt(NbtCompound nbt) {
+        public void writeCustomData(WriteView view) {
 
         }
 
@@ -240,7 +260,8 @@ public class Glowing implements ClientModInitializer {
         }
     }
 
-    public static class HighlightEntityRenderer extends EntityRenderer<HighlightEntity, HighlightEntityRenderer.HighlightEntityRenderState> {
+    public static class HighlightEntityRenderer
+            extends EntityRenderer<HighlightEntity, HighlightEntityRenderer.HighlightEntityRenderState> {
 
         private final CubeEntityModel model;
 
@@ -273,28 +294,30 @@ public class Glowing implements ClientModInitializer {
                 // Make sure the cube is large enough
                 root.addChild("cube",
                         ModelPartBuilder.create().cuboid(-0.0F, -0.0F, -0.0F, 16, 16, 16),
-                        ModelTransform.NONE
-                );
+                        ModelTransform.NONE);
 
                 return TexturedModelData.of(modelData, 16, 16);
             }
         }
 
         @Override
-        public boolean shouldRender(HighlightEntity entity, Frustum frustum, double x, double y, double z) {
-            return true;
-        }
-
-        @Override
-        public void render(HighlightEntityRenderState state, MatrixStack matrices, VertexConsumerProvider vertexConsumers, int light) {
+        public void render(HighlightEntityRenderState state, MatrixStack matrices,
+                OrderedRenderCommandQueue commandQueue, CameraRenderState camera) {
 
             matrices.push();
-            VertexConsumer glowingConsumers = vertexConsumers.getBuffer(RenderLayer.getOutline(Identifier.ofVanilla("textures/block/glass.png")));
-
             var color = state.sneaking ? 0xFF00FF00 : 0xFFFFFFFF;
-            this.model.render(matrices, glowingConsumers, light, OverlayTexture.DEFAULT_UV, color);
+
+            commandQueue.submitModel(
+                    this.model,
+                    state,
+                    matrices,
+                    RenderLayers.outlineNoCull(Identifier.ofVanilla("textures/block/glass.png")),
+                    0xF000F0, // default light
+                    OverlayTexture.DEFAULT_UV,
+                    color,
+                    null);
+
             matrices.pop();
         }
     }
 }
-
