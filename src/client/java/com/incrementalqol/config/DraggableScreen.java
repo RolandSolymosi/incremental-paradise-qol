@@ -2,105 +2,118 @@ package com.incrementalqol.config;
 
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.util.math.MatrixStack;
+import org.joml.Matrix3x2fStack; // Use JOML directly
 import net.minecraft.text.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import net.minecraft.client.gui.Click; // The new Click object
 
 import static com.incrementalqol.modules.OptionsModule.MOD_ID;
 
 public class DraggableScreen extends Screen {
     public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
     private final Screen parent;
-
     private final Config config = Config.HANDLER.instance();
+
+    public HudWidget hud1;
+
+    private boolean isDragging = false;
+    private double dragOffsetX = 0;
+    private double dragOffsetY = 0;
 
     public DraggableScreen(Screen parent) {
         super(Text.literal("Incremental Paradise QOL Options"));
         this.parent = parent;
     }
 
-    public HudWidget hud1;
-
-    private boolean isDragging = false;
-    private int dragOffsetX = 0;
-    private int dragOffsetY = 0;
-
     @Override
     protected void init() {
         hud1 = new HudWidget(config.getHudPosX(), config.getHudPosY(), 100, 50);
-        this.addDrawableChild(hud1);
+        // addSelectableChild allows the screen to process clicks for the widget 
+        // without drawing it automatically (so we can handle the scaling manually).
+        this.addSelectableChild(hud1);
     }
 
     @Override
     public void close() {
         Config.HANDLER.save();
-        client.setScreen(parent);
-    }
-
-    @Override
-    public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        float scale = (float) config.getHudScale();
-        if (hud1.isHovered(mouseX, mouseY)) {
-            // Start dragging
-            isDragging = true;
-            dragOffsetX = (int) (mouseX / scale - hud1.getX()); // Adjust by scale
-            dragOffsetY = (int) (mouseY / scale - hud1.getY()); // Adjust by scale
-            return true; // Indicate that this event was handled
+        if (this.client != null) {
+            this.client.setScreen(parent);
         }
-        return super.mouseClicked(mouseX, mouseY, button);
     }
 
+    // Signature updated to use Click click, boolean bl
     @Override
-    public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
+    public boolean mouseClicked(Click click, boolean bl) {
+        float scale = (float) config.getHudScale();
+        
+        // Adjust mouse coordinates from the Click object to match the widget's scale
+        double scaledX = click.x() / scale;
+        double scaledY = click.y() / scale;
+
+        if (hud1.isMouseOver(scaledX, scaledY)) {
+            isDragging = true;
+            dragOffsetX = scaledX - hud1.getX();
+            dragOffsetY = scaledY - hud1.getY();
+            return true; 
+        }
+        return super.mouseClicked(click, bl);
+    }
+
+    // Signature updated to use Click click, double deltaX, double deltaY
+    @Override
+    public boolean mouseDragged(Click click, double deltaX, double deltaY) {
         if (isDragging) {
-            // Apply scaling to the mouse position to match the scaled rendering.
-            float scaleFactor = (float) config.getHudScale(); // Make sure this matches your rendering scale
+            float scaleFactor = (float) config.getHudScale();
 
-            // Calculate the new position based on the scaled mouse position and the initial drag offset
-            int newX = (int) (mouseX / scaleFactor) - dragOffsetX;
-            int newY = (int) (mouseY / scaleFactor) - dragOffsetY;
+            int newX = (int) (click.x() / scaleFactor - dragOffsetX);
+            int newY = (int) (click.y() / scaleFactor - dragOffsetY);
 
-            // Set the new position for the widget
             hud1.setPosition(newX, newY);
-
-            // Save the updated position without scaling (so the configuration reflects the original scale)
             config.setHudPosX(newX);
             config.setHudPosY(newY);
 
-            return true; // Indicate that this event was handled
+            return true;
         }
-        return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+        return super.mouseDragged(click, deltaX, deltaY);
     }
 
+    // Signature updated to use Click click
     @Override
-    public boolean mouseReleased(double mouseX, double mouseY, int button) {
+    public boolean mouseReleased(Click click) {
         if (isDragging) {
             isDragging = false;
-            return true; // Indicate that this event was handled
+            return true;
         }
-        return super.mouseReleased(mouseX, mouseY, button);
+        return super.mouseReleased(click);
     }
 
     @Override
     public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta) {
-        return;
+        // Standard background rendering for 1.21.x
+        this.renderInGameBackground(context);
     }
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        super.render(context, mouseX, mouseY, delta);
+        this.renderBackground(context, mouseX, mouseY, delta);
 
         float scale = (float) config.getHudScale();
-        MatrixStack matrixStack = context.getMatrices();
-        matrixStack.push();
+        
+        // Use Matrix3x2fStack (JOML) instead of MatrixStack
+        Matrix3x2fStack matrices = context.getMatrices();
+        
+        matrices.pushMatrix();
+        matrices.scale(scale, scale);
 
-        // Apply the same scaling as for the widget
-        matrixStack.scale(scale, scale, scale);
+        // Adjust mouse coords for widget hover state
+        int scaledMouseX = (int) (mouseX / scale);
+        int scaledMouseY = (int) (mouseY / scale);
+        
+        hud1.renderWidget(context, scaledMouseX, scaledMouseY, delta);
 
-        // Render the HUD and hitbox
-        hud1.render(context, mouseX, mouseY, delta);
+        matrices.popMatrix();
 
-        matrixStack.pop();
+        super.render(context, mouseX, mouseY, delta);
     }
 }

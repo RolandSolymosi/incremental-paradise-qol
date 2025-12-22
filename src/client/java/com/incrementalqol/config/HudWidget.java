@@ -3,7 +3,7 @@ package com.incrementalqol.config;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.client.util.math.MatrixStack;
+import org.joml.Matrix3x2fStack;
 import net.minecraft.text.Text;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,19 +26,19 @@ public class HudWidget extends ClickableWidget {
     private final Config config = Config.HANDLER.instance();
 
     public HudWidget(int x, int y, int width, int height) {
-        super(x,y,width,height, Text.empty());
+        super(x, y, width, height, Text.empty());
     }
 
     @Override
     protected void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
-        MatrixStack matrixStack = context.getMatrices();
-        matrixStack.push();
+        Matrix3x2fStack matrixStack = context.getMatrices();
+        matrixStack.pushMatrix();
 
         float scaleFactor = (float) this.config.getHudScale();
-        matrixStack.scale(scaleFactor, scaleFactor, scaleFactor); // Apply scale during rendering
+        matrixStack.scale(scaleFactor, scaleFactor); // Apply scale during rendering
 
         context.fill(getX(), getY(), getX() + getWidth(), getY() + getHeight(), 0x00000000);
-        matrixStack.pop();
+        matrixStack.popMatrix();
     }
 
     @Override
@@ -56,7 +56,8 @@ public class HudWidget extends ClickableWidget {
         int unscaledWidth = this.width;
         int unscaledHeight = this.height;
 
-        // Adjust the mouse coordinates to unscaled space by dividing by the scale factor
+        // Adjust the mouse coordinates to unscaled space by dividing by the scale
+        // factor
         double adjustedMouseX = mouseX / scaleFactor;
         double adjustedMouseY = mouseY / scaleFactor;
 
@@ -64,6 +65,5 @@ public class HudWidget extends ClickableWidget {
         return adjustedMouseX >= unscaledX && adjustedMouseX <= (unscaledX + unscaledWidth) &&
                 adjustedMouseY >= unscaledY && adjustedMouseY <= (unscaledY + unscaledHeight);
     }
-
 
 }

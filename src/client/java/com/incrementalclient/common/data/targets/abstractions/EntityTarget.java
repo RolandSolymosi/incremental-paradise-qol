@@ -20,11 +20,15 @@ public final class EntityTarget implements ITarget {
         this.region = region;
     }
 
-    @Override public String name() { return name; }
+    @Override
+    public String name() {
+        return name;
+    }
 
     @Override
     public boolean matches(Entity entity) {
-        return (region != null && region.isInRegion(entity.getWorld(), entity.getBlockPos())) && entity.getType() == type && condition.test(entity);
+        return (region != null && region.isInRegion(entity.getEntityWorld(), entity.getBlockPos()))
+                && entity.getType() == type && condition.test(entity);
     }
 
     @Override
@@ -32,5 +36,7 @@ public final class EntityTarget implements ITarget {
         // Example: set glowing, or your ghost entity renderer logic
     }
 
-    public EntityType<?> getType() { return type; }
+    public EntityType<?> getType() {
+        return type;
+    }
 }

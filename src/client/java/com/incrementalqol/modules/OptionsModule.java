@@ -8,11 +8,13 @@ import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
+import net.minecraft.util.Identifier;
 import org.lwjgl.glfw.GLFW;
-
 
 public class OptionsModule implements ClientModInitializer {
     public static final String MOD_ID = "incremental-qol";
+    public static final KeyBinding.Category CATEGORY = KeyBinding.Category
+            .create(Identifier.of("incrementalqol", "main"));
 
     private static KeyBinding optionsScreen;
 
@@ -23,6 +25,7 @@ public class OptionsModule implements ClientModInitializer {
         ClientLifecycleEvents.CLIENT_STARTED.register(t -> Config.HANDLER.load());
         ClientTickEvents.END_CLIENT_TICK.register(OptionsModule::keybindCheck);
     }
+
     private static void keybindCheck(MinecraftClient minecraftClient) {
 
         while (optionsScreen.wasPressed()) {
@@ -31,12 +34,10 @@ public class OptionsModule implements ClientModInitializer {
     }
 
     private void initializeKeybinds() {
-
         optionsScreen = KeyBindingHelper.registerKeyBinding(new KeyBinding(
                 "Options Screen",
                 InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_O,
-                "Incremental QOL"
-        ));
+                CATEGORY));
     }
 }
