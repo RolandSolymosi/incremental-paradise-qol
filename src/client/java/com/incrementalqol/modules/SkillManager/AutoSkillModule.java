@@ -5,6 +5,7 @@ import com.incrementalqol.common.data.Skills.*;
 import com.incrementalqol.common.data.World;
 import com.incrementalqol.common.utils.ConfiguredLogger;
 import com.incrementalqol.common.utils.ScreenInteraction;
+import com.incrementalqol.common.utils.Utils;
 import com.incrementalqol.common.utils.WorldChangeNotifier;
 import com.incrementalqol.config.Config;
 import net.fabricmc.api.ClientModInitializer;
@@ -27,7 +28,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -80,7 +80,7 @@ public class AutoSkillModule implements ClientModInitializer {
                 s -> s.contains("Skills"),
                 s -> true,
                 (input) -> {
-                    ScreenInteraction.WellKnownInteractions.ClickSlot(input.getLeft(), getSkillSlotId(input, actualSkillType), ScreenInteraction.WellKnownInteractions.Button.Left, SlotActionType.PICKUP);
+                    ScreenInteraction.WellKnownInteractions.ClickSlot(input.getLeft(), Utils.getSkillSlotId(input, actualSkillType), ScreenInteraction.WellKnownInteractions.Button.Left, SlotActionType.PICKUP);
                     return true;
                 }
         )
@@ -213,53 +213,7 @@ public class AutoSkillModule implements ClientModInitializer {
         return true;
     }
 
-    private static short getSkillSlotId(Pair<Integer, List<ItemStack>> content, SkillType skillType) {
-        // Current three variations (1. No Sharpshooting or Excavation, 2. Only Sharpshooting, 3. Sharpshooting and Excavation)
-        // These can be differentiated by the item in slot 25
-        short slotId = 0;
-        var customName = Objects.requireNonNull(content.getRight().get(25).getCustomName()).getString();
-        switch (customName) {
-            case "Excavation": {
-                slotId = switch (skillType) {
-                    case SkillType.Combat -> 21;
-                    case SkillType.Mining -> 19;
-                    case SkillType.Foraging -> 20;
-                    case SkillType.Farming -> 22;
-                    case SkillType.SpearFishing -> 23;
-                    case SkillType.Sharpshooting -> 24;
-                    case SkillType.Excavation -> 25;
-                };
-                break;
-            }
-            case "Sharpshooting": {
-                slotId = switch (skillType) {
-                    case SkillType.Combat -> 21;
-                    case SkillType.Mining -> 19;
-                    case SkillType.Foraging -> 20;
-                    case SkillType.Farming -> 23;
-                    case SkillType.SpearFishing -> 24;
-                    case SkillType.Sharpshooting -> 25;
-                    case Excavation -> 0;
-                };
-                break;
-            }
-            case " ": {
-                slotId = switch (skillType) {
-                    case SkillType.Combat -> 22;
-                    case SkillType.Mining -> 20;
-                    case SkillType.Foraging -> 21;
-                    case SkillType.Farming -> 23;
-                    case SkillType.SpearFishing -> 24;
-                    case Sharpshooting -> 0;
-                    case Excavation -> 0;
-                };
-                break;
-            }
-        }
-        return slotId;
-    }
-
-        private static List<String> SkillNameListInOrderForSkill(SkillType toolType) {
+    private static List<String> SkillNameListInOrderForSkill(SkillType toolType) {
         if (WorldChangeNotifier.IsActualWorldNightmare()) {
             return switch (toolType) {
                 case SkillType.Combat ->
