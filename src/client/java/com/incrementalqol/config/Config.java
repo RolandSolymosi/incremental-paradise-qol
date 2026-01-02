@@ -10,8 +10,7 @@ import dev.isxander.yacl3.config.v2.api.SerialEntry;
 import dev.isxander.yacl3.config.v2.api.serializer.GsonConfigSerializerBuilder;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.text.Text;
+import net.minecraft.client.gui.screen.Screen;import net.minecraft.text.Text;
 import net.minecraft.util.Identifier;
 
 import java.awt.Color;
@@ -133,7 +132,6 @@ public class Config {
     public List<NightmareSpearFishingSkill> nightmareSpearFishingSkills = new ArrayList<>();
     @SerialEntry
     public List<NightmareSharpshootingSkill> nightmareSharpshootingSkills = new ArrayList<>();
-
     public static class Overrides {
         @SerialEntry
         private String warp;
