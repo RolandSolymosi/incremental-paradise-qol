@@ -18,18 +18,20 @@ public class SellAllHotkey implements Configurable<SellAllHotkey.Configuration, 
     private final Configuration configuration = new Configuration();
 
     private final Option<Integer> options;
+    private final KeyBinding keyBind;
 
     public SellAllHotkey(
             KeyBindMonitor keyBindMonitor,
             CommandSender commandSender
     ){
         this.commandSender = commandSender;
-        keyBindMonitor.subscribe(new KeyBindMonitor.KeyBindListener(new KeyBinding(
+        keyBind = new KeyBinding(
                 "Auto Sell",
                 InputUtil.Type.KEYSYM,
                 configuration.keybind,
                 "Incremental QOL"
-        ), this::sellAll));
+        );
+        keyBindMonitor.subscribe(new KeyBindMonitor.KeyBindListener(keyBind, this::sellAll));
 
         options = Option.<Integer>createBuilder()
                 .name(Text.literal("My Hotkey"))
@@ -69,6 +71,12 @@ public class SellAllHotkey implements Configurable<SellAllHotkey.Configuration, 
     @Override
     public Option<Integer> getOption() {
         return options;
+    }
+
+    @Override
+    public void optionChanged() {
+        keyBind.setBoundKey(InputUtil.fromKeyCode(configuration.keybind, 0));
+        KeyBinding.updateKeysByCode();
     }
 
     static public class Configuration {
