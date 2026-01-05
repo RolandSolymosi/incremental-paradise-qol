@@ -2,7 +2,7 @@ package com.incrementalclient.featues;
 
 import com.incrementalclient.config.components.KeyBindController;
 import com.incrementalclient.interfaces.Configurable;
-import com.incrementalclient.services.CommandSender;
+import com.incrementalclient.services.CommandHandler;
 import com.incrementalclient.services.KeyBindMonitor;
 import dev.isxander.yacl3.api.Option;
 import dev.isxander.yacl3.config.v2.api.SerialEntry;
@@ -13,7 +13,7 @@ import org.lwjgl.glfw.GLFW;
 
 public class SellAllHotkey implements Configurable<SellAllHotkey.Configuration, Integer> {
 
-    private final CommandSender commandSender;
+    private final CommandHandler commandHandler;
 
     private final Configuration configuration = new Configuration();
 
@@ -22,9 +22,9 @@ public class SellAllHotkey implements Configurable<SellAllHotkey.Configuration, 
 
     public SellAllHotkey(
             KeyBindMonitor keyBindMonitor,
-            CommandSender commandSender
+            CommandHandler commandHandler
     ){
-        this.commandSender = commandSender;
+        this.commandHandler = commandHandler;
         keyBind = new KeyBinding(
                 "Auto Sell",
                 InputUtil.Type.KEYSYM,
@@ -45,7 +45,7 @@ public class SellAllHotkey implements Configurable<SellAllHotkey.Configuration, 
     }
 
     private void sellAll(){
-        commandSender.send("sellall");
+        commandHandler.send("sellall");
     }
 
     @Override

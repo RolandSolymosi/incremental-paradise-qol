@@ -19,6 +19,10 @@ public class ServiceCollection {
         descriptors.add(new ServiceDescriptor(serviceType, impl, ServiceLifetime.SINGLETON, null));
         return this;
     }
+    public <T> ServiceCollection addSingleton(Class<T> serviceType) {
+        descriptors.add(new ServiceDescriptor(serviceType, serviceType, ServiceLifetime.SINGLETON, null));
+        return this;
+    }
 
     //public <T> ServiceCollection addTransient(Class<T> serviceType, Class<? extends T> impl) {
     //    descriptors.add(new ServiceDescriptor(serviceType, impl, ServiceLifetime.TRANSIENT, null));

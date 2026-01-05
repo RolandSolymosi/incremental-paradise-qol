@@ -1,31 +1,31 @@
 package com.incrementalclient;
 
+import com.incrementalclient.featues.LinksCommand;
 import com.incrementalclient.featues.SellAllHotkey;
 import com.incrementalclient.interfaces.Configurable;
-import com.incrementalclient.services.MinecraftScreenAccessor;
+import com.incrementalclient.internals.events.ClientCommandRegistrationCallbackListenable;
+import com.incrementalclient.services.*;
 import com.incrementalclient.internals.events.EndClientTickListenable;
-import com.incrementalclient.services.BossBarReader;
 import com.incrementalclient.common.utils.dependencyInjection.ServiceCollection;
 import com.incrementalclient.common.utils.dependencyInjection.ServiceProvider;
-import com.incrementalclient.services.CommandSender;
-import com.incrementalclient.services.ConfigHandler;
-import com.incrementalclient.services.KeyBindMonitor;
 import net.fabricmc.api.ClientModInitializer;
 
 public class Main implements ClientModInitializer {
 
     public static final ServiceProvider SERVICE_PROVIDER = new ServiceCollection()
-            // Minecraft Events
+            // Low level Services
             .addListenable(EndClientTickListenable.class)
-            // Observables/Listenable
+            .addObservable(ClientCommandRegistrationCallbackListenable.class)
+            // High level Services
             .addObservable(BossBarReader.class)
-            .addListenable(KeyBindMonitor.class)
-            // Services
-            .addSingleton(MinecraftScreenAccessor.class, MinecraftScreenAccessor.class)
-            .addSingleton(CommandSender.class, CommandSender.class)
-            .addSingleton(ConfigHandler.class, ConfigHandler.class)
+            .addSingleton(MinecraftScreenAccessor.class)
+            .addSingleton(CommandHandler.class)
+            .addSingleton(ChatHandler.class)
+            .addSingleton(ConfigHandler.class)
+            .addSingleton(KeyBindMonitor.class)
             // Features
-            .addSingleton(SellAllHotkey.class, SellAllHotkey.class).forwardSingleton(Configurable.class, SellAllHotkey.class)
+            .addSingleton(SellAllHotkey.class).forwardSingleton(Configurable.class, SellAllHotkey.class)
+            .addSingleton(LinksCommand.class)
             .buildServiceProvider();
 
     @Override
