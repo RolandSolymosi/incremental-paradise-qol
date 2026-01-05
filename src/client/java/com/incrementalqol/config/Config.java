@@ -73,6 +73,21 @@ public class Config {
     private Color ticketColor = new Color(0x8845d1);
 
     @SerialEntry
+    private boolean isConsumableHudEnabled = true;
+    @SerialEntry
+    private double consumableHudBackgroundOpacity = 0.3;
+    @SerialEntry
+    private int consumableHudPosX = 10;
+    @SerialEntry
+    private int consumableHudPosY = 10;
+    @SerialEntry
+    private double consumableHudScale = 1.0;
+    @SerialEntry
+    private Color consumableTimerColor = new Color(0xffaa00);
+    @SerialEntry
+    private Color consumableTimeColor = new Color(0x55ff55);
+
+    @SerialEntry
     private int legendaryPxpValue = 75;
     @SerialEntry
     private int mythicPxpValue = 500;
@@ -297,6 +312,7 @@ public class Config {
                         TaskCategory(),
                         SkillLeveling(),
                         TaskOverride(),
+                        ConsumableHudCategory(),
                         Others(),
                         Debug())
                 )
@@ -732,6 +748,57 @@ public class Config {
                 .build();
     }
 
+    public ConfigCategory ConsumableHudCategory() {
+        return ConfigCategory.createBuilder()
+                .name(Text.of("Consumable Timer HUD"))
+                .tooltip(Text.of("This category is about configuring the Consumable Timer HUD settings."))
+                .group(OptionGroup.createBuilder()
+                        .name(Text.of("Consumable Timer HUD configuration"))
+                        .description(OptionDescription.of(Text.of("These are the basic settings for the consumable timer HUD.")))
+                        .option(Option.<Boolean>createBuilder()
+                                .name(Text.of("Toggle Consumable HUD on and off"))
+                                .description(OptionDescription.of(Text.of("Turn on and off the consumable timer HUD.")))
+                                .binding(true, () -> this.isConsumableHudEnabled, newVal -> this.isConsumableHudEnabled = newVal)
+                                .controller(BooleanControllerBuilder::create)
+                                .build())
+                        .option(Option.<Double>createBuilder()
+                                .name(Text.of("Consumable HUD background opacity"))
+                                .description(OptionDescription.of(Text.of("Set the opacity of the consumable HUD background.")))
+                                .binding(0.3, () -> this.consumableHudBackgroundOpacity, newVal -> this.consumableHudBackgroundOpacity = newVal)
+                                .controller(o -> DoubleSliderControllerBuilder.create(o).step(0.01).range(0.0, 1.0))
+                                .build())
+                        .option(Option.<Double>createBuilder()
+                                .name(Text.of("Resize the Consumable HUD"))
+                                .description(OptionDescription.of(Text.of("Setting scale ratio from 0.5x-2x with 0.1 steps.")))
+                                .binding(1.0, () -> this.consumableHudScale, newVal -> this.consumableHudScale = newVal)
+                                .controller(o -> DoubleSliderControllerBuilder.create(o).step(0.1).range(0.5, 2.0))
+                                .build())
+                        .option(ButtonOption.createBuilder()
+                                .name(Text.of("Consumable HUD Position"))
+                                .description(OptionDescription.of(Text.of("Activate the function to move the consumable HUD. Press ESC to return here.")))
+                                .action((t, o) -> MinecraftClient.getInstance().setScreen(new ConsumableDraggableScreen(t)))
+                                .build())
+                        .build())
+                .group(OptionGroup.createBuilder()
+                        .name(Text.of("Consumable Timer HUD Color configuration"))
+                        .description(OptionDescription.of(Text.of("These allow you to set the colors of the consumable timer HUD. Press enter or esc to exit the color selection.")))
+                        .option(Option.<Color>createBuilder()
+                                .name(Text.of("Color of the timer name"))
+                                .description(OptionDescription.of(Text.of("The color of the consumable timer name.")))
+                                .binding(new Color(0xffaa00), () -> this.consumableTimerColor, newVal -> this.consumableTimerColor = newVal)
+                                .controller(ColorControllerBuilder::create)
+                                .build())
+                        .option(Option.<Color>createBuilder()
+                                .name(Text.of("Color of the time left"))
+                                .description(OptionDescription.of(Text.of("The color of the time left text.")))
+                                .binding(new Color(0x55ff55), () -> this.consumableTimeColor, newVal -> this.consumableTimeColor = newVal)
+                                .controller(ColorControllerBuilder::create)
+                                .build())
+                        .collapsed(true)
+                        .build())
+                .build();
+    }
+
     public ConfigCategory Others() {
         return ConfigCategory.createBuilder()
                 .name(Text.of("Others"))
@@ -846,5 +913,41 @@ public class Config {
 
     public boolean isInteractionIsPriority() {
         return interactionIsPriority;
+    }
+
+    public boolean getIsConsumableHudEnabled() {
+        return isConsumableHudEnabled;
+    }
+
+    public int getConsumableHudPosX() {
+        return consumableHudPosX;
+    }
+
+    public int getConsumableHudPosY() {
+        return consumableHudPosY;
+    }
+
+    public int getConsumableHudBackgroundOpacity() {
+        return (int) (consumableHudBackgroundOpacity * 255);
+    }
+
+    public double getConsumableHudScale() {
+        return consumableHudScale;
+    }
+
+    public Color getConsumableTimerColor() {
+        return consumableTimerColor;
+    }
+
+    public Color getConsumableTimeColor() {
+        return consumableTimeColor;
+    }
+
+    public void setConsumableHudPosX(int consumableHudPosX) {
+        this.consumableHudPosX = consumableHudPosX;
+    }
+
+    public void setConsumableHudPosY(int consumableHudPosY) {
+        this.consumableHudPosY = consumableHudPosY;
     }
 }

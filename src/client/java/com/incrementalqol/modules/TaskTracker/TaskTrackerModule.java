@@ -471,6 +471,6 @@ public class TaskTrackerModule implements ClientModInitializer {
         Pattern p = Pattern.compile("^≡ƒöÑ?\\s*(.+?)\\s*(?:≡ƒöÑ|EASY|MEDIUM|HARD)?$");
         Matcher m = p.matcher(taskName);
 
-        return m.matches() ? m.group(1) : "";
+        return m.matches() ? m.group(1) : taskName;
     }
 }
