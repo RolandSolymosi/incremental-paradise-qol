@@ -1,7 +1,6 @@
 package com.incrementalclient;
 
-import com.incrementalclient.featues.LinksCommand;
-import com.incrementalclient.featues.SellAllHotkey;
+import com.incrementalclient.featues.*;
 import com.incrementalclient.interfaces.Configurable;
 import com.incrementalclient.internals.events.ClientCommandRegistrationCallbackListenable;
 import com.incrementalclient.services.*;
@@ -26,6 +25,7 @@ public class Main implements ClientModInitializer {
             // Features
             .addSingleton(SellAllHotkey.class).forwardSingleton(Configurable.class, SellAllHotkey.class)
             .addSingleton(LinksCommand.class)
+            .addSingleton(CommandAliases.class).forwardSingleton(Configurable.class, CommandAliases.class)
             .buildServiceProvider();
 
     @Override

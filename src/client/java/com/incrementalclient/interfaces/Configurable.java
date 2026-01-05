@@ -8,6 +8,7 @@ public interface Configurable<TConfiguration, TOption> {
     int getOrder();
     TConfiguration getConfiguration();
     Option<TOption> getOption();
+    default boolean hasOption(){ return true; }
 
     void optionChanged();
 

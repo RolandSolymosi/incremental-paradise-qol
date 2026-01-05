@@ -5,6 +5,8 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.Strictness;
 import com.incrementalclient.interfaces.Configurable;
+import com.incrementalclient.interfaces.ExternalConfigurable;
+import com.incrementalclient.interfaces.Listener;
 import dev.isxander.yacl3.api.ConfigCategory;
 import dev.isxander.yacl3.api.YetAnotherConfigLib;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
@@ -46,27 +48,35 @@ public class ConfigHandler {
                 .title(Text.literal("Incremental Qol"))
                 .save(this::save);
 
+        var listener = new Listener.DefaultListener(this::save);
+        for (Configurable<?, ?> conf : configurableServices) {
+            if (conf instanceof ExternalConfigurable<?,?> externalConfigurable){
+                externalConfigurable.subscribe(listener);
+            }
+        }
+
         Map<String, List<Configurable<?, ?>>> grouped = Arrays.stream(configurableServices)
                 .collect(Collectors.groupingBy(
                         Configurable::getCategory,
                         TreeMap::new,
                         Collectors.toList()
                 ));
-
         for (var entry : grouped.entrySet()) {
-            ConfigCategory.Builder catBuilder = ConfigCategory.createBuilder()
-                    .name(Text.of(entry.getKey()));
+            if (entry.getValue().stream().anyMatch(Configurable::hasOption)){
+                ConfigCategory.Builder catBuilder = ConfigCategory.createBuilder()
+                        .name(Text.of(entry.getKey()));
 
-            List<Configurable<?, ?>> sortedOptions = entry.getValue().stream()
-                    .sorted(Comparator.comparingInt(c -> ((Configurable<?, ?>)c).getOrder())
-                            .thenComparing(c -> ((Configurable<?, ?>)c).getConfiguration().getClass().getSimpleName()))
-                    .toList();
+                List<Configurable<?, ?>> sortedOptions = entry.getValue().stream()
+                        .sorted(Comparator.comparingInt(c -> ((Configurable<?, ?>)c).getOrder())
+                                .thenComparing(c -> ((Configurable<?, ?>)c).getConfiguration().getClass().getSimpleName()))
+                        .toList();
 
-            for (Configurable<?, ?> conf : sortedOptions) {
-                catBuilder.option(conf.getOption());
+                for (Configurable<?, ?> conf : sortedOptions) {
+                    catBuilder.option(conf.getOption());
+                }
+
+                screenBuilder.category(catBuilder.build());
             }
-
-            screenBuilder.category(catBuilder.build());
         }
 
         load();

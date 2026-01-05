@@ -3,6 +3,7 @@ package com.incrementalclient.services;
 import com.incrementalclient.interfaces.Observer;
 import com.incrementalclient.internals.events.ClientCommandRegistrationCallbackListenable;
 import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.fabricmc.fabric.api.client.command.v2.FabricClientCommandSource;
 import net.minecraft.client.MinecraftClient;
@@ -35,15 +36,22 @@ public class CommandHandler implements Observer<Pair<CommandDispatcher<FabricCli
     @Override
     public void onEvent(Pair<CommandDispatcher<FabricClientCommandSource>, CommandRegistryAccess> result) {
         for (CommandRegistration registration : commandRegistrations) {
-            result.getLeft().register(
-                    ClientCommandManager.literal(registration.command).executes(context -> {
-                        registration.runnable.run();
-                        return 0;
-                    })
-            );
+            result.getLeft().register(registration.argumentBuilder);
         }
     }
 
-    public record CommandRegistration(String command, Runnable runnable) {
+    public static class CommandRegistration {
+        private final LiteralArgumentBuilder<FabricClientCommandSource> argumentBuilder;
+
+        public CommandRegistration(LiteralArgumentBuilder<FabricClientCommandSource> argumentBuilder) {
+            this.argumentBuilder = argumentBuilder;
+        }
+        public CommandRegistration(String command, Runnable runnable){
+            this(ClientCommandManager.literal(command).executes(context -> {
+                runnable.run();
+                return 0;
+            }));
+        }
+
     }
 }
