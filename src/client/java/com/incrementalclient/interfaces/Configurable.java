@@ -9,6 +9,8 @@ public interface Configurable<TConfiguration, TOption> {
     TConfiguration getConfiguration();
     Option<TOption> getOption();
 
+    void optionChanged();
+
     default void copyFrom(Object other) {
         if (other == null) return;
         if (other.getClass() != getConfiguration().getClass()) {
@@ -26,5 +28,6 @@ public interface Configurable<TConfiguration, TOption> {
                 System.err.println("Failed to copy field: " + field.getName());
             }
         }
+        optionChanged();
     }
 }

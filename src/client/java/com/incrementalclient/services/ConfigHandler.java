@@ -80,6 +80,7 @@ public class ConfigHandler {
         JsonObject root = new JsonObject();
         for (Configurable<?, ?> conf : configurableServices) {
             root.add(conf.getJsonSection(), gson.toJsonTree(conf.getConfiguration()));
+            conf.optionChanged();
         }
 
         try {
