@@ -1,35 +1,24 @@
 {
 	"schemaVersion": 1,
 	"id": "incremental-paradise-qol",
-	"version": "2.5.2",
+	"version": "3.0.0",
 	"name": "Incremental Paradise QoL",
 	"description": "A bunch of handy tweaks and additions for the Incremental Paradise server. Client-side only.",
 	"authors": [
 		"AlvinTheFox",
 		"Jeremyrab",
 		"Johulk",
-		"Razorspined",
-		"AlvinTheFox",
-		"Jeremyrab"
+		"Razorspined"
 	],
 	"contact": {
-		"sources": "https://github.com/quadro313/incremental-paradise-qol"
+		"sources": "https://github.com/RolandSolymosi/incremental-paradise-qol"
 	},
 	"license": "CC0-1.0",
 	"icon": "icon/pack.png",
 	"environment": "client",
 	"entrypoints": {
 		"client": [
-			"com.incrementalqol.modules.SkillManager.AutoSkillModule",
-			"com.incrementalqol.modules.DepositHotkey.DepositHotkeyModule",
-			"com.incrementalqol.modules.DepositHotkey.SellAllHotkeyModule",
-			"com.incrementalqol.modules.TaskTracker.TaskTrackerModule",
-			"com.incrementalqol.modules.PetXpCalculator.PxpCalculatorModule",
-			"com.incrementalqol.modules.CommandAliases.CommandAliasModule",
-			"com.incrementalqol.modules.Loadouts.LoadoutsModule",
-			"com.incrementalqol.modules.BlueprintSwap.BlueprintSwapModule",
-			"com.incrementalqol.modules.OptionsModule",
-			"com.incrementalqol.modules.LinkCommandModule"
+			"com.incrementalclient.Main"
 		]
 	},
 	"mixins": [
@@ -42,6 +31,5 @@
 		"fabric-api": "*"
 	},
 	"suggests": {
-		"another-mod": "*"
 	}
 }

@@ -14,7 +14,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public enum Target {
-    Fossil(new BlockTarget("fossil", null, t -> true, Blocks.SUSPICIOUS_SAND)),
+    Fossil_Sand(new BlockTarget("fossil", null, t -> true, Blocks.SUSPICIOUS_SAND)),
+    Fossil_Gravel(new BlockTarget("fossil", null, t -> true, Blocks.SUSPICIOUS_GRAVEL)),
 
     W1_Coal(new BlockTarget("coalore", Region.W1_CoalMine, t -> true, Blocks.DEEPSLATE_COAL_ORE)),
     W1_Iron(new BlockTarget("ironore", Region.W1_IronMine, t -> true, Blocks.DEEPSLATE_IRON_ORE)),
@@ -40,10 +41,10 @@ public enum Target {
 
     ;
 
-    private static final Map<String, ITarget> BY_NAME = Collections.unmodifiableMap(Arrays
+    private static final Map<String, ITarget> BY_NAME = Arrays
             .stream(Target.values())
             .map(e -> e.target)
-            .collect(Collectors.toUnmodifiableMap(ITarget::name, e -> e)));
+            .collect(Collectors.toUnmodifiableMap(ITarget::name, e -> e));
 
     private static final Map<net.minecraft.block.Block, List<BlockTarget>> BY_TYPE_BLOCK = Collections.unmodifiableMap(Arrays
             .stream(Target.values()).map(e -> e.target)
