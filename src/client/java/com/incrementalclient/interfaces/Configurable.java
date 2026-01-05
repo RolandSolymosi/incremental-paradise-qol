@@ -2,13 +2,24 @@ package com.incrementalclient.interfaces;
 
 import dev.isxander.yacl3.api.Option;
 
-public interface Configurable<TConfiguration, TOption> {
+public interface Configurable<TConfiguration, TOption extends Option<?>> {
     String getCategory();
+
+    String getGroupName();
+
     String getJsonSection();
+
     int getOrder();
+
     TConfiguration getConfiguration();
-    Option<TOption> getOption();
-    default boolean hasOption(){ return true; }
+
+    default TOption getOption() {
+        return null;
+    }
+
+    default boolean hasOption() {
+        return getOption() != null;
+    }
 
     void optionChanged();
 

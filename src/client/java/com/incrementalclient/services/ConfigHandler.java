@@ -4,10 +4,12 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.Strictness;
+import com.incrementalclient.interfaces.ComplexConfigurable;
 import com.incrementalclient.interfaces.Configurable;
 import com.incrementalclient.interfaces.ExternalConfigurable;
 import com.incrementalclient.interfaces.Listener;
 import dev.isxander.yacl3.api.ConfigCategory;
+import dev.isxander.yacl3.api.OptionGroup;
 import dev.isxander.yacl3.api.YetAnotherConfigLib;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.loader.api.FabricLoader;
@@ -32,9 +34,12 @@ public class ConfigHandler {
             .create();
     private final YetAnotherConfigLib.Builder screenBuilder;
 
-    public ConfigHandler(MinecraftScreenAccessor screenAccessor, KeyBindMonitor keyBindMonitor, Configurable<?, ?>[] configurableServices){
+    public ConfigHandler(MinecraftScreenAccessor screenAccessor, KeyBindMonitor keyBindMonitor, Configurable<?, ?>[] configurableServices) {
         this.screenAccessor = screenAccessor;
         this.configurableServices = configurableServices;
+
+        load();
+
         var keyBind = new KeyBinding(
                 "Options Screen",
                 InputUtil.Type.KEYSYM,
@@ -50,39 +55,58 @@ public class ConfigHandler {
 
         var listener = new Listener.DefaultListener(this::save);
         for (Configurable<?, ?> conf : configurableServices) {
-            if (conf instanceof ExternalConfigurable<?,?> externalConfigurable){
+            if (conf instanceof ExternalConfigurable<?, ?> externalConfigurable) {
                 externalConfigurable.subscribe(listener);
+            }
+            if (conf instanceof ComplexConfigurable<?, ?> complexConfigurable) {
+                complexConfigurable.subscribe(listener);
             }
         }
 
-        Map<String, List<Configurable<?, ?>>> grouped = Arrays.stream(configurableServices)
+        Map<String, Map<String, List<Configurable<?, ?>>>> groupedData = Arrays.stream(configurableServices)
                 .collect(Collectors.groupingBy(
                         Configurable::getCategory,
                         TreeMap::new,
-                        Collectors.toList()
+                        Collectors.groupingBy(
+                                Configurable::getGroupName,
+                                TreeMap::new,
+                                Collectors.toList()
+                        )
                 ));
-        for (var entry : grouped.entrySet()) {
-            if (entry.getValue().stream().anyMatch(Configurable::hasOption)){
+
+        for (var category : groupedData.entrySet()) {
+            if (category.getValue().entrySet().stream().anyMatch(c -> c.getValue().stream().anyMatch(Configurable::hasOption))) {
                 ConfigCategory.Builder catBuilder = ConfigCategory.createBuilder()
-                        .name(Text.of(entry.getKey()));
+                        .name(Text.of(category.getKey()));
 
-                List<Configurable<?, ?>> sortedOptions = entry.getValue().stream()
-                        .sorted(Comparator.comparingInt(c -> ((Configurable<?, ?>)c).getOrder())
-                                .thenComparing(c -> ((Configurable<?, ?>)c).getConfiguration().getClass().getSimpleName()))
-                        .toList();
+                for (var group : category.getValue().entrySet()) {
+                    List<Configurable<?, ?>> sortedOptions = group.getValue().stream()
+                            .sorted(Comparator.comparingInt(c -> ((Configurable<?, ?>) c).getOrder())
+                                    .thenComparing(c -> ((Configurable<?, ?>) c).getConfiguration().getClass().getSimpleName()))
+                            .toList();
 
-                for (Configurable<?, ?> conf : sortedOptions) {
-                    catBuilder.option(conf.getOption());
+                    if (!group.getKey().isEmpty()) {
+                        var groupBuilder = OptionGroup.createBuilder()
+                                .name(Text.of(group.getKey()));
+
+                        for (Configurable<?, ?> conf : sortedOptions) {
+                            groupBuilder.option(conf.getOption());
+                        }
+
+                        catBuilder.group(groupBuilder.build());
+                    } else {
+                        for (Configurable<?, ?> conf : sortedOptions) {
+                            catBuilder.option(conf.getOption());
+                        }
+                    }
                 }
 
                 screenBuilder.category(catBuilder.build());
             }
         }
-
-        load();
     }
 
-    private void open(){
+    private void open() {
         screenAccessor.setScreen(screenBuilder.build().generateScreen(screenAccessor.getScreen().isPresent() ? screenAccessor.getScreen().get() : null));
     }
 

@@ -1,7 +1,9 @@
 package com.incrementalclient.config.components;
 
+import com.incrementalclient.services.MinecraftScreenAccessor;
 import dev.isxander.yacl3.api.Controller;
 import dev.isxander.yacl3.api.Option;
+import dev.isxander.yacl3.api.YetAnotherConfigLib;
 import dev.isxander.yacl3.api.controller.ControllerBuilder;
 import dev.isxander.yacl3.api.utils.Dimension;
 import dev.isxander.yacl3.gui.AbstractWidget;
@@ -17,12 +19,14 @@ import java.util.function.Function;
 public final class ComplexTypeController<T> implements Controller<T> {
     private final Option<T> option;
     private final Function<T, Text> textProvider;
-    private final Function<T, Screen> screenFactory;
+    private final Function<T, YetAnotherConfigLib.Builder> screenFactory;
+    private final MinecraftScreenAccessor screenAccessor;
 
-    public ComplexTypeController(Option<T> option, Function<T, Text> textProvider, Function<T, Screen> screenFactory) {
+    public ComplexTypeController(Option<T> option, Function<T, Text> textProvider, Function<T, YetAnotherConfigLib.Builder> screenFactory, MinecraftScreenAccessor screenAccessor) {
         this.option = option;
         this.textProvider = textProvider;
         this.screenFactory = screenFactory;
+        this.screenAccessor = screenAccessor;
     }
 
     @Override
@@ -42,11 +46,13 @@ public final class ComplexTypeController<T> implements Controller<T> {
 
     public static class Builder<T> implements ControllerBuilder<T> {
         private final Option<T> option;
+        private final MinecraftScreenAccessor screenAccessor;
         private Function<T, Text> textProvider = t -> Text.of(t.toString());
-        private Function<T, Screen> screenFactory;
+        private Function<T, YetAnotherConfigLib.Builder> screenFactory;
 
-        public Builder(Option<T> option) {
+        public Builder(Option<T> option, MinecraftScreenAccessor screenAccessor) {
             this.option = option;
+            this.screenAccessor = screenAccessor;
         }
 
         public Builder<T> textProvider(Function<T, Text> textProvider) {
@@ -54,7 +60,7 @@ public final class ComplexTypeController<T> implements Controller<T> {
             return this;
         }
 
-        public Builder<T> screenFactory(Function<T, Screen> screenFactory) {
+        public Builder<T> screenFactory(Function<T, YetAnotherConfigLib.Builder> screenFactory) {
             this.screenFactory = screenFactory;
             return this;
         }
@@ -64,12 +70,12 @@ public final class ComplexTypeController<T> implements Controller<T> {
             if (screenFactory == null) {
                 throw new IllegalStateException("Screen factory must be provided");
             }
-            return new ComplexTypeController<>(option, textProvider, screenFactory);
+            return new ComplexTypeController<>(option, textProvider, screenFactory, screenAccessor);
         }
     }
 
-    public static <T> Builder<T> create(Option<T> option) {
-        return new Builder<>(option);
+    public static <T> Builder<T> create(Option<T> option, MinecraftScreenAccessor screenAccessor) {
+        return new Builder<>(option, screenAccessor);
     }
 
     private class ComplexTypeWidget extends AbstractWidget {
@@ -103,8 +109,8 @@ public final class ComplexTypeController<T> implements Controller<T> {
         @Override
         public boolean mouseClicked(double mouseX, double mouseY, int button) {
             if (isMouseOver(mouseX, mouseY)) {
-                Screen editScreen = controller.screenFactory.apply(controller.option().pendingValue());
-                MinecraftClient.getInstance().setScreen(editScreen);
+                Screen editScreen = controller.screenFactory.apply(controller.option().pendingValue()).build().generateScreen(controller.screenAccessor.getScreen().orElse(null));
+                controller.screenAccessor.setScreen(editScreen);
                 return true;
             }
             return false;

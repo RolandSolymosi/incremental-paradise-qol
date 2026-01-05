@@ -15,11 +15,15 @@ public abstract class ListenableBase<TListener extends Listener>  implements Lis
     }
 
     public void subscribe(TListener listener) {
-        listeners.add(listener);
+        synchronized (listeners){
+            listeners.add(listener);
+        }
     }
 
     public void unsubscribe(TListener listener) {
-        listeners.remove(listener);
+        synchronized (listeners){
+            listeners.remove(listener);
+        }
     }
 
     protected void notifyListeners() {

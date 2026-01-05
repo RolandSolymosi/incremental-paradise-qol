@@ -26,6 +26,7 @@ public class Main implements ClientModInitializer {
             .addSingleton(SellAllHotkey.class).forwardSingleton(Configurable.class, SellAllHotkey.class)
             .addSingleton(LinksCommand.class)
             .addSingleton(CommandAliases.class).forwardSingleton(Configurable.class, CommandAliases.class)
+            .addSingleton(Loadouts.class).forwardSingleton(Configurable.class, Loadouts.class)
             .buildServiceProvider();
 
     @Override

@@ -1,4 +1,6 @@
 package com.incrementalclient.interfaces;
 
-public interface ExternalConfigurable<TConfiguration, TOption> extends Configurable<TConfiguration, TOption>, Listenable<Listener> {
+import dev.isxander.yacl3.api.Option;
+
+public interface ExternalConfigurable<TConfiguration, TOption extends Option<?>> extends Configurable<TConfiguration, TOption>, Listenable<Listener> {
 }

@@ -11,7 +11,7 @@ import net.minecraft.client.util.InputUtil;
 import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
 
-public class SellAllHotkey implements Configurable<SellAllHotkey.Configuration, Integer> {
+public class SellAllHotkey implements Configurable<SellAllHotkey.Configuration, Option<Integer>> {
 
     private final CommandHandler commandHandler;
 
@@ -34,7 +34,7 @@ public class SellAllHotkey implements Configurable<SellAllHotkey.Configuration, 
         keyBindMonitor.subscribe(new KeyBindMonitor.KeyBindListener(keyBind, this::sellAll));
 
         options = Option.<Integer>createBuilder()
-                .name(Text.literal("My Hotkey"))
+                .name(Text.literal("Sell all"))
                 .binding(
                         configuration.keybind,
                         () -> configuration.keybind,
@@ -51,6 +51,11 @@ public class SellAllHotkey implements Configurable<SellAllHotkey.Configuration, 
     @Override
     public String getCategory() {
         return "Hotkeys";
+    }
+
+    @Override
+    public String getGroupName() {
+        return "Store";
     }
 
     @Override

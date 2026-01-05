@@ -11,7 +11,7 @@ import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
 import net.minecraft.text.Text;
 import java.util.*;
 
-public class CommandAliases extends ListenableBase<Listener> implements ExternalConfigurable<CommandAliases.Configuration, CommandAliases.Configuration> {
+public class CommandAliases extends ListenableBase<Listener> implements ExternalConfigurable<CommandAliases.Configuration, Option<CommandAliases.Configuration>> {
     private final CommandHandler commandHandler;
 
     private final CommandAliases.Configuration configuration = new CommandAliases.Configuration();
@@ -84,6 +84,11 @@ public class CommandAliases extends ListenableBase<Listener> implements External
     }
 
     @Override
+    public String getGroupName() {
+        return "None";
+    }
+
+    @Override
     public String getJsonSection() {
         return "commandAliases";
     }
@@ -96,16 +101,6 @@ public class CommandAliases extends ListenableBase<Listener> implements External
     @Override
     public Configuration getConfiguration() {
         return configuration;
-    }
-
-    @Override
-    public Option<Configuration> getOption() {
-        return null;
-    }
-
-    @Override
-    public boolean hasOption(){
-        return false;
     }
 
     @Override
