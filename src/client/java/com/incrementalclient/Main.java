@@ -5,11 +5,8 @@ import com.incrementalclient.interfaces.Configurable;
 import com.incrementalclient.internals.BossBarReader;
 import com.incrementalclient.internals.MinecraftScreenAccessor;
 import com.incrementalclient.internals.ScreenCapture;
-import com.incrementalclient.internals.events.ClientCommandRegistrationCallbackObservable;
-import com.incrementalclient.internals.events.ClientReceiveMessageEventsObservable;
-import com.incrementalclient.internals.events.HudRenderCallbackObservable;
+import com.incrementalclient.internals.events.*;
 import com.incrementalclient.services.*;
-import com.incrementalclient.internals.events.EndClientTickListenable;
 import com.incrementalclient.common.utils.dependencyInjection.ServiceCollection;
 import com.incrementalclient.common.utils.dependencyInjection.ServiceProvider;
 import net.fabricmc.api.ClientModInitializer;
@@ -22,6 +19,7 @@ public class Main implements ClientModInitializer {
             .addObservable(HudRenderCallbackObservable.class)
             .addObservable(ClientCommandRegistrationCallbackObservable.class)
             .addObservable(ClientReceiveMessageEventsObservable.class)
+            .addObservable(ClientWorldEventObservable.class)
             .addObservable(BossBarReader.class)
             .addObservable(ScreenCapture.class)
             // High level Services
@@ -31,8 +29,10 @@ public class Main implements ClientModInitializer {
             .addSingleton(ConfigHandler.class)
             .addSingleton(KeyBindMonitor.class)
             .addSingleton(TaskMonitor.class)
+            .addSingleton(WorldMonitor.class)
             // Features
             .addSingleton(SellAllHotkey.class).forwardSingleton(Configurable.class, SellAllHotkey.class)
+            .addSingleton(WarpNextHotkey.class).forwardSingleton(Configurable.class, WarpNextHotkey.class)
             .addSingleton(LinksCommand.class)
             .addSingleton(CommandAliases.class).forwardSingleton(Configurable.class, CommandAliases.class)
             .addSingleton(Loadouts.class).forwardSingleton(Configurable.class, Loadouts.class)

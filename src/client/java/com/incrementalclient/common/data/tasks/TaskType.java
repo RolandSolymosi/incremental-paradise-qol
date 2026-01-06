@@ -42,7 +42,8 @@ public enum TaskType {
             Pattern.compile("Earn (?<amount>[0-9.,]+[kmbt]?) (?<constraint>.+) in (?<type>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)"),
             Pattern.compile("Earn (?<amount>[0-9.,]+[kmbt]?)\\s+(?<constraint>.+) playing (?<type>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)"),
             Pattern.compile("Find (?<amount>[0-9.,]+[kmbt]?) (?<constraint>.+) while playing (?<type>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)"))),
-    Quest("Quest", List.of());
+    Quest("Quest", List.of()),
+    Tutorial("Tutorial", List.of());
 
     private final String name;
     private final List<Pattern> patterns;

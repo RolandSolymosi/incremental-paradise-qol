@@ -6,11 +6,11 @@ import com.incrementalclient.internals.events.ClientReceiveMessageEventsObservab
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.text.Text;
 
-public class ChatHandler extends ObservableBase<Observer<Text>, Text> implements Observer<ClientReceiveMessageEventsObservable.Event> {
+public class ChatHandler extends ObservableBase<Observer<ChatHandler.Event>, ChatHandler.Event> implements Observer<ClientReceiveMessageEventsObservable.Event> {
     private final MinecraftClient client;
 
     public ChatHandler(ClientReceiveMessageEventsObservable clientReceiveMessageEventsObservable) {
-        client =  MinecraftClient.getInstance();
+        client = MinecraftClient.getInstance();
         clientReceiveMessageEventsObservable.subscribe(this);
     }
 
@@ -22,6 +22,9 @@ public class ChatHandler extends ObservableBase<Observer<Text>, Text> implements
 
     @Override
     public void onEvent(ClientReceiveMessageEventsObservable.Event result) {
+        notifyObservers(new Event(result.message(), result.overlay()));
+    }
 
+    public record Event(Text message, boolean isOverlay) {
     }
 }

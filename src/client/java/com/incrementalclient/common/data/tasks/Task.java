@@ -310,5 +310,9 @@ public enum Task {
         }
         return null;
     }
+
+    public ITask getDescriptor(){
+        return task;
+    }
 }
 

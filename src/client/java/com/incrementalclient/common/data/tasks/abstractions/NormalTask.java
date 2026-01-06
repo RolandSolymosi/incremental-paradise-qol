@@ -14,7 +14,7 @@ import java.util.Optional;
 public final class NormalTask implements ITask {
 
     private final ImmutableList<String> names;
-    private final List<Constraint> constraints;
+    private final ImmutableList<Constraint> constraints;
     private final ImmutableList<com.incrementalclient.common.data.targets.Target> targets;
     private final TaskType taskType;
     private final ImmutableList<Warp> warps;
@@ -23,7 +23,7 @@ public final class NormalTask implements ITask {
 
     public NormalTask(List<String> names, List<Constraint> constraints, TaskType taskType, DefaultWardrobe wardrobe, Tool tool, List<Target> targets, List<Warp> warps) {
         this.names = ImmutableList.copyOf(names);
-        this.constraints = constraints != null ? constraints : List.of();
+        this.constraints = constraints != null ?  ImmutableList.copyOf(constraints) : ImmutableList.of();
         this.targets = targets != null ? ImmutableList.copyOf(targets) : ImmutableList.of();
         this.taskType = taskType;
         this.warps = warps != null ? ImmutableList.copyOf(warps) : ImmutableList.of();
@@ -37,7 +37,7 @@ public final class NormalTask implements ITask {
     }
 
     @Override
-    public List<Constraint> constraints() {
+    public ImmutableList<Constraint> constraints() {
         return constraints;
     }
 

@@ -20,6 +20,7 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
 public class Loadouts extends ListenableBase<Listener> implements ComplexConfigurable<Loadouts.Configuration, ListOption<Loadouts.Configuration.Loadout>> {
@@ -30,7 +31,7 @@ public class Loadouts extends ListenableBase<Listener> implements ComplexConfigu
     private final Supplier<ListOption<Configuration.Loadout>> options = Suppliers.memoize(this::createScreen);;
     private final MinecraftScreenAccessor screenAccessor;
 
-    public HashMap<Integer, KeyBindMonitor.KeyBindListener> registeredHotkeys = new HashMap<>();
+    public ConcurrentHashMap<Integer, KeyBindMonitor.KeyBindListener> registeredHotkeys = new ConcurrentHashMap<>();
 
     public Loadouts(
             KeyBindMonitor keyBindMonitor,
