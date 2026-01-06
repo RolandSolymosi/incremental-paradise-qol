@@ -30,4 +30,8 @@ public enum Constraint {
     public static Constraint find(String name){
         return Constraints.get(name);
     }
+
+    public String getName() {
+        return name;
+    }
 }

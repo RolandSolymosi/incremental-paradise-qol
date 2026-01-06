@@ -9,7 +9,9 @@ import com.incrementalclient.interfaces.Configurable;
 import com.incrementalclient.interfaces.ExternalConfigurable;
 import com.incrementalclient.interfaces.Listener;
 import com.incrementalclient.internals.MinecraftScreenAccessor;
+import com.incrementalclient.internals.events.EndClientTickListenable;
 import dev.isxander.yacl3.api.ConfigCategory;
+import dev.isxander.yacl3.api.OptionDescription;
 import dev.isxander.yacl3.api.OptionGroup;
 import dev.isxander.yacl3.api.YetAnotherConfigLib;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
@@ -27,7 +29,7 @@ import java.util.stream.Collectors;
 
 public class ConfigHandler {
     private final MinecraftScreenAccessor screenAccessor;
-    private final Configurable<?, ?>[] configurableServices;
+    private final Configurable<?>[] configurableServices;
     private static final Path configPath = FabricLoader.getInstance().getConfigDir().resolve("incremental-qol-v2.json5");
     private final Gson gson = new GsonBuilder()
             .setStrictness(Strictness.LENIENT)
@@ -35,75 +37,82 @@ public class ConfigHandler {
             .create();
     private final YetAnotherConfigLib.Builder screenBuilder;
 
-    public ConfigHandler(MinecraftScreenAccessor screenAccessor, KeyBindMonitor keyBindMonitor, Configurable<?, ?>[] configurableServices) {
+    public ConfigHandler(MinecraftScreenAccessor screenAccessor, KeyBindMonitor keyBindMonitor, Configurable<?>[] configurableServices) {
         this.screenAccessor = screenAccessor;
         this.configurableServices = configurableServices;
 
         load();
 
-        var keyBind = new KeyBinding(
+        new KeyBindMonitor.KeyBindListener(keyBindMonitor, new KeyBinding(
                 "Options Screen",
                 InputUtil.Type.KEYSYM,
                 GLFW.GLFW_KEY_O,
                 "Incremental QOL"
-        );
-        keyBindMonitor.subscribe(new KeyBindMonitor.KeyBindListener(keyBind, this::open));
-        KeyBindingHelper.registerKeyBinding(keyBind);
+        ), this::open, true);
 
         screenBuilder = YetAnotherConfigLib.createBuilder()
                 .title(Text.literal("Incremental Qol"))
                 .save(this::save);
 
         var listener = new Listener.DefaultListener(this::save);
-        for (Configurable<?, ?> conf : configurableServices) {
-            if (conf instanceof ExternalConfigurable<?, ?> externalConfigurable) {
+        for (Configurable<?> conf : configurableServices) {
+            if (conf instanceof ExternalConfigurable<?> externalConfigurable) {
                 externalConfigurable.subscribe(listener);
             }
-            if (conf instanceof ComplexConfigurable<?, ?> complexConfigurable) {
+            if (conf instanceof ComplexConfigurable<?> complexConfigurable) {
                 complexConfigurable.subscribe(listener);
             }
         }
 
-        Map<String, Map<String, List<Configurable<?, ?>>>> groupedData = Arrays.stream(configurableServices)
+        var groupedData = Arrays.stream(configurableServices)
+                .filter(Configurable::hasOption)
+                .flatMap(service -> service.getOption().stream().map(option -> new ConfigPiece(option, service)))
                 .collect(Collectors.groupingBy(
-                        Configurable::getCategory,
+                        o -> o.optionPiece.Category(),
                         TreeMap::new,
                         Collectors.groupingBy(
-                                Configurable::getGroupName,
+                                o -> o.optionPiece.Group(),
                                 TreeMap::new,
                                 Collectors.toList()
                         )
                 ));
 
         for (var category : groupedData.entrySet()) {
-            if (category.getValue().entrySet().stream().anyMatch(c -> c.getValue().stream().anyMatch(Configurable::hasOption))) {
-                ConfigCategory.Builder catBuilder = ConfigCategory.createBuilder()
-                        .name(Text.of(category.getKey()));
+            ConfigCategory.Builder catBuilder = ConfigCategory.createBuilder()
+                    .name(Text.of(category.getKey()));
 
-                for (var group : category.getValue().entrySet()) {
-                    List<Configurable<?, ?>> sortedOptions = group.getValue().stream()
-                            .sorted(Comparator.comparingInt(c -> ((Configurable<?, ?>) c).getOrder())
-                                    .thenComparing(c -> ((Configurable<?, ?>) c).getConfiguration().getClass().getSimpleName()))
-                            .toList();
+            var sortedGroups = category.getValue().entrySet().stream()
+                    .sorted(Comparator.<Map.Entry<String, List<ConfigPiece>>, Integer>comparing(group ->
+                                    group.getValue().stream()
+                                            .mapToInt(sp -> sp.optionPiece().GroupOrder())
+                                            .min()
+                                            .orElse(0))
+                            .thenComparing(Map.Entry::getKey))
+                    .toList();
 
-                    if (!group.getKey().isEmpty()) {
-                        var groupBuilder = OptionGroup.createBuilder()
-                                .name(Text.of(group.getKey()));
+            for (var group : sortedGroups) {
+                var sortedOptions = group.getValue().stream()
+                        .sorted(Comparator.comparingInt(sp -> sp.optionPiece.Order()))
+                        .toList();
 
-                        for (Configurable<?, ?> conf : sortedOptions) {
-                            groupBuilder.option(conf.getOption());
-                        }
+                if (!group.getKey().isEmpty()) {
+                    var groupBuilder = OptionGroup.createBuilder()
+                            .name(Text.of(group.getKey()))
+                            .description(OptionDescription.of(Text.of(group.getValue().stream().map(g -> g.optionPiece.GroupDescription()).filter(g -> !g.isEmpty()).collect(Collectors.joining("\n")))));
 
-                        catBuilder.group(groupBuilder.build());
-                    } else {
-                        for (Configurable<?, ?> conf : sortedOptions) {
-                            catBuilder.option(conf.getOption());
-                        }
+                    for (var option : sortedOptions) {
+                        groupBuilder.option(option.optionPiece().Option());
+                    }
+
+                    catBuilder.group(groupBuilder.build());
+                } else {
+                    for (var option : sortedOptions) {
+                        catBuilder.option(option.optionPiece().Option());
                     }
                 }
-
-                screenBuilder.category(catBuilder.build());
             }
+
+            screenBuilder.category(catBuilder.build());
         }
     }
 
@@ -113,7 +122,7 @@ public class ConfigHandler {
 
     private void save() {
         JsonObject root = new JsonObject();
-        for (Configurable<?, ?> conf : configurableServices) {
+        for (Configurable<?> conf : configurableServices) {
             root.add(conf.getJsonSection(), gson.toJsonTree(conf.getConfiguration()));
             conf.optionChanged();
         }
@@ -133,7 +142,7 @@ public class ConfigHandler {
             JsonObject root = gson.fromJson(content, JsonObject.class);
             if (root == null) return;
 
-            for (Configurable<?, ?> conf : configurableServices) {
+            for (Configurable<?> conf : configurableServices) {
                 String section = conf.getJsonSection();
                 if (root.has(section)) {
                     Object loadedData = gson.fromJson(root.get(section), conf.getConfiguration().getClass());
@@ -143,5 +152,8 @@ public class ConfigHandler {
         } catch (Exception e) {
             System.err.println("[Config] Failed to load config: " + e.getMessage());
         }
+    }
+
+    private record ConfigPiece(Configurable.OptionPiece optionPiece, Configurable<?> configurable) {
     }
 }

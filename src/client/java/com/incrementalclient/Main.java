@@ -1,6 +1,9 @@
 package com.incrementalclient;
 
 import com.incrementalclient.featues.*;
+import com.incrementalclient.featues.Tasking.AutoSwapLoadout;
+import com.incrementalclient.featues.Tasking.TaskingOverrides;
+import com.incrementalclient.featues.Tasking.WarpNextHotkey;
 import com.incrementalclient.interfaces.Configurable;
 import com.incrementalclient.internals.BossBarReader;
 import com.incrementalclient.internals.MinecraftScreenAccessor;
@@ -30,12 +33,15 @@ public class Main implements ClientModInitializer {
             .addSingleton(KeyBindMonitor.class)
             .addSingleton(TaskMonitor.class)
             .addSingleton(WorldMonitor.class)
+            .addSingleton(HotbarHandler.class)
             // Features
             .addSingleton(SellAllHotkey.class).forwardSingleton(Configurable.class, SellAllHotkey.class)
-            .addSingleton(WarpNextHotkey.class).forwardSingleton(Configurable.class, WarpNextHotkey.class)
             .addSingleton(LinksCommand.class)
             .addSingleton(CommandAliases.class).forwardSingleton(Configurable.class, CommandAliases.class)
-            .addSingleton(Loadouts.class).forwardSingleton(Configurable.class, Loadouts.class)
+            .addSingleton(LoadoutsHotkeys.class).forwardSingleton(Configurable.class, LoadoutsHotkeys.class)
+            .addSingleton(TaskingOverrides.class).forwardSingleton(Configurable.class, TaskingOverrides.class)
+            .addSingleton(WarpNextHotkey.class).forwardSingleton(Configurable.class, WarpNextHotkey.class)
+            .addSingleton(AutoSwapLoadout.class).forwardSingleton(Configurable.class, AutoSwapLoadout.class)
             .buildServiceProvider();
 
     @Override

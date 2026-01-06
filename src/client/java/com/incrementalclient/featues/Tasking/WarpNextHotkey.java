@@ -1,6 +1,5 @@
-package com.incrementalclient.featues;
+package com.incrementalclient.featues.Tasking;
 
-import com.incrementalclient.common.data.Warp;
 import com.incrementalclient.common.data.World;
 import com.incrementalclient.common.data.tasks.TaskType;
 import com.incrementalclient.common.data.tasks.abstractions.ITask;
@@ -11,28 +10,27 @@ import com.incrementalclient.internals.events.EndClientTickListenable;
 import com.incrementalclient.services.*;
 import dev.isxander.yacl3.api.Option;
 import dev.isxander.yacl3.config.v2.api.SerialEntry;
-import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
 
+import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class WarpNextHotkey implements Configurable<WarpNextHotkey.Configuration, Option<Integer>>, Observer<EndClientTickListenable> {
+public class WarpNextHotkey implements Configurable<WarpNextHotkey.Configuration>, Observer<EndClientTickListenable> {
     private static final int MAX_WAIT = 20;
 
     private final CommandHandler commandHandler;
-    @org.jetbrains.annotations.NotNull
     private final ChatHandler chatHandler;
-    @org.jetbrains.annotations.NotNull
     private final WorldMonitor worldMonitor;
     private final TaskMonitor taskMonitor;
+    private final TaskingOverrides taskingOverrides;
 
     private final WarpNextHotkey.Configuration configuration = new Configuration();
 
-    private final Option<Integer> options;
-    private final KeyBinding keyBind;
+    private final List<OptionPiece> options;
+    private final KeyBindMonitor.KeyBindListener keyBindListener;
 
     private int warpIndex = 0;
     private int tickCounter = 0;
@@ -45,24 +43,31 @@ public class WarpNextHotkey implements Configurable<WarpNextHotkey.Configuration
             ChatHandler chatHandler,
             WorldMonitor worldMonitor,
             TaskMonitor taskMonitor,
+            TaskingOverrides taskingOverrides,
             EndClientTickListenable tickListenable
     ) {
         this.commandHandler = commandHandler;
         this.chatHandler = chatHandler;
         this.worldMonitor = worldMonitor;
         this.taskMonitor = taskMonitor;
-        keyBind = new KeyBinding(
+        this.taskingOverrides = taskingOverrides;
+        keyBindListener = new KeyBindMonitor.KeyBindListener(keyBindMonitor, new KeyBinding(
                 "Warp Next Task",
                 InputUtil.Type.KEYSYM,
                 configuration.keybind,
                 "Incremental QOL"
-        );
-        keyBindMonitor.subscribe(new KeyBindMonitor.KeyBindListener(keyBind, this::warpNext));
+        ),this::warpNext);
         chatHandler.subscribe(new ChatMessageObserver(this));
         worldMonitor.subscribe(new WorldChangeObserver(this));
         tickListenable.subscribe(this);
 
-        options = Option.<Integer>createBuilder()
+        options = List.of(new OptionPiece(
+                "Tasking",
+                0,
+                "Hotkeys",
+                "",
+                0,
+                Option.<Integer>createBuilder()
                 .name(Text.literal("Warp closest to Next Task"))
                 .binding(
                         configuration.keybind,
@@ -70,17 +75,24 @@ public class WarpNextHotkey implements Configurable<WarpNextHotkey.Configuration
                         v -> configuration.keybind = v
                 )
                 .controller((option) -> () -> new KeyBindController(option))
-                .build();
+                .build()));
     }
 
     private void warpNext() {
         if (ongoingWarp.compareAndSet(false, true)) {
             if (worldMonitor.currentWorld() != World.BossArenas) {
-                var nextUnfinishedTask = taskMonitor.getTaskList().stream().filter(p -> !p.isComplete()).findFirst();
+                var nextUnfinishedTask = taskMonitor.getTaskList().stream().filter(p ->
+                        !p.isComplete() && (!p.isTicket() || !taskingOverrides.getOverrides().containsKey(p.getTask()) || !taskingOverrides.getOverrides().get(p.getTask()).skipTicket)
+                ).findFirst();
                 if (nextUnfinishedTask.isPresent()) {
                     var task = nextUnfinishedTask.get().getTask();
                     if (task != null) {
                         if (task.getDescriptor().taskType() != TaskType.Quest && task.getDescriptor().taskType() != TaskType.Tutorial) {
+                            var override = taskingOverrides.getOverrides().get(task);
+                            if (override != null && !override.warp.isEmpty()){
+                                commandHandler.send(override.warp);
+                                return;
+                            }
                             currentTask = task.getDescriptor();
                             commandHandler.send(currentTask.warps().get(warpIndex).getWarpCommand());
                             return;
@@ -127,25 +139,9 @@ public class WarpNextHotkey implements Configurable<WarpNextHotkey.Configuration
         if (ongoingWarp.get()) {}
     }
 
-
-    @Override
-    public String getCategory() {
-        return "Hotkeys";
-    }
-
-    @Override
-    public String getGroupName() {
-        return "Tasking";
-    }
-
     @Override
     public String getJsonSection() {
         return "warpNext";
-    }
-
-    @Override
-    public int getOrder() {
-        return 0;
     }
 
     @Override
@@ -154,14 +150,13 @@ public class WarpNextHotkey implements Configurable<WarpNextHotkey.Configuration
     }
 
     @Override
-    public Option<Integer> getOption() {
+    public List<OptionPiece> getOption() {
         return options;
     }
 
     @Override
     public void optionChanged() {
-        keyBind.setBoundKey(InputUtil.fromKeyCode(configuration.keybind, 0));
-        KeyBinding.updateKeysByCode();
+        keyBindListener.updateKeyBind(configuration.keybind);
     }
 
     private record WorldChangeObserver(WarpNextHotkey warpNextHotkey) implements Observer<WorldMonitor.Event> {

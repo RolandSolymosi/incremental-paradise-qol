@@ -11,51 +11,49 @@ import net.minecraft.client.util.InputUtil;
 import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
 
-public class SellAllHotkey implements Configurable<SellAllHotkey.Configuration, Option<Integer>> {
+import java.util.List;
+
+public class SellAllHotkey implements Configurable<SellAllHotkey.Configuration> {
 
     private final CommandHandler commandHandler;
 
     private final Configuration configuration = new Configuration();
 
-    private final Option<Integer> options;
-    private final KeyBinding keyBind;
+    private final List<OptionPiece> options;
+    private final KeyBindMonitor.KeyBindListener keyBindListener;
 
     public SellAllHotkey(
             KeyBindMonitor keyBindMonitor,
             CommandHandler commandHandler
-    ){
+    ) {
         this.commandHandler = commandHandler;
-        keyBind = new KeyBinding(
+        keyBindListener = new KeyBindMonitor.KeyBindListener(keyBindMonitor, new KeyBinding(
                 "Auto Sell",
                 InputUtil.Type.KEYSYM,
                 configuration.keybind,
                 "Incremental QOL"
+        ), this::sellAll);
+
+        options = List.of(new OptionPiece(
+                "Hotkeys",
+                0,
+                "Store",
+                "",
+                0,
+                Option.<Integer>createBuilder()
+                        .name(Text.literal("Sell all"))
+                        .binding(
+                                configuration.keybind,
+                                () -> configuration.keybind,
+                                v -> configuration.keybind = v
+                        )
+                        .controller((option) -> () -> new KeyBindController(option))
+                        .build())
         );
-        keyBindMonitor.subscribe(new KeyBindMonitor.KeyBindListener(keyBind, this::sellAll));
-
-        options = Option.<Integer>createBuilder()
-                .name(Text.literal("Sell all"))
-                .binding(
-                        configuration.keybind,
-                        () -> configuration.keybind,
-                        v -> configuration.keybind = v
-                )
-                .controller((option)-> () -> new KeyBindController(option))
-                .build();
     }
 
-    private void sellAll(){
+    private void sellAll() {
         commandHandler.send("sellall");
-    }
-
-    @Override
-    public String getCategory() {
-        return "Hotkeys";
-    }
-
-    @Override
-    public String getGroupName() {
-        return "Store";
     }
 
     @Override
@@ -64,24 +62,18 @@ public class SellAllHotkey implements Configurable<SellAllHotkey.Configuration, 
     }
 
     @Override
-    public int getOrder() {
-        return 0;
-    }
-
-    @Override
     public SellAllHotkey.Configuration getConfiguration() {
         return configuration;
     }
 
     @Override
-    public Option<Integer> getOption() {
+    public List<OptionPiece> getOption() {
         return options;
     }
 
     @Override
     public void optionChanged() {
-        keyBind.setBoundKey(InputUtil.fromKeyCode(configuration.keybind, 0));
-        KeyBinding.updateKeysByCode();
+        keyBindListener.updateKeyBind(configuration.keybind);
     }
 
     static public class Configuration {

@@ -1,0 +1,287 @@
+package com.incrementalclient.featues.Tasking;
+
+import com.incrementalclient.common.data.DefaultWardrobe;
+import com.incrementalclient.common.data.Tool;
+import com.incrementalclient.common.data.tasks.TaskType;
+import com.incrementalclient.common.data.tasks.abstractions.NormalTask;
+import com.incrementalclient.config.components.KeyBindController;
+import com.incrementalclient.interfaces.Configurable;
+import com.incrementalclient.services.*;
+import dev.isxander.yacl3.api.Option;
+import dev.isxander.yacl3.api.OptionDescription;
+import dev.isxander.yacl3.api.controller.BooleanControllerBuilder;
+import dev.isxander.yacl3.api.controller.IntegerSliderControllerBuilder;
+import dev.isxander.yacl3.api.controller.StringControllerBuilder;
+import dev.isxander.yacl3.config.v2.api.SerialEntry;
+import net.minecraft.client.option.KeyBinding;
+import net.minecraft.client.util.InputUtil;
+import net.minecraft.text.Text;
+import org.lwjgl.glfw.GLFW;
+
+import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
+
+public class AutoSwapLoadout implements Configurable<AutoSwapLoadout.Configuration> {
+    private final CommandHandler commandHandler;
+    private final TaskMonitor taskMonitor;
+    private final TaskingOverrides taskingOverrides;
+    private final HotbarHandler hotbarHandler;
+
+    private final AutoSwapLoadout.Configuration configuration = new Configuration();
+
+    private final List<OptionPiece> options;
+    private final KeyBindMonitor.KeyBindListener keyBindListener;
+
+    private final AtomicBoolean ongoingWarp = new AtomicBoolean();
+
+    public AutoSwapLoadout(
+            KeyBindMonitor keyBindMonitor,
+            CommandHandler commandHandler,
+            TaskMonitor taskMonitor,
+            TaskingOverrides taskingOverrides,
+            HotbarHandler hotbarHandler
+    ) {
+        this.commandHandler = commandHandler;
+        this.taskMonitor = taskMonitor;
+        this.taskingOverrides = taskingOverrides;
+        this.hotbarHandler = hotbarHandler;
+        keyBindListener = new KeyBindMonitor.KeyBindListener(keyBindMonitor, new KeyBinding(
+                "Swap Loadout for Next Task",
+                InputUtil.Type.KEYSYM,
+                configuration.keybind,
+                "Incremental QOL"
+        ),this::swap);
+
+        options = List.of(new OptionPiece(
+                        "Tasking",
+                        0,
+                        "Hotkeys",
+                        "",
+                        0,
+                        Option.<Integer>createBuilder()
+                                .name(Text.literal("Swap Loadout for Next Task"))
+                                .binding(
+                                        configuration.keybind,
+                                        () -> configuration.keybind,
+                                        v -> configuration.keybind = v
+                                )
+                                .controller((option) -> () -> new KeyBindController(option))
+                                .build()),
+                new OptionPiece("Tasking", 1, "Task Category Auto Swap of Wardrobes", "These are the basic settings of task category based auto wardrobe swap.", 0,
+                        Option.<Boolean>createBuilder()
+                                .name(Text.of("Toggle the Auto Swap of Wardrobe"))
+                                .description(OptionDescription.of(Text.of("Turning on/off the auto swap of wardrobes functionality")))
+                                .binding(false, () -> this.configuration.enableWardrobeSwap, newVal -> this.configuration.enableWardrobeSwap = newVal)
+                                .controller(BooleanControllerBuilder::create)
+                                .build()),
+                new OptionPiece("Tasking", 1, "Task Category Auto Swap of Wardrobes", "", 1,
+                        Option.<String>createBuilder()
+                                .name(Text.of("Combat Wardrobe Name"))
+                                .description(OptionDescription.of(Text.of("The name of your wardrobe slot for Combat tasks.")))
+                                .binding("1", () -> this.configuration.combatWardrobeName, newVal -> this.configuration.combatWardrobeName = newVal)
+                                .controller(StringControllerBuilder::create)
+                                .build()),
+                new OptionPiece("Tasking", 1, "Task Category Auto Swap of Wardrobes", "", 2,
+                        Option.<String>createBuilder()
+                                .name(Text.of("Mining Wardrobe Name"))
+                                .description(OptionDescription.of(Text.of("The name of your wardrobe slot for Mining tasks.")))
+                                .binding("2", () -> this.configuration.miningWardrobeName, newVal -> this.configuration.miningWardrobeName = newVal)
+                                .controller(StringControllerBuilder::create)
+                                .build()),
+                new OptionPiece("Tasking", 1, "Task Category Auto Swap of Wardrobes", "", 3,
+                        Option.<String>createBuilder()
+                                .name(Text.of("Foraging Wardrobe Name"))
+                                .description(OptionDescription.of(Text.of("The name of your wardrobe slot for Foraging tasks.")))
+                                .binding("3", () -> this.configuration.foragingWardrobeName, newVal -> this.configuration.foragingWardrobeName = newVal)
+                                .controller(StringControllerBuilder::create)
+                                .build()),
+                new OptionPiece("Tasking", 1, "Task Category Auto Swap of Wardrobes", "", 4,
+                        Option.<String>createBuilder()
+                                .name(Text.of("Farming Wardrobe Name"))
+                                .description(OptionDescription.of(Text.of("The name of your wardrobe slot for Farming tasks.")))
+                                .binding("4", () -> this.configuration.farmingWardrobeName, newVal -> this.configuration.farmingWardrobeName = newVal)
+                                .controller(StringControllerBuilder::create)
+                                .build()),
+                new OptionPiece("Tasking", 1, "Task Category Auto Swap of Wardrobes", "", 5,
+                        Option.<String>createBuilder()
+                                .name(Text.of("Fishing Wardrobe Name"))
+                                .description(OptionDescription.of(Text.of("The name of your wardrobe slot for Fishing tasks.")))
+                                .binding("5", () -> this.configuration.fishingWardrobeName, newVal -> this.configuration.fishingWardrobeName = newVal)
+                                .controller(StringControllerBuilder::create)
+                                .build()),
+                new OptionPiece("Tasking", 1, "Task Category Auto Swap of Wardrobes", "", 6,
+                        Option.<String>createBuilder()
+                                .name(Text.of("Combat Fishing Wardrobe Name"))
+                                .description(OptionDescription.of(Text.of("The name of your wardrobe slot for Combat fishing tasks (e.g.: Crabs)")))
+                                .binding("6", () -> this.configuration.combatFishingWardrobeName, newVal -> this.configuration.combatFishingWardrobeName = newVal)
+                                .controller(StringControllerBuilder::create)
+                                .build()),
+
+                new OptionPiece("Tasking", 2, "Task Category Auto Swap of Tools", "These are the basic settings of task category based auto tool swap.", 0,
+                        Option.<Boolean>createBuilder()
+                                .name(Text.of("Toggle the Auto Swap of Tools"))
+                                .description(OptionDescription.of(Text.of("Turning on/off the auto swap of tools functionality")))
+                                .binding(false, () -> this.configuration.enableToolSwap, newVal -> this.configuration.enableToolSwap = newVal)
+                                .controller(BooleanControllerBuilder::create)
+                                .build()),
+                new OptionPiece("Tasking", 2, "Task Category Auto Swap of Tools", "", 1,
+                        Option.<Integer>createBuilder()
+                                .name(Text.of("Melee Weapon HotBar Slot"))
+                                .description(OptionDescription.of(Text.of("The slot on the HotBar for your melee weapon. (1-8)")))
+                                .binding(1, () -> this.configuration.meleeWeaponSlot + 1, newVal -> this.configuration.meleeWeaponSlot = newVal - 1)
+                                .controller(o -> IntegerSliderControllerBuilder.create(o).step(1).range(1, 8))
+                                .build()),
+                new OptionPiece("Tasking", 2, "Task Category Auto Swap of Tools", "", 2,
+                        Option.<Integer>createBuilder()
+                                .name(Text.of("Ranged Weapon HotBar Slot"))
+                                .description(OptionDescription.of(Text.of("The slot on the HotBar for your ranged weapon. (1-8)")))
+                                .binding(6, () -> this.configuration.rangedWeaponSlot + 1, newVal -> this.configuration.rangedWeaponSlot = newVal - 1)
+                                .controller(o -> IntegerSliderControllerBuilder.create(o).step(1).range(1, 8))
+                                .build()),
+                new OptionPiece("Tasking", 2, "Task Category Auto Swap of Tools", "", 3,
+                        Option.<Integer>createBuilder()
+                                .name(Text.of("Pickaxe HotBar Slot"))
+                                .description(OptionDescription.of(Text.of("The slot on the HotBar for your pickaxe. (1-8)")))
+                                .binding(2, () -> this.configuration.miningWeaponSlot + 1, newVal -> this.configuration.miningWeaponSlot = newVal - 1)
+                                .controller(o -> IntegerSliderControllerBuilder.create(o).step(1).range(1, 8))
+                                .build()),
+                new OptionPiece("Tasking", 2, "Task Category Auto Swap of Tools", "", 4,
+                        Option.<Integer>createBuilder()
+                                .name(Text.of("Axe HotBar Slot"))
+                                .description(OptionDescription.of(Text.of("The slot on the HotBar for your axe. (1-8)")))
+                                .binding(3, () -> this.configuration.foragingWeaponSlot + 1, newVal -> this.configuration.foragingWeaponSlot = newVal - 1)
+                                .controller(o -> IntegerSliderControllerBuilder.create(o).step(1).range(1, 8))
+                                .build()),
+                new OptionPiece("Tasking", 2, "Task Category Auto Swap of Tools", "", 5,
+                        Option.<Integer>createBuilder()
+                                .name(Text.of("Hoe HotBar Slot"))
+                                .description(OptionDescription.of(Text.of("The slot on the HotBar for your hoe. (1-8)")))
+                                .binding(4, () -> this.configuration.farmingWeaponSlot + 1, newVal -> this.configuration.farmingWeaponSlot = newVal - 1)
+                                .controller(o -> IntegerSliderControllerBuilder.create(o).step(1).range(1, 8))
+                                .build()),
+                new OptionPiece("Tasking", 2, "Task Category Auto Swap of Tools", "", 6,
+                        Option.<Integer>createBuilder()
+                                .name(Text.of("Fishing Rod HotBar Slot"))
+                                .description(OptionDescription.of(Text.of("The slot on the HotBar for your fishing rod. (1-8)")))
+                                .binding(5, () -> this.configuration.fishingWeaponSlot + 1, newVal -> this.configuration.fishingWeaponSlot = newVal - 1)
+                                .controller(o -> IntegerSliderControllerBuilder.create(o).step(1).range(1, 8))
+                                .build())
+        );
+    }
+
+    private void swap() {
+        if (ongoingWarp.compareAndSet(false, true)) {
+            var nextUnfinishedTask = taskMonitor.getTaskList().stream().filter(p -> !p.isComplete()).findFirst();
+            if (nextUnfinishedTask.isPresent()) {
+                var task = nextUnfinishedTask.get().getTask();
+                if (task != null) {
+                    if (task.getDescriptor().taskType() != TaskType.Quest && task.getDescriptor().taskType() != TaskType.Tutorial) {
+                        var taskDescriptor = task.getDescriptor();
+                        if (taskDescriptor instanceof NormalTask normalTask) {
+                            var override = taskingOverrides.getOverrides().get(task);
+                            var wardrobe = override != null && !override.wardrobe.isEmpty()
+                                    ? override.wardrobe
+                                    : normalTask.wardrobe() != null
+                                    ? getWardrobeNameToDefault(normalTask.wardrobe())
+                                    : null;
+                            if (wardrobe != null) {
+                                commandHandler.send("wardrobe " + wardrobe);
+                            }
+                            var pet = override != null && !override.pet.isEmpty()
+                                    ? override.pet
+                                    : null;
+                            if (pet != null) {
+                                commandHandler.send("pet " + pet);
+                            }
+                            var slot = override != null && override.toolSlotId >= 0
+                                    ? override.toolSlotId
+                                    : getSlotToDefault(normalTask.tool());
+                            hotbarHandler.swapActiveHotbarSlot(slot);
+                        }
+                    }
+                }
+            }
+            ongoingWarp.set(false);
+        }
+    }
+
+    public String getWardrobeNameToDefault(DefaultWardrobe defaultWardrobe) {
+        return switch (defaultWardrobe) {
+            case Combat -> configuration.combatWardrobeName;
+            case Mining -> configuration.miningWardrobeName;
+            case Foraging -> configuration.foragingWardrobeName;
+            case Farming -> configuration.farmingWardrobeName;
+            case Fishing -> configuration.fishingWardrobeName;
+            case CombatFishing -> configuration.combatFishingWardrobeName;
+            default -> defaultWardrobe.getString();
+        };
+    }
+
+    public int getSlotToDefault(Tool defaultToolType) {
+        return switch (defaultToolType) {
+            case Melee -> configuration.meleeWeaponSlot;
+            case Pickaxe -> configuration.miningWeaponSlot;
+            case Axe -> configuration.foragingWeaponSlot;
+            case Hoe -> configuration.farmingWeaponSlot;
+            case Spear -> configuration.fishingWeaponSlot;
+            case Bow -> configuration.rangedWeaponSlot;
+            default -> 0;
+        };
+    }
+
+    @Override
+    public String getJsonSection() {
+        return "warpNext";
+    }
+
+    @Override
+    public Configuration getConfiguration() {
+        return configuration;
+    }
+
+    @Override
+    public List<OptionPiece> getOption() {
+        return options;
+    }
+
+    @Override
+    public void optionChanged() {
+        keyBindListener.updateKeyBind(configuration.keybind);
+    }
+
+    public static class Configuration {
+        @SerialEntry
+        public int keybind = GLFW.GLFW_KEY_N;
+
+        @SerialEntry
+        private boolean enableWardrobeSwap = true;
+        @SerialEntry
+        private boolean enableToolSwap = true;
+
+        @SerialEntry
+        private String combatWardrobeName = "1";
+        @SerialEntry
+        private int meleeWeaponSlot = 0;
+        @SerialEntry
+        private int rangedWeaponSlot = 5;
+
+        @SerialEntry
+        private String miningWardrobeName = "2";
+        @SerialEntry
+        private int miningWeaponSlot = 1;
+        @SerialEntry
+        private String foragingWardrobeName = "3";
+        @SerialEntry
+        private int foragingWeaponSlot = 2;
+        @SerialEntry
+        private String farmingWardrobeName = "4";
+        @SerialEntry
+        private int farmingWeaponSlot = 3;
+        @SerialEntry
+        private String fishingWardrobeName = "5";
+        @SerialEntry
+        private String combatFishingWardrobeName = "6";
+        @SerialEntry
+        private int fishingWeaponSlot = 4;
+    }
+}

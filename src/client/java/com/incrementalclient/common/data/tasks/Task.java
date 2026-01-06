@@ -122,7 +122,7 @@ public enum Task {
 
     W2_Blackjack(new GamingTask(List.of("21"), GameKind.Blackjack, null, List.of(Warp.W2_Spawn))),
     W2_SilverMoney(new NormalTask(List.of("silver from selling items"), null, TaskType.Mining, DefaultWardrobe.Mining, Tool.Pickaxe, null, List.of(Warp.W2_Infernal, Warp.W2_Veil, Warp.W2_Lush, Warp.W2_Spawn))),
-    W2_AbyssLamp(new NormalTask(List.of("lampposts"), null, TaskType.Misc, null, null, null, List.of(Warp.W2_Abyss, Warp.W2_Infernal, Warp.W2_Veil, Warp.W2_Lush, Warp.W2_Spawn))),
+    W2_AbyssLamp(new NormalTask(List.of("lampposts"), null, TaskType.Misc, null, Tool.Spear, null, List.of(Warp.W2_Abyss, Warp.W2_Infernal, Warp.W2_Veil, Warp.W2_Lush, Warp.W2_Spawn))),
 
     // World 3
     W3_Brightstone(new NormalTask(List.of("brightstone"), null, TaskType.Mining, DefaultWardrobe.Mining, Tool.Pickaxe, null, List.of(Warp.W3_Mines, Warp.W3_Spawn))),
