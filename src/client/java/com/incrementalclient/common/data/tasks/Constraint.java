@@ -8,14 +8,16 @@ public enum Constraint {
     Shiny("shiny"),
     Elite("elite"),
     Large("large"),
-    Color("colored"),
+    Colored("colored"),
     Consecutive("in a row without missing"),
-    Ticket("Tickets"),
+    Ticket("tickets"),
     Games("games"),
     Score("score"),
     Matches("matches"),
-    PeaShooter("pea shooter"),
-    Gambit("devils gambit");
+    PeaShooter("ranged damage & pea shooter"),
+    Gambit("devil's gambit"),
+    AxeJuggling("axe juggling"),
+    Landscaping("landscaping leaves");
 
     private static final Map<String, Constraint> Constraints = Arrays.stream(Constraint.values()).collect(Collectors.toMap(Constraint::name, e -> e));
 

@@ -12,13 +12,13 @@ import java.util.Optional;
 public final class GamingTask implements ITask {
 
     private final ImmutableList<String> names;
-    private final Optional<Constraint> constraint;
+    private final List<Constraint> constraints;
     private final GameKind game;
     private final ImmutableList<Warp> warps;
 
-    public GamingTask(List<String> names, GameKind game, Constraint constraint, List<Warp> warps) {
+    public GamingTask(List<String> names, GameKind game, List<Constraint> constraints, List<Warp> warps) {
         this.names = ImmutableList.copyOf(names);
-        this.constraint = Optional.ofNullable(constraint);
+        this.constraints = constraints != null ? constraints : List.of();
         this.game = game;
         this.warps = warps != null ? ImmutableList.copyOf(warps) : ImmutableList.of();
     }
@@ -29,8 +29,8 @@ public final class GamingTask implements ITask {
     }
 
     @Override
-    public Optional<Constraint> constraint() {
-        return constraint;
+    public List<Constraint> constraints() {
+        return constraints;
     }
 
     @Override

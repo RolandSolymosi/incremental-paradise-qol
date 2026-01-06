@@ -14,16 +14,16 @@ import java.util.Optional;
 public final class NormalTask implements ITask {
 
     private final ImmutableList<String> names;
-    private final Optional<Constraint> constraint;
+    private final List<Constraint> constraints;
     private final ImmutableList<com.incrementalclient.common.data.targets.Target> targets;
     private final TaskType taskType;
     private final ImmutableList<Warp> warps;
     private final DefaultWardrobe wardrobe;
     private final Tool tool;
 
-    public NormalTask(List<String> names, Constraint constraint, TaskType taskType, DefaultWardrobe wardrobe, Tool tool, List<Target> targets, List<Warp> warps) {
+    public NormalTask(List<String> names, List<Constraint> constraints, TaskType taskType, DefaultWardrobe wardrobe, Tool tool, List<Target> targets, List<Warp> warps) {
         this.names = ImmutableList.copyOf(names);
-        this.constraint = Optional.ofNullable(constraint);
+        this.constraints = constraints != null ? constraints : List.of();
         this.targets = targets != null ? ImmutableList.copyOf(targets) : ImmutableList.of();
         this.taskType = taskType;
         this.warps = warps != null ? ImmutableList.copyOf(warps) : ImmutableList.of();
@@ -37,8 +37,8 @@ public final class NormalTask implements ITask {
     }
 
     @Override
-    public Optional<Constraint> constraint() {
-        return constraint;
+    public List<Constraint> constraints() {
+        return constraints;
     }
 
     @Override

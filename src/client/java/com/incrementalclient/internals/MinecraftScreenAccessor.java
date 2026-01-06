@@ -1,4 +1,4 @@
-package com.incrementalclient.services;
+package com.incrementalclient.internals;
 
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.gui.screen.Screen;

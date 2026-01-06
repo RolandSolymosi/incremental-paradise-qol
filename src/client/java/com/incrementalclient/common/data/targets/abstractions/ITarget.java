@@ -1,8 +1,11 @@
 package com.incrementalclient.common.data.targets.abstractions;
 
+import com.incrementalclient.common.data.Region;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+
+import java.util.List;
 
 public sealed interface ITarget permits BlockTarget, EntityTarget {
     String name();

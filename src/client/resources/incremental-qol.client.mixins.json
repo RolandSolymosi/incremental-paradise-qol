@@ -3,8 +3,9 @@
   "package": "com.incrementalclient.internals.mixins",
   "compatibilityLevel": "JAVA_21",
   "client": [
+    "BossBarHud",
     "ClientPlayNetworkHandler",
-    "BossBarHud"
+    "Packet"
   ],
   "injectors": {
     "defaultRequire": 1

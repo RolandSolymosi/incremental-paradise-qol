@@ -8,6 +8,7 @@ import com.incrementalclient.interfaces.ComplexConfigurable;
 import com.incrementalclient.interfaces.Configurable;
 import com.incrementalclient.interfaces.ExternalConfigurable;
 import com.incrementalclient.interfaces.Listener;
+import com.incrementalclient.internals.MinecraftScreenAccessor;
 import dev.isxander.yacl3.api.ConfigCategory;
 import dev.isxander.yacl3.api.OptionGroup;
 import dev.isxander.yacl3.api.YetAnotherConfigLib;

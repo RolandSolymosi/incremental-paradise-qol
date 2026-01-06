@@ -1,6 +1,5 @@
 package com.incrementalclient.common.data;
 
-import com.incrementalqol.common.data.World;
 import net.minecraft.client.world.ClientWorld;
 import net.minecraft.util.math.BlockPos;
 
@@ -25,33 +24,34 @@ public enum Warp {
     W1_Hoglin("hoglin", World.World1, new BlockPos(343,109,235)),
 
     W2_Spawn("w2", World.World1, new BlockPos(343,109,235)),
-    W2_Lush("lush", World.World1, new BlockPos(343,109,235)),
-    W2_Veil("veil", World.World1, new BlockPos(343,109,235)),
-    W2_Infernal("infernal", World.World1, new BlockPos(343,109,235)),
-    W2_Abyss("abyss", World.World1, new BlockPos(343,109,235)),
-    W2_Shimmer("shimmer", World.World1, new BlockPos(343,109,235)),
-    W2_Garlic("garlic", World.World1, new BlockPos(343,109,235)),
-    W2_Corn("corn", World.World1, new BlockPos(343,109,235)),
-    W2_Forge("forge", World.World1, new BlockPos(343,109,235)),
-    W2_Rodrick("rodrick", World.World1, new BlockPos(343,109,235)),
-    W2_Sky("sky", World.World1, new BlockPos(343,109,235)),
-    W2_Bakery("bakery", World.World1, new BlockPos(343,109,235)),
+    W2_Lush("lush", World.World2, new BlockPos(343,109,235)),
+    W2_Veil("veil", World.World2, new BlockPos(343,109,235)),
+    W2_Infernal("infernal", World.World2, new BlockPos(343,109,235)),
+    W2_Abyss("abyss", World.World2, new BlockPos(343,109,235)),
+    W2_Shimmer("shimmer", World.World2, new BlockPos(343,109,235)),
+    W2_Garlic("garlic", World.World2, new BlockPos(343,109,235)),
+    W2_Corn("corn", World.World2, new BlockPos(343,109,235)),
+    W2_Forge("forge", World.World2, new BlockPos(343,109,235)),
+    W2_Rodrick("rodrick", World.World2, new BlockPos(343,109,235)),
+    W2_Sky("sky", World.World2, new BlockPos(343,109,235)),
+    W2_Bakery("bakery", World.World2, new BlockPos(343,109,235)),
 
-    W3_Spawn("hoglin", World.World1, new BlockPos(343,109,235)),
-    W3_Sheep("hoglin", World.World1, new BlockPos(343,109,235)),
-    W3_Sty("hoglin", World.World1, new BlockPos(343,109,235)),
-    W3_Beach("hoglin", World.World1, new BlockPos(343,109,235)),
-    W3_Underside("hoglin", World.World1, new BlockPos(343,109,235)),
-    W3_Topside("hoglin", World.World1, new BlockPos(343,109,235)),
-    W3_Canine("hoglin", World.World1, new BlockPos(343,109,235)),
-    W3_Mines("hoglin", World.World1, new BlockPos(343,109,235)),
-    W3_Dreadhorn("hoglin", World.World1, new BlockPos(343,109,235)),
+    W3_Spawn("w3", World.World3, new BlockPos(343,109,235)),
+    W3_Sheep("sheep", World.World3, new BlockPos(343,109,235)),
+    W3_Sty("sty", World.World3, new BlockPos(343,109,235)),
+    W3_Beach("beach", World.World3, new BlockPos(343,109,235)),
+    W3_Underside("underside", World.World3, new BlockPos(343,109,235)),
+    W3_Topside("topside", World.World3, new BlockPos(343,109,235)),
+    W3_Canine("canine", World.World3, new BlockPos(343,109,235)),
+    W3_Mines("mines3", World.World3, new BlockPos(343,109,235)),
+    W3_Dreadhorn("dreadhorn", World.World3, new BlockPos(343,109,235)),
 
-    W4_Spawn("w4", World.World1, new BlockPos(343,109,235)),
-    W4_Sewer("sewer", World.World1, new BlockPos(343,109,235)),
-    W4_Alpha("alpha", World.World1, new BlockPos(343,109,235)),
-    W4_Root("root", World.World1, new BlockPos(343,109,235)),
-    W4_Beta("beta", World.World1, new BlockPos(343,109,235));
+    W4_Spawn("w4", World.World4, new BlockPos(343,109,235)),
+    W4_Sewer("sewer", World.World4, new BlockPos(343,109,235)),
+    W4_Alpha("alpha", World.World4, new BlockPos(343,109,235)),
+    W4_Root("root", World.World4, new BlockPos(343,109,235)),
+    W4_Beta("beta", World.World4, new BlockPos(343,109,235)),
+    W4_Delta("delta", World.World4, new BlockPos(343,109,235));
 
     private static final Map<String, Warp> WarpsByCommand = Arrays.stream(Warp.values()).collect(Collectors.toMap(Warp::getCommand, e -> e));
     private static final double TOLERANCE = 5;

@@ -237,9 +237,8 @@ public class Task {
         this.completed = true;
     }
 
-    public void bossBarForTask(ClientBossBar bar) {
+    public void bossBarForTask(String data) {
         boolean matched = false;
-        String data = bar.getName().getString();
         if (this.applicablePattern == null) return;
 
 

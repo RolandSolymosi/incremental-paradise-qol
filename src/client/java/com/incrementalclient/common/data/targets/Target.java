@@ -14,8 +14,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public enum Target {
-    Fossil_Sand(new BlockTarget("fossil", null, t -> true, Blocks.SUSPICIOUS_SAND)),
-    Fossil_Gravel(new BlockTarget("fossil", null, t -> true, Blocks.SUSPICIOUS_GRAVEL)),
+    Fossil_Sand(new BlockTarget("sandfossil", null, t -> true, Blocks.SUSPICIOUS_SAND)),
+    Fossil_Gravel(new BlockTarget("gravelfossil", null, t -> true, Blocks.SUSPICIOUS_GRAVEL)),
 
     W1_Coal(new BlockTarget("coalore", Region.W1_CoalMine, t -> true, Blocks.DEEPSLATE_COAL_ORE)),
     W1_Iron(new BlockTarget("ironore", Region.W1_IronMine, t -> true, Blocks.DEEPSLATE_IRON_ORE)),

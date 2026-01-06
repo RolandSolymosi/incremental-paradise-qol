@@ -1,6 +1,6 @@
 package com.incrementalclient.config.components;
 
-import com.incrementalclient.services.MinecraftScreenAccessor;
+import com.incrementalclient.internals.MinecraftScreenAccessor;
 import dev.isxander.yacl3.api.Controller;
 import dev.isxander.yacl3.api.Option;
 import dev.isxander.yacl3.api.YetAnotherConfigLib;

@@ -1,4 +1,4 @@
-package com.incrementalclient.services;
+package com.incrementalclient.internals;
 
 import com.incrementalclient.abstractions.ObservableBase;
 import com.incrementalclient.interfaces.Observer;

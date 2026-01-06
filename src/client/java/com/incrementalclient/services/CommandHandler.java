@@ -1,7 +1,7 @@
 package com.incrementalclient.services;
 
 import com.incrementalclient.interfaces.Observer;
-import com.incrementalclient.internals.events.ClientCommandRegistrationCallbackListenable;
+import com.incrementalclient.internals.events.ClientCommandRegistrationCallbackObservable;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import net.fabricmc.fabric.api.client.command.v2.ClientCommandManager;
@@ -12,13 +12,13 @@ import net.minecraft.util.Pair;
 
 import java.util.HashSet;
 
-public class CommandHandler implements Observer<Pair<CommandDispatcher<FabricClientCommandSource>, CommandRegistryAccess>> {
+public class CommandHandler implements Observer<ClientCommandRegistrationCallbackObservable.Event> {
     private final MinecraftClient client;
 
     private final HashSet<CommandRegistration> commandRegistrations = new HashSet<>();
 
-    public CommandHandler(ClientCommandRegistrationCallbackListenable clientCommandRegistrationCallbackListenable) {
-        clientCommandRegistrationCallbackListenable.subscribe(this);
+    public CommandHandler(ClientCommandRegistrationCallbackObservable clientCommandRegistrationCallbackObservable) {
+        clientCommandRegistrationCallbackObservable.subscribe(this);
         client = MinecraftClient.getInstance();
     }
 
@@ -34,9 +34,9 @@ public class CommandHandler implements Observer<Pair<CommandDispatcher<FabricCli
     }
 
     @Override
-    public void onEvent(Pair<CommandDispatcher<FabricClientCommandSource>, CommandRegistryAccess> result) {
+    public void onEvent(ClientCommandRegistrationCallbackObservable.Event result) {
         for (CommandRegistration registration : commandRegistrations) {
-            result.getLeft().register(registration.argumentBuilder);
+            result.dispatcher().register(registration.argumentBuilder);
         }
     }
 

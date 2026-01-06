@@ -9,7 +9,7 @@ import com.incrementalclient.interfaces.ComplexConfigurable;
 import com.incrementalclient.interfaces.Listener;
 import com.incrementalclient.services.CommandHandler;
 import com.incrementalclient.services.KeyBindMonitor;
-import com.incrementalclient.services.MinecraftScreenAccessor;
+import com.incrementalclient.internals.MinecraftScreenAccessor;
 import dev.isxander.yacl3.api.*;
 import dev.isxander.yacl3.api.controller.StringControllerBuilder;
 import dev.isxander.yacl3.config.v2.api.SerialEntry;
