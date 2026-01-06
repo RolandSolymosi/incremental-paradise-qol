@@ -48,10 +48,26 @@ public enum Warp {
 
     W4_Spawn("w4", World.World4, new BlockPos(343,109,235)),
     W4_Sewer("sewer", World.World4, new BlockPos(343,109,235)),
+    W4_Rattus("sewer", World.World4, new BlockPos(343,109,235)),
     W4_Alpha("alpha", World.World4, new BlockPos(343,109,235)),
     W4_Root("root", World.World4, new BlockPos(343,109,235)),
     W4_Beta("beta", World.World4, new BlockPos(343,109,235)),
-    W4_Delta("delta", World.World4, new BlockPos(343,109,235));
+    W4_Delta("delta", World.World4, new BlockPos(343,109,235)),
+
+    WN1_Spawn("n1", World.WorldNightmare1, new BlockPos(343,109,235)),
+    WN1_Stable("stable", World.WorldNightmare1, new BlockPos(343,109,235)),
+    WN1_Decay("decay", World.WorldNightmare1, new BlockPos(343,109,235)),
+    WN1_Torchflower("torchflower", World.WorldNightmare1, new BlockPos(343,109,235)),
+    WN1_Mandrake("mandrake", World.WorldNightmare1, new BlockPos(343,109,235)),
+    WN1_Splinterseed("splinterseed", World.WorldNightmare1, new BlockPos(343,109,235)),
+    WN1_Quartz("quartz", World.WorldNightmare1, new BlockPos(343,109,235)),
+    WN1_Lapis("lapis", World.WorldNightmare1, new BlockPos(343,109,235)),
+    WN1_NetherGold("ngold", World.WorldNightmare1, new BlockPos(343,109,235)),
+    WN1_Netherite("netherite", World.WorldNightmare1, new BlockPos(343,109,235)),
+    WN1_Bamboodle("bamboodle", World.WorldNightmare1, new BlockPos(343,109,235)),
+    WN1_Firefox("firefox", World.WorldNightmare1, new BlockPos(343,109,235)),
+    WN1_Zoglin("zoglin", World.WorldNightmare1, new BlockPos(343,109,235)),
+    ;
 
     private static final Map<String, Warp> WarpsByCommand = Arrays.stream(Warp.values()).collect(Collectors.toMap(Warp::getCommand, e -> e));
     private static final double TOLERANCE = 5;

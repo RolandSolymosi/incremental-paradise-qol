@@ -15,7 +15,7 @@ public enum Constraint {
     Score("score"),
     Matches("matches"),
     PeaShooter("ranged damage & pea shooter"),
-    Gambit("devil's gambit"),
+    DevilsGambit("devil's gambit"),
     AxeJuggling("axe juggling"),
     Landscaping("landscaping leaves");
 
