@@ -1,4 +1,4 @@
-package com.incrementalclient.config.components;
+package com.incrementalclient.config.internals;
 
 import com.google.common.collect.ImmutableList;
 import dev.isxander.yacl3.api.ListOption;

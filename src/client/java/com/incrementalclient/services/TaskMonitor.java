@@ -6,7 +6,7 @@ import com.incrementalclient.common.data.tasks.Task;
 import com.incrementalclient.common.data.tasks.TaskType;
 import com.incrementalclient.common.utils.Utils;
 import com.incrementalclient.interfaces.Observer;
-import com.incrementalclient.internals.BossBarReader;
+import com.incrementalclient.internals.BossBarObservable;
 import com.incrementalclient.internals.ScreenCapture;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.ItemStack;
@@ -25,17 +25,17 @@ public class TaskMonitor extends ObservableBase<Observer<List<TaskMonitor.TaskSt
 
     private final static Pattern bossBarPatternForTask = Pattern.compile("^(Kill |Slay |Collect |Harvest |Spear |Clean |Repair |Sell |Gain |Loot |Play |Earn |Find )");
 
-    public TaskMonitor(BossBarReader bossBarReader, ChatHandler chatHandler, ScreenCapture screenCapture) {
-        bossBarReader.subscribe(new BossBarObserver(this));
+    public TaskMonitor(BossBarObservable bossBarObservable, ChatHandler chatHandler, ScreenCapture screenCapture) {
+        bossBarObservable.subscribe(new BossBarObserver(this));
         chatHandler.subscribe(new ChatMessageObserver(this));
         screenCapture.subscribe(new ScreenObserver(this));
     }
 
-    public List<TaskState> getTaskList(){
+    public List<TaskState> getTaskList() {
         return this.taskList;
     }
 
-    private void bossBarUpdated(BossBarReader.BossBar bossBar) {
+    private void bossBarUpdated(BossBarObservable.BossBar bossBar) {
         var isTaskUpdate = bossBarPatternForTask.matcher(bossBar.text());
         if (isTaskUpdate.hasMatch()) {
             for (var task : taskList) {
@@ -88,9 +88,9 @@ public class TaskMonitor extends ObservableBase<Observer<List<TaskMonitor.TaskSt
         }
     }
 
-    private record BossBarObserver(TaskMonitor taskMonitor) implements Observer<BossBarReader.BossBar> {
+    private record BossBarObserver(TaskMonitor taskMonitor) implements Observer<BossBarObservable.BossBar> {
         @Override
-        public void onEvent(BossBarReader.BossBar result) {
+        public void onEvent(BossBarObservable.BossBar result) {
             taskMonitor.bossBarUpdated(result);
         }
     }
@@ -121,14 +121,14 @@ public class TaskMonitor extends ObservableBase<Observer<List<TaskMonitor.TaskSt
 
                     if (taskType.isPresent()) {
                         var taskName = cleanTaskName(itemStack.getName().getString());
-                        if (taskType.get() == TaskType.Quest) {
-                            return new TaskState(taskName, null, slotId, false, false, "", "", null);
+                        if (taskType.get() == TaskType.Quest || taskType.get() == TaskType.Tutorial) {
+                            return new TaskState(taskName, "", taskType.get(), null, slotId, false, false, "", "", null);
                         } else {
                             String description = blocks.size() > 1 ? blocks.get(1) : "";
                             for (Pattern pattern : taskType.get().getPatterns()) {
                                 var taskMatch = tryMatchTask(pattern, description);
                                 if (taskMatch != null) {
-                                    return new TaskState(taskName, taskMatch.task, slotId, isTicketTask(blocks.getFirst()), isSocialiteTask(blocks.getFirst()), taskMatch.amount, taskMatch.progress, pattern);
+                                    return new TaskState(taskName, description, taskType.get(), taskMatch.task, slotId, isTicketTask(blocks.getFirst()), isSocialiteTask(blocks.getFirst()), taskMatch.amount, taskMatch.progress, pattern);
                                 }
                             }
                         }
@@ -216,6 +216,9 @@ public class TaskMonitor extends ObservableBase<Observer<List<TaskMonitor.TaskSt
 
     public static final class TaskState {
         private final String name;
+        // TODO: Remove after region can be got from Tasks/TheirTargets
+        private final String description;
+        private final TaskType taskType;
         private final Task task;
         private final int slotId;
         private final boolean isTicket;
@@ -225,8 +228,10 @@ public class TaskMonitor extends ObservableBase<Observer<List<TaskMonitor.TaskSt
         private String current;
         private boolean isCompleted;
 
-        TaskState(String name, Task task, int slotId, boolean isTicket, boolean isSocialite, String required, String current, Pattern taskPattern) {
+        TaskState(String name, String description, TaskType taskType, Task task, int slotId, boolean isTicket, boolean isSocialite, String required, String current, Pattern taskPattern) {
             this.name = name;
+            this.description = description;
+            this.taskType = task != null ? task.getDescriptor().taskType() : taskType;
             this.task = task;
             this.slotId = slotId;
             this.isCompleted = required.equals(current);
@@ -284,7 +289,7 @@ public class TaskMonitor extends ObservableBase<Observer<List<TaskMonitor.TaskSt
             return task;
         }
 
-        public boolean isComplete() {
+        public boolean isCompleted() {
             return isCompleted;
         }
 
@@ -294,6 +299,14 @@ public class TaskMonitor extends ObservableBase<Observer<List<TaskMonitor.TaskSt
 
         public String getName() {
             return name;
+        }
+
+        public TaskType getTaskType() {
+            return taskType;
+        }
+
+        public String getDescription() {
+            return description;
         }
 
         public enum UpdateState {

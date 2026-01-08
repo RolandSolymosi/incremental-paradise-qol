@@ -120,7 +120,7 @@ public enum Task {
     W2_Bubbler(new NormalTask(List.of("bubbler"), null, TaskType.Fishing, DefaultWardrobe.Fishing, Tool.Spear, null, List.of(Warp.W2_Infernal, Warp.W2_Veil, Warp.W2_Lush, Warp.W2_Spawn))),
     W2_AbyssalCrab(new NormalTask(List.of("abyssal crabs"), null, TaskType.Fishing, DefaultWardrobe.CombatFishing, Tool.Spear, null, List.of(Warp.W2_Abyss, Warp.W2_Infernal, Warp.W2_Veil, Warp.W2_Lush, Warp.W2_Spawn))),
 
-    W2_Blackjack(new GamingTask(List.of("21"), GameKind.Blackjack, null, List.of(Warp.W2_Spawn))),
+    W2_PlayBlackjack(new GamingTask(List.of("21"), GameKind.Blackjack, List.of(Constraint.Games), List.of(Warp.W2_Spawn))),
     W2_SilverMoney(new NormalTask(List.of("silver from selling items"), null, TaskType.Mining, DefaultWardrobe.Mining, Tool.Pickaxe, null, List.of(Warp.W2_Infernal, Warp.W2_Veil, Warp.W2_Lush, Warp.W2_Spawn))),
     W2_AbyssLamp(new NormalTask(List.of("lampposts"), null, TaskType.Misc, null, Tool.Spear, null, List.of(Warp.W2_Abyss, Warp.W2_Infernal, Warp.W2_Veil, Warp.W2_Lush, Warp.W2_Spawn))),
 
@@ -168,7 +168,8 @@ public enum Task {
     W3_Soarfish(new NormalTask(List.of("soarfish"), null, TaskType.Fishing, DefaultWardrobe.Fishing, Tool.Spear, null, List.of(Warp.W3_Beach, Warp.W3_Spawn))),
     W3_Guardian(new NormalTask(List.of("guardians"), null, TaskType.Fishing, DefaultWardrobe.CombatFishing, Tool.Spear, null, List.of(Warp.W3_Underside, Warp.W3_Spawn))),
 
-    W3_Matcher(new GamingTask(List.of("matcher"), GameKind.Matcher, null, List.of(Warp.W3_Spawn))),
+    W3_FindMatchesMatcher(new GamingTask(List.of("matcher"), GameKind.Matcher, List.of(Constraint.Matches), List.of(Warp.W3_Spawn))),
+    W3_EarnTicketMatcher(new GamingTask(List.of("matcher"), GameKind.Matcher, List.of(Constraint.Ticket), List.of(Warp.W3_Spawn))),
 
     // World 4
     W4_Cheddore(new NormalTask(List.of("cheddore"), null, TaskType.Mining, DefaultWardrobe.Mining, Tool.Pickaxe, null, List.of(Warp.W4_Spawn))),
@@ -273,7 +274,8 @@ public enum Task {
     WN1_SmokedSalmon(new NormalTask(List.of("smoked salmon"), null, TaskType.Fishing, DefaultWardrobe.Fishing, Tool.Spear, null, List.of(Warp.WN1_Decay, Warp.WN1_Spawn))),
     WN1_Strider(new NormalTask(List.of("striders"), null, TaskType.Fishing, DefaultWardrobe.CombatFishing, Tool.Spear, null, List.of(Warp.WN1_Spawn))),
 
-    WN1_Dice(new GamingTask(List.of("pairadice"), GameKind.Pairdice, null, List.of(Warp.WN1_Spawn))),
+    WN1_EarnTicketDice(new GamingTask(List.of("pairadice"), GameKind.Pairdice, List.of(Constraint.Ticket), List.of(Warp.WN1_Spawn))),
+    WN1_EarnPointDice(new GamingTask(List.of("pairadice"), GameKind.Pairdice, null /* TODO: Missing constraint name*/, List.of(Warp.WN1_Spawn))),
     WN1_ShiverMoney(new NormalTask(List.of("shiver from selling items"), null, TaskType.Mining, DefaultWardrobe.Mining, Tool.Pickaxe, null, List.of(Warp.WN1_Quartz, Warp.WN1_Spawn))),
     ;
 

@@ -6,21 +6,23 @@ import java.util.Arrays;
 import java.util.Optional;
 
 public enum World {
-    Hub(Identifier.of("minecraft", "worldhub"), Realm.Hub),
-    Overworld(Identifier.of("minecraft", "overworld"), Realm.Unknown),
-    BossArenas(Identifier.of("minecraft", "bossarenas"), Realm.Normal),
-    CrabIsland(Identifier.of("minecraft", "hermitworld"), Realm.Normal),
-    World1(Identifier.of("minecraft", "world1"), Realm.Normal),
-    World2(Identifier.of("minecraft", "world2"), Realm.Normal),
-    World3(Identifier.of("minecraft", "world3"), Realm.Normal),
-    World4(Identifier.of("minecraft", "world4"), Realm.Normal),
-    WorldNightmare1(Identifier.of("minecraft", "worldnightmare"), Realm.Nightmare);
+    Hub("Hub", Identifier.of("minecraft", "worldhub"), Realm.Hub),
+    Overworld("Overworld", Identifier.of("minecraft", "overworld"), Realm.Unknown),
+    BossArenas("Boss Arena", Identifier.of("minecraft", "bossarenas"), Realm.Normal),
+    CrabIsland("Crab Island",Identifier.of("minecraft", "hermitworld"), Realm.Normal),
+    World1("World 1", Identifier.of("minecraft", "world1"), Realm.Normal),
+    World2("World 2", Identifier.of("minecraft", "world2"), Realm.Normal),
+    World3("World 3", Identifier.of("minecraft", "world3"), Realm.Normal),
+    World4("World 4", Identifier.of("minecraft", "world4"), Realm.Normal),
+    WorldNightmare1("Nightmare 1", Identifier.of("minecraft", "worldnightmare"), Realm.Nightmare);
 
 
+    private final String name;
     private final Identifier id;
     private final Realm realm;
 
-    World(Identifier id, Realm realm) {
+    World(String name, Identifier id, Realm realm) {
+        this.name = name;
         this.id = id;
         this.realm = realm;
     }
@@ -31,6 +33,10 @@ public enum World {
 
     public Realm getRealm() {
         return realm;
+    }
+
+    public String getName() {
+        return name;
     }
 
     public enum Realm {

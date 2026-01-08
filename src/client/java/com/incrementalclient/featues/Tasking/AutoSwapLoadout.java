@@ -4,7 +4,7 @@ import com.incrementalclient.common.data.DefaultWardrobe;
 import com.incrementalclient.common.data.Tool;
 import com.incrementalclient.common.data.tasks.TaskType;
 import com.incrementalclient.common.data.tasks.abstractions.NormalTask;
-import com.incrementalclient.config.components.KeyBindController;
+import com.incrementalclient.config.controllers.KeyBindController;
 import com.incrementalclient.interfaces.Configurable;
 import com.incrementalclient.services.*;
 import dev.isxander.yacl3.api.Option;
@@ -171,7 +171,7 @@ public class AutoSwapLoadout implements Configurable<AutoSwapLoadout.Configurati
 
     private void swap() {
         if (ongoingWarp.compareAndSet(false, true)) {
-            var nextUnfinishedTask = taskMonitor.getTaskList().stream().filter(p -> !p.isComplete()).findFirst();
+            var nextUnfinishedTask = taskMonitor.getTaskList().stream().filter(p -> !p.isCompleted()).findFirst();
             if (nextUnfinishedTask.isPresent()) {
                 var task = nextUnfinishedTask.get().getTask();
                 if (task != null) {

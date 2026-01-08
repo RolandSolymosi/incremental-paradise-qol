@@ -1,5 +1,7 @@
 package com.incrementalclient.interfaces;
 
+import org.jetbrains.annotations.NotNull;
+
 public interface Listener {
     void onEvent();
 

@@ -9,7 +9,7 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class BossBarReader extends ObservableBase<Observer<BossBarReader.BossBar>, BossBarReader.BossBar> {
+public class BossBarObservable extends ObservableBase<Observer<BossBarObservable.BossBar>, BossBarObservable.BossBar> {
 
     private final AtomicBoolean ongoing = new AtomicBoolean();
 

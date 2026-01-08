@@ -1,6 +1,6 @@
-package com.incrementalclient.config.components;
+package com.incrementalclient.config.controllers;
 
-import com.incrementalclient.internals.MinecraftScreenAccessor;
+import com.incrementalclient.internals.MinecraftClientAccessor;
 import dev.isxander.yacl3.api.Controller;
 import dev.isxander.yacl3.api.Option;
 import dev.isxander.yacl3.api.YetAnotherConfigLib;
@@ -20,9 +20,9 @@ public final class ComplexTypeController<T> implements Controller<T> {
     private final Option<T> option;
     private final Function<T, Text> textProvider;
     private final Function<T, YetAnotherConfigLib.Builder> screenFactory;
-    private final MinecraftScreenAccessor screenAccessor;
+    private final MinecraftClientAccessor screenAccessor;
 
-    public ComplexTypeController(Option<T> option, Function<T, Text> textProvider, Function<T, YetAnotherConfigLib.Builder> screenFactory, MinecraftScreenAccessor screenAccessor) {
+    public ComplexTypeController(Option<T> option, Function<T, Text> textProvider, Function<T, YetAnotherConfigLib.Builder> screenFactory, MinecraftClientAccessor screenAccessor) {
         this.option = option;
         this.textProvider = textProvider;
         this.screenFactory = screenFactory;
@@ -46,11 +46,11 @@ public final class ComplexTypeController<T> implements Controller<T> {
 
     public static class Builder<T> implements ControllerBuilder<T> {
         private final Option<T> option;
-        private final MinecraftScreenAccessor screenAccessor;
+        private final MinecraftClientAccessor screenAccessor;
         private Function<T, Text> textProvider = t -> Text.of(t.toString());
         private Function<T, YetAnotherConfigLib.Builder> screenFactory;
 
-        public Builder(Option<T> option, MinecraftScreenAccessor screenAccessor) {
+        public Builder(Option<T> option, MinecraftClientAccessor screenAccessor) {
             this.option = option;
             this.screenAccessor = screenAccessor;
         }
@@ -74,7 +74,7 @@ public final class ComplexTypeController<T> implements Controller<T> {
         }
     }
 
-    public static <T> Builder<T> create(Option<T> option, MinecraftScreenAccessor screenAccessor) {
+    public static <T> Builder<T> create(Option<T> option, MinecraftClientAccessor screenAccessor) {
         return new Builder<>(option, screenAccessor);
     }
 

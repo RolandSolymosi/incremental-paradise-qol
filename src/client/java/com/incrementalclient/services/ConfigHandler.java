@@ -8,13 +8,11 @@ import com.incrementalclient.interfaces.ComplexConfigurable;
 import com.incrementalclient.interfaces.Configurable;
 import com.incrementalclient.interfaces.ExternalConfigurable;
 import com.incrementalclient.interfaces.Listener;
-import com.incrementalclient.internals.MinecraftScreenAccessor;
-import com.incrementalclient.internals.events.EndClientTickListenable;
+import com.incrementalclient.internals.MinecraftClientAccessor;
 import dev.isxander.yacl3.api.ConfigCategory;
 import dev.isxander.yacl3.api.OptionDescription;
 import dev.isxander.yacl3.api.OptionGroup;
 import dev.isxander.yacl3.api.YetAnotherConfigLib;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.loader.api.FabricLoader;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
@@ -28,7 +26,7 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 public class ConfigHandler {
-    private final MinecraftScreenAccessor screenAccessor;
+    private final MinecraftClientAccessor screenAccessor;
     private final Configurable<?>[] configurableServices;
     private static final Path configPath = FabricLoader.getInstance().getConfigDir().resolve("incremental-qol-v2.json5");
     private final Gson gson = new GsonBuilder()
@@ -37,7 +35,7 @@ public class ConfigHandler {
             .create();
     private final YetAnotherConfigLib.Builder screenBuilder;
 
-    public ConfigHandler(MinecraftScreenAccessor screenAccessor, KeyBindMonitor keyBindMonitor, Configurable<?>[] configurableServices) {
+    public ConfigHandler(MinecraftClientAccessor screenAccessor, KeyBindMonitor keyBindMonitor, Configurable<?>[] configurableServices) {
         this.screenAccessor = screenAccessor;
         this.configurableServices = configurableServices;
 
@@ -120,7 +118,7 @@ public class ConfigHandler {
         screenAccessor.setScreen(screenBuilder.build().generateScreen(screenAccessor.getScreen().isPresent() ? screenAccessor.getScreen().get() : null));
     }
 
-    private void save() {
+    public void save() {
         JsonObject root = new JsonObject();
         for (Configurable<?> conf : configurableServices) {
             root.add(conf.getJsonSection(), gson.toJsonTree(conf.getConfiguration()));
@@ -145,6 +143,7 @@ public class ConfigHandler {
             for (Configurable<?> conf : configurableServices) {
                 String section = conf.getJsonSection();
                 if (root.has(section)) {
+                    var classes = conf.getConfiguration().getClass();
                     Object loadedData = gson.fromJson(root.get(section), conf.getConfiguration().getClass());
                     conf.copyFrom(loadedData);
                 }

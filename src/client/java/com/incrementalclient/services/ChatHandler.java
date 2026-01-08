@@ -20,6 +20,12 @@ public class ChatHandler extends ObservableBase<Observer<ChatHandler.Event>, Cha
         client.player.sendMessage(message, false);
     }
 
+    public void sendOverlayMessage(Text message) {
+        if (message == null || message.getString().isEmpty()) return;
+        if (client.player == null) return;
+        client.player.sendMessage(message, true);
+    }
+
     @Override
     public void onEvent(ClientReceiveMessageEventsObservable.Event result) {
         notifyObservers(new Event(result.message(), result.overlay()));

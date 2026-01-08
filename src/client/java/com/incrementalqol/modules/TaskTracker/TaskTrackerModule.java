@@ -13,12 +13,9 @@ import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.LoreComponent;
 import net.minecraft.item.Item;
@@ -27,7 +24,6 @@ import net.minecraft.network.packet.c2s.play.UpdateSelectedSlotC2SPacket;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.text.Text;
 import net.minecraft.util.Pair;
-import net.minecraft.util.math.ColorHelper;
 import org.lwjgl.glfw.GLFW;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -216,47 +212,7 @@ public class TaskTrackerModule implements ClientModInitializer {
             }
         });
 
-        HudRenderCallback.EVENT.register(((drawContext, renderTickCounter) -> {
-
-            var config = Config.HANDLER.instance();
-            TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
-
-            int color = ColorHelper.getArgb(config.getHudBackgroundOpacity(), 0, 0, 0);
-            int CompletedGreen = ColorHelper.getArgb(255, 0, 194, 32);
-            int toComplete = ColorHelper.getArgb(255, 255, 255, 255);
-            int rectangleX = 10;
-            int rectangleY = 10;
-            // x1, y1, x2, y2, color
-
-            if (!MinecraftClient.getInstance().options.hudHidden && config.getIsHudEnabled() && !taskList.isEmpty() && !(config.getIsHudDisabledDuringBossFight() && WorldChangeNotifier.getLastWorld() == World.BossArenas)) {
-                int size = taskList.getFirst().getStrWidth();
-                for (Task task : taskList) {
-                    if (task.getStrWidth() > size) {
-                        size = task.getStrWidth();
-                    }
-                }
-
-                if (config.getSortedByType()) {
-                    taskList.sort(Comparator.comparing(Task::getTaskType));
-                }
-
-
-                float scaleFactor = (float) config.getHudScale();
-
-                MatrixStack matrixStack = drawContext.getMatrices();
-                matrixStack.push();
-                matrixStack.scale(scaleFactor, scaleFactor, scaleFactor);
-
-
-                if (config.getHudBackgroundOpacity() != 0) {
-                    drawContext.fill(config.getHudPosX(), config.getHudPosY(), config.getHudPosX() + ((size + 1) * 5), config.getHudPosY() + 5 + (15 * taskList.size()), color);
-                }
-                for (int i = 0; i < taskList.size(); i++) {
-                    drawContext.drawText(textRenderer, taskList.get(i).render(), config.getHudPosX() + 2, config.getHudPosY() + 5 + (15 * i), toComplete, true);
-                }
-                matrixStack.pop();
-            }
-        }));
+        // HUD rendering is now handled by HudModule
     }
 
     private static void resetWarp() {

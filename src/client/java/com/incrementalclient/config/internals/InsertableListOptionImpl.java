@@ -1,4 +1,4 @@
-package com.incrementalclient.config.components;
+package com.incrementalclient.config.internals;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;

@@ -1,6 +1,6 @@
 package com.incrementalclient.featues;
 
-import com.incrementalclient.config.components.KeyBindController;
+import com.incrementalclient.config.controllers.KeyBindController;
 import com.incrementalclient.interfaces.Configurable;
 import com.incrementalclient.services.CommandHandler;
 import com.incrementalclient.services.KeyBindMonitor;

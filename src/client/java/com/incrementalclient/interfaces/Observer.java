@@ -1,5 +1,7 @@
 package com.incrementalclient.interfaces;
 
+import org.jetbrains.annotations.NotNull;
+
 import java.util.function.Consumer;
 
 public interface Observer<T> extends Listener {

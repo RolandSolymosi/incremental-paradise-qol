@@ -23,11 +23,14 @@ public class ServiceCollection {
         descriptors.add(new ServiceDescriptor(serviceType, serviceType, ServiceLifetime.SINGLETON, null));
         return this;
     }
-
-    //public <T> ServiceCollection addTransient(Class<T> serviceType, Class<? extends T> impl) {
-    //    descriptors.add(new ServiceDescriptor(serviceType, impl, ServiceLifetime.TRANSIENT, null));
-    //    return this;
-    //}
+    public <T> ServiceCollection addTransient(Class<T> serviceType, Class<? extends T> impl) {
+        descriptors.add(new ServiceDescriptor(serviceType, impl, ServiceLifetime.TRANSIENT, null));
+        return this;
+    }
+    public <T> ServiceCollection addTransient(Class<T> serviceType) {
+        descriptors.add(new ServiceDescriptor(serviceType, serviceType, ServiceLifetime.TRANSIENT, null));
+        return this;
+    }
 
     // Factory-based registrations
     public <T> ServiceCollection addSingleton(Class<T> serviceType, Function<ServiceProvider, T> factory) {
@@ -35,10 +38,10 @@ public class ServiceCollection {
         return this;
     }
 
-    //public <T> ServiceCollection addTransient(Class<T> serviceType, Function<ServiceProvider, T> factory) {
-    //    descriptors.add(new ServiceDescriptor(serviceType, null, ServiceLifetime.TRANSIENT, factory));
-    //    return this;
-    //}
+    public <T> ServiceCollection addTransient(Class<T> serviceType, Function<ServiceProvider, T> factory) {
+        descriptors.add(new ServiceDescriptor(serviceType, null, ServiceLifetime.TRANSIENT, factory));
+        return this;
+    }
 
     public <T extends ListenableBase<?>> ServiceCollection addListenable(Class<T> concreteType) {
         return this.addSingleton(concreteType, concreteType);
@@ -160,6 +163,9 @@ public class ServiceCollection {
             }
 
             try {
+                if (descriptor.implementationType().getConstructors().length != 1){
+                    throw new RuntimeException("There must be exactly one public constructor. This type either have multiple, or none: " + descriptor.implementationType().getSimpleName());
+                }
                 Constructor<?> constructor = descriptor.implementationType().getConstructors()[0];
 
                 Class<?>[] paramTypes = constructor.getParameterTypes();

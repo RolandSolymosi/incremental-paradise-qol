@@ -1,5 +1,6 @@
 package com.incrementalqol.config;
 
+import com.incrementalclient.hud.internals.HudCustomizationScreen;
 import com.incrementalqol.common.data.Skills.*;
 import com.incrementalqol.common.data.TaskCollection;
 import com.incrementalqol.common.data.ToolType;
@@ -86,6 +87,49 @@ public class Config {
     private Color consumableTimerColor = new Color(0xffaa00);
     @SerialEntry
     private Color consumableTimeColor = new Color(0x55ff55);
+
+    @SerialEntry
+    private boolean hideVanillaScoreboard = false;
+    @SerialEntry
+    private boolean hideVanillaHearts = false;
+    @SerialEntry
+    private boolean hideVanillaFood = false;
+    @SerialEntry
+    private boolean hideVanillaArmor = false;
+    @SerialEntry
+    private boolean hideVanillaEffects = false;
+    @SerialEntry
+    private boolean hideVanillaOverlayMessage = false;
+    @SerialEntry
+    private boolean hideVanillaExperienceBar = false;
+    @SerialEntry
+    private boolean hideVanillaExperienceLevel = false;
+    
+    @SerialEntry
+    private String hpBarDisplayMode = "BAR_AND_NUMBER"; // "NUMBER_ONLY" or "BAR_AND_NUMBER"
+
+    @SerialEntry
+    private int hpBarRenderScale = 2; // 1 = pixelated, higher = smoother (via supersampled render + downscale)
+
+    @SerialEntry
+    private double hpBarSizeScale = 0.75; // Scales only the bar (not the text). 1.0 = current size.
+
+
+    public int getHpBarRenderScale() {
+        return hpBarRenderScale;
+    }
+
+    public void setHpBarRenderScale(int hpBarRenderScale) {
+        this.hpBarRenderScale = hpBarRenderScale;
+    }
+
+    public double getHpBarSizeScale() {
+        return hpBarSizeScale;
+    }
+
+    public void setHpBarSizeScale(double hpBarSizeScale) {
+        this.hpBarSizeScale = hpBarSizeScale;
+    }
 
     @SerialEntry
     private int legendaryPxpValue = 75;
@@ -313,6 +357,7 @@ public class Config {
                         SkillLeveling(),
                         TaskOverride(),
                         ConsumableHudCategory(),
+                        VanillaHudCategory(),
                         Others(),
                         Debug())
                 )
@@ -357,11 +402,11 @@ public class Config {
                                 .binding(1.0, () -> this.hudScale, newVal -> this.hudScale = newVal)
                                 .controller(o -> DoubleSliderControllerBuilder.create(o).step(0.1).range(0.5, 2.0))
                                 .build())
-                        .option(ButtonOption.createBuilder()
-                                .name(Text.of("Task HUD Position"))
-                                .description(OptionDescription.of(Text.of("Activate the function to move the task HUD. Press ESC to return here.")))
-                                .action((t, o) -> MinecraftClient.getInstance().setScreen(new DraggableScreen(t)))
-                                .build())
+                        //.option(ButtonOption.createBuilder()
+                        //        .name(Text.of("HUD Customization"))
+                        //        .description(OptionDescription.of(Text.of("Open the HUD customization screen to position and scale all HUD elements.")))
+                        //        .action((t, o) -> MinecraftClient.getInstance().setScreen(new HudCustomizationScreen(t)))
+                        //        .build())
                         .build())
                 .group(OptionGroup.createBuilder()
                         .name(Text.of("Task Warp Extras"))
@@ -773,11 +818,7 @@ public class Config {
                                 .binding(1.0, () -> this.consumableHudScale, newVal -> this.consumableHudScale = newVal)
                                 .controller(o -> DoubleSliderControllerBuilder.create(o).step(0.1).range(0.5, 2.0))
                                 .build())
-                        .option(ButtonOption.createBuilder()
-                                .name(Text.of("Consumable HUD Position"))
-                                .description(OptionDescription.of(Text.of("Activate the function to move the consumable HUD. Press ESC to return here.")))
-                                .action((t, o) -> MinecraftClient.getInstance().setScreen(new ConsumableDraggableScreen(t)))
-                                .build())
+                        // HUD customization is now unified - use the button in Task category
                         .build())
                 .group(OptionGroup.createBuilder()
                         .name(Text.of("Consumable Timer HUD Color configuration"))
@@ -795,6 +836,91 @@ public class Config {
                                 .controller(ColorControllerBuilder::create)
                                 .build())
                         .collapsed(true)
+                        .build())
+                .build();
+    }
+
+    public ConfigCategory VanillaHudCategory() {
+        return ConfigCategory.createBuilder()
+                .name(Text.of("Vanilla HUD Elements"))
+                .tooltip(Text.of("Hide vanilla Minecraft HUD elements to replace them with custom versions."))
+                .group(OptionGroup.createBuilder()
+                        .name(Text.of("Vanilla HUD Visibility"))
+                        .description(OptionDescription.of(Text.of("Toggle visibility of vanilla HUD elements. Hidden elements can be replaced with custom versions.")))
+                        .option(Option.<Boolean>createBuilder()
+                                .name(Text.of("Hide vanilla scoreboard"))
+                                .description(OptionDescription.of(Text.of("Hides the vanilla scoreboard sidebar.")))
+                                .binding(false, () -> this.hideVanillaScoreboard, newVal -> this.hideVanillaScoreboard = newVal)
+                                .controller(BooleanControllerBuilder::create)
+                                .build())
+                        .option(Option.<Boolean>createBuilder()
+                                .name(Text.of("Hide vanilla hearts"))
+                                .description(OptionDescription.of(Text.of("Hides the vanilla health hearts.")))
+                                .binding(false, () -> this.hideVanillaHearts, newVal -> this.hideVanillaHearts = newVal)
+                                .controller(BooleanControllerBuilder::create)
+                                .build())
+                        .option(Option.<Boolean>createBuilder()
+                                .name(Text.of("Hide vanilla food"))
+                                .description(OptionDescription.of(Text.of("Hides the vanilla hunger/food bar.")))
+                                .binding(false, () -> this.hideVanillaFood, newVal -> this.hideVanillaFood = newVal)
+                                .controller(BooleanControllerBuilder::create)
+                                .build())
+                        .option(Option.<Boolean>createBuilder()
+                                .name(Text.of("Hide vanilla armor"))
+                                .description(OptionDescription.of(Text.of("Hides the vanilla armor indicators.")))
+                                .binding(false, () -> this.hideVanillaArmor, newVal -> this.hideVanillaArmor = newVal)
+                                .controller(BooleanControllerBuilder::create)
+                                .build())
+                        .option(Option.<Boolean>createBuilder()
+                                .name(Text.of("Hide vanilla effects"))
+                                .description(OptionDescription.of(Text.of("Hides the vanilla potion effect icons.")))
+                                .binding(false, () -> this.hideVanillaEffects, newVal -> this.hideVanillaEffects = newVal)
+                                .controller(BooleanControllerBuilder::create)
+                                .build())
+                        .option(Option.<Boolean>createBuilder()
+                                .name(Text.of("Hide vanilla overlay message"))
+                                .description(OptionDescription.of(Text.of("Hides the vanilla action bar overlay (health/mana display).")))
+                                .binding(false, () -> this.hideVanillaOverlayMessage, newVal -> this.hideVanillaOverlayMessage = newVal)
+                                .controller(BooleanControllerBuilder::create)
+                                .build())
+                        .option(Option.<Boolean>createBuilder()
+                                .name(Text.of("Hide vanilla experience bar"))
+                                .description(OptionDescription.of(Text.of("Hides the vanilla experience bar.")))
+                                .binding(false, () -> this.hideVanillaExperienceBar, newVal -> this.hideVanillaExperienceBar = newVal)
+                                .controller(BooleanControllerBuilder::create)
+                                .build())
+                        .option(Option.<Boolean>createBuilder()
+                                .name(Text.of("Hide vanilla experience level"))
+                                .description(OptionDescription.of(Text.of("Hides the vanilla experience level number.")))
+                                .binding(false, () -> this.hideVanillaExperienceLevel, newVal -> this.hideVanillaExperienceLevel = newVal)
+                                .controller(BooleanControllerBuilder::create)
+                                .build())
+                        .build())
+                .group(OptionGroup.createBuilder()
+                        .name(Text.of("HP Bar Display"))
+                        .description(OptionDescription.of(Text.of("Configure how the HP bar is displayed.")))
+                        //.option(Option.<HPBarDisplayMode>createBuilder()
+                        //        .name(Text.of("HP Bar Display Mode"))
+                        //        .description(OptionDescription.of(Text.of("Choose between 'Number Only' (like overlay) or 'Bar and Number'.")))
+                        //        .binding(HPBarDisplayMode.BAR_AND_NUMBER,
+                        //            () -> this.getHpBarDisplayModeEnum(),
+                        //            newVal -> this.setHpBarDisplayModeEnum(newVal))
+                        //        .controller(o -> EnumDropdownControllerBuilder.create(o)
+                        //                .formatValue(mode -> Text.of(mode.getDisplayName()))
+                        //        )
+                        //        .build())
+                        .option(Option.<Integer>createBuilder()
+                                .name(Text.of("HP Bar Render Scale"))
+                                .description(OptionDescription.of(Text.of("Controls aliasing vs smoothness of the bar edges. 1 = more pixelated, higher = smoother. Very high values can cost FPS. Changes apply instantly.")))
+                                .binding(2, () -> this.hpBarRenderScale, newVal -> this.hpBarRenderScale = newVal)
+                                .controller(o -> IntegerSliderControllerBuilder.create(o).step(1).range(1, 32))
+                                .build())
+                        .option(Option.<Double>createBuilder()
+                                .name(Text.of("HP Bar Size"))
+                                .description(OptionDescription.of(Text.of("Scales the bar only (not the text). Changes apply instantly.")))
+                                .binding(0.75, () -> this.hpBarSizeScale, newVal -> this.hpBarSizeScale = newVal)
+                                .controller(o -> DoubleSliderControllerBuilder.create(o).step(0.05).range(0.4, 1.0))
+                                .build())
                         .build())
                 .build();
     }
@@ -858,6 +984,8 @@ public class Config {
     public boolean getIsHudEnabled() { return isHudEnabled; }
 
     public boolean getIsHudDisabledDuringBossFight() { return isHudDisabledDuringBossFight; }
+    
+    public String getHpBarDisplayMode() { return hpBarDisplayMode; }
 
     public int getHudPosX() {
         return hudPosX;
@@ -949,5 +1077,37 @@ public class Config {
 
     public void setConsumableHudPosY(int consumableHudPosY) {
         this.consumableHudPosY = consumableHudPosY;
+    }
+
+    public boolean getHideVanillaScoreboard() {
+        return hideVanillaScoreboard;
+    }
+
+    public boolean getHideVanillaHearts() {
+        return hideVanillaHearts;
+    }
+
+    public boolean getHideVanillaFood() {
+        return hideVanillaFood;
+    }
+
+    public boolean getHideVanillaArmor() {
+        return hideVanillaArmor;
+    }
+
+    public boolean getHideVanillaEffects() {
+        return hideVanillaEffects;
+    }
+
+    public boolean getHideVanillaOverlayMessage() {
+        return hideVanillaOverlayMessage;
+    }
+
+    public boolean getHideVanillaExperienceBar() {
+        return hideVanillaExperienceBar;
+    }
+
+    public boolean getHideVanillaExperienceLevel() {
+        return hideVanillaExperienceLevel;
     }
 }

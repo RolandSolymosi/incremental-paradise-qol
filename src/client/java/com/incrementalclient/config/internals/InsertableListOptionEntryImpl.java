@@ -1,4 +1,4 @@
-package com.incrementalclient.config.components;
+package com.incrementalclient.config.internals;
 
 import dev.isxander.yacl3.api.*;
 import dev.isxander.yacl3.api.utils.Dimension;

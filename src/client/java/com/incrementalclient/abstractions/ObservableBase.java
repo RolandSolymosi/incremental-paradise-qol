@@ -6,7 +6,7 @@ import com.incrementalclient.interfaces.Observer;
 public abstract class ObservableBase<TObserver extends Observer<TResult>, TResult> extends ListenableBase<TObserver> implements Observable<TObserver, TResult> {
 
     protected void notifyObservers(TResult result) {
-        for (Observer<TResult> observer : getListeners()) {
+        for (var observer : getListeners()) {
             observer.onEvent(result);
         }
     }

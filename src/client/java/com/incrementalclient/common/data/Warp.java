@@ -89,6 +89,10 @@ public enum Warp {
         return "warp " + command;
     }
 
+    public World getWorld() {
+        return world;
+    }
+
     public boolean isAtPosition() {
         return isAtPosition(TOLERANCE);
     }

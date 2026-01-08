@@ -3,7 +3,7 @@ package com.incrementalclient.featues.Tasking;
 import com.incrementalclient.common.data.World;
 import com.incrementalclient.common.data.tasks.TaskType;
 import com.incrementalclient.common.data.tasks.abstractions.ITask;
-import com.incrementalclient.config.components.KeyBindController;
+import com.incrementalclient.config.controllers.KeyBindController;
 import com.incrementalclient.interfaces.Configurable;
 import com.incrementalclient.interfaces.Observer;
 import com.incrementalclient.internals.events.EndClientTickListenable;
@@ -82,7 +82,7 @@ public class WarpNextHotkey implements Configurable<WarpNextHotkey.Configuration
         if (ongoingWarp.compareAndSet(false, true)) {
             if (worldMonitor.currentWorld() != World.BossArenas) {
                 var nextUnfinishedTask = taskMonitor.getTaskList().stream().filter(p ->
-                        !p.isComplete() && (!p.isTicket() || !taskingOverrides.getOverrides().containsKey(p.getTask()) || !taskingOverrides.getOverrides().get(p.getTask()).skipTicket)
+                        !p.isCompleted() && (!p.isTicket() || !taskingOverrides.getOverrides().containsKey(p.getTask()) || !taskingOverrides.getOverrides().get(p.getTask()).skipTicket)
                 ).findFirst();
                 if (nextUnfinishedTask.isPresent()) {
                     var task = nextUnfinishedTask.get().getTask();

@@ -1,0 +1,144 @@
+package com.incrementalclient.hud;
+
+import com.incrementalclient.abstractions.HudElement;
+import com.incrementalclient.abstractions.TextListHudElement;
+import com.incrementalclient.interfaces.Configurable;
+import com.incrementalclient.internals.MinecraftClientAccessor;
+import com.incrementalclient.common.utils.Vector2f;
+import com.incrementalclient.services.HudManager;
+import dev.isxander.yacl3.api.ConfigCategory;
+import dev.isxander.yacl3.api.Option;
+import dev.isxander.yacl3.api.OptionDescription;
+import dev.isxander.yacl3.api.OptionGroup;
+import dev.isxander.yacl3.api.controller.BooleanControllerBuilder;
+import dev.isxander.yacl3.api.controller.ColorControllerBuilder;
+import dev.isxander.yacl3.api.controller.DoubleSliderControllerBuilder;
+import dev.isxander.yacl3.config.v2.api.SerialEntry;
+import net.minecraft.text.Text;
+
+import java.awt.*;
+import java.util.List;
+import java.util.stream.Collectors;
+
+public class ConsumableTimerElement extends TextListHudElement<ConsumableTimerElement.Configuration> {
+
+    private final Configuration configuration = new Configuration();
+
+    private final List<OptionPiece> options;
+
+    public ConsumableTimerElement(MinecraftClientAccessor uiAccessor,
+                                  HudManager hudManager) {
+        super(uiAccessor, hudManager);
+        this.anchorPoint = new Vector2f(10, 10);
+
+        options = List.of(
+                new OptionPiece(
+                        "HUD",
+                        100,
+                        "Consumable Timer HUD configuration",
+                        "These are the basic settings for the consumable timer HUD.",
+                        0,
+                        Option.<Boolean>createBuilder()
+                                .name(Text.of("Toggle Consumable HUD on and off"))
+                                .description(OptionDescription.of(Text.of("Turn on and off the consumable timer HUD.")))
+                                .binding(true, () -> configuration.isConsumableHudEnabled, newVal -> configuration.isConsumableHudEnabled = newVal)
+                                .controller(BooleanControllerBuilder::create)
+                                .build()),
+                new OptionPiece(
+                        "HUD",
+                        100,
+                        "Consumable Timer HUD configuration",
+                        "These are the basic settings for the consumable timer HUD.",
+                        1,
+                        Option.<Double>createBuilder()
+                                .name(Text.of("Consumable HUD background opacity"))
+                                .description(OptionDescription.of(Text.of("Set the opacity of the consumable HUD background.")))
+                                .binding(0.3, () -> configuration.consumableHudBackgroundOpacity, newVal -> configuration.consumableHudBackgroundOpacity = newVal)
+                                .controller(o -> DoubleSliderControllerBuilder.create(o).step(0.01).range(0.0, 1.0))
+                                .build()),
+                new OptionPiece(
+                        "HUD",
+                        100,
+                        "Consumable Timer HUD configuration",
+                        "Also allow you to set the colors of the consumable timer HUD.",
+                        2,
+                        Option.<Color>createBuilder()
+                                .name(Text.of("Color of the timer name"))
+                                .description(OptionDescription.of(Text.of("The color of the consumable timer name.")))
+                                .binding(new Color(0xffaa00), () -> new Color(configuration.consumableTimerColor), newVal -> configuration.consumableTimerColor = newVal.getRGB())
+                                .controller(ColorControllerBuilder::create)
+                                .build()),
+                new OptionPiece(
+                        "HUD",
+                        100,
+                        "Consumable Timer HUD configuration",
+                        "",
+                        3,
+                        Option.<Color>createBuilder()
+                                .name(Text.of("Color of the time left"))
+                                .description(OptionDescription.of(Text.of("The color of the time left text.")))
+                                .binding(new Color(0x55ff55), () -> new Color(configuration.consumableTimeColor), newVal -> configuration.consumableTimeColor = newVal.getRGB())
+                                .controller(ColorControllerBuilder::create)
+                                .build())
+        );
+    }
+
+    @Override
+    protected List<Text> getTextsToRender(boolean editMode) {
+        return List.of();
+        // TODO: reactivate once ConsumerTimer is migrated
+        /*
+        return ConsumableTimerModule.consumableList.stream()
+            .map(ConsumableTimer::render)
+            .collect(Collectors.toList());*/
+    }
+
+    @Override
+    protected int getBackgroundOpacity() {
+        return (int) (getConfiguration().consumableHudBackgroundOpacity * 255);
+    }
+
+    @Override
+    public boolean isElementEnabled() {
+        return getConfiguration().isConsumableHudEnabled;
+    }
+
+    @Override
+    public String getDisplayName() {
+        return "Consumable Timer";
+    }
+
+    @Override
+    public Vector2f getAnchorPoint() {
+        return anchorPoint;
+    }
+
+    @Override
+    public String getJsonSection() {
+        return "consumableHud";
+    }
+
+    @Override
+    public Configuration getConfiguration() {
+        return configuration;
+    }
+
+    @Override
+    public List<OptionPiece> getOption() {
+        return options;
+    }
+
+
+    public static class Configuration extends HudElement.ConfigurationBase {
+        @SerialEntry
+        public boolean isConsumableHudEnabled = true;
+        @SerialEntry
+        public double consumableHudBackgroundOpacity = 0.3;
+
+        @SerialEntry
+        public int consumableTimerColor = 0xffaa00;
+        @SerialEntry
+        public int consumableTimeColor = 0x55ff55;
+    }
+}
+

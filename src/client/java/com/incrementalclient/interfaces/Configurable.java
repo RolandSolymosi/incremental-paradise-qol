@@ -26,16 +26,21 @@ public interface Configurable<TConfiguration> {
         }
         TConfiguration target = getConfiguration();
         // Iterate through all fields of the configuration class
-        for (java.lang.reflect.Field field : getConfiguration().getClass().getDeclaredFields()) {
-            try {
-                field.setAccessible(true);
-                // Copy the value from the 'other' (loaded) object to 'target' (live) object
-                Object value = field.get(other);
-                field.set(target, value);
-            } catch (IllegalAccessException e) {
-                System.err.println("Failed to copy field: " + field.getName());
+        var currentClass = target.getClass();
+        while (currentClass != null && currentClass != Object.class) {
+            for (java.lang.reflect.Field field : currentClass.getDeclaredFields()) {
+                try {
+                    field.setAccessible(true);
+                    // Copy the value from the 'other' (loaded) object to 'target' (live) object
+                    var value = field.get(other);
+                    field.set(target, value);
+                } catch (IllegalAccessException e) {
+                    System.err.println("Failed to copy field: " + field.getName());
+                }
             }
+            currentClass = currentClass.getSuperclass();
         }
+
         optionChanged();
     }
 

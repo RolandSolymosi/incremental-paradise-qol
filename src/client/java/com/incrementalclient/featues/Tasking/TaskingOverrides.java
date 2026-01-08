@@ -4,11 +4,11 @@ import com.google.common.base.Suppliers;
 import com.incrementalclient.abstractions.ListenableBase;
 import com.incrementalclient.common.data.tasks.Constraint;
 import com.incrementalclient.common.data.tasks.Task;
-import com.incrementalclient.config.components.ComplexTypeController;
-import com.incrementalclient.config.components.InsertableListOption;
+import com.incrementalclient.config.controllers.ComplexTypeController;
+import com.incrementalclient.config.InsertableListOption;
 import com.incrementalclient.interfaces.ComplexConfigurable;
 import com.incrementalclient.interfaces.Listener;
-import com.incrementalclient.internals.MinecraftScreenAccessor;
+import com.incrementalclient.internals.MinecraftClientAccessor;
 import dev.isxander.yacl3.api.*;
 import dev.isxander.yacl3.api.controller.BooleanControllerBuilder;
 import dev.isxander.yacl3.api.controller.EnumDropdownControllerBuilder;
@@ -26,12 +26,12 @@ public class TaskingOverrides extends ListenableBase<Listener> implements Comple
 
     private final Configuration configuration = new Configuration();
     private final Supplier<List<OptionPiece>> options = Suppliers.memoize(this::createScreen);
-    private final MinecraftScreenAccessor screenAccessor;
+    private final MinecraftClientAccessor screenAccessor;
 
     private HashMap<Task, TaskingOverrides.Configuration.Override> overrides = new HashMap<>();
 
     public TaskingOverrides(
-            MinecraftScreenAccessor screenAccessor
+            MinecraftClientAccessor screenAccessor
     ) {
         this.screenAccessor = screenAccessor;
     }

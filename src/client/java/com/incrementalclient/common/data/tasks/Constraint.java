@@ -19,7 +19,7 @@ public enum Constraint {
     AxeJuggling("axe juggling"),
     Landscaping("landscaping leaves");
 
-    private static final Map<String, Constraint> Constraints = Arrays.stream(Constraint.values()).collect(Collectors.toMap(Constraint::name, e -> e));
+    private static final Map<String, Constraint> Constraints = Arrays.stream(Constraint.values()).collect(Collectors.toMap(Constraint::getName, e -> e));
 
     private final String name;
 
@@ -28,7 +28,7 @@ public enum Constraint {
     }
 
     public static Constraint find(String name){
-        return Constraints.get(name);
+        return Constraints.get(name.toLowerCase());
     }
 
     public String getName() {

@@ -1,5 +1,6 @@
-package com.incrementalclient.config.components;
+package com.incrementalclient.config;
 
+import com.incrementalclient.config.internals.InsertableListOptionImpl;
 import dev.isxander.yacl3.api.ListOption;
 
 public interface InsertableListOption<T> extends ListOption<T> {

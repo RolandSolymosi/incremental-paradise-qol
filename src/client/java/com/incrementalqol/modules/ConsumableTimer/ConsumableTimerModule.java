@@ -1,35 +1,34 @@
 package com.incrementalqol.modules.ConsumableTimer;
 
-import com.incrementalqol.common.data.ConsumableDatabase;
+import com.incrementalqol.common.data.World;
 import com.incrementalqol.common.utils.ScreenInteraction;
 import com.incrementalqol.common.utils.Utils;
-import com.incrementalqol.config.Config;
+import com.incrementalqol.common.utils.WorldChangeNotifier;
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.message.v1.ClientReceiveMessageEvents;
 import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
-import net.fabricmc.fabric.api.client.rendering.v1.HudRenderCallback;
 import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.font.TextRenderer;
-import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.component.type.LoreComponent;
 import net.minecraft.item.ItemStack;
+import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.text.Text;
-import net.minecraft.util.math.ColorHelper;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import net.minecraft.util.Pair;
 
 public class ConsumableTimerModule implements ClientModInitializer {
 
     public static final List<ConsumableTimer> consumableList = new CopyOnWriteArrayList<>();
 
     private static ScreenInteraction screenInteraction;
+    private static ScreenInteraction enforceRefreshScreenInteraction;
 
     private static final Pattern TIME_PATTERN = Pattern.compile("Time Left:?\\s*(.+)", Pattern.CASE_INSENSITIVE);
     private static final Pattern CONSUMED_PATTERN = Pattern.compile("You consumed a (.+)", Pattern.CASE_INSENSITIVE);
@@ -41,99 +40,240 @@ public class ConsumableTimerModule implements ClientModInitializer {
 
     @Override
     public void onInitializeClient() {
-        // Screen interaction for Active Consumables screen
+        // Screen interaction for Consumables menu navigation
+        // First step: detect initial consumables screen and click the "Active Consumable Buffs" cookie
         screenInteraction = new ScreenInteraction.ScreenInteractionBuilder(
                 "ConsumableTimer",
-                s -> s.equals("Active Consumables"),
+                s -> s.contains("Consumable") && !s.equals("Active Consumables"),
                 s -> !s.isEmpty(),
                 (input) -> {
-                    parseInventory(input.getRight());
-                    return false;
+                    List<ItemStack> content = input.getRight();
+                    
+                    // First try to find by name "Active Consumable Buffs"
+                    for (short slotId = 0; slotId < content.size(); slotId++) {
+                        ItemStack stack = content.get(slotId);
+                        if (stack.isEmpty()) continue;
+                        
+                        var customName = stack.get(DataComponentTypes.CUSTOM_NAME);
+                        if (customName != null) {
+                            String displayName = customName.getString();
+                            if (displayName.contains("Active Consumable Buffs")) {
+                                // Found it by name, click it
+                                ScreenInteraction.WellKnownInteractions.ClickSlot(
+                                    input.getLeft(),
+                                    slotId,
+                                    ScreenInteraction.WellKnownInteractions.Button.Left,
+                                    SlotActionType.PICKUP
+                                );
+                                return true;
+                            }
+                        }
+                    }
+                    
+                    // Fallback: click at specific position (3rd row, 4th column = row 2, col 3 in 0-indexed)
+                    // Slot = row * 9 + col = 2 * 9 + 3 = 21
+                    short targetSlot = (short)(2 * 9 + 3); // 21
+                    if (targetSlot < content.size() && !content.get(targetSlot).isEmpty()) {
+                        ScreenInteraction.WellKnownInteractions.ClickSlot(
+                            input.getLeft(),
+                            targetSlot,
+                            ScreenInteraction.WellKnownInteractions.Button.Left,
+                            SlotActionType.PICKUP
+                        );
+                        return true;
+                    }
+                    
+                    return false; // No valid item found
                 }
         )
-                .setKeepScreenHidden(false)
+                .addInteraction(
+                        // Second step: detect "Active Consumables" screen and parse inventory
+                        s -> s.equals("Active Consumables"),
+                        s -> !s.isEmpty(),
+                        (input) -> {
+                            parseInventory(input.getRight());
+                            return false;
+                        }
+                )
+                .setKeepScreenHidden(true)
                 .build();
         screenInteraction.startAsync(true);
 
+        // Screen interaction for refreshing consumables when "You consumed a X" is detected
+        // This will open the menu and get the exact time left from the server
+        // First interaction: handle "Active Consumables" directly (in case it opens immediately)
+        // or handle the initial consumables menu
+        enforceRefreshScreenInteraction = new ScreenInteraction.ScreenInteractionBuilder(
+                "ConsumableTimerRefresh",
+                // First step: detect "Active Consumables" screen (both screens have this name)
+                // We differentiate by checking if the cookie "Active Consumable Buffs" exists
+                s -> s.equals("Active Consumables"),
+                s -> {
+                    // Check if this is the first screen (with the cookie) or the second screen (with consumables list)
+                    for (ItemStack stack : s) {
+                        if (stack.isEmpty()) continue;
+                        var customName = stack.get(DataComponentTypes.CUSTOM_NAME);
+                        if (customName != null) {
+                            String displayName = customName.getString();
+                            // If we find "Active Consumable Buffs", this is the first screen
+                            if (displayName.contains("Active Consumable Buffs")) {
+                                return true; // First screen - needs to click
+                            }
+                        }
+                    }
+                    // If we don't find the cookie, check if there are actual consumable items with lore
+                    // This would be the second screen with the list
+                    for (ItemStack stack : s) {
+                        if (stack.isEmpty()) continue;
+                        String itemName = stack.getItem().getName().getString();
+                        // Skip borders and empty slots
+                        if (itemName.contains("Black Stained Glass Pane") || 
+                            itemName.contains("black_stained_glass_pane") ||
+                            itemName.contains("White Stained Glass Pane") ||
+                            itemName.contains("white_stained_glass_pane")) {
+                            continue;
+                        }
+                        var customName = stack.get(DataComponentTypes.CUSTOM_NAME);
+                        if (customName != null && customName.getString().contains("Go Back")) {
+                            continue;
+                        }
+                        // If we find an item with lore (likely a consumable), this is the second screen
+                        if (stack.get(DataComponentTypes.LORE) != null) {
+                            return true; // Second screen - needs to parse
+                        }
+                    }
+                    return false;
+                },
+                (input) -> {
+                    List<ItemStack> content = input.getRight();
+                    
+                    // Check if this is the first screen (has the cookie) or second screen (has consumables)
+                    boolean hasCookie = false;
+                    for (short slotId = 0; slotId < content.size(); slotId++) {
+                        ItemStack stack = content.get(slotId);
+                        if (stack.isEmpty()) continue;
+                        
+                        var customName = stack.get(DataComponentTypes.CUSTOM_NAME);
+                        if (customName != null) {
+                            String displayName = customName.getString();
+                            if (displayName.contains("Active Consumable Buffs")) {
+                                hasCookie = true;
+                                // Found the cookie, click it
+                                ScreenInteraction.WellKnownInteractions.ClickSlot(
+                                    input.getLeft(),
+                                    slotId,
+                                    ScreenInteraction.WellKnownInteractions.Button.Left,
+                                    SlotActionType.PICKUP
+                                );
+                                return true;
+                            }
+                        }
+                    }
+                    
+                    // If no cookie found, this is the second screen - parse directly
+                    if (!hasCookie) {
+                        parseInventory(content);
+                        return true; // Mark as complete
+                    }
+                    
+                    // Fallback: try clicking at specific position if cookie not found by name
+                    short targetSlot = (short)(2 * 9 + 3); // 21
+                    if (targetSlot < content.size() && !content.get(targetSlot).isEmpty()) {
+                        ScreenInteraction.WellKnownInteractions.ClickSlot(
+                            input.getLeft(),
+                            targetSlot,
+                            ScreenInteraction.WellKnownInteractions.Button.Left,
+                            SlotActionType.PICKUP
+                        );
+                        return true;
+                    }
+                    
+                    return false;
+                }
+        )
+                .addInteraction(
+                        // Second step: detect "Active Consumables" screen after clicking the cookie
+                        s -> s.equals("Active Consumables"),
+                        s -> !s.isEmpty(),
+                        (input) -> {
+                            // Parse the inventory and mark as complete
+                            parseInventory(input.getRight());
+                            return true;
+                        }
+                )
+                .setStartingAction((c) -> 
+                        c.player.networkHandler.sendChatCommand("consumable")
+                )
+                .setKeepScreenHidden(true)
+                .build();
+        
+        // Register the listener immediately so it's always ready to intercept screens
+        // We'll only activate it when needed via startAsync
+        enforceRefreshScreenInteraction.register();
+
         // Chat message listener for "You consumed a X"
+        // Instead of using the database, we open the menu to get the exact time left from the server
         ClientReceiveMessageEvents.GAME.register((message, overlay) -> {
             String messageText = message.getString();
             Matcher matcher = CONSUMED_PATTERN.matcher(messageText);
-            if (matcher.find()) {
-                String consumableName = matcher.group(1).trim();
-                // Remove trailing punctuation (like !, ., etc.)
-                consumableName = consumableName.replaceAll("[!.]$", "").trim();
-                
-                // Try exact match first
-                Integer durationSeconds = ConsumableDatabase.getDuration(consumableName);
-                
-                // If not found, try matching any database entry that starts with the consumable name
-                if (durationSeconds == null) {
-                    for (Map.Entry<String, Integer> entry : ConsumableDatabase.getDatabase().entrySet()) {
-                        String dbName = entry.getKey();
-                        if (dbName.startsWith(consumableName)) {
-                            durationSeconds = entry.getValue();
-                            consumableName = dbName; // Use the full database name for display
-                            break;
-                        }
-                    }
-                }
-                
-                if (durationSeconds != null) {
-                    long expirationTime = System.currentTimeMillis() + (durationSeconds * 1000L);
-                    ConsumableTimer timer = new ConsumableTimer(consumableName, expirationTime);
-                    consumableList.add(timer);
+            if (matcher.find() && MinecraftClient.getInstance().player != null) {
+                // Execute on client thread to ensure listener activation happens before command is sent
+                // This ensures the listener is active and ready to intercept OpenScreenS2CPacket
+                MinecraftClient.getInstance().execute(() -> {
+                    // Start the interaction - this will activate the listener and then send the command
+                    // The listener is already registered, so it will be ready to intercept immediately
+                    enforceRefreshScreenInteraction.startAsync(false);
+                });
+            }
+        });
+
+        // Tick event to remove expired timers and hide screen if needed
+        ClientTickEvents.END_CLIENT_TICK.register(client -> {
+            consumableList.removeIf(ConsumableTimer::isExpired);
+            
+            // Immediately hide screen if it's a consumables screen during active interaction
+            // This ensures the screen doesn't appear even if there's a timing issue
+            if (client.currentScreen != null && 
+                ScreenInteraction.ScreenInteractionManager.anyActiveInteractionOngoing()) {
+                String screenTitle = client.currentScreen.getTitle().getString();
+                // Hide consumables-related screens that appear during interaction
+                if (screenTitle.contains("Consumable") && 
+                    !(client.currentScreen instanceof net.minecraft.client.gui.screen.ingame.InventoryScreen)) {
+                    client.setScreen(null);
                 }
             }
         });
 
-        // Tick event to remove expired timers
-        ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            consumableList.removeIf(ConsumableTimer::isExpired);
+        // World change listener - refresh consumables when switching worlds
+        WorldChangeNotifier.Register((Pair<World, Boolean> input) -> {
+            var future = new CompletableFuture<Boolean>();
+            // input.getRight() is true when switching between Normal and Nightmare realms
+            // Always refresh consumables when changing worlds, but clear list only when changing realms
+            if (input.getRight()) {
+                // Clear the list when changing realms (different consumables in different realms)
+                consumableList.clear();
+            }
+            // Refresh consumables for the new world/realm
+            MinecraftClient.getInstance().execute(() -> {
+                enforceRefreshScreenInteraction.startAsync(false).thenAccept(future::complete);
+            });
+            return future;
         });
 
         ClientPlayConnectionEvents.DISCONNECT.register((handler, client) -> {
             consumableList.clear();
             screenInteraction.stop();
+            enforceRefreshScreenInteraction.stop();
         });
-        ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> startConsumableTimer());
+        ClientPlayConnectionEvents.JOIN.register((handler, sender, client) -> {
+            startConsumableTimer();
+            // Check consumables when joining the game
+            MinecraftClient.getInstance().execute(() -> {
+                enforceRefreshScreenInteraction.startAsync(false);
+            });
+        });
 
-        HudRenderCallback.EVENT.register(((drawContext, renderTickCounter) -> {
-            var config = Config.HANDLER.instance();
-            TextRenderer textRenderer = MinecraftClient.getInstance().textRenderer;
-
-            int color = ColorHelper.getArgb(config.getConsumableHudBackgroundOpacity(), 0, 0, 0);
-            int textColor = ColorHelper.getArgb(255, 255, 255, 255);
-
-            if (!MinecraftClient.getInstance().options.hudHidden && config.getIsConsumableHudEnabled() && !consumableList.isEmpty()) {
-                int size = 0;
-                if (!consumableList.isEmpty()) {
-                    size = consumableList.get(0).getStrWidth();
-                    for (ConsumableTimer timer : consumableList) {
-                        if (timer.getStrWidth() > size) {
-                            size = timer.getStrWidth();
-                        }
-                    }
-                }
-
-                float scaleFactor = (float) config.getConsumableHudScale();
-
-                MatrixStack matrixStack = drawContext.getMatrices();
-                matrixStack.push();
-                matrixStack.scale(scaleFactor, scaleFactor, scaleFactor);
-
-                int posX = config.getConsumableHudPosX();
-                int posY = config.getConsumableHudPosY();
-
-                if (config.getConsumableHudBackgroundOpacity() != 0) {
-                    drawContext.fill(posX, posY, posX + ((size + 1) * 5), posY + 5 + (15 * consumableList.size()), color);
-                }
-                for (int i = 0; i < consumableList.size(); i++) {
-                    drawContext.drawText(textRenderer, consumableList.get(i).render(), posX + 2, posY + 5 + (15 * i), textColor, true);
-                }
-                matrixStack.pop();
-            }
-        }));
+        // HUD rendering is now handled by HudModule
     }
 
     public static void parseInventory(List<ItemStack> content) {

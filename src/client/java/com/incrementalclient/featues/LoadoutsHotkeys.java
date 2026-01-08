@@ -2,14 +2,14 @@ package com.incrementalclient.featues;
 
 import com.google.common.base.Suppliers;
 import com.incrementalclient.abstractions.ListenableBase;
-import com.incrementalclient.config.components.ComplexTypeController;
-import com.incrementalclient.config.components.InsertableListOption;
-import com.incrementalclient.config.components.KeyBindController;
+import com.incrementalclient.config.controllers.ComplexTypeController;
+import com.incrementalclient.config.InsertableListOption;
+import com.incrementalclient.config.controllers.KeyBindController;
 import com.incrementalclient.interfaces.ComplexConfigurable;
 import com.incrementalclient.interfaces.Listener;
 import com.incrementalclient.services.CommandHandler;
 import com.incrementalclient.services.KeyBindMonitor;
-import com.incrementalclient.internals.MinecraftScreenAccessor;
+import com.incrementalclient.internals.MinecraftClientAccessor;
 import dev.isxander.yacl3.api.*;
 import dev.isxander.yacl3.api.controller.StringControllerBuilder;
 import dev.isxander.yacl3.config.v2.api.SerialEntry;
@@ -29,14 +29,14 @@ public class LoadoutsHotkeys extends ListenableBase<Listener> implements Complex
     private final CommandHandler commandHandler;
     private final Supplier<List<OptionPiece>> options = Suppliers.memoize(this::createScreen);
     ;
-    private final MinecraftScreenAccessor screenAccessor;
+    private final MinecraftClientAccessor screenAccessor;
 
     public ConcurrentHashMap<Integer, KeyBindMonitor.KeyBindListener> registeredHotkeys = new ConcurrentHashMap<>();
 
     public LoadoutsHotkeys(
             KeyBindMonitor keyBindMonitor,
             CommandHandler commandHandler,
-            MinecraftScreenAccessor screenAccessor
+            MinecraftClientAccessor screenAccessor
     ) {
         this.keyBindMonitor = keyBindMonitor;
         this.commandHandler = commandHandler;

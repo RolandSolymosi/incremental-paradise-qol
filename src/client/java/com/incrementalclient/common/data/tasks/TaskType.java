@@ -11,16 +11,16 @@ public enum TaskType {
     Combat("Combat", List.of(
             Pattern.compile("Kill (?:the )?(?<type>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)/(?<amount>[0-9.,]+[kmbt]?)"),
             Pattern.compile("Slay (?:the )?(?<type>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)/(?<amount>[0-9.,]+[kmbt]?)"),
-            Pattern.compile("Collect (?<amount>[0-9.,]+[kmbt]?) drops from (?<constraint>elite )?(?<type>.+) with (?<constraint2>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)"),
-            Pattern.compile("Collect (?<amount>[0-9.,]+[kmbt]?) drops from (?<constraint>elite )?(?<type>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)"))),
+            Pattern.compile("Collect (?<amount>[0-9.,]+[kmbt]?) drops from (?<constraint>elite)?\\s*(?<type>.+) with (?<constraint2>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)"),
+            Pattern.compile("Collect (?<amount>[0-9.,]+[kmbt]?) drops from (?<constraint>elite)?\\s*(?<type>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)"))),
     Mining("Mining", List.of(
             Pattern.compile("Collect (?<amount>[0-9.,]+[kmbt]?) (?<type>.+) from (?<constraint>Shiny) Ores \\(?(?<progress>[0-9.,]+[kmbt]?)"),
-            Pattern.compile("Collect (?<amount>[0-9.,]+[kmbt]?) (?<constraint>Shiny) (?<type>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)"),
+            Pattern.compile("Collect (?<amount>[0-9.,]+[kmbt]?) (?<constraint>Shiny)\\s*(?<type>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)"),
             Pattern.compile("Collect (?<amount>[0-9.,]+[kmbt]?) (?<type>.+) with (?<constraint>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)"),
             Pattern.compile("Collect (?<amount>[0-9.,]+[kmbt]?) (?<type>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)"))),
     Foraging("Foraging", List.of(
-            Pattern.compile("Collect (?<amount>[0-9.,]+[kmbt]?) (?<constraint>Large )?(?<type>.+) with (?<constraint2>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)"),
-            Pattern.compile("Collect (?<amount>[0-9.,]+[kmbt]?) (?<constraint>Large )?(?<type>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)"))),
+            Pattern.compile("Collect (?<amount>[0-9.,]+[kmbt]?) (?<constraint>Large)?\\s*(?<type>.+) with (?<constraint2>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)"),
+            Pattern.compile("Collect (?<amount>[0-9.,]+[kmbt]?) (?<constraint>Large)?\\s*(?<type>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)"))),
     Farming("Farming", List.of(
             Pattern.compile("Harvest (?<amount>[0-9.,]+[kmbt]?) (?<type>.+) with (?:[0-9]++ |)(?<constraint>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)"),
             Pattern.compile("Harvest (?<amount>[0-9.,]+[kmbt]?) (?<type>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)"))),
@@ -40,7 +40,7 @@ public enum TaskType {
     Gaming("Gaming", List.of(
             Pattern.compile("Play (?<amount>[0-9.,]+[kmbt]?) (?<constraint>.+) of (?<type>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)"),
             Pattern.compile("Earn (?<amount>[0-9.,]+[kmbt]?) (?<constraint>.+) in (?<type>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)"),
-            Pattern.compile("Earn (?<amount>[0-9.,]+[kmbt]?)\\s+(?<constraint>.+) playing (?<type>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)"),
+            Pattern.compile("Earn (?<amount>[0-9.,]+[kmbt]?) (?<constraint>.+) playing (?<type>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)"),
             Pattern.compile("Find (?<amount>[0-9.,]+[kmbt]?) (?<constraint>.+) while playing (?<type>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)"))),
     Quest("Quest", List.of()),
     Tutorial("Tutorial", List.of());

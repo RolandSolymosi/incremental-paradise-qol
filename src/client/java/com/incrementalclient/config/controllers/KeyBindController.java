@@ -1,4 +1,4 @@
-package com.incrementalclient.config.components;
+package com.incrementalclient.config.controllers;
 
 import dev.isxander.yacl3.api.Controller;
 import dev.isxander.yacl3.api.Option;
@@ -6,8 +6,6 @@ import dev.isxander.yacl3.api.utils.Dimension;
 import dev.isxander.yacl3.gui.AbstractWidget;
 import dev.isxander.yacl3.gui.YACLScreen;
 import dev.isxander.yacl3.gui.controllers.ControllerWidget;
-import dev.isxander.yacl3.gui.controllers.string.StringController;
-import dev.isxander.yacl3.impl.controller.StringControllerBuilderImpl;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.text.Text;

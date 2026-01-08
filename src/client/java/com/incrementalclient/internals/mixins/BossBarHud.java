@@ -2,7 +2,7 @@ package com.incrementalclient.internals.mixins;
 
 import com.google.common.base.Suppliers;
 import com.incrementalclient.Main;
-import com.incrementalclient.internals.BossBarReader;
+import com.incrementalclient.internals.BossBarObservable;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.ClientBossBar;
 import org.spongepowered.asm.mixin.Final;
@@ -26,8 +26,8 @@ public class BossBarHud {
     private Map<UUID, ClientBossBar> bossBars;
 
     @Unique
-    private static final Supplier<BossBarReader> bossBarReader = Suppliers.memoize(() ->
-            Main.SERVICE_PROVIDER.getService(BossBarReader.class));
+    private static final Supplier<BossBarObservable> bossBarReader = Suppliers.memoize(() ->
+            Main.SERVICE_PROVIDER.getService(BossBarObservable.class));
 
     @Inject(at=@At("HEAD"), method="render(Lnet/minecraft/client/gui/DrawContext;)V")
     private void render(DrawContext ctx, CallbackInfo ci) {
