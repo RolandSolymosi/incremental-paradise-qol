@@ -1,7 +1,5 @@
 package com.incrementalclient.common.data.tasks;
 
-import com.incrementalclient.common.data.skills.Category;
-
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -26,7 +24,7 @@ public enum TaskType {
             Pattern.compile("Harvest (?<amount>[0-9.,]+[kmbt]?) (?<type>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)"))),
     Fishing("Fishing", List.of(
             Pattern.compile("Spear [0-9.,]+ (?<type>.+) (?<constraint>in a row without missing) (?<amount>[0-9.,]+[kmbt]?).+\\((?<progress>[0-9.,]+[kmbt]?)"),
-            Pattern.compile("Collect (?<amount>[0-9.,]+[kmbt]?) (?<color>.+) (?<constraint>colored) (?<type>.+) using a Fishing Spear \\(?(?<progress>[0-9.,]+[kmbt]?)"),
+            Pattern.compile("Collect (?<amount>[0-9.,]+[kmbt]?) (?<parameter>.+) (?<constraint>colored) (?<type>.+) using a Fishing Spear \\(?(?<progress>[0-9.,]+[kmbt]?)"),
             Pattern.compile("Collect (?<amount>[0-9.,]+[kmbt]?) (?<type>.+) using a Fishing Spear \\(?(?<progress>[0-9.,]+[kmbt]?)"),
             Pattern.compile("Collect (?<amount>[0-9.,]+[kmbt]?) drops from (?<type>.+) with (?<constraint>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)"),
             Pattern.compile("Collect (?<amount>[0-9.,]+[kmbt]?) drops from (?<type>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)"),

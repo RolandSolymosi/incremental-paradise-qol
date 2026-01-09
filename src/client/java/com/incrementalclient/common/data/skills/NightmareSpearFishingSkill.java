@@ -4,7 +4,7 @@ package com.incrementalclient.common.data.skills;
 import dev.isxander.yacl3.api.NameableEnum;
 import net.minecraft.text.Text;
 
-public enum NightmareSpearFishingSkill implements NameableEnum {
+public enum NightmareSpearFishingSkill implements Skill {
     FishSenses("Fish Senses",0),
 
     HomingHarpoon("Homing Harpoon",1),

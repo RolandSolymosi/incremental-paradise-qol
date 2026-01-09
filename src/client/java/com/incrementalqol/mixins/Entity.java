@@ -1,10 +1,10 @@
 package com.incrementalqol.mixins;
 
+/*
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-
 @Mixin(net.minecraft.entity.Entity.class)
 public abstract class Entity {
     @Inject(method = "isGlowing", at = @At("HEAD"), cancellable = true)
@@ -12,4 +12,6 @@ public abstract class Entity {
         com.incrementalqol.mixinWrappers.Entity.isGlowing((net.minecraft.entity.Entity) (Object) this, cir);
     }
 }
+
+ */
 

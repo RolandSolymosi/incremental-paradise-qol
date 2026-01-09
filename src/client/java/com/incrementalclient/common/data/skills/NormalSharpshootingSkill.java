@@ -4,7 +4,7 @@ package com.incrementalclient.common.data.skills;
 import dev.isxander.yacl3.api.NameableEnum;
 import net.minecraft.text.Text;
 
-public enum NormalSharpshootingSkill implements NameableEnum {
+public enum NormalSharpshootingSkill implements Skill {
     ExplosiveArrow("Explosive Arrow"),
     SwarmSurfer("Swarm Surfer"),
     Hawkeye("Hawkeye"),

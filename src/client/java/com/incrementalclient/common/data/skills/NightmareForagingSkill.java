@@ -4,7 +4,7 @@ package com.incrementalclient.common.data.skills;
 import dev.isxander.yacl3.api.NameableEnum;
 import net.minecraft.text.Text;
 
-public enum NightmareForagingSkill implements NameableEnum {
+public enum NightmareForagingSkill implements Skill {
     AxeJuggling("Axe Juggling",0),
 
     QuickFeet("Quick Feet",1),

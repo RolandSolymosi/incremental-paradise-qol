@@ -4,7 +4,7 @@ package com.incrementalclient.common.data.skills;
 import dev.isxander.yacl3.api.NameableEnum;
 import net.minecraft.text.Text;
 
-public enum NormalExcavationSkill implements NameableEnum {
+public enum NormalExcavationSkill implements Skill {
     SeismicResonance("Seismic Resonance"),
     FeatherDuster("Feather Duster"),
     ExperiencedManager("Experienced Manager"),

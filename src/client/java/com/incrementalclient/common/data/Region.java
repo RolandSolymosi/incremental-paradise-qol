@@ -1,6 +1,5 @@
 package com.incrementalclient.common.data;
 
-import com.incrementalqol.common.data.World;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.util.math.Box;
 
@@ -64,5 +63,9 @@ public enum Region {
 
     public String getName() {
         return name;
+    }
+
+    public World getWorld() {
+        return world;
     }
 }

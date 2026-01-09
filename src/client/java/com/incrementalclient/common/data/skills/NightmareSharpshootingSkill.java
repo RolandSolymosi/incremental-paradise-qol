@@ -4,7 +4,7 @@ package com.incrementalclient.common.data.skills;
 import dev.isxander.yacl3.api.NameableEnum;
 import net.minecraft.text.Text;
 
-public enum NightmareSharpshootingSkill implements NameableEnum {
+public enum NightmareSharpshootingSkill implements Skill {
     PeaShooter("Pea Shooter", 0),
 
     TurretAccuracy("Turret Accuracy", 1),

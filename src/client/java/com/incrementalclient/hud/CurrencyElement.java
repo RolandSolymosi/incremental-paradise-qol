@@ -317,7 +317,7 @@ public class CurrencyElement extends HudElement<CurrencyElement.Configuration> {
     }
 
 
-    public static class Configuration extends ConfigurationBase {
+    public static class Configuration extends HudElement.ConfigurationBase {
         @SerialEntry
         public double currencyHudBackgroundOpacity = 0.3;
     }

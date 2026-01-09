@@ -4,7 +4,7 @@ package com.incrementalclient.common.data.skills;
 import dev.isxander.yacl3.api.NameableEnum;
 import net.minecraft.text.Text;
 
-public enum NightmareFarmingSkill implements NameableEnum {
+public enum NightmareFarmingSkill implements Skill {
     Landscaper("Landscaper",0),
 
     BiggerRake("Bigger Rake",1),

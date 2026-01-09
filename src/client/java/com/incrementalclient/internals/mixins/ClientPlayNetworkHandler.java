@@ -5,6 +5,7 @@ import com.incrementalclient.Main;
 import com.incrementalclient.internals.ScoreboardChangedListenable;
 import com.incrementalclient.internals.ScreenCapture;
 import com.incrementalclient.internals.interfaces.ReentryPacket;
+import com.incrementalclient.services.HotbarHandler;
 import net.minecraft.network.packet.s2c.play.*;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -25,6 +26,10 @@ public class ClientPlayNetworkHandler {
     private static final Supplier<ScreenCapture> screenCapture = Suppliers.memoize(() ->
             Main.SERVICE_PROVIDER.getService(ScreenCapture.class));
 
+    @Unique
+    private static final Supplier<HotbarHandler> hotbarHandle = Suppliers.memoize(() ->
+            Main.SERVICE_PROVIDER.getService(HotbarHandler.class));
+
     @Inject(method = "onOpenScreen", at = @At("HEAD"), cancellable = true)
     private void onOpenScreen(OpenScreenS2CPacket packet, CallbackInfo ci) {
         if (ReentryPacket.shouldCancel(packet, ci)) {
@@ -33,22 +38,28 @@ public class ClientPlayNetworkHandler {
     }
     @Inject(method = "onInventory", at = @At("HEAD"), cancellable = true)
     private void onInventory(InventoryS2CPacket packet, CallbackInfo ci) {
-        if (ReentryPacket.shouldCancel(packet, ci)) {
+        //if (ReentryPacket.shouldCancel(packet, ci)) {
             screenCapture.get().contentArrived((net.minecraft.client.network.ClientPlayNetworkHandler) (Object)this, packet);
-        }
+        //}
     }
     @Inject(method = "onCloseScreen", at = @At("HEAD"), cancellable = true)
     private void onCloseScreen(CloseScreenS2CPacket packet, CallbackInfo ci) {
-        if (ReentryPacket.shouldCancel(packet, ci)) {
+        //if (ReentryPacket.shouldCancel(packet, ci)) {
             screenCapture.get().screenClosed(packet.getSyncId());
-        }
+        //}
 
     }
+    @Inject(method = "onUpdateSelectedSlot", at = @At("HEAD"), cancellable = true)
+    private void onUpdateSelectedSlot(UpdateSelectedSlotS2CPacket packet, CallbackInfo ci) {
+        //if (hotbarHandle.get().checkSwapped(packet.slot())){
+            ci.cancel();
+        //}
+    }
     @Inject(method = "onScreenHandlerSlotUpdate", at = @At("HEAD"), cancellable = true)
-    private void onCloseScreen(ScreenHandlerSlotUpdateS2CPacket packet, CallbackInfo ci) {
-        if (ReentryPacket.shouldCancel(packet, ci)) {
+    private void onScreenHandlerSlotUpdate(ScreenHandlerSlotUpdateS2CPacket packet, CallbackInfo ci) {
+        //if (ReentryPacket.shouldCancel(packet, ci)) {
             screenCapture.get().slotUpdate((net.minecraft.client.network.ClientPlayNetworkHandler) (Object)this, packet);
-        }
+        //}
 
     }
     //@Inject(method = "onScreenHandlerPropertyUpdate", at = @At("HEAD"), cancellable = true)

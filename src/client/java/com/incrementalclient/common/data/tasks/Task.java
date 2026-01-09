@@ -47,16 +47,15 @@ public enum Task {
     W1_Crops(new NormalTask("Crops", Region.W1_Overworld, List.of("crops"), null, TaskType.Farming, DefaultWardrobe.Farming, Tool.Hoe, List.of(Target.W1_Wheat, Target.W1_Carrot, Target.W1_Potato, Target.W1_Beetroot), List.of(Warp.W1_Carrot, Warp.W1_Spawn))),
 
     W1_Riverfish(new NormalTask("Riverfish", Region.W1_Overworld, List.of("riverfish"), null, TaskType.Fishing, DefaultWardrobe.Fishing, Tool.Spear, List.of(Target.W1_Riverfish), List.of(Warp.W1_Carrot, Warp.W1_Spawn))),
-    // TODO: Separate colored fish to each its own task
-    W1_ColoredRiverfish(new NormalTask("(TODO) Colored Riverfish", Region.W1_Overworld, List.of("riverfish"), List.of(Constraint.Colored), TaskType.Fishing, DefaultWardrobe.Fishing, Tool.Spear, List.of(Target.W1_Riverfish), List.of(Warp.W1_Carrot, Warp.W1_Spawn))),
+    W1_ColoredRiverfish(new NormalTask("%s Colored Riverfish", Region.W1_Overworld, List.of("riverfish"), List.of(Constraint.Colored), TaskType.Fishing, DefaultWardrobe.Fishing, Tool.Spear, List.of(Target.W1_Riverfish), List.of(Warp.W1_Carrot, Warp.W1_Spawn))),
     W1_ConsecutiveFish(new NormalTask("2 fish without missing", Region.W1_Overworld, List.of("fish"), List.of(Constraint.Consecutive), TaskType.Fishing, DefaultWardrobe.Fishing, Tool.Spear, List.of(Target.W1_Riverfish), List.of(Warp.W1_Carrot, Warp.W1_Spawn))),
     W1_Crab(new NormalTask("Crab", Region.W1_Crab, List.of("crabs"), null, TaskType.Fishing, DefaultWardrobe.CombatFishing, Tool.Spear, List.of(Target.W1_Crab), List.of(Warp.W1_Crab, Warp.W1_Spawn))),
     W1_HermitCrab(new NormalTask("Hermit crab", Region.W1_Crab, List.of("hermit crabs"), null, TaskType.Fishing, DefaultWardrobe.CombatFishing, Tool.Spear, List.of(Target.W1_HermitCrab), List.of(Warp.W1_Crab, Warp.W1_Spawn))),
 
-    W1_PlayCoinflip(new GamingTask("Play coinflip", List.of("coinflip"), GameKind.Rps, List.of(Constraint.Games), List.of(Warp.W1_Spawn))),
-    W1_PlayRps(new GamingTask("Play rps", List.of("rps"), GameKind.Rps, List.of(Constraint.Games), List.of(Warp.W1_Spawn))),
-    W1_EarnScorePixelpop(new GamingTask("Score in Pixelpop", List.of("pixel pop"), GameKind.Pixelpop, List.of(Constraint.Score), List.of(Warp.W1_Spawn))),
-    W1_EarnTicketPixelpop(new GamingTask("Ticket for Pixelpop", List.of("rps"), GameKind.Pixelpop, List.of(Constraint.Ticket), List.of(Warp.W1_Spawn))),
+    W1_PlayCoinflip(new GamingTask("Play coinflip", Region.W1_Overworld, List.of("coinflip"), GameKind.Rps, List.of(Constraint.Games), List.of(Warp.W1_Spawn))),
+    W1_PlayRps(new GamingTask("Play rps", Region.W1_Overworld, List.of("rps"), GameKind.Rps, List.of(Constraint.Games), List.of(Warp.W1_Spawn))),
+    W1_EarnScorePixelpop(new GamingTask("Score in Pixelpop", Region.W1_Overworld, List.of("pixel pop"), GameKind.Pixelpop, List.of(Constraint.Score), List.of(Warp.W1_Spawn))),
+    W1_EarnTicketPixelpop(new GamingTask("Ticket for Pixelpop", Region.W1_Overworld, List.of("rps"), GameKind.Pixelpop, List.of(Constraint.Ticket), List.of(Warp.W1_Spawn))),
 
     W1_EarnGold(new NormalTask("Sell for gold", Region.W1_Overworld, List.of("gold from selling items"), null, TaskType.Misc, DefaultWardrobe.Farming, Tool.Hoe, List.of(Target.W1_Carrot), List.of(Warp.W1_Carrot, Warp.W1_Spawn))),
     W1_CleanGarbage(new NormalTask("Clean garbage", Region.W1_Overworld, List.of("garbage cans"), null, TaskType.Misc, DefaultWardrobe.Fishing, Tool.Spear, List.of(Target.W1_GarbageCan), List.of(Warp.W1_Spawn))),
@@ -117,7 +116,7 @@ public enum Task {
     W2_Bubbler(new NormalTask("Bubbler", Region.W2_Infernal, List.of("bubbler"), null, TaskType.Fishing, DefaultWardrobe.Fishing, Tool.Spear, null, List.of(Warp.W2_Infernal, Warp.W2_Veil, Warp.W2_Lush, Warp.W2_Spawn))),
     W2_AbyssalCrab(new NormalTask("Abyssal crab", Region.W2_Abyss, List.of("abyssal crabs"), null, TaskType.Fishing, DefaultWardrobe.CombatFishing, Tool.Spear, null, List.of(Warp.W2_Abyss, Warp.W2_Infernal, Warp.W2_Veil, Warp.W2_Lush, Warp.W2_Spawn))),
 
-    W2_PlayBlackjack(new GamingTask("Play 21", List.of("21"), GameKind.Blackjack, List.of(Constraint.Games), List.of(Warp.W2_Spawn))),
+    W2_PlayBlackjack(new GamingTask("Play 21", Region.W2_Overworld, List.of("21"), GameKind.Blackjack, List.of(Constraint.Games), List.of(Warp.W2_Spawn))),
     W2_SilverMoney(new NormalTask("Sell for silver", Region.W1_Overworld, List.of("silver from selling items"), null, TaskType.Mining, DefaultWardrobe.Mining, Tool.Pickaxe, null, List.of(Warp.W2_Infernal, Warp.W2_Veil, Warp.W2_Lush, Warp.W2_Spawn))),
     W2_AbyssLamp(new NormalTask("Repair Lamppost", Region.W2_Abyss, List.of("lampposts"), null, TaskType.Misc, null, Tool.Spear, null, List.of(Warp.W2_Abyss, Warp.W2_Infernal, Warp.W2_Veil, Warp.W2_Lush, Warp.W2_Spawn))),
 
@@ -165,8 +164,8 @@ public enum Task {
     W3_GoldfishRetriever(new NormalTask("Goldfish retriever", Region.W3_Canine, List.of("goldfish retrievers"), null, TaskType.Fishing, DefaultWardrobe.Fishing, Tool.Spear, null, List.of(Warp.W3_Canine, Warp.W3_Spawn))),
     W3_Guardian(new NormalTask("Guardian", Region.W3_Underside, List.of("guardians"), null, TaskType.Fishing, DefaultWardrobe.CombatFishing, Tool.Spear, null, List.of(Warp.W3_Underside, Warp.W3_Spawn))),
 
-    W3_FindMatchesMatcher(new GamingTask("Score in matcher", List.of("matcher"), GameKind.Matcher, List.of(Constraint.Matches), List.of(Warp.W3_Spawn))),
-    W3_EarnTicketMatcher(new GamingTask("Ticket for matcher", List.of("matcher"), GameKind.Matcher, List.of(Constraint.Ticket), List.of(Warp.W3_Spawn))),
+    W3_FindMatchesMatcher(new GamingTask("Score in matcher", Region.W3_Overworld, List.of("matcher"), GameKind.Matcher, List.of(Constraint.Matches), List.of(Warp.W3_Spawn))),
+    W3_EarnTicketMatcher(new GamingTask("Ticket for matcher", Region.W3_Overworld, List.of("matcher"), GameKind.Matcher, List.of(Constraint.Ticket), List.of(Warp.W3_Spawn))),
 
     // World 4
     W4_Cheddore(new NormalTask("Cheddore", Region.W4_Homestead, List.of("cheddore"), null, TaskType.Mining, DefaultWardrobe.Mining, Tool.Pickaxe, null, List.of(Warp.W4_Spawn))),
@@ -263,11 +262,11 @@ public enum Task {
     WN1_Zoglin(new NormalTask("Zoglin", Region.WN1_Overworld, List.of("zoglin"), null, TaskType.Combat, DefaultWardrobe.Combat, Tool.Melee, null, List.of(Warp.WN1_Zoglin, Warp.WN1_Bamboodle, Warp.WN1_Decay, Warp.WN1_Spawn))),
 
     WN1_Decay(new NormalTask("Decay", Region.WN1_Overworld, List.of("decay"), null, TaskType.Farming, DefaultWardrobe.Farming, Tool.Hoe, null, List.of(Warp.WN1_Decay, Warp.WN1_Spawn))),
-    WN1_DecayWithLandscaping(new NormalTask("Decay with 4+ landscaping", Region.WN1_Overworld, List.of("decay"), List.of(Constraint.Landscaping), TaskType.Farming, DefaultWardrobe.Farming, Tool.Hoe, null, List.of(Warp.WN1_Decay, Warp.WN1_Spawn))),
+    WN1_DecayWithLandscaping(new NormalTask("Decay with %s+ landscaping", Region.WN1_Overworld, List.of("decay"), List.of(Constraint.Landscaping), TaskType.Farming, DefaultWardrobe.Farming, Tool.Hoe, null, List.of(Warp.WN1_Decay, Warp.WN1_Spawn))),
     WN1_IcebergLettuceOrTorchFlower(new NormalTask("Iceberg lettuce or torchflower", Region.WN1_Overworld, List.of("torchflowers or iceberg lettuce"), null, TaskType.Farming, DefaultWardrobe.Farming, Tool.Hoe, null, List.of(Warp.WN1_Torchflower, Warp.WN1_Spawn))),
-    WN1_IcebergLettuceOrTorchFlowerWithLandscaping(new NormalTask("Iceberg lettuce or torchflower with 4+ landscaping", Region.WN1_Overworld, List.of("torchflowers or iceberg lettuce"), List.of(Constraint.Landscaping), TaskType.Farming, DefaultWardrobe.Farming, Tool.Hoe, null, List.of(Warp.WN1_Torchflower, Warp.WN1_Spawn))),
+    WN1_IcebergLettuceOrTorchFlowerWithLandscaping(new NormalTask("Iceberg lettuce or torchflower with %s+ landscaping", Region.WN1_Overworld, List.of("torchflowers or iceberg lettuce"), List.of(Constraint.Landscaping), TaskType.Farming, DefaultWardrobe.Farming, Tool.Hoe, null, List.of(Warp.WN1_Torchflower, Warp.WN1_Spawn))),
     WN1_Mandrake(new NormalTask("Mandrake", Region.WN1_Overworld, List.of("mandrakes"), null, TaskType.Farming, DefaultWardrobe.Farming, Tool.Hoe, null, List.of(Warp.WN1_Mandrake, Warp.WN1_Spawn))),
-    WN1_MandrakeWithLandscaping(new NormalTask("Mandrake with 4+ landscaping", Region.WN1_Overworld, List.of("mandrakes"), List.of(Constraint.Landscaping), TaskType.Farming, DefaultWardrobe.Farming, Tool.Hoe, null, List.of(Warp.WN1_Mandrake, Warp.WN1_Spawn))),
+    WN1_MandrakeWithLandscaping(new NormalTask("Mandrake with %s+ landscaping", Region.WN1_Overworld, List.of("mandrakes"), List.of(Constraint.Landscaping), TaskType.Farming, DefaultWardrobe.Farming, Tool.Hoe, null, List.of(Warp.WN1_Mandrake, Warp.WN1_Spawn))),
     WN1_Splinterseed(new NormalTask("Splinterseed", Region.WN1_Overworld, List.of("splinterseed"), null, TaskType.Farming, DefaultWardrobe.Farming, Tool.Hoe, null, List.of(Warp.WN1_Splinterseed, Warp.WN1_Stable, Warp.WN1_Spawn))),
     WN1_SplinterseedWithLandscaping(new NormalTask("Splinterseed with %s+ landscaping", Region.WN1_Overworld, List.of("splinterseed"), List.of(Constraint.Landscaping), TaskType.Farming, DefaultWardrobe.Farming, Tool.Hoe, null, List.of(Warp.WN1_Splinterseed, Warp.WN1_Stable, Warp.WN1_Spawn))),
 
@@ -275,8 +274,8 @@ public enum Task {
     WN1_SmokedSalmon(new NormalTask("Smoked salmon", Region.WN1_Overworld, List.of("smoked salmon"), null, TaskType.Fishing, DefaultWardrobe.Fishing, Tool.Spear, null, List.of(Warp.WN1_Decay, Warp.WN1_Spawn))),
     WN1_Strider(new NormalTask("Strider", Region.WN1_Overworld, List.of("striders"), null, TaskType.Fishing, DefaultWardrobe.CombatFishing, Tool.Spear, null, List.of(Warp.WN1_Spawn))),
 
-    WN1_EarnTicketDice(new GamingTask("Ticker for pairdice", List.of("pairadice"), GameKind.Pairdice, List.of(Constraint.Ticket), List.of(Warp.WN1_Spawn))),
-    WN1_EarnPointDice(new GamingTask("Score in pairdice", List.of("pairadice"), GameKind.Pairdice, null /* TODO: Missing constraint name*/, List.of(Warp.WN1_Spawn))),
+    WN1_EarnTicketDice(new GamingTask("Ticker for pairdice", Region.WN1_Overworld, List.of("pairadice"), GameKind.Pairdice, List.of(Constraint.Ticket), List.of(Warp.WN1_Spawn))),
+    WN1_EarnPointDice(new GamingTask("Score in pairdice", Region.WN1_Overworld, List.of("pairadice"), GameKind.Pairdice, null /* TODO: Missing constraint name*/, List.of(Warp.WN1_Spawn))),
     WN1_ShiverMoney(new NormalTask("Sell for shiver", Region.WN1_Overworld, List.of("shiver from selling items"), null, TaskType.Mining, DefaultWardrobe.Mining, Tool.Pickaxe, null, List.of(Warp.WN1_Quartz, Warp.WN1_Spawn))),
     ;
 

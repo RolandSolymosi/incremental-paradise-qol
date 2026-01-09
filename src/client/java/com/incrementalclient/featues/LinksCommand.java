@@ -2,8 +2,7 @@ package com.incrementalclient.featues;
 
 import com.incrementalclient.services.ChatHandler;
 import com.incrementalclient.services.CommandHandler;
-import com.incrementalqol.common.utils.TextUtils;
-import net.minecraft.client.MinecraftClient;
+import com.incrementalclient.common.utils.TextUtils;
 import net.minecraft.text.Text;
 
 public class LinksCommand {

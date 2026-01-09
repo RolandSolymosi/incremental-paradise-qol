@@ -1,10 +1,10 @@
 package com.incrementalclient.common.utils;
 
-import com.incrementalqol.common.data.SkillType;
+import com.incrementalclient.common.data.skills.SkillCategory;
+import com.incrementalclient.internals.ScreenCapture;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
-import net.minecraft.util.Pair;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -33,43 +33,42 @@ public class Utils {
         return blocks;
     }
 
-    public static short getSkillSlotId(Pair<Integer, List<ItemStack>> content, SkillType skillType) {
+    public static short getSkillSlotId(String nameOfSlot25, SkillCategory skillType) {
         // Current three variations (1. No Sharpshooting or Excavation, 2. Only Sharpshooting, 3. Sharpshooting and Excavation)
         // These can be differentiated by the item in slot 25
         short slotId = 0;
-        var customName = Objects.requireNonNull(content.getRight().get(25).getCustomName()).getString();
-        switch (customName) {
+        switch (nameOfSlot25) {
             case "Excavation": {
                 slotId = switch (skillType) {
-                    case SkillType.Combat -> 21;
-                    case SkillType.Mining -> 19;
-                    case SkillType.Foraging -> 20;
-                    case SkillType.Farming -> 22;
-                    case SkillType.SpearFishing -> 23;
-                    case SkillType.Sharpshooting -> 24;
-                    case SkillType.Excavation -> 25;
+                    case SkillCategory.Combat -> 21;
+                    case SkillCategory.Mining -> 19;
+                    case SkillCategory.Foraging -> 20;
+                    case SkillCategory.Farming -> 22;
+                    case SkillCategory.SpearFishing -> 23;
+                    case SkillCategory.Sharpshooting -> 24;
+                    case SkillCategory.Excavation -> 25;
                 };
                 break;
             }
             case "Sharpshooting": {
                 slotId = switch (skillType) {
-                    case SkillType.Combat -> 21;
-                    case SkillType.Mining -> 19;
-                    case SkillType.Foraging -> 20;
-                    case SkillType.Farming -> 23;
-                    case SkillType.SpearFishing -> 24;
-                    case SkillType.Sharpshooting -> 25;
+                    case SkillCategory.Combat -> 21;
+                    case SkillCategory.Mining -> 19;
+                    case SkillCategory.Foraging -> 20;
+                    case SkillCategory.Farming -> 23;
+                    case SkillCategory.SpearFishing -> 24;
+                    case SkillCategory.Sharpshooting -> 25;
                     case Excavation -> 0;
                 };
                 break;
             }
             case " ": {
                 slotId = switch (skillType) {
-                    case SkillType.Combat -> 22;
-                    case SkillType.Mining -> 20;
-                    case SkillType.Foraging -> 21;
-                    case SkillType.Farming -> 23;
-                    case SkillType.SpearFishing -> 24;
+                    case SkillCategory.Combat -> 22;
+                    case SkillCategory.Mining -> 20;
+                    case SkillCategory.Foraging -> 21;
+                    case SkillCategory.Farming -> 23;
+                    case SkillCategory.SpearFishing -> 24;
                     case Sharpshooting -> 0;
                     case Excavation -> 0;
                 };

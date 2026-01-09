@@ -1,5 +1,6 @@
 package com.incrementalqol.modules;
 
+/*
 import net.fabricmc.api.ClientModInitializer;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
 import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientWorldEvents;
@@ -42,7 +43,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 import java.util.concurrent.ConcurrentHashMap;
-
 
 public class Glowing implements ClientModInitializer {
     private static final double PROXIMITY_THRESHOLD = 0.1f;
@@ -297,4 +297,6 @@ public class Glowing implements ClientModInitializer {
         }
     }
 }
+*/
+
 

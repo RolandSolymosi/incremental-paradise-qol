@@ -2,18 +2,18 @@ package com.incrementalclient.hud;
 
 import com.incrementalclient.abstractions.HudElement;
 import com.incrementalclient.abstractions.TextListHudElement;
-import com.incrementalclient.interfaces.Configurable;
 import com.incrementalclient.internals.MinecraftClientAccessor;
 import com.incrementalclient.common.utils.Vector2f;
+import com.incrementalclient.services.ActiveConsumableMonitor;
 import com.incrementalclient.services.HudManager;
-import dev.isxander.yacl3.api.ConfigCategory;
+import com.incrementalclient.common.utils.TextUtils;
 import dev.isxander.yacl3.api.Option;
 import dev.isxander.yacl3.api.OptionDescription;
-import dev.isxander.yacl3.api.OptionGroup;
 import dev.isxander.yacl3.api.controller.BooleanControllerBuilder;
 import dev.isxander.yacl3.api.controller.ColorControllerBuilder;
 import dev.isxander.yacl3.api.controller.DoubleSliderControllerBuilder;
 import dev.isxander.yacl3.config.v2.api.SerialEntry;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 
 import java.awt.*;
@@ -25,10 +25,15 @@ public class ConsumableTimerElement extends TextListHudElement<ConsumableTimerEl
     private final Configuration configuration = new Configuration();
 
     private final List<OptionPiece> options;
+    private final ActiveConsumableMonitor activeConsumableMonitor;
 
-    public ConsumableTimerElement(MinecraftClientAccessor uiAccessor,
-                                  HudManager hudManager) {
+    public ConsumableTimerElement(
+            MinecraftClientAccessor uiAccessor,
+            HudManager hudManager,
+            ActiveConsumableMonitor activeConsumableMonitor
+    ) {
         super(uiAccessor, hudManager);
+        this.activeConsumableMonitor = activeConsumableMonitor;
         this.anchorPoint = new Vector2f(10, 10);
 
         options = List.of(
@@ -83,14 +88,22 @@ public class ConsumableTimerElement extends TextListHudElement<ConsumableTimerEl
         );
     }
 
+    public Text render(ActiveConsumableMonitor.ConsumableTimer consumableTimer) {
+        int timerColor = configuration.consumableTimerColor;
+        int timeColor = configuration.consumableTimeColor;
+
+        String timeLeft = consumableTimer.getTimeLeftString();
+
+        return Text.literal("")
+                .append(TextUtils.textColor(consumableTimer.getBuffName() + ": ", timerColor))
+                .append(TextUtils.textColor(timeLeft, timeColor));
+    }
+
     @Override
     protected List<Text> getTextsToRender(boolean editMode) {
-        return List.of();
-        // TODO: reactivate once ConsumerTimer is migrated
-        /*
-        return ConsumableTimerModule.consumableList.stream()
-            .map(ConsumableTimer::render)
-            .collect(Collectors.toList());*/
+        return activeConsumableMonitor.getConsumableList().stream()
+                .map(this::render)
+                .collect(Collectors.toList());
     }
 
     @Override

@@ -4,7 +4,7 @@ package com.incrementalclient.common.data.skills;
 import dev.isxander.yacl3.api.NameableEnum;
 import net.minecraft.text.Text;
 
-public enum NormalMiningSkill implements NameableEnum {
+public enum NormalMiningSkill implements Skill {
     Ricochet("Ricochet"),
     CondensedStrike("Condensed Strike"),
     WingsOfWealth("Wings of Wealth"),

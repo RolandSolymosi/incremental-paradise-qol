@@ -1,19 +1,10 @@
 package com.incrementalqol.mixinWrappers;
 
-import com.incrementalqol.modules.Glowing;
-import com.incrementalqol.common.utils.ScreenInteraction;
+    /*
 import net.minecraft.network.packet.s2c.play.*;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 public class ClientPlayNetworkHandler {
-    public static void onOpenScreen(OpenScreenS2CPacket packet, CallbackInfo ci) {
-        //ScreenManager.OpenScreenPacket(packet, ci);
-        ScreenInteraction.ScreenInteractionManager.OpenScreen(packet, ci);
-    }
-    public static void onInventory(InventoryS2CPacket packet, CallbackInfo ci) {
-        //ScreenManager.InventoryPacket(packet, ci);
-        ScreenInteraction.ScreenInteractionManager.InventoryPackage(packet, ci);
-    }
     public static void onCloseScreen(CloseScreenS2CPacket packet, CallbackInfo ci) {
         //ScreenManager.CloseScreenPacket(packet, ci);
     }
@@ -41,3 +32,5 @@ public class ClientPlayNetworkHandler {
         Glowing.onParticle(packet, ci);
     }
 }
+
+    */

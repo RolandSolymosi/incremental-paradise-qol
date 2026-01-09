@@ -6,6 +6,10 @@ import com.incrementalclient.common.data.tasks.TaskType;
 import com.incrementalclient.common.data.tasks.abstractions.NormalTask;
 import com.incrementalclient.config.controllers.KeyBindController;
 import com.incrementalclient.interfaces.Configurable;
+import com.incrementalclient.interfaces.Listener;
+import com.incrementalclient.interfaces.Observer;
+import com.incrementalclient.internals.events.ClientPlayConnectionObservable;
+import com.incrementalclient.internals.events.EndClientTickListenable;
 import com.incrementalclient.services.*;
 import dev.isxander.yacl3.api.Option;
 import dev.isxander.yacl3.api.OptionDescription;
@@ -20,6 +24,8 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class AutoSwapLoadout implements Configurable<AutoSwapLoadout.Configuration> {
     private final CommandHandler commandHandler;
@@ -32,14 +38,13 @@ public class AutoSwapLoadout implements Configurable<AutoSwapLoadout.Configurati
     private final List<OptionPiece> options;
     private final KeyBindMonitor.KeyBindListener keyBindListener;
 
-    private final AtomicBoolean ongoingWarp = new AtomicBoolean();
-
     public AutoSwapLoadout(
             KeyBindMonitor keyBindMonitor,
             CommandHandler commandHandler,
             TaskMonitor taskMonitor,
             TaskingOverrides taskingOverrides,
-            HotbarHandler hotbarHandler
+            HotbarHandler hotbarHandler,
+            WarpNextHotkey warpNextHotkey
     ) {
         this.commandHandler = commandHandler;
         this.taskMonitor = taskMonitor;
@@ -50,8 +55,9 @@ public class AutoSwapLoadout implements Configurable<AutoSwapLoadout.Configurati
                 InputUtil.Type.KEYSYM,
                 configuration.keybind,
                 "Incremental QOL"
-        ),this::swap);
+        ), this::swap);
 
+        warpNextHotkey.subscribe(new Listener.DefaultListener(this::swap));
         options = List.of(new OptionPiece(
                         "Tasking",
                         0,
@@ -170,15 +176,15 @@ public class AutoSwapLoadout implements Configurable<AutoSwapLoadout.Configurati
     }
 
     private void swap() {
-        if (ongoingWarp.compareAndSet(false, true)) {
-            var nextUnfinishedTask = taskMonitor.getTaskList().stream().filter(p -> !p.isCompleted()).findFirst();
-            if (nextUnfinishedTask.isPresent()) {
-                var task = nextUnfinishedTask.get().getTask();
-                if (task != null) {
-                    if (task.getDescriptor().taskType() != TaskType.Quest && task.getDescriptor().taskType() != TaskType.Tutorial) {
-                        var taskDescriptor = task.getDescriptor();
-                        if (taskDescriptor instanceof NormalTask normalTask) {
-                            var override = taskingOverrides.getOverrides().get(task);
+        var nextUnfinishedTask = taskMonitor.getTaskList().stream().filter(p -> !p.isCompleted()).findFirst();
+        if (nextUnfinishedTask.isPresent()) {
+            var task = nextUnfinishedTask.get().getTask();
+            if (task != null) {
+                if (task.getDescriptor().taskType() != TaskType.Quest && task.getDescriptor().taskType() != TaskType.Tutorial) {
+                    var taskDescriptor = task.getDescriptor();
+                    if (taskDescriptor instanceof NormalTask normalTask) {
+                        var override = taskingOverrides.getOverrides().get(task);
+                        if (configuration.enableWardrobeSwap) {
                             var wardrobe = override != null && !override.wardrobe.isEmpty()
                                     ? override.wardrobe
                                     : normalTask.wardrobe() != null
@@ -193,15 +199,16 @@ public class AutoSwapLoadout implements Configurable<AutoSwapLoadout.Configurati
                             if (pet != null) {
                                 commandHandler.send("pet " + pet);
                             }
-                            var slot = override != null && override.toolSlotId >= 0
-                                    ? override.toolSlotId
-                                    : getSlotToDefault(normalTask.tool());
+                        }
+                        var slot = override != null && override.toolSlotId >= 0
+                                ? override.toolSlotId
+                                : getSlotToDefault(normalTask.tool());
+                        if (configuration.enableToolSwap) {
                             hotbarHandler.swapActiveHotbarSlot(slot);
                         }
                     }
                 }
             }
-            ongoingWarp.set(false);
         }
     }
 

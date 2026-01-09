@@ -4,7 +4,7 @@ package com.incrementalclient.common.data.skills;
 import dev.isxander.yacl3.api.NameableEnum;
 import net.minecraft.text.Text;
 
-public enum NormalFarmingSkill implements NameableEnum {
+public enum NormalFarmingSkill implements Skill {
     Harvester("Harvester"),
     CropChomp("Crop Chomp"),
     Pollinate("Pollinate"),

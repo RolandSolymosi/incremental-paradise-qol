@@ -1,6 +1,5 @@
 package com.incrementalqol.mixinWrappers;
-
-import com.incrementalqol.modules.Glowing;
+/*
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 
 public class Entity {
@@ -10,5 +9,7 @@ public class Entity {
             cir.setReturnValue(true);
         }
     }
+
 }
+ */
 

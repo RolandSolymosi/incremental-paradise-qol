@@ -4,7 +4,7 @@ package com.incrementalclient.common.data.skills;
 import dev.isxander.yacl3.api.NameableEnum;
 import net.minecraft.text.Text;
 
-public enum NightmareMiningSkill implements NameableEnum {
+public enum NightmareMiningSkill implements Skill {
     Shatterpoint("Shatterpoint",0),
 
     HeavyStrikes("Heavy Strikes",1),

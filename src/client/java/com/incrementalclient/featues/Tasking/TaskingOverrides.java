@@ -88,7 +88,7 @@ public class TaskingOverrides extends ListenableBase<Listener> implements Comple
                                                 .controller(i -> IntegerSliderControllerBuilder.create(i).step(1).range(-1, 7))
                                                 .build())
                                         .option(Option.<Boolean>createBuilder()
-                                                .name(Text.of("Skip Ticket task"))
+                                                .name(Text.of("Invert Ticket task skip rule"))
                                                 .binding(opt.skipTicket, () -> opt.skipTicket, val -> opt.skipTicket = val)
                                                 .controller(BooleanControllerBuilder::create)
                                                 .build())

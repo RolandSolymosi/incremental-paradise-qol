@@ -4,7 +4,7 @@ package com.incrementalclient.common.data.skills;
 import dev.isxander.yacl3.api.NameableEnum;
 import net.minecraft.text.Text;
 
-public enum NightmareCombatSkill implements NameableEnum {
+public enum NightmareCombatSkill implements Skill {
     DevilsGambit("Devil's Gambit",0),
 
     FasterSpins("Faster Spins",1),

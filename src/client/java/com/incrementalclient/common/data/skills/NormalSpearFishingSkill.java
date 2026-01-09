@@ -4,7 +4,7 @@ package com.incrementalclient.common.data.skills;
 import dev.isxander.yacl3.api.NameableEnum;
 import net.minecraft.text.Text;
 
-public enum NormalSpearFishingSkill implements NameableEnum {
+public enum NormalSpearFishingSkill implements Skill {
     SpoonBender("Spoon Bender"),
     Wavestreak("Wavestreak"),
     Beenado("Beenado"),

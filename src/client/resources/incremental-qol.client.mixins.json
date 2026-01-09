@@ -5,8 +5,9 @@
   "client": [
     "BossBarHud",
     "ClientPlayNetworkHandler",
-    "Packet",
-    "InGameHud"
+    "EntityRenderer",
+    "InGameHud",
+    "Packet"
   ],
   "injectors": {
     "defaultRequire": 1

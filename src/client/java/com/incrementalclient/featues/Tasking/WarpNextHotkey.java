@@ -1,24 +1,31 @@
 package com.incrementalclient.featues.Tasking;
 
+import com.incrementalclient.abstractions.ListenableBase;
 import com.incrementalclient.common.data.World;
 import com.incrementalclient.common.data.tasks.TaskType;
+import com.incrementalclient.common.data.tasks.abstractions.GamingTask;
 import com.incrementalclient.common.data.tasks.abstractions.ITask;
 import com.incrementalclient.config.controllers.KeyBindController;
 import com.incrementalclient.interfaces.Configurable;
+import com.incrementalclient.interfaces.Listener;
 import com.incrementalclient.interfaces.Observer;
+import com.incrementalclient.internals.MinecraftClientAccessor;
 import com.incrementalclient.internals.events.EndClientTickListenable;
 import com.incrementalclient.services.*;
 import dev.isxander.yacl3.api.Option;
+import dev.isxander.yacl3.api.controller.BooleanControllerBuilder;
 import dev.isxander.yacl3.config.v2.api.SerialEntry;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-public class WarpNextHotkey implements Configurable<WarpNextHotkey.Configuration>, Observer<EndClientTickListenable> {
+public class WarpNextHotkey extends ListenableBase<Listener> implements Configurable<WarpNextHotkey.Configuration>, Observer<EndClientTickListenable> {
     private static final int MAX_WAIT = 20;
 
     private final CommandHandler commandHandler;
@@ -31,6 +38,8 @@ public class WarpNextHotkey implements Configurable<WarpNextHotkey.Configuration
 
     private final List<OptionPiece> options;
     private final KeyBindMonitor.KeyBindListener keyBindListener;
+    private final InteractionScheduler<Void> interactionScheduler;
+    private final InteractionScheduler.Builder<Void, Void> autoLevelUpTask;
 
     private int warpIndex = 0;
     private int tickCounter = 0;
@@ -44,7 +53,9 @@ public class WarpNextHotkey implements Configurable<WarpNextHotkey.Configuration
             WorldMonitor worldMonitor,
             TaskMonitor taskMonitor,
             TaskingOverrides taskingOverrides,
-            EndClientTickListenable tickListenable
+            EndClientTickListenable tickListenable,
+            InteractionScheduler<Void> interactionScheduler,
+            MinecraftClientAccessor minecraftClientAccessor
     ) {
         this.commandHandler = commandHandler;
         this.chatHandler = chatHandler;
@@ -56,45 +67,130 @@ public class WarpNextHotkey implements Configurable<WarpNextHotkey.Configuration
                 InputUtil.Type.KEYSYM,
                 configuration.keybind,
                 "Incremental QOL"
-        ),this::warpNext);
+        ), this::warpNext);
+        this.interactionScheduler = interactionScheduler;
+        this.autoLevelUpTask = new InteractionScheduler.Builder<Void, Void>("AutoLevelUp", interactionScheduler, minecraftClientAccessor)
+                .priority(1)
+                .timeout(20)
+                .retries(2)
+                .startWith(() -> commandHandler.send("tasks"))
+                .step(
+                        (screen, ctx) -> screen.title().getString().contains("Tasks"),
+                        ctx -> {
+                            ItemStack levelUpSlot = null;
+                            short levelUpSlotId = 0;
+                            for (var slot : ctx.screen().contents()) {
+                                var customName = slot.get(DataComponentTypes.CUSTOM_NAME);
+                                if (customName != null && customName.getString().equals("Claim Rewards")) {
+                                    levelUpSlot = slot;
+                                    break;
+                                }
+                                levelUpSlotId++;
+                            }
+                            if (levelUpSlot != null) {
+                                var lore = levelUpSlot.get(DataComponentTypes.LORE);
+                                if (lore != null && lore.lines().getLast().getString().contains("Click to claim rewards")) {
+                                    ctx.click(levelUpSlotId);
+                                } else {
+                                    ctx.complete();
+                                }
+                            }
+
+                            return false;
+                        }
+                )
+                .step(
+                        (screen, ctx) -> screen.title().getString().contains("Tasks"),
+                        ctx -> false
+                );
+
         chatHandler.subscribe(new ChatMessageObserver(this));
         worldMonitor.subscribe(new WorldChangeObserver(this));
         tickListenable.subscribe(this);
 
         options = List.of(new OptionPiece(
-                "Tasking",
-                0,
-                "Hotkeys",
-                "",
-                0,
-                Option.<Integer>createBuilder()
-                .name(Text.literal("Warp closest to Next Task"))
-                .binding(
-                        configuration.keybind,
-                        () -> configuration.keybind,
-                        v -> configuration.keybind = v
-                )
-                .controller((option) -> () -> new KeyBindController(option))
-                .build()));
+                        "Tasking",
+                        0,
+                        "Hotkeys",
+                        "",
+                        0,
+                        Option.<Integer>createBuilder()
+                                .name(Text.literal("Warp closest to Next Task"))
+                                .binding(
+                                        configuration.keybind,
+                                        () -> configuration.keybind,
+                                        v -> configuration.keybind = v
+                                )
+                                .controller((option) -> () -> new KeyBindController(option))
+                                .build()),
+                new OptionPiece(
+                        "Tasking",
+                        0,
+                        "Hotkeys",
+                        "",
+                        1,
+                        Option.<Boolean>createBuilder()
+                                .name(Text.literal("Toggle Auto LevelUp on WarpNext"))
+                                .binding(
+                                        configuration.autoLevelUp,
+                                        () -> configuration.autoLevelUp,
+                                        v -> configuration.autoLevelUp = v
+                                )
+                                .controller(BooleanControllerBuilder::create)
+                                .build()),
+                new OptionPiece(
+                        "Tasking",
+                        0,
+                        "Hotkeys",
+                        "",
+                        2,
+                        Option.<Boolean>createBuilder()
+                                .name(Text.literal("Warp after Auto LevelUp"))
+                                .binding(
+                                        configuration.warpOnAutoLevelUp,
+                                        () -> configuration.warpOnAutoLevelUp,
+                                        v -> configuration.warpOnAutoLevelUp = v
+                                )
+                                .controller(BooleanControllerBuilder::create)
+                                .build()),
+                new OptionPiece(
+                        "Tasking",
+                        1,
+                        "General Settings",
+                        "",
+                        1,
+                        Option.<Boolean>createBuilder()
+                                .name(Text.literal("Toggle ticket task skip's base rule (Override will behave as opposite then)"))
+                                .binding(
+                                        configuration.ticketTastkDefaultSkip,
+                                        () -> configuration.ticketTastkDefaultSkip,
+                                        v -> configuration.ticketTastkDefaultSkip = v
+                                )
+                                .controller(BooleanControllerBuilder::create)
+                                .build()));
     }
 
     private void warpNext() {
         if (ongoingWarp.compareAndSet(false, true)) {
             if (worldMonitor.currentWorld() != World.BossArenas) {
-                var nextUnfinishedTask = taskMonitor.getTaskList().stream().filter(p ->
-                        !p.isCompleted() && (!p.isTicket() || !taskingOverrides.getOverrides().containsKey(p.getTask()) || !taskingOverrides.getOverrides().get(p.getTask()).skipTicket)
-                ).findFirst();
+                var nextUnfinishedTask = taskMonitor.getTaskList().stream().filter(p -> !p.isCompleted() && (!p.isTicket() ||
+                        ((!configuration.ticketTastkDefaultSkip && (!taskingOverrides.getOverrides().containsKey(p.getTask()) || !taskingOverrides.getOverrides().get(p.getTask()).skipTicket))) ||
+                        (configuration.ticketTastkDefaultSkip && (taskingOverrides.getOverrides().containsKey(p.getTask()) && taskingOverrides.getOverrides().get(p.getTask()).skipTicket))
+                )).findFirst();
                 if (nextUnfinishedTask.isPresent()) {
                     var task = nextUnfinishedTask.get().getTask();
                     if (task != null) {
                         if (task.getDescriptor().taskType() != TaskType.Quest && task.getDescriptor().taskType() != TaskType.Tutorial) {
                             var override = taskingOverrides.getOverrides().get(task);
-                            if (override != null && !override.warp.isEmpty()){
+                            if (override != null && !override.warp.isEmpty()) {
                                 commandHandler.send(override.warp);
                                 return;
                             }
                             currentTask = task.getDescriptor();
                             commandHandler.send(currentTask.warps().get(warpIndex).getWarpCommand());
+                            if (task.getDescriptor() instanceof GamingTask gamingTask) {
+                                commandHandler.send(gamingTask.game().getCommand());
+                            }
                             return;
                         } else {
                             chatHandler.sendChatMessage(Text.literal("No being lazy with the quests and tutorials, go complete them!"));
@@ -103,7 +199,18 @@ public class WarpNextHotkey implements Configurable<WarpNextHotkey.Configuration
                         chatHandler.sendChatMessage(Text.literal("The task was not correctly identified, send task description to Devs (QoL channel)."));
                     }
                 } else {
-                    chatHandler.sendChatMessage(Text.literal("No incomplete tasks available."));
+                    if (this.configuration.autoLevelUp) {
+                        var task = autoLevelUpTask.build(null);
+                        if (this.configuration.warpOnAutoLevelUp) {
+                            task.getFuture().thenRun(() -> {
+                                notifyListeners();
+                                this.warpNext();
+                            });
+                        }
+                        interactionScheduler.submit(task);
+                    } else {
+                        chatHandler.sendChatMessage(Text.literal("No incomplete tasks available."));
+                    }
                 }
             } else {
                 chatHandler.sendChatMessage(Text.literal("§4You're in the middle of a boss fight, I don't think it is time to task!"));
@@ -116,7 +223,7 @@ public class WarpNextHotkey implements Configurable<WarpNextHotkey.Configuration
     public void onEvent(EndClientTickListenable result) {
         if (ongoingWarp.get()) {
             tickCounter++;
-            if (currentTask.warps().get(warpIndex).isAtPosition() || tickCounter >= MAX_WAIT){
+            if (currentTask.warps().get(warpIndex).isAtPosition() || tickCounter >= MAX_WAIT) {
                 tickCounter = 0;
                 warpIndex = 0;
                 currentTask = null;
@@ -127,7 +234,7 @@ public class WarpNextHotkey implements Configurable<WarpNextHotkey.Configuration
 
     private void chatMessageArrived(Text text) {
         if (ongoingWarp.get()) {
-            if (text.getString().contains("You don't have access to this warp.")){
+            if (text.getString().contains("You don't have access to this warp.")) {
                 warpIndex++;
                 tickCounter = 0;
                 commandHandler.send(currentTask.warps().get(warpIndex).getWarpCommand());
@@ -136,7 +243,8 @@ public class WarpNextHotkey implements Configurable<WarpNextHotkey.Configuration
     }
 
     private void worldChanged(World world) {
-        if (ongoingWarp.get()) {}
+        if (ongoingWarp.get()) {
+        }
     }
 
     @Override
@@ -176,5 +284,11 @@ public class WarpNextHotkey implements Configurable<WarpNextHotkey.Configuration
     public static class Configuration {
         @SerialEntry
         public int keybind = GLFW.GLFW_KEY_N;
+        @SerialEntry
+        public boolean autoLevelUp = true;
+        @SerialEntry
+        public boolean warpOnAutoLevelUp = true;
+        @SerialEntry
+        public boolean ticketTastkDefaultSkip = false;
     }
 }

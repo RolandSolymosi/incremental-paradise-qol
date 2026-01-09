@@ -4,7 +4,6 @@ import com.incrementalclient.abstractions.HudElement;
 import com.incrementalclient.abstractions.TextListHudElement;
 import com.incrementalclient.common.data.Region;
 import com.incrementalclient.common.data.World;
-import com.incrementalclient.common.data.tasks.Constraint;
 import com.incrementalclient.common.data.tasks.TaskType;
 import com.incrementalclient.common.data.tasks.abstractions.NormalTask;
 import com.incrementalclient.common.utils.TextUtils;
@@ -25,7 +24,6 @@ import net.minecraft.text.Text;
 import java.awt.*;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public class TaskTrackerElement extends TextListHudElement<TaskTrackerElement.Configuration> {
     private final WorldMonitor worldMonitor;
@@ -273,7 +271,7 @@ public class TaskTrackerElement extends TextListHudElement<TaskTrackerElement.Co
         int worldColor = configuration.worldColor;
 
         String world = taskState.getTask() != null
-                ? taskState.getTask().getDescriptor().warps().getFirst().getWorld().getName()
+                ? taskState.getTask().getDescriptor().getRegion().getWorld().getShortName()
                 : "-";
 
         return Text.literal("")
@@ -297,7 +295,6 @@ public class TaskTrackerElement extends TextListHudElement<TaskTrackerElement.Co
     public List<Configurable.OptionPiece> getOption() {
         return options;
     }
-
 
     public static class Configuration extends HudElement.ConfigurationBase {
 

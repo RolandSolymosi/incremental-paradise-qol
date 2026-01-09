@@ -4,7 +4,7 @@ package com.incrementalclient.common.data.skills;
 import dev.isxander.yacl3.api.NameableEnum;
 import net.minecraft.text.Text;
 
-public enum NormalForagingSkill implements NameableEnum {
+public enum NormalForagingSkill implements Skill {
     Timberstrike("Timberstrike"),
     LuckyGathering("Lucky Gathering"),
     BuzzingAssault("Buzzing Assault"),

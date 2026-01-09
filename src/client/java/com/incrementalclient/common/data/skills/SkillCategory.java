@@ -1,9 +1,9 @@
-package com.incrementalqol.common.data;
+package com.incrementalclient.common.data.skills;
 
 import java.util.Arrays;
 import java.util.Optional;
 
-public enum SkillType {
+public enum SkillCategory {
     Combat("Combat"),
     Mining("Mining"),
     Foraging("Foraging"),
@@ -14,7 +14,7 @@ public enum SkillType {
 
     private final String name;
 
-    SkillType(String name) {
+    SkillCategory(String name) {
         this.name = name;
     }
 
@@ -22,7 +22,7 @@ public enum SkillType {
         return name;
     }
 
-    public static Optional<SkillType> findByName(String name) {
+    public static Optional<SkillCategory> findByName(String name) {
         return Arrays.stream(values())
                 .filter(e -> e.name.equals(name))
                 .findFirst();

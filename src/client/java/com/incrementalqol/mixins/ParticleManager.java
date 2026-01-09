@@ -1,5 +1,5 @@
 package com.incrementalqol.mixins;
-
+/*
 import net.minecraft.client.particle.Particle;
 import net.minecraft.particle.ParticleEffect;
 import org.spongepowered.asm.mixin.Mixin;
@@ -15,3 +15,4 @@ public class ParticleManager {
         //Glowing.onAddParticle(parameters, x, y, z, velocityX, velocityY, velocityZ, cir);
     }
 }
+*/

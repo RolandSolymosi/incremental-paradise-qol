@@ -66,8 +66,7 @@ public class KeyBindMonitor extends ListenableBase<KeyBindMonitor.KeyBindListene
         }
         for (var entry : listenersByKeyBind.entrySet()) {
             var tasks = entry.getValue();
-
-            while (tasks.getFirst().keyBinding.wasPressed()) {
+            while (tasks.stream().anyMatch(t -> t.keyBinding.wasPressed())) {
                 for (var task : tasks) {
                     task.onEvent();
                 }

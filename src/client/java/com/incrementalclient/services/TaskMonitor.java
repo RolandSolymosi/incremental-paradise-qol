@@ -7,6 +7,7 @@ import com.incrementalclient.common.data.tasks.TaskType;
 import com.incrementalclient.common.utils.Utils;
 import com.incrementalclient.interfaces.Observer;
 import com.incrementalclient.internals.BossBarObservable;
+import com.incrementalclient.internals.MinecraftClientAccessor;
 import com.incrementalclient.internals.ScreenCapture;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.ItemStack;
@@ -23,29 +24,51 @@ import java.util.regex.Pattern;
 public class TaskMonitor extends ObservableBase<Observer<List<TaskMonitor.TaskState>>, List<TaskMonitor.TaskState>> {
     private final List<TaskState> taskList = new CopyOnWriteArrayList<>();
 
-    private final static Pattern bossBarPatternForTask = Pattern.compile("^(Kill |Slay |Collect |Harvest |Spear |Clean |Repair |Sell |Gain |Loot |Play |Earn |Find )");
+    private final InteractionScheduler<Void> interactionScheduler;
+    private final InteractionScheduler.Builder<Void, Void> refreshTaskBuilder;
 
-    public TaskMonitor(BossBarObservable bossBarObservable, ChatHandler chatHandler, ScreenCapture screenCapture) {
+    public TaskMonitor(
+            BossBarObservable bossBarObservable,
+            ChatHandler chatHandler,
+            CommandHandler commandHandler,
+            ScreenCapture screenCapture,
+            InteractionScheduler<Void> interactionScheduler,
+            MinecraftClientAccessor minecraftClientAccessor,
+            WorldMonitor worldMonitor
+    ) {
+        this.interactionScheduler = interactionScheduler;
+        this.refreshTaskBuilder = new InteractionScheduler.Builder<Void, Void>("TaskRefresh", interactionScheduler, minecraftClientAccessor)
+                .priority(100)
+                .timeout(20)
+                .retries(2)
+                .startWith(() -> commandHandler.send("tasks"))
+                .step(
+                        (screen, ctx) -> screen.title().getString().contains("Tasks"),
+                        ctx -> false
+                );
+
         bossBarObservable.subscribe(new BossBarObserver(this));
         chatHandler.subscribe(new ChatMessageObserver(this));
         screenCapture.subscribe(new ScreenObserver(this));
+        worldMonitor.subscribe(new Observer.DefaultObserver<>(w -> {
+            if (w.from().getRealm() != w.to().getRealm()){
+                interactionScheduler.submit(refreshTaskBuilder.build(null));
+            }
+        }));
     }
 
     public List<TaskState> getTaskList() {
-        return this.taskList;
+        return taskList;
     }
 
     private void bossBarUpdated(BossBarObservable.BossBar bossBar) {
-        var isTaskUpdate = bossBarPatternForTask.matcher(bossBar.text());
-        if (isTaskUpdate.hasMatch()) {
-            for (var task : taskList) {
-                var updateState = task.tryUpdate(bossBar.text());
-                if (updateState != TaskState.UpdateState.NotMatched) {
-                    if (updateState == TaskState.UpdateState.Changed) {
-                        notifyObservers(taskList);
-                    }
-                    break;
+        for (var task : taskList) {
+            var updateState = task.tryUpdate(bossBar.text());
+            if (updateState != TaskState.UpdateState.NotMatched) {
+                if (updateState == TaskState.UpdateState.Changed) {
+                    notifyObservers(taskList);
                 }
+                break;
             }
         }
     }
@@ -70,6 +93,16 @@ public class TaskMonitor extends ObservableBase<Observer<List<TaskMonitor.TaskSt
                 }
             }
         }
+        else if (text.getString().contains("You are now Prestige ") ||
+                text.getString().contains("You are now Ascension ") ||
+                text.getString().contains("You are now Nightmare Prestige ") ||
+                text.getString().contains("You are now Transcendence ") ||
+                text.getString().contains("You started the Tr") ||
+                text.getString().contains("You completed Tr") ||
+                text.getString().contains("Trial abandoned")){
+            interactionScheduler.submit(refreshTaskBuilder.build(null));
+        }
+
     }
 
     private void screenInfoArrived(ScreenCapture.Screen screen) {
@@ -122,13 +155,13 @@ public class TaskMonitor extends ObservableBase<Observer<List<TaskMonitor.TaskSt
                     if (taskType.isPresent()) {
                         var taskName = cleanTaskName(itemStack.getName().getString());
                         if (taskType.get() == TaskType.Quest || taskType.get() == TaskType.Tutorial) {
-                            return new TaskState(taskName, "", taskType.get(), null, new String[0], slotId, false, false, "", "", null);
+                            return new TaskState(taskName, "", "", taskType.get(), null, new String[0], slotId, false, false, "", "", null);
                         } else {
                             String description = blocks.size() > 1 ? blocks.get(1) : "";
                             for (Pattern pattern : taskType.get().getPatterns()) {
-                                var taskMatch = tryMatchTask(pattern, description);
+                                var taskMatch = tryMatchTaskByFullInfo(pattern, description);
                                 if (taskMatch != null) {
-                                    return new TaskState(taskName, description, taskType.get(), taskMatch.task, taskMatch.constraintParameters.toArray(new String[0]), slotId, isTicketTask(blocks.getFirst()), isSocialiteTask(blocks.getFirst()), taskMatch.amount, taskMatch.progress, pattern);
+                                    return new TaskState(taskName, description, taskMatch.taskTarget, taskType.get(), taskMatch.task, taskMatch.constraintParameters.toArray(new String[0]), slotId, isTicketTask(blocks.getFirst()), isSocialiteTask(blocks.getFirst()), taskMatch.amount, taskMatch.progress, pattern);
                                 }
                             }
                         }
@@ -138,7 +171,7 @@ public class TaskMonitor extends ObservableBase<Observer<List<TaskMonitor.TaskSt
             return null;
         }
 
-        private static TaskMatch tryMatchTask(Pattern pattern, String description) {
+        private static TaskMatch tryMatchTaskByFullInfo(Pattern pattern, String description) {
             var matcher = pattern.matcher(description);
             if (matcher.find()) {
                 var taskTarget = getGroupValue(matcher, "type");
@@ -162,7 +195,7 @@ public class TaskMonitor extends ObservableBase<Observer<List<TaskMonitor.TaskSt
                 }
 
                 var task = Task.tryGetTask(taskTarget, constraints);
-                return new TaskMatch(task, progress, targetAmount, parameters);
+                return new TaskMatch(task, taskTarget, progress, targetAmount, parameters);
             }
             return null;
         }
@@ -210,13 +243,14 @@ public class TaskMonitor extends ObservableBase<Observer<List<TaskMonitor.TaskSt
         }
 
         private static String cleanTaskName(String taskName) {
-            Pattern p = Pattern.compile("^≡ƒöÑ?\\s*(.+?)\\s*(?:≡ƒöÑ|EASY|MEDIUM|HARD)?$");
+            Pattern p = Pattern.compile("^\uD83D\uDD25?\\s*(.+?)\\s*(?:\uD83D\uDD25|EASY|MEDIUM|HARD)?$");
             Matcher m = p.matcher(taskName);
 
             return m.matches() ? m.group(1) : taskName;
         }
 
-        private record TaskMatch(Task task, String progress, String amount, List<String> constraintParameters) {
+        private record TaskMatch(Task task, String taskTarget, String progress, String amount,
+                                 List<String> constraintParameters) {
         }
     }
 
@@ -232,10 +266,11 @@ public class TaskMonitor extends ObservableBase<Observer<List<TaskMonitor.TaskSt
         private final boolean isSocialite;
         private final String required;
         private final Pattern taskPattern;
+        private final Pattern nonTrackedPattern;
         private String current;
         private boolean isCompleted;
 
-        TaskState(String name, String description, TaskType taskType, Task task, String[] constraintParameters, int slotId, boolean isTicket, boolean isSocialite, String required, String current, Pattern taskPattern) {
+        TaskState(String name, String description, String taskTarget, TaskType taskType, Task task, String[] constraintParameters, int slotId, boolean isTicket, boolean isSocialite, String required, String current, Pattern taskPattern) {
             this.name = name;
             this.description = description;
             this.constraintParameters = constraintParameters;
@@ -247,17 +282,31 @@ public class TaskMonitor extends ObservableBase<Observer<List<TaskMonitor.TaskSt
             this.isSocialite = isSocialite;
             this.required = required;
             this.current = current;
-            this.taskPattern = taskPattern;
+            this.taskPattern = Pattern.compile(taskPattern.pattern().replace("(?<type>.+)", taskTarget));
+            this.nonTrackedPattern = Pattern.compile(Pattern.quote(this.name) + " \\(?(?<progress>[0-9.,]+[kmbt]?)");
         }
 
         private UpdateState tryUpdate(String text) {
-            var taskMatch = TaskStateFactory.tryMatchTask(taskPattern, text);
-
-            if (taskMatch == null) {
-                return UpdateState.NotMatched;
+            var nameMatcher = nonTrackedPattern.matcher(text);
+            if (nameMatcher.find()){
+                var progress = nameMatcher.group("progress");
+                return isChanged(progress);
             }
-            if (!taskMatch.progress.equals(current)) {
-                current = taskMatch.progress;
+            else{
+                if (taskPattern == null)
+                    return UpdateState.NotMatched;
+
+                var taskMatch = TaskStateFactory.tryMatchTaskByFullInfo(taskPattern, text);
+                if (taskMatch == null) {
+                    return UpdateState.NotMatched;
+                }
+                return isChanged(taskMatch.progress);
+            }
+        }
+
+        private UpdateState isChanged(String progress){
+            if (!progress.equals(current)) {
+                current = progress;
                 if (current.equals(required)) {
                     isCompleted = true;
                 }
@@ -323,9 +372,9 @@ public class TaskMonitor extends ObservableBase<Observer<List<TaskMonitor.TaskSt
             Changed
         }
 
-        public String getDisplayName(){
-            if (task != null){
-                task.getDescriptor().displayName(constraintParameters);
+        public String getDisplayName() {
+            if (task != null) {
+                return task.getDescriptor().displayName(constraintParameters);
             }
             return name;
         }

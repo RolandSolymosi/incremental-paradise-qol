@@ -4,7 +4,7 @@ package com.incrementalclient.common.data.skills;
 import dev.isxander.yacl3.api.NameableEnum;
 import net.minecraft.text.Text;
 
-public enum NormalCombatSkill implements NameableEnum {
+public enum NormalCombatSkill implements Skill {
     SweepingStrike("Sweeping Strike"),
     RhinoCharge("Rhino Charge"),
     BeeStorm("Bee Storm"),
