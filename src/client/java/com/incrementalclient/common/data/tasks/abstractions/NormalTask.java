@@ -2,6 +2,7 @@ package com.incrementalclient.common.data.tasks.abstractions;
 
 import com.google.common.collect.ImmutableList;
 import com.incrementalclient.common.data.DefaultWardrobe;
+import com.incrementalclient.common.data.Region;
 import com.incrementalclient.common.data.Tool;
 import com.incrementalclient.common.data.Warp;
 import com.incrementalclient.common.data.targets.Target;
@@ -13,6 +14,8 @@ import java.util.Optional;
 
 public final class NormalTask implements ITask {
 
+    private final String displayName;
+    private final Region region;
     private final ImmutableList<String> names;
     private final ImmutableList<Constraint> constraints;
     private final ImmutableList<com.incrementalclient.common.data.targets.Target> targets;
@@ -21,7 +24,9 @@ public final class NormalTask implements ITask {
     private final DefaultWardrobe wardrobe;
     private final Tool tool;
 
-    public NormalTask(List<String> names, List<Constraint> constraints, TaskType taskType, DefaultWardrobe wardrobe, Tool tool, List<Target> targets, List<Warp> warps) {
+    public NormalTask(String displayName, Region region, List<String> names, List<Constraint> constraints, TaskType taskType, DefaultWardrobe wardrobe, Tool tool, List<Target> targets, List<Warp> warps) {
+        this.displayName = displayName;
+        this.region = region;
         this.names = ImmutableList.copyOf(names);
         this.constraints = constraints != null ?  ImmutableList.copyOf(constraints) : ImmutableList.of();
         this.targets = targets != null ? ImmutableList.copyOf(targets) : ImmutableList.of();
@@ -29,6 +34,14 @@ public final class NormalTask implements ITask {
         this.warps = warps != null ? ImmutableList.copyOf(warps) : ImmutableList.of();
         this.wardrobe = wardrobe;
         this.tool = tool;
+    }
+
+    @Override
+    public String displayName(String[] parameters) {
+        if (parameters != null && parameters.length > 0){
+            return String.format(displayName, (Object[]) parameters);
+        }
+        return displayName;
     }
 
     @Override
@@ -61,5 +74,9 @@ public final class NormalTask implements ITask {
 
     public ImmutableList<Target> targets(){
         return targets;
+    }
+
+    public Region getRegion() {
+        return region;
     }
 }

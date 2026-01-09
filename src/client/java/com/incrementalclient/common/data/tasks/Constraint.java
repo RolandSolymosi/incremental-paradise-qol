@@ -14,6 +14,7 @@ public enum Constraint {
     Games("games"),
     Score("score"),
     Matches("matches"),
+    Shatterpoint("shatterpoint")/* TODO: Check if correct*/,
     PeaShooter("ranged damage & pea shooter"),
     DevilsGambit("devil's gambit"),
     AxeJuggling("axe juggling"),

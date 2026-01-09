@@ -14,7 +14,7 @@ public enum World {
     World2(Identifier.of("minecraft", "world2"), Realm.Normal),
     World3(Identifier.of("minecraft", "world3"), Realm.Normal),
     World4(Identifier.of("minecraft", "world4"), Realm.Normal),
-    WorldNightmare(Identifier.of("minecraft", "worldnightmare"), Realm.Nightmare);
+    WorldNightmare1(Identifier.of("minecraft", "worldnightmare"), Realm.Nightmare);
 
 
     private final Identifier id;

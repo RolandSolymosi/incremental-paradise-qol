@@ -122,13 +122,13 @@ public class TaskMonitor extends ObservableBase<Observer<List<TaskMonitor.TaskSt
                     if (taskType.isPresent()) {
                         var taskName = cleanTaskName(itemStack.getName().getString());
                         if (taskType.get() == TaskType.Quest || taskType.get() == TaskType.Tutorial) {
-                            return new TaskState(taskName, "", taskType.get(), null, slotId, false, false, "", "", null);
+                            return new TaskState(taskName, "", taskType.get(), null, new String[0], slotId, false, false, "", "", null);
                         } else {
                             String description = blocks.size() > 1 ? blocks.get(1) : "";
                             for (Pattern pattern : taskType.get().getPatterns()) {
                                 var taskMatch = tryMatchTask(pattern, description);
                                 if (taskMatch != null) {
-                                    return new TaskState(taskName, description, taskType.get(), taskMatch.task, slotId, isTicketTask(blocks.getFirst()), isSocialiteTask(blocks.getFirst()), taskMatch.amount, taskMatch.progress, pattern);
+                                    return new TaskState(taskName, description, taskType.get(), taskMatch.task, taskMatch.constraintParameters.toArray(new String[0]), slotId, isTicketTask(blocks.getFirst()), isSocialiteTask(blocks.getFirst()), taskMatch.amount, taskMatch.progress, pattern);
                                 }
                             }
                         }
@@ -155,8 +155,14 @@ public class TaskMonitor extends ObservableBase<Observer<List<TaskMonitor.TaskSt
                 var progress = getGroupValue(matcher, "progress");
                 var targetAmount = getGroupValue(matcher, "amount");
 
+                var parameters = new ArrayList<String>();
+                var parameter = getGroupValue(matcher, "parameter");
+                if (parameter != null) {
+                    parameters.add(parameter);
+                }
+
                 var task = Task.tryGetTask(taskTarget, constraints);
-                return new TaskMatch(task, progress, targetAmount);
+                return new TaskMatch(task, progress, targetAmount, parameters);
             }
             return null;
         }
@@ -210,7 +216,7 @@ public class TaskMonitor extends ObservableBase<Observer<List<TaskMonitor.TaskSt
             return m.matches() ? m.group(1) : taskName;
         }
 
-        private record TaskMatch(Task task, String progress, String amount) {
+        private record TaskMatch(Task task, String progress, String amount, List<String> constraintParameters) {
         }
     }
 
@@ -218,6 +224,7 @@ public class TaskMonitor extends ObservableBase<Observer<List<TaskMonitor.TaskSt
         private final String name;
         // TODO: Remove after region can be got from Tasks/TheirTargets
         private final String description;
+        private final String[] constraintParameters;
         private final TaskType taskType;
         private final Task task;
         private final int slotId;
@@ -228,9 +235,10 @@ public class TaskMonitor extends ObservableBase<Observer<List<TaskMonitor.TaskSt
         private String current;
         private boolean isCompleted;
 
-        TaskState(String name, String description, TaskType taskType, Task task, int slotId, boolean isTicket, boolean isSocialite, String required, String current, Pattern taskPattern) {
+        TaskState(String name, String description, TaskType taskType, Task task, String[] constraintParameters, int slotId, boolean isTicket, boolean isSocialite, String required, String current, Pattern taskPattern) {
             this.name = name;
             this.description = description;
+            this.constraintParameters = constraintParameters;
             this.taskType = task != null ? task.getDescriptor().taskType() : taskType;
             this.task = task;
             this.slotId = slotId;
@@ -313,6 +321,13 @@ public class TaskMonitor extends ObservableBase<Observer<List<TaskMonitor.TaskSt
             NotMatched,
             UnChanged,
             Changed
+        }
+
+        public String getDisplayName(){
+            if (task != null){
+                task.getDescriptor().displayName(constraintParameters);
+            }
+            return name;
         }
     }
 }
