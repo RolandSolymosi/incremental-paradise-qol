@@ -54,6 +54,7 @@ public class Main implements ClientModInitializer {
             .addSingleton(CurrencyElement.class).forwardSingleton(Configurable.class, CurrencyElement.class).forwardSingleton(HudElement.class, CurrencyElement.class)
             .addSingleton(HPBarElement.class).forwardSingleton(Configurable.class, HPBarElement.class).forwardSingleton(HudElement.class, HPBarElement.class)
             .addSingleton(TaskTrackerElement.class).forwardSingleton(Configurable.class, TaskTrackerElement.class).forwardSingleton(HudElement.class, TaskTrackerElement.class)
+            .addSingleton(PlayerNameElement.class).forwardSingleton(Configurable.class, PlayerNameElement.class).forwardSingleton(HudElement.class, PlayerNameElement.class)
             .buildServiceProvider();
 
     @Override

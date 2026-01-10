@@ -201,7 +201,6 @@ public class GameInfoMonitor {
      * Parses the collected scoreboard lines to extract player progress information.
      * This concatenates all lines, parses them, and merges with persistent data.
      * Values are accumulated across worlds (never lost when changing worlds).
-     * Passes styled Text components to preserve styling for area, rank, and layers.
      */
     private void parseScoreboardForProgress() {
         if (scoreboardLines.isEmpty()) {
@@ -211,8 +210,8 @@ public class GameInfoMonitor {
         // Concatenate all scoreboard lines into one string (for regex parsing)
         String fullText = String.join(" ", scoreboardLines);
         
-        // Parse using the PlayerProgressParser with styled components to preserve styling
-        var newSnapshot = PlayerProgressParser.parse(fullText, scoreboardComponents);
+        // Parse using the PlayerProgressParser (plain text - styling applied later)
+        var newSnapshot = PlayerProgressParser.parse(fullText);
         
         // Merge with persistent data (accumulates values across worlds)
         if (!newSnapshot.isEmpty()) {

@@ -2,13 +2,11 @@ package com.incrementalclient.hud;
 
 import com.incrementalclient.abstractions.HudElement;
 import com.incrementalclient.common.utils.Vector2f;
-import com.incrementalclient.interfaces.Configurable;
 import com.incrementalclient.internals.MinecraftClientAccessor;
 import com.incrementalclient.services.GameInfoMonitor;
 import com.incrementalclient.services.HudManager;
 import dev.isxander.yacl3.api.Option;
 import dev.isxander.yacl3.api.OptionDescription;
-import dev.isxander.yacl3.api.OptionGroup;
 import dev.isxander.yacl3.api.controller.*;
 import dev.isxander.yacl3.config.v2.api.SerialEntry;
 import net.minecraft.client.font.TextRenderer;
@@ -16,15 +14,11 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.text.Text;
 import net.minecraft.util.math.ColorHelper;
 
-import java.awt.*;
 import java.util.List;
 
 public class HPBarElement extends HudElement<HPBarElement.Configuration> {
-    private static final int BASE_BAR_WIDTH = 200; // Base width before applying Config hpBarSizeScale
-    private static final int BASE_BAR_HEIGHT = 8;  // Base height before applying Config hpBarSizeScale
+    private static final int BASE_BAR_WIDTH = 100; // Base width before applying Config hpBarSizeScale
     private static final int TEXT_HEIGHT = 9; // Height for text
-    // Render scale is configurable in-game (Config -> Vanilla HUD Elements -> HP Bar Display).
-    // Higher = smoother, lower = more pixelated.
 
     private final HPBarElement.Configuration configuration = new Configuration();
 
@@ -147,108 +141,41 @@ public class HPBarElement extends HudElement<HPBarElement.Configuration> {
             // Bar sizing (bar only, not text)
             double sizeScale = Math.max(0.4, Math.min(1.0, configuration.hpBarSizeScale));
             int barWidth = Math.max(40, (int) Math.round(BASE_BAR_WIDTH * sizeScale));
-            int barHeight = Math.max(4, (int) Math.round(BASE_BAR_HEIGHT * sizeScale));
-            // Keep pill perfect: radius = half height
-            int barRadius = Math.max(2, barHeight / 2);
 
-            // True supersampling: draw the bar at higher internal resolution and scale down.
-            var matrices = context.getMatrices();
-            matrices.push();
-            int renderScale = Math.max(1, Math.min(32, configuration.hpBarRenderScale));
-            float inv = 1.0f / renderScale;
-            matrices.scale(inv, inv, 1.0f);
-
-            int sx = x * renderScale;
-            int sy = barY * renderScale;
-            int sBarWidth = barWidth * renderScale;
-            int sBarHeight = barHeight * renderScale;
-            int sRadius = barRadius * renderScale;
-
-            // Background: lighter grey (no borders anywhere)
-            drawPillShapeSmooth(context, sx, sy, sBarWidth, sBarHeight, sRadius, ColorHelper.getArgb(255, 80, 80, 80));
-
-            // Filled portion
-            if (fillRatio > 0) {
-                int sFilledWidth = (int) (sBarWidth * fillRatio);
-                if (sFilledWidth > 0) {
-                    int barColor = getColorForHP((int) totalHP);
-                    if (fillRatio >= 1.0f) {
-                        drawPillShapeSmooth(context, sx, sy, sFilledWidth, sBarHeight, sRadius, barColor);
-                    } else {
-                        drawPillShapePartialSmooth(context, sx, sy, sFilledWidth, sBarHeight, sRadius, barColor);
-                    }
-                }
+            int filledWidth = (int) (barWidth * fillRatio);
+            int shadowX = x + 2;
+            int shadowY = barY + 1;
+            
+            // Draw shadow bar first (2 pixels to the right, 1 pixel below) - full width
+            // Dark green for filled portion, lighter black for unfilled portion
+            int darkGreenColor = ColorHelper.getArgb(255, 30, 100, 30); // Less saturated dark green for filled
+            int shadowUnfilledColor = ColorHelper.getArgb(255, 50, 50, 50); // Lighter black (dark gray) for unfilled
+            
+            // Draw filled portion of shadow (dark green)
+            if (filledWidth > 0) {
+                context.fill(shadowX, shadowY, shadowX + filledWidth, shadowY + 1, darkGreenColor);
             }
-
-            matrices.pop();
-        }
-    }
-
-    /**
-     * Get color for HP range
-     * Red: 0-50, Yellow: 51-100, Green: 101-150, Blue: 151-200, etc.
-     */
-    private int getColorForHP(int hp) {
-        int range = hp / 50; // Which 50 HP range are we in?
-
-        return switch (range % 4) {
-            case 0 -> ColorHelper.getArgb(255, 255, 0, 0);     // Red (0-50, 200-250, etc.)
-            case 1 -> ColorHelper.getArgb(255, 255, 255, 0);    // Yellow (51-100, 251-300, etc.)
-            case 2 -> ColorHelper.getArgb(255, 0, 255, 0);     // Green (101-150, 301-350, etc.)
-            case 3 -> ColorHelper.getArgb(255, 0, 150, 255);   // Blue (151-200, 351-400, etc.)
-            default -> ColorHelper.getArgb(255, 255, 255, 255); // White fallback
-        };
-    }
-
-    /**
-     * Draw a pill-shaped rectangle (fully rounded ends) - high resolution smooth version
-     */
-    private void drawPillShapeSmooth(DrawContext context, int x, int y, int width, int height, int radius, int color) {
-        // Draw main rectangle (excluding rounded end areas)
-        if (width > radius * 2) {
-            context.fill(x + radius, y, x + width - radius, y + height, color);
-        }
-
-        // Draw left rounded end
-        drawCircleSmooth(context, x + radius, y + height / 2, radius, color);
-
-        // Draw right rounded end
-        drawCircleSmooth(context, x + width - radius, y + height / 2, radius, color);
-    }
-
-    /**
-     * Draw a pill shape that's partially filled (rounded on left, square on right)
-     */
-    private void drawPillShapePartialSmooth(DrawContext context, int x, int y, int width, int height, int radius, int color) {
-        // Draw main rectangle (excluding left rounded end)
-        if (width > radius) {
-            context.fill(x + radius, y, x + width, y + height, color);
-        }
-
-        // Draw left rounded end (high resolution circle) only if we have enough width
-        if (width >= radius) {
-            drawCircleSmooth(context, x + radius, y + height / 2, radius, color);
-        }
-    }
-
-    /**
-     * Draw a high-resolution filled circle using sub-pixel precision for smoother edges
-     */
-    private void drawCircleSmooth(DrawContext context, int centerX, int centerY, int radius, int color) {
-        // With renderScale, we already have more pixels to work with.
-        // A simple filled circle is sufficient and much cheaper than heavy CPU supersampling.
-        int rSq = radius * radius;
-        for (int py = centerY - radius; py <= centerY + radius; py++) {
-            int dy = py - centerY;
-            int dySq = dy * dy;
-            for (int px = centerX - radius; px <= centerX + radius; px++) {
-                int dx = px - centerX;
-                if (dx * dx + dySq <= rSq) {
-                    context.fill(px, py, px + 1, py + 1, color);
-                }
+            // Draw unfilled portion of shadow (lighter black)
+            if (filledWidth < barWidth) {
+                context.fill(shadowX + filledWidth, shadowY, shadowX + barWidth, shadowY + 1, shadowUnfilledColor);
+            }
+            
+            // Draw main bar (1 pixel tall) on top - full width
+            // Bright green for filled portion, darker gray for unfilled portion
+            int brightGreenColor = ColorHelper.getArgb(255, 40, 200, 40); // Less saturated bright green for filled
+            int lightGrayColor = ColorHelper.getArgb(255, 80, 80, 80); // Darker gray for unfilled
+            
+            // Draw filled portion of main bar (bright green)
+            if (filledWidth > 0) {
+                context.fill(x, barY, x + filledWidth, barY + 1, brightGreenColor);
+            }
+            // Draw unfilled portion of main bar (light gray)
+            if (filledWidth < barWidth) {
+                context.fill(x + filledWidth, barY, x + barWidth, barY + 1, lightGrayColor);
             }
         }
     }
+
 
     private void renderEditModePlaceholder(DrawContext context) {
         Vector2f pos = getCurrentPosition();
@@ -288,12 +215,11 @@ public class HPBarElement extends HudElement<HPBarElement.Configuration> {
             // Only text, no bar
             return new Vector2f(textWidth + HudConstants.BACKGROUND_PADDING, TEXT_HEIGHT + 2);
         } else {
-            // Text + bar
+            // Text + bar (1 pixel tall bar with shadow)
             double sizeScale = Math.max(0.4, Math.min(1.0, configuration.hpBarSizeScale));
             int barWidth = Math.max(40, (int) Math.round(BASE_BAR_WIDTH * sizeScale));
-            int barHeight = Math.max(4, (int) Math.round(BASE_BAR_HEIGHT * sizeScale));
             int width = Math.max(textWidth, barWidth) + HudConstants.BACKGROUND_PADDING;
-            int height = TEXT_HEIGHT + 4 + barHeight + 2;
+            int height = TEXT_HEIGHT + 4 + 1 + 1; // Text + spacing + 1px bar + 1px shadow offset
             return new Vector2f(width, height);
         }
     }
