@@ -60,8 +60,8 @@ public class InteractionScheduler<C> extends TaskScheduler<C, InteractionSchedul
         // 1. Inventory (0) is never silenced and is used to clear state
         if (incomingId == 0) return false;
 
-        // 2. A screen is already open
-        if (mcAccessor.getScreen().isPresent()) return false;
+        //// 2. A screen is already open
+        //if (mcAccessor.getScreen().isPresent() && isHardInterrupted()) return false;
 
         // 3. An unexpected screen appeared based on what we are doing
         if (lastExpectedStep != null && !lastExpectedStep.test(screen)){
@@ -106,6 +106,12 @@ public class InteractionScheduler<C> extends TaskScheduler<C, InteractionSchedul
         return (current - last) < -50;
     }
 
+    public boolean isHardInterrupted() {
+        return mcAccessor.getScreen()
+                .map(screen -> screen instanceof net.minecraft.client.gui.screen.ingame.GenericContainerScreen)
+                .orElse(false);
+    }
+
     public int getActualSyncId() {
         return activeSyncId;
     }
@@ -121,7 +127,7 @@ public class InteractionScheduler<C> extends TaskScheduler<C, InteractionSchedul
 
     @Override
     protected boolean canProcessNext() {
-        return activeSyncId == 0 && !isCleaning() && mcAccessor.getScreen().isEmpty();
+        return activeSyncId == 0 && !isCleaning()&& !this.isHardInterrupted();
     }
 
     @Override
@@ -130,7 +136,7 @@ public class InteractionScheduler<C> extends TaskScheduler<C, InteractionSchedul
     }
 
     private void forceSyncId(int syncId) {
-        mcAccessor.closeScreen(this.activeSyncId);
+        //mcAccessor.closeScreen(this.activeSyncId);
         this.activeSyncId = syncId;
     }
 
@@ -170,7 +176,7 @@ public class InteractionScheduler<C> extends TaskScheduler<C, InteractionSchedul
 
         @Override
         public void execute() {
-            if (mcAccessor.getScreen().isPresent()) {
+            if (scheduler.isHardInterrupted()) {
                 reset();
                 this.fail(new RuntimeException("Interrupted by user GUI open"));
                 return;
@@ -234,22 +240,29 @@ public class InteractionScheduler<C> extends TaskScheduler<C, InteractionSchedul
         @Override
         public boolean isInterrupted() {
             // Known interruptions to fail fast, otherwise it will wait till timeout
-            return mcAccessor.getPlayer().isEmpty() || mcAccessor.getPlayer().get().isDead() || mcAccessor.getScreen().isPresent();
+            return mcAccessor.getPlayer().isEmpty() || mcAccessor.getPlayer().get().isDead() || scheduler.isHardInterrupted();
         }
 
         @Override
         public void startReset(boolean completed) {
             this.cleanupTicks = 3;
             this.lastSeenScreen = null;
-            scheduler.forceSyncId(0);
 
-            if (mcAccessor.getScreen().isEmpty() && mcAccessor.getPlayer().isPresent()) {
-                int syncId = scheduler.getActualSyncId();
-                if (syncId != 0) {
-                    mcAccessor.closeScreen(syncId);
-                }
-                mcAccessor.setScreen(null);
+            int syncId = scheduler.getActualSyncId();
+            if (syncId != 0) {
+                mcAccessor.getNetworkHandler().ifPresent(h ->
+                        {
+                            //h.sendPacket(new net.minecraft.network.packet.c2s.play.CloseHandledScreenC2SPacket(syncId));
+                        }
+                );
+                scheduler.forceSyncId(0);
             }
+
+            mcAccessor.getScreen().ifPresent(screen -> {
+                if (screen instanceof net.minecraft.client.gui.screen.ingame.GenericContainerScreen) {
+                    //mcAccessor.setScreen(null);
+                }
+            });
         }
 
         @Override
