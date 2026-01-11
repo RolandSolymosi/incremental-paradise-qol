@@ -346,8 +346,8 @@ public class AutoSkill extends ListenableBase<Listener> implements ComplexConfig
                     return skillLeveling(ctx);
                 } else {
                     if (lore.lines().getLast().getString().contains("Can't afford")) {
-                        ctx.context().index++;
-                        return skillLeveling(ctx);
+                        ctx.complete();
+                        return false;
                     }
                     if (lore.lines().getLast().getString().contains("MAX LEVEL")) {
                         ctx.context().index++;
