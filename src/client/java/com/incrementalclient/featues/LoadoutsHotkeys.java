@@ -44,12 +44,7 @@ public class LoadoutsHotkeys extends ListenableBase<Listener> implements Complex
     }
 
     private List<OptionPiece> createScreen() {
-        return List.of(new OptionPiece(
-                "Hotkeys",
-                0,
-                "",
-                "",
-                1,
+        return List.of(Categories.Hotkeys.createConfig(10000,
                 InsertableListOption.<Configuration.Loadout>createBuilder()
                         .name(Text.literal("Loadouts"))
                         .binding(

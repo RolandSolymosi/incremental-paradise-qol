@@ -32,12 +32,7 @@ public class DepositHotkey implements Configurable<DepositHotkey.Configuration> 
             CommandHandler commandHandler
     ) {
         this.interactionScheduler = interactionScheduler;
-        options = List.of(new OptionPiece(
-                "Hotkeys",
-                0,
-                "Deposit",
-                "",
-                1,
+        options = List.of(Categories.Hotkeys.Bank.createConfig(0,
                 Option.<Integer>createBuilder()
                         .name(Text.literal("Deposit all"))
                         .binding(

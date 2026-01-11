@@ -24,12 +24,7 @@ public class BalloonRopeHider implements Configurable<BalloonRopeHider.Configura
             EntityRendererObservable entityRendererObservable
     ) {
         entityRendererObservable.subscribe(this);
-        options = List.of(new OptionPiece(
-                        "Others",
-                        0,
-                        "Toggle balloon ropes for self.",
-                        "Turn on and off the balloon rope attached to the player.",
-                        0,
+        options = List.of(Categories.Misc.General.createConfig(0,
                         Option.<Boolean>createBuilder()
                                 .name(Text.of("Toggle balloon ropes for self."))
                                 .description(OptionDescription.of(Text.of("Turn on and off the balloon rope attached to the player.")))

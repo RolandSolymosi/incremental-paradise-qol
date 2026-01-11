@@ -100,12 +100,7 @@ public class AutoSkill extends ListenableBase<Listener> implements ComplexConfig
 
     private List<OptionPiece> createScreen() {
         return List.of(
-                new OptionPiece(
-                        "Skill Leveling",
-                        20,
-                        "Base Settings",
-                        "The common base settings for all skill category",
-                        0,
+                Categories.SkillLeveling.General.createConfig(0,
                         Option.<Boolean>createBuilder()
                                 .name(Text.literal("Is Enabled"))
                                 .binding(
@@ -115,12 +110,7 @@ public class AutoSkill extends ListenableBase<Listener> implements ComplexConfig
                                 )
                                 .controller(BooleanControllerBuilder::create)
                                 .build()),
-                new OptionPiece(
-                        "Skill Leveling",
-                        20,
-                        "Base Settings",
-                        "",
-                        1,
+                Categories.SkillLeveling.General.createConfig(100,
                         Option.<Boolean>createBuilder()
                                 .name(Text.literal("Trigger all skill on realm change (Nightmare <-> Normal), including login."))
                                 .binding(
@@ -130,12 +120,7 @@ public class AutoSkill extends ListenableBase<Listener> implements ComplexConfig
                                 )
                                 .controller(BooleanControllerBuilder::create)
                                 .build()),
-                new OptionPiece(
-                        "Skill Leveling",
-                        20,
-                        "Base Settings",
-                        "",
-                        2,
+                Categories.SkillLeveling.General.createConfig(200,
                         Option.<Integer>createBuilder()
                                 .name(Text.literal("Force all skill to level up"))
                                 .binding(
@@ -145,12 +130,7 @@ public class AutoSkill extends ListenableBase<Listener> implements ComplexConfig
                                 )
                                 .controller((option) -> () -> new KeyBindController(option))
                                 .build()),
-                new OptionPiece(
-                        "Skill Leveling",
-                        100,
-                        "",
-                        "",
-                        0,
+                Categories.SkillLeveling.createConfig(200,
                         createSkillOption(
                                 "Normal Combat",
                                 () -> configuration.normalCombat,
@@ -161,12 +141,7 @@ public class AutoSkill extends ListenableBase<Listener> implements ComplexConfig
                                     return newSkill;
                                 }
                         )),
-                new OptionPiece(
-                        "Skill Leveling",
-                        100,
-                        "",
-                        "",
-                        1,
+                Categories.SkillLeveling.createConfig(300,
                         createSkillOption(
                                 "Normal Mining",
                                 () -> configuration.normalMining,
@@ -177,12 +152,7 @@ public class AutoSkill extends ListenableBase<Listener> implements ComplexConfig
                                     return newSkill;
                                 }
                         )),
-                new OptionPiece(
-                        "Skill Leveling",
-                        100,
-                        "",
-                        "",
-                        2,
+                Categories.SkillLeveling.createConfig(400,
                         createSkillOption(
                                 "Normal Foraging",
                                 () -> configuration.normalForaging,
@@ -193,12 +163,7 @@ public class AutoSkill extends ListenableBase<Listener> implements ComplexConfig
                                     return newSkill;
                                 }
                         )),
-                new OptionPiece(
-                        "Skill Leveling",
-                        100,
-                        "",
-                        "",
-                        3,
+                Categories.SkillLeveling.createConfig(500,
                         createSkillOption(
                                 "Normal Farming",
                                 () -> configuration.normalFarming,
@@ -209,12 +174,7 @@ public class AutoSkill extends ListenableBase<Listener> implements ComplexConfig
                                     return newSkill;
                                 }
                         )),
-                new OptionPiece(
-                        "Skill Leveling",
-                        100,
-                        "",
-                        "",
-                        4,
+                Categories.SkillLeveling.createConfig(600,
                         createSkillOption(
                                 "Normal Fishing",
                                 () -> configuration.normalFishing,
@@ -225,12 +185,7 @@ public class AutoSkill extends ListenableBase<Listener> implements ComplexConfig
                                     return newSkill;
                                 }
                         )),
-                new OptionPiece(
-                        "Skill Leveling",
-                        100,
-                        "",
-                        "",
-                        5,
+                Categories.SkillLeveling.createConfig(700,
                         createSkillOption(
                                 "Normal Sharpshooting",
                                 () -> configuration.normalSharpshooting,
@@ -241,12 +196,7 @@ public class AutoSkill extends ListenableBase<Listener> implements ComplexConfig
                                     return newSkill;
                                 }
                         )),
-                new OptionPiece(
-                        "Skill Leveling",
-                        100,
-                        "",
-                        "",
-                        6,
+                Categories.SkillLeveling.createConfig(800,
                         createSkillOption(
                                 "Normal Excavating",
                                 () -> configuration.normalExcavating,
@@ -257,12 +207,7 @@ public class AutoSkill extends ListenableBase<Listener> implements ComplexConfig
                                     return newSkill;
                                 }
                         )),
-                new OptionPiece(
-                        "Skill Leveling",
-                        100,
-                        "",
-                        "",
-                        7,
+                Categories.SkillLeveling.createConfig(900,
                         createSkillOption(
                                 "Nightmare Combat",
                                 () -> configuration.nightmareCombat,
@@ -273,12 +218,7 @@ public class AutoSkill extends ListenableBase<Listener> implements ComplexConfig
                                     return newSkill;
                                 }
                         )),
-                new OptionPiece(
-                        "Skill Leveling",
-                        100,
-                        "",
-                        "",
-                        8,
+                Categories.SkillLeveling.createConfig(1000,
                         createSkillOption(
                                 "Nightmare Mining",
                                 () -> configuration.nightmareMining,
@@ -289,12 +229,7 @@ public class AutoSkill extends ListenableBase<Listener> implements ComplexConfig
                                     return newSkill;
                                 }
                         )),
-                new OptionPiece(
-                        "Skill Leveling",
-                        100,
-                        "",
-                        "",
-                        9,
+                Categories.SkillLeveling.createConfig(1100,
                         createSkillOption(
                                 "Nightmare Foraging",
                                 () -> configuration.nightmareForaging,
@@ -305,12 +240,7 @@ public class AutoSkill extends ListenableBase<Listener> implements ComplexConfig
                                     return newSkill;
                                 }
                         )),
-                new OptionPiece(
-                        "Skill Leveling",
-                        100,
-                        "",
-                        "",
-                        10,
+                Categories.SkillLeveling.createConfig(1200,
                         createSkillOption(
                                 "Nightmare Farming",
                                 () -> configuration.nightmareFarming,
@@ -321,12 +251,7 @@ public class AutoSkill extends ListenableBase<Listener> implements ComplexConfig
                                     return newSkill;
                                 }
                         )),
-                new OptionPiece(
-                        "Skill Leveling",
-                        100,
-                        "",
-                        "",
-                        11,
+                Categories.SkillLeveling.createConfig(1300,
                         createSkillOption(
                                 "Nightmare Fishing",
                                 () -> configuration.nightmareFishing,
@@ -337,12 +262,7 @@ public class AutoSkill extends ListenableBase<Listener> implements ComplexConfig
                                     return newSkill;
                                 }
                         )),
-                new OptionPiece(
-                        "Skill Leveling",
-                        100,
-                        "",
-                        "",
-                        12,
+                Categories.SkillLeveling.createConfig(1400,
                         createSkillOption(
                                 "Nightmare Sharpshooting",
                                 () -> configuration.nightmareSharpshooting,

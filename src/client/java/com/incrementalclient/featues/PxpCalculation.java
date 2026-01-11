@@ -59,12 +59,7 @@ public class PxpCalculation implements Configurable<PxpCalculation.Configuration
 
         commandHandler.register(new CommandHandler.CommandRegistration("pxpcalc", this::sumPetXpValue));
 
-        options = List.of(new OptionPiece(
-                        "Others",
-                        1,
-                        "PXP Calculator settings",
-                        "These are the setting for the PXP Calculator.",
-                        0,
+        options = List.of(Categories.Misc.PetXp.createConfig(0,
                         Option.<Integer>createBuilder()
                                 .name(Text.of("Legendary Pet Value"))
                                 .description(OptionDescription.of(Text.of("The PXP value of a legendary pet")))
@@ -72,12 +67,7 @@ public class PxpCalculation implements Configurable<PxpCalculation.Configuration
                                 .controller(opt -> IntegerFieldControllerBuilder.create(opt)
                                         .min(50).max(500))
                                 .build()),
-                new OptionPiece(
-                        "Others",
-                        1,
-                        "PXP Calculator settings",
-                        "",
-                        1,
+                Categories.Misc.PetXp.createConfig(1,
                         Option.<Integer>createBuilder()
                                 .name(Text.of("Mythic Pet Value"))
                                 .description(OptionDescription.of(Text.of("The PXP value of a mythic pet")))

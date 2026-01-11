@@ -31,119 +31,70 @@ public class HudManager extends ObservableBase<Observer<HudManager.Event>, HudMa
             HudRenderCallbackObservable hudRenderCallbackObservable) {
         this.mcClient = mcClient;
 
-        options = List.of(new OptionPiece(
-                        "HUD",
-                        0,
-                        "Hud General",
-                        "The common configuration affect all Hud component.",
-                        0,
+        options = List.of(
+                Categories.Hud.General.createConfig(0,
                         Option.<Boolean>createBuilder()
                                 .name(Text.of("Toggle HUD on and off"))
                                 .description(OptionDescription.of(Text.of("Turn on and off the task HUD.")))
                                 .binding(true, () -> configuration.isHudEnabled, newVal -> configuration.isHudEnabled = newVal)
                                 .controller(BooleanControllerBuilder::create)
                                 .build()),
-                new OptionPiece(
-                        "HUD",
-                        0,
-                        "Hud General",
-                        "",
-                        1,
+                Categories.Hud.General.createConfig(100,
                         ButtonOption.createBuilder()
                                 .name(Text.of("HUD Customization"))
                                 .description(OptionDescription.of(Text.of("Open the HUD customization screen to position and scale all HUD elements.")))
                                 .action((t, o) -> mcClient.setScreen(Main.SERVICE_PROVIDER.getService(HudCustomizationScreen.class)))
                                 .build()),
-                new OptionPiece(
-                        "HUD",
-                        1,
-                        "Vanilla HUD Elements",
-                        "Hide vanilla Minecraft HUD elements to replace them with custom versions.",
-                        0,
+                Categories.Hud.Vanilla.createConfig(0,
                         Option.<Boolean>createBuilder()
                                 .name(Text.of("Hide vanilla scoreboard"))
                                 .description(OptionDescription.of(Text.of("Hides the vanilla scoreboard sidebar.")))
                                 .binding(false, () -> configuration.hideVanillaScoreboard, newVal -> configuration.hideVanillaScoreboard = newVal)
                                 .controller(BooleanControllerBuilder::create)
                                 .build()),
-                new OptionPiece(
-                        "HUD",
-                        1,
-                        "Vanilla HUD Elements",
-                        "Hide vanilla Minecraft HUD elements to replace them with custom versions.",
-                        1,
+                Categories.Hud.Vanilla.createConfig(100,
                         Option.<Boolean>createBuilder()
                                 .name(Text.of("Hide vanilla hearts"))
                                 .description(OptionDescription.of(Text.of("Hides the vanilla health hearts.")))
                                 .binding(false, () -> configuration.hideVanillaHearts, newVal -> configuration.hideVanillaHearts = newVal)
                                 .controller(BooleanControllerBuilder::create)
                                 .build()),
-                new OptionPiece(
-                        "HUD",
-                        1,
-                        "Vanilla HUD Elements",
-                        "Hide vanilla Minecraft HUD elements to replace them with custom versions.",
-                        2,
+                Categories.Hud.Vanilla.createConfig(200,
                         Option.<Boolean>createBuilder()
                                 .name(Text.of("Hide vanilla food"))
                                 .description(OptionDescription.of(Text.of("Hides the vanilla hunger/food bar.")))
                                 .binding(false, () -> configuration.hideVanillaFood, newVal -> configuration.hideVanillaFood = newVal)
                                 .controller(BooleanControllerBuilder::create)
                                 .build()),
-                new OptionPiece(
-                        "HUD",
-                        1,
-                        "Vanilla HUD Elements",
-                        "Hide vanilla Minecraft HUD elements to replace them with custom versions.",
-                        3,
+                Categories.Hud.Vanilla.createConfig(300,
                         Option.<Boolean>createBuilder()
                                 .name(Text.of("Hide vanilla armor"))
                                 .description(OptionDescription.of(Text.of("Hides the vanilla armor indicators.")))
                                 .binding(false, () -> configuration.hideVanillaArmor, newVal -> configuration.hideVanillaArmor = newVal)
                                 .controller(BooleanControllerBuilder::create)
                                 .build()),
-                new OptionPiece(
-                        "HUD",
-                        1,
-                        "Vanilla HUD Elements",
-                        "Hide vanilla Minecraft HUD elements to replace them with custom versions.",
-                        4,
+                Categories.Hud.Vanilla.createConfig(400,
                         Option.<Boolean>createBuilder()
                                 .name(Text.of("Hide vanilla effects"))
                                 .description(OptionDescription.of(Text.of("Hides the vanilla potion effect icons.")))
                                 .binding(false, () -> configuration.hideVanillaEffects, newVal -> configuration.hideVanillaEffects = newVal)
                                 .controller(BooleanControllerBuilder::create)
                                 .build()),
-                new OptionPiece(
-                        "HUD",
-                        1,
-                        "Vanilla HUD Elements",
-                        "Hide vanilla Minecraft HUD elements to replace them with custom versions.",
-                        5,
+                Categories.Hud.Vanilla.createConfig(500,
                         Option.<Boolean>createBuilder()
                                 .name(Text.of("Hide vanilla overlay message"))
                                 .description(OptionDescription.of(Text.of("Hides the vanilla action bar overlay (health/mana display).")))
                                 .binding(false, () -> configuration.hideVanillaOverlayMessage, newVal -> configuration.hideVanillaOverlayMessage = newVal)
                                 .controller(BooleanControllerBuilder::create)
                                 .build()),
-                new OptionPiece(
-                        "HUD",
-                        1,
-                        "Vanilla HUD Elements",
-                        "Hide vanilla Minecraft HUD elements to replace them with custom versions.",
-                        6,
+                Categories.Hud.Vanilla.createConfig(600,
                         Option.<Boolean>createBuilder()
                                 .name(Text.of("Hide vanilla experience bar"))
                                 .description(OptionDescription.of(Text.of("Hides the vanilla experience bar.")))
                                 .binding(false, () -> configuration.hideVanillaExperienceBar, newVal -> configuration.hideVanillaExperienceBar = newVal)
                                 .controller(BooleanControllerBuilder::create)
                                 .build()),
-                new OptionPiece(
-                        "HUD",
-                        1,
-                        "Vanilla HUD Elements",
-                        "Hide vanilla Minecraft HUD elements to replace them with custom versions.",
-                        7,
+                Categories.Hud.Vanilla.createConfig(700,
                         Option.<Boolean>createBuilder()
                                 .name(Text.of("Hide vanilla experience level"))
                                 .description(OptionDescription.of(Text.of("Hides the vanilla experience level number.")))

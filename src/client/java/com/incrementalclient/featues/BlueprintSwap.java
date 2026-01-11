@@ -40,12 +40,8 @@ public class BlueprintSwap implements Configurable<BlueprintSwap.Configuration> 
             CommandHandler commandHandler
     ) {
         this.interactionScheduler = interactionScheduler;
-        options = List.of(new OptionPiece(
-                        "Hotkeys",
-                        3,
-                        "Blueprint Swap",
-                        "Hotkeys to swap blueprint (swap to the first blueprint in the list)",
-                        0,
+        options = List.of(
+                Categories.Hotkeys.BlueprintSwap.createConfig(0,
                         Option.<Integer>createBuilder()
                                 .name(Text.literal("Swap Melee Blueprint"))
                                 .binding(
@@ -55,12 +51,7 @@ public class BlueprintSwap implements Configurable<BlueprintSwap.Configuration> 
                                 )
                                 .controller((option) -> () -> new KeyBindController(option))
                                 .build()),
-                new OptionPiece(
-                        "Hotkeys",
-                        3,
-                        "Blueprint Swap",
-                        "",
-                        1,
+                Categories.Hotkeys.BlueprintSwap.createConfig(1,
                         Option.<Integer>createBuilder()
                                 .name(Text.literal("Swap Ranged Blueprint"))
                                 .binding(
@@ -70,12 +61,7 @@ public class BlueprintSwap implements Configurable<BlueprintSwap.Configuration> 
                                 )
                                 .controller((option) -> () -> new KeyBindController(option))
                                 .build()),
-                new OptionPiece(
-                        "Hotkeys",
-                        3,
-                        "Blueprint Swap",
-                        "",
-                        2,
+                Categories.Hotkeys.BlueprintSwap.createConfig(2,
                         Option.<Integer>createBuilder()
                                 .name(Text.literal("Swap Pickaxe Blueprint"))
                                 .binding(
@@ -85,12 +71,7 @@ public class BlueprintSwap implements Configurable<BlueprintSwap.Configuration> 
                                 )
                                 .controller((option) -> () -> new KeyBindController(option))
                                 .build()),
-                new OptionPiece(
-                        "Hotkeys",
-                        3,
-                        "Blueprint Swap",
-                        "",
-                        3,
+                Categories.Hotkeys.BlueprintSwap.createConfig(3,
                         Option.<Integer>createBuilder()
                                 .name(Text.literal("Swap Axe Blueprint"))
                                 .binding(
@@ -100,12 +81,7 @@ public class BlueprintSwap implements Configurable<BlueprintSwap.Configuration> 
                                 )
                                 .controller((option) -> () -> new KeyBindController(option))
                                 .build()),
-                new OptionPiece(
-                        "Hotkeys",
-                        3,
-                        "Blueprint Swap",
-                        "",
-                        4,
+                Categories.Hotkeys.BlueprintSwap.createConfig(4,
                         Option.<Integer>createBuilder()
                                 .name(Text.literal("Swap Pickaxe Blueprint"))
                                 .binding(
@@ -115,12 +91,7 @@ public class BlueprintSwap implements Configurable<BlueprintSwap.Configuration> 
                                 )
                                 .controller((option) -> () -> new KeyBindController(option))
                                 .build()),
-                new OptionPiece(
-                        "Hotkeys",
-                        3,
-                        "Blueprint Swap",
-                        "",
-                        5,
+                Categories.Hotkeys.BlueprintSwap.createConfig(5,
                         Option.<Integer>createBuilder()
                                 .name(Text.literal("Swap Fishing Spear Blueprint"))
                                 .binding(

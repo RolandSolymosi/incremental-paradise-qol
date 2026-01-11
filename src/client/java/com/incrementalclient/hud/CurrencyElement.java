@@ -49,12 +49,7 @@ public class CurrencyElement extends HudElement<CurrencyElement.Configuration> {
         this.anchorPoint = new Vector2f(0, 0);
 
         options = List.of(
-                new OptionPiece(
-                        "HUD",
-                        120,
-                        "Currency HUD configuration",
-                        "These are the basic settings for the currency HUD.",
-                        1,
+                Categories.Hud.Currency.createConfig(0,
                         Option.<Double>createBuilder()
                                 .name(Text.of("Currency HUD background opacity"))
                                 .description(OptionDescription.of(Text.of("Set the opacity of the currency HUD background.")))

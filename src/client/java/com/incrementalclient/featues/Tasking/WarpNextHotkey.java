@@ -108,12 +108,7 @@ public class WarpNextHotkey extends ListenableBase<Listener> implements Configur
         worldMonitor.subscribe(new WorldChangeObserver(this));
         tickListenable.subscribe(this);
 
-        options = List.of(new OptionPiece(
-                        "Tasking",
-                        0,
-                        "Hotkeys",
-                        "",
-                        0,
+        options = List.of(Categories.Tasking.General.createConfig(100,
                         Option.<Integer>createBuilder()
                                 .name(Text.literal("Warp closest to Next Task"))
                                 .binding(
@@ -123,12 +118,7 @@ public class WarpNextHotkey extends ListenableBase<Listener> implements Configur
                                 )
                                 .controller((option) -> () -> new KeyBindController(option))
                                 .build()),
-                new OptionPiece(
-                        "Tasking",
-                        0,
-                        "Hotkeys",
-                        "",
-                        1,
+                Categories.Tasking.General.createConfig(101,
                         Option.<Boolean>createBuilder()
                                 .name(Text.literal("Toggle Auto LevelUp on WarpNext"))
                                 .binding(
@@ -138,12 +128,7 @@ public class WarpNextHotkey extends ListenableBase<Listener> implements Configur
                                 )
                                 .controller(BooleanControllerBuilder::create)
                                 .build()),
-                new OptionPiece(
-                        "Tasking",
-                        0,
-                        "Hotkeys",
-                        "",
-                        2,
+                Categories.Tasking.General.createConfig(102,
                         Option.<Boolean>createBuilder()
                                 .name(Text.literal("Warp after Auto LevelUp"))
                                 .binding(
@@ -153,12 +138,7 @@ public class WarpNextHotkey extends ListenableBase<Listener> implements Configur
                                 )
                                 .controller(BooleanControllerBuilder::create)
                                 .build()),
-                new OptionPiece(
-                        "Tasking",
-                        1,
-                        "General Settings",
-                        "",
-                        1,
+                Categories.Tasking.General.createConfig(103,
                         Option.<Boolean>createBuilder()
                                 .name(Text.literal("Toggle ticket task skip's base rule (Override will behave as opposite then)"))
                                 .binding(

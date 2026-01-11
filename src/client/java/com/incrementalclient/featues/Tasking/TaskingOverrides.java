@@ -37,12 +37,7 @@ public class TaskingOverrides extends ListenableBase<Listener> implements Comple
     }
 
     private List<OptionPiece> createScreen(){
-        return List.of(new OptionPiece(
-                "Tasking",
-                100,
-                "",
-                "",
-                100,
+        return List.of(Categories.Tasking.createConfig(10000,
                 InsertableListOption.<Configuration.Override>createBuilder()
                 .name(Text.literal("Task Specific Overrides"))
                 .binding(

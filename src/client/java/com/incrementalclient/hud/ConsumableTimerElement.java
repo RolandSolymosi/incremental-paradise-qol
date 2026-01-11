@@ -37,48 +37,28 @@ public class ConsumableTimerElement extends TextListHudElement<ConsumableTimerEl
         this.anchorPoint = new Vector2f(10, 10);
 
         options = List.of(
-                new OptionPiece(
-                        "HUD",
-                        100,
-                        "Consumable Timer HUD configuration",
-                        "These are the basic settings for the consumable timer HUD.",
-                        0,
+                Categories.Hud.Consumable.createConfig(0,
                         Option.<Boolean>createBuilder()
                                 .name(Text.of("Toggle Consumable HUD on and off"))
                                 .description(OptionDescription.of(Text.of("Turn on and off the consumable timer HUD.")))
                                 .binding(true, () -> configuration.isConsumableHudEnabled, newVal -> configuration.isConsumableHudEnabled = newVal)
                                 .controller(BooleanControllerBuilder::create)
                                 .build()),
-                new OptionPiece(
-                        "HUD",
-                        100,
-                        "Consumable Timer HUD configuration",
-                        "These are the basic settings for the consumable timer HUD.",
-                        1,
+                Categories.Hud.Consumable.createConfig(1,
                         Option.<Double>createBuilder()
                                 .name(Text.of("Consumable HUD background opacity"))
                                 .description(OptionDescription.of(Text.of("Set the opacity of the consumable HUD background.")))
                                 .binding(0.3, () -> configuration.consumableHudBackgroundOpacity, newVal -> configuration.consumableHudBackgroundOpacity = newVal)
                                 .controller(o -> DoubleSliderControllerBuilder.create(o).step(0.01).range(0.0, 1.0))
                                 .build()),
-                new OptionPiece(
-                        "HUD",
-                        100,
-                        "Consumable Timer HUD configuration",
-                        "Also allow you to set the colors of the consumable timer HUD.",
-                        2,
+                Categories.Hud.Consumable.createConfig(2,
                         Option.<Color>createBuilder()
                                 .name(Text.of("Color of the timer name"))
                                 .description(OptionDescription.of(Text.of("The color of the consumable timer name.")))
                                 .binding(new Color(0xffaa00), () -> new Color(configuration.consumableTimerColor), newVal -> configuration.consumableTimerColor = newVal.getRGB())
                                 .controller(ColorControllerBuilder::create)
                                 .build()),
-                new OptionPiece(
-                        "HUD",
-                        100,
-                        "Consumable Timer HUD configuration",
-                        "",
-                        3,
+                Categories.Hud.Consumable.createConfig(3,
                         Option.<Color>createBuilder()
                                 .name(Text.of("Color of the time left"))
                                 .description(OptionDescription.of(Text.of("The color of the time left text.")))

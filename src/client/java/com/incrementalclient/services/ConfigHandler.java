@@ -62,56 +62,120 @@ public class ConfigHandler {
             }
         }
 
-        var groupedData = Arrays.stream(configurableServices)
+        // 1. Flatten all options from all services
+        List<ConfigPiece> allPieces = Arrays.stream(configurableServices)
                 .filter(Configurable::hasOption)
                 .flatMap(service -> service.getOption().stream().map(option -> new ConfigPiece(option, service)))
-                .collect(Collectors.groupingBy(
-                        o -> o.optionPiece.Category(),
-                        TreeMap::new,
-                        Collectors.groupingBy(
-                                o -> o.optionPiece.Group(),
-                                TreeMap::new,
-                                Collectors.toList()
-                        )
-                ));
+                .toList();
 
-        for (var category : groupedData.entrySet()) {
-            ConfigCategory.Builder catBuilder = ConfigCategory.createBuilder()
-                    .name(Text.of(category.getKey()));
+        // 2. Validate and Sort Category Names by their predefined CategoryOrder
+        List<String> sortedCategoryNames = allPieces.stream()
+                .map(p -> p.optionPiece().Category())
+                .distinct()
+                .sorted(Comparator.comparingInt(catName -> findFirst(allPieces, catName).CategoryOrder()))
+                .toList();
 
-            var sortedGroups = category.getValue().entrySet().stream()
-                    .sorted(Comparator.<Map.Entry<String, List<ConfigPiece>>, Integer>comparing(group ->
-                                    group.getValue().stream()
-                                            .mapToInt(sp -> sp.optionPiece().GroupOrder())
-                                            .min()
-                                            .orElse(0))
-                            .thenComparing(Map.Entry::getKey))
+        // Validation: Strict Category Order check
+        for (int i = 0; i < sortedCategoryNames.size() - 1; i++) {
+            var p1 = findFirst(allPieces, sortedCategoryNames.get(i));
+            var p2 = findFirst(allPieces, sortedCategoryNames.get(i + 1));
+            if (p1.CategoryOrder() == p2.CategoryOrder()) {
+                throw new IllegalStateException(String.format(
+                        "Tab Order Collision: '%s' and '%s' both have CategoryOrder %d",
+                        p1.Category(), p2.Category(), p1.CategoryOrder()));
+            }
+        }
+
+        // 3. Build the Categories (Tabs)
+        for (String catName : sortedCategoryNames) {
+            var catPieces = allPieces.stream()
+                    .filter(p -> p.optionPiece().Category().equals(catName))
                     .toList();
 
-            for (var group : sortedGroups) {
-                var sortedOptions = group.getValue().stream()
-                        .sorted(Comparator.comparingInt(sp -> sp.optionPiece.Order()))
-                        .toList();
+            var firstInCat = catPieces.get(0).optionPiece();
 
-                if (!group.getKey().isEmpty()) {
-                    var groupBuilder = OptionGroup.createBuilder()
-                            .name(Text.of(group.getKey()))
-                            .description(OptionDescription.of(Text.of(group.getValue().stream().map(g -> g.optionPiece.GroupDescription()).filter(g -> !g.isEmpty()).collect(Collectors.joining("\n")))));
+            ConfigCategory.Builder catBuilder = ConfigCategory.createBuilder()
+                    .name(Text.of(catName))
+                    .tooltip(Text.of(firstInCat.CategoryDescription()));
 
-                    for (var option : sortedOptions) {
-                        groupBuilder.option(option.optionPiece().Option());
-                    }
+            // 4. Group items:
+            // We group by (GroupName + GroupOrder) to allow multiple "Direct" slots
+            // at different positions without them merging and causing "Inconsistent GroupOrder" errors.
+            Map<String, List<ConfigPiece>> groups = catPieces.stream()
+                    .collect(Collectors.groupingBy(p -> {
+                        String gName = p.optionPiece().Group();
+                        return gName.isEmpty() ? "DIRECT_SLOT_" + p.optionPiece().GroupOrder() : gName;
+                    }));
 
-                    catBuilder.group(groupBuilder.build());
-                } else {
-                    for (var option : sortedOptions) {
-                        catBuilder.option(option.optionPiece().Option());
-                    }
+            // Sort the Group Keys by the GroupOrder of the pieces inside
+            List<String> sortedGroupKeys = groups.keySet().stream()
+                    .sorted(Comparator.comparingInt(key -> groups.get(key).get(0).optionPiece().GroupOrder()))
+                    .toList();
+
+            // Validation: Strict Group Order check within this tab
+            for (int i = 0; i < sortedGroupKeys.size() - 1; i++) {
+                var g1Key = sortedGroupKeys.get(i);
+                var g2Key = sortedGroupKeys.get(i + 1);
+                int o1 = groups.get(g1Key).get(0).optionPiece().GroupOrder();
+                int o2 = groups.get(g2Key).get(0).optionPiece().GroupOrder();
+
+                if (o1 == o2) {
+                    String name1 = groups.get(g1Key).get(0).optionPiece().Group();
+                    String name2 = groups.get(g2Key).get(0).optionPiece().Group();
+                    throw new IllegalStateException(String.format(
+                            "Group Order Collision in Tab '%s': '%s' and '%s' both have GroupOrder %d",
+                            catName, name1.isEmpty() ? "Direct Item" : name1, name2.isEmpty() ? "Direct Item" : name2, o1));
                 }
             }
 
+            // 5. Build the UI Groups and Options
+            for (String gKey : sortedGroupKeys) {
+                var groupPieces = groups.get(gKey);
+                var sortedOptions = groupPieces.stream()
+                        .sorted(Comparator.comparingInt(p -> p.optionPiece().Order()))
+                        .toList();
+
+                // Validation: Strict Option Order check within this specific group
+                for (int i = 0; i < sortedOptions.size() - 1; i++) {
+                    var p1 = sortedOptions.get(i).optionPiece();
+                    var p2 = sortedOptions.get(i + 1).optionPiece();
+                    if (p1.Order() == p2.Order()) {
+                        String gName = p1.Group().isEmpty() ? "Direct" : p1.Group();
+                        throw new IllegalStateException(String.format(
+                                "Option Order Collision in %s -> %s: Order %d used twice",
+                                catName, gName, p1.Order()));
+                    }
+                }
+
+                String actualGroupName = groupPieces.get(0).optionPiece().Group();
+
+                if (!actualGroupName.isEmpty()) {
+                    // This is a visible Group Box
+                    var groupBuilder = OptionGroup.createBuilder()
+                            .name(Text.of(actualGroupName))
+                            .description(OptionDescription.of(Text.of(sortedOptions.get(0).optionPiece().GroupDescription())));
+
+                    for (var p : sortedOptions) {
+                        groupBuilder.option(p.optionPiece().Option());
+                    }
+                    catBuilder.group(groupBuilder.build());
+                } else {
+                    // These are Direct items (no box)
+                    for (var p : sortedOptions) {
+                        catBuilder.option(p.optionPiece().Option());
+                    }
+                }
+            }
             screenBuilder.category(catBuilder.build());
         }
+    }
+
+    private Configurable.OptionPiece findFirst(List<ConfigPiece> pieces, String catName) {
+        return pieces.stream()
+                .filter(p -> p.optionPiece().Category().equals(catName))
+                .findFirst()
+                .map(ConfigPiece::optionPiece)
+                .orElseThrow();
     }
 
     private void open() {

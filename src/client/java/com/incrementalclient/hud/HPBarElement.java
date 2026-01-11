@@ -40,12 +40,7 @@ public class HPBarElement extends HudElement<HPBarElement.Configuration> {
         this.gameInfoMonitor = gameInfoMonitor;
 
         options = List.of(
-                new OptionPiece(
-                        "HUD",
-                        70,
-                        "HP Bar Display",
-                        "Configure how the HP bar is displayed.",
-                        0,
+                Categories.Hud.HpBar.createConfig(0,
                         Option.<HPBarDisplayMode>createBuilder()
                                 .name(Text.of("HP Bar Display Mode"))
                                 .description(OptionDescription.of(Text.of("Choose between 'Number Only' (like overlay) or 'Bar and Number'.")))
@@ -56,24 +51,14 @@ public class HPBarElement extends HudElement<HPBarElement.Configuration> {
                                         .formatValue(mode -> Text.of(mode.getDisplayName()))
                                 )
                                 .build()),
-                new OptionPiece(
-                        "HUD",
-                        70,
-                        "Consumable Timer HUD configuration",
-                        "These are the basic settings for the consumable timer HUD.",
-                        1,
+                Categories.Hud.HpBar.createConfig(1,
                         Option.<Integer>createBuilder()
                                 .name(Text.of("HP Bar Render Scale"))
                                 .description(OptionDescription.of(Text.of("Controls aliasing vs smoothness of the bar edges. 1 = more pixelated, higher = smoother. Very high values can cost FPS. Changes apply instantly.")))
                                 .binding(2, () -> configuration.hpBarRenderScale, newVal -> configuration.hpBarRenderScale = newVal)
                                 .controller(o -> IntegerSliderControllerBuilder.create(o).step(1).range(1, 32))
                                 .build()),
-                new OptionPiece(
-                        "HUD",
-                        70,
-                        "Consumable Timer HUD configuration",
-                        "Also allow you to set the colors of the consumable timer HUD.",
-                        2,
+                Categories.Hud.HpBar.createConfig(2,
                         Option.<Double>createBuilder()
                                 .name(Text.of("HP Bar Size"))
                                 .description(OptionDescription.of(Text.of("Scales the bar only (not the text). Changes apply instantly.")))
