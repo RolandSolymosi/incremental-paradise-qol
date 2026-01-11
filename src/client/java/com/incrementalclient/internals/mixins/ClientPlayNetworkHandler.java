@@ -51,16 +51,15 @@ public class ClientPlayNetworkHandler {
     }
     @Inject(method = "onUpdateSelectedSlot", at = @At("HEAD"), cancellable = true)
     private void onUpdateSelectedSlot(UpdateSelectedSlotS2CPacket packet, CallbackInfo ci) {
-        //if (hotbarHandle.get().checkSwapped(packet.slot())){
+        if (hotbarHandle.get().checkSwapped(packet.slot())){
             ci.cancel();
-        //}
+        }
     }
     @Inject(method = "onScreenHandlerSlotUpdate", at = @At("HEAD"), cancellable = true)
     private void onScreenHandlerSlotUpdate(ScreenHandlerSlotUpdateS2CPacket packet, CallbackInfo ci) {
         //if (ReentryPacket.shouldCancel(packet, ci)) {
             screenCapture.get().slotUpdate((net.minecraft.client.network.ClientPlayNetworkHandler) (Object)this, packet);
         //}
-
     }
     //@Inject(method = "onScreenHandlerPropertyUpdate", at = @At("HEAD"), cancellable = true)
     //private void onCloseScreen(ScreenHandlerPropertyUpdateS2CPacket packet, CallbackInfo ci) {

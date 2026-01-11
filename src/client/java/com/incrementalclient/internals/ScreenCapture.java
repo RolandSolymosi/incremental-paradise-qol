@@ -183,13 +183,14 @@ public class ScreenCapture extends ObservableBase<Observer<ScreenCapture.Screen>
         if (data.openPacket != null) {
             data.handler.onOpenScreen(data.openPacket);
         }
+        /*
         if (data.contentPacket != null) {
             data.handler.onInventory(data.contentPacket);
         }
         // Also re-send any slot updates that arrived during the pending phase
         for (ScreenHandlerSlotUpdateS2CPacket slotPacket : data.earlySlotUpdates) {
             data.handler.onScreenHandlerSlotUpdate(slotPacket);
-        }
+        }*/
     }
 
     private boolean shouldSilence(Screen screen) {
