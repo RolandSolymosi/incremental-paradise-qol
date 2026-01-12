@@ -6,6 +6,7 @@ import com.incrementalclient.internals.ScoreboardChangedListenable;
 import com.incrementalclient.internals.ScreenCapture;
 import com.incrementalclient.internals.interfaces.ReentryPacket;
 import com.incrementalclient.services.HotbarHandler;
+import com.incrementalclient.services.ShinyOreMonitor;
 import net.minecraft.network.packet.s2c.play.*;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Unique;
@@ -29,6 +30,11 @@ public class ClientPlayNetworkHandler {
     @Unique
     private static final Supplier<HotbarHandler> hotbarHandle = Suppliers.memoize(() ->
             Main.SERVICE_PROVIDER.getService(HotbarHandler.class));
+
+    @Unique
+    private static final Supplier<ShinyOreMonitor> shinyOreMonitor = Suppliers.memoize(() ->
+            Main.SERVICE_PROVIDER.getService(ShinyOreMonitor.class));
+
 
     @Inject(method = "onOpenScreen", at = @At("HEAD"), cancellable = true)
     private void onOpenScreen(OpenScreenS2CPacket packet, CallbackInfo ci) {
@@ -61,16 +67,27 @@ public class ClientPlayNetworkHandler {
             screenCapture.get().slotUpdate((net.minecraft.client.network.ClientPlayNetworkHandler) (Object)this, packet);
         //}
     }
+
     //@Inject(method = "onScreenHandlerPropertyUpdate", at = @At("HEAD"), cancellable = true)
-    //private void onCloseScreen(ScreenHandlerPropertyUpdateS2CPacket packet, CallbackInfo ci) {
+    //private void onScreenHandlerPropertyUpdate(ScreenHandlerPropertyUpdateS2CPacket packet, CallbackInfo ci) {
     //    if (ReentryPacket.shouldCancel(packet, ci)) return;
     //
     //    screenReader.get().propertyUpdate(packet.getSyncId(), packet.getPropertyId(), packet.getValue());
     //}
-    //@Inject(method = "onParticle", at = @At("HEAD"), cancellable = true)
-    //private void onParticle(ParticleS2CPacket packet, CallbackInfo ci) {
-    //    com.incrementalqol.mixinWrappers.ClientPlayNetworkHandler.onParticle(packet, ci);
-    //}
+
+
+    @Inject(method = "onBlockUpdate", at = @At("HEAD"), cancellable = true)
+    private void onBlockUpdate(BlockUpdateS2CPacket packet, CallbackInfo ci) {
+        shinyOreMonitor.get().removeShinyBecauseOfStateChange(packet.getPos(), packet.getState());
+    }
+    @Inject(method = "onChunkDeltaUpdate", at = @At("HEAD"), cancellable = true)
+    private void onChunkDeltaUpdate(ChunkDeltaUpdateS2CPacket packet, CallbackInfo ci) {
+        packet.visitUpdates((p, s) -> shinyOreMonitor.get().removeShinyBecauseOfStateChange(p, s));
+    }
+    @Inject(method = "onParticle", at = @At("HEAD"), cancellable = true)
+    private void onParticle(ParticleS2CPacket packet, CallbackInfo ci) {
+        shinyOreMonitor.get().addOrUpdateShinyBecauseOfParticle(packet.getParameters(), packet.getX(), packet.getY(), packet.getZ());
+    }
 
     // Scoreboard-related packets: refresh GameInfo scoreboard only when these arrive
     @Inject(method = "onScoreboardDisplay", at = @At("TAIL"))

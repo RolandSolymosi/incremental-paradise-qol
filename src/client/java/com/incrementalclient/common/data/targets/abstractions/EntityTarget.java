@@ -27,10 +27,5 @@ public final class EntityTarget implements ITarget {
         return (region != null && region.isInRegion(entity.getWorld(), entity.getBlockPos())) && entity.getType() == type && condition.test(entity);
     }
 
-    @Override
-    public void highlight(MinecraftClient client) {
-        // Example: set glowing, or your ghost entity renderer logic
-    }
-
     public EntityType<?> getType() { return type; }
 }

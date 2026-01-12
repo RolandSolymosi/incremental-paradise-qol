@@ -55,7 +55,7 @@ public class ProgressLayerElement extends HudElement<ProgressLayerElement.Config
         this.anchorPoint = new Vector2f(10, 10);
 
         options = List.of(
-                Configurable.Categories.Hud.General.createConfig(0,
+                Configurable.Categories.Hud.General.createConfig(1000,
                         Option.<Double>createBuilder()
                                 .name(Text.of("Progress Layer HUD background opacity"))
                                 .description(OptionDescription.of(Text.of("Set the opacity of the progress layer HUD background.")))

@@ -6,9 +6,9 @@ import java.util.function.Consumer;
 
 public interface Observable<TObserver extends Observer<TResult>, TResult> extends Listenable<TObserver>{
 
-    void subscribe(Observer<TResult> observer);
+    void subscribe(TObserver observer);
 
-    void unsubscribe(Observer<TResult> observer);
+    void unsubscribe(TObserver observer);
 
     final class DefaultObserver<T> implements Observer<T>{
 

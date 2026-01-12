@@ -148,6 +148,7 @@ public interface Configurable<TConfiguration> {
             public final Group Consumable = new Group(this, "Consumable", 200, "Active Consumable tracker Hud related settings.");
             public final Group Currency = new Group(this, "Currency", 300, "Currency Hud related settings.");
             public final Group HpBar = new Group(this, "HpBar", 400, "HpBar related settings.");
+            public final Group ItemTarget = new Group(this, "Item Target", 500, "Item Target tracker Hud element.");
         }
         public static final HudCategory Hud = new HudCategory();
 

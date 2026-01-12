@@ -4,10 +4,12 @@
   "compatibilityLevel": "JAVA_21",
   "client": [
     "BossBarHud",
+    "ChatHud",
     "ClientPlayNetworkHandler",
     "EntityRenderer",
     "InGameHud",
-    "Packet"
+    "Packet",
+    "ParticleManager"
   ],
   "injectors": {
     "defaultRequire": 1

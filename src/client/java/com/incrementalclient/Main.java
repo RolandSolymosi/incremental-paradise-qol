@@ -33,16 +33,18 @@ public class Main implements ClientModInitializer {
             // High level Services
             .addSingleton(MinecraftClientAccessor.class)
             .addSingleton(CommandHandler.class)
-            .addSingleton(ChatHandler.class)
+            .addObservable(ChatHandler.class)
             .addSingleton(ConfigHandler.class)
-            .addSingleton(KeyBindMonitor.class)
-            .addSingleton(TaskMonitor.class)
-            .addSingleton(WorldMonitor.class)
+            .addListenable(KeyBindMonitor.class)
+            .addObservable(TaskMonitor.class)
+            .addObservable(WorldMonitor.class)
             .addSingleton(HotbarHandler.class)
             .addSingleton(GameInfoMonitor.class)
-            .addSingleton(HudManager.class).forwardSingleton(Configurable.class, HudManager.class)
+            .addObservable(HudManager.class).forwardSingleton(Configurable.class, HudManager.class)
             .addSingleton(InteractionScheduler.class)
-            .addSingleton(ActiveConsumableMonitor.class)
+            .addObservable(ActiveConsumableMonitor.class)
+            .addObservable(ShinyOreMonitor.class)
+            .addSingleton(ItemTargetMonitor.class)
             // Features
             .addSingleton(SellAllHotkey.class).forwardSingleton(Configurable.class, SellAllHotkey.class)
             .addSingleton(DepositHotkey.class).forwardSingleton(Configurable.class, DepositHotkey.class)
@@ -51,7 +53,7 @@ public class Main implements ClientModInitializer {
             .addSingleton(CommandAliases.class).forwardSingleton(Configurable.class, CommandAliases.class)
             .addSingleton(LoadoutsHotkeys.class).forwardSingleton(Configurable.class, LoadoutsHotkeys.class)
             .addSingleton(TaskingOverrides.class).forwardSingleton(Configurable.class, TaskingOverrides.class)
-            .addSingleton(WarpNextHotkey.class).forwardSingleton(Configurable.class, WarpNextHotkey.class)
+            .addListenable(WarpNextHotkey.class).forwardSingleton(Configurable.class, WarpNextHotkey.class)
             .addSingleton(AutoSwapLoadout.class).forwardSingleton(Configurable.class, AutoSwapLoadout.class)
             .addSingleton(PxpCalculation.class).forwardSingleton(Configurable.class, PxpCalculation.class)
             .addSingleton(BalloonRopeHider.class).forwardSingleton(Configurable.class, BalloonRopeHider.class)
@@ -69,6 +71,7 @@ public class Main implements ClientModInitializer {
             .addSingleton(ProgressLayerElement.class).forwardSingleton(Configurable.class, ProgressLayerElement.class).forwardSingleton(HudElement.class, ProgressLayerElement.class)
             .addSingleton(CompletedTasksElement.class).forwardSingleton(Configurable.class, CompletedTasksElement.class).forwardSingleton(HudElement.class, CompletedTasksElement.class)
             .addSingleton(AggroElement.class).forwardSingleton(Configurable.class, AggroElement.class).forwardSingleton(HudElement.class, AggroElement.class)
+            .addSingleton(ItemTargetTrackerElement.class).forwardSingleton(Configurable.class, ItemTargetTrackerElement.class).forwardSingleton(HudElement.class, ItemTargetTrackerElement.class)
             .buildServiceProvider();
 
     @Override

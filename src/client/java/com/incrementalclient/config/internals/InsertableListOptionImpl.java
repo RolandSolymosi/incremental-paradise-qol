@@ -92,6 +92,7 @@ public final class InsertableListOptionImpl<T> implements ListOption<T> {
     @Deprecated
     public @NotNull Binding<List<T>> binding() {
         if (stateManager instanceof ProvidesBindingForDeprecation) {
+            //noinspection unchecked
             return ((ProvidesBindingForDeprecation<List<T>>) stateManager).getBinding();
         }
         throw new UnsupportedOperationException("Binding is not available for this option - using a new state manager which does not directly expose the binding as it may not have one.");
@@ -114,6 +115,7 @@ public final class InsertableListOptionImpl<T> implements ListOption<T> {
 
     @Override
     public void insertEntry(int index, ListOptionEntry<?> entry) {
+        //noinspection unchecked
         entries.add(index, (ListOptionEntry<T>) entry);
         onRefresh();
     }
@@ -125,7 +127,7 @@ public final class InsertableListOptionImpl<T> implements ListOption<T> {
             entries.add(newEntry);
         } else {
             // insert at top
-            entries.add(0, newEntry);
+            entries.addFirst(newEntry);
         }
         onRefresh();
         return newEntry;
@@ -201,10 +203,12 @@ public final class InsertableListOptionImpl<T> implements ListOption<T> {
     public int numberOfEntries() {
         return this.entries.size();
     }
+
     @Override
     public int maximumNumberOfEntries() {
         return this.maximumNumberOfEntries;
     }
+
     @Override
     public int minimumNumberOfEntries() {
         return this.minimumNumberOfEntries;

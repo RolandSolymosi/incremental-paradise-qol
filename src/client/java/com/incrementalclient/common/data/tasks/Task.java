@@ -52,7 +52,7 @@ public enum Task {
     W1_Crab(new NormalTask("Crab", Region.W1_Crab, List.of("crabs"), null, TaskType.Fishing, DefaultWardrobe.CombatFishing, Tool.Spear, List.of(Target.W1_Crab), List.of(Warp.W1_Crab, Warp.W1_Spawn))),
     W1_HermitCrab(new NormalTask("Hermit crab", Region.W1_Crab, List.of("hermit crabs"), null, TaskType.Fishing, DefaultWardrobe.CombatFishing, Tool.Spear, List.of(Target.W1_HermitCrab), List.of(Warp.W1_Crab, Warp.W1_Spawn))),
 
-    W1_PlayCoinflip(new GamingTask("Play coinflip", Region.W1_Overworld, List.of("coinflip"), GameKind.Rps, List.of(Constraint.Games), List.of(Warp.W1_Spawn))),
+    W1_PlayCoinflip(new GamingTask("Play coinflip", Region.W1_Overworld, List.of("coinflip"), GameKind.Coinflip, List.of(Constraint.Games), List.of(Warp.W1_Spawn))),
     W1_PlayRps(new GamingTask("Play rps", Region.W1_Overworld, List.of("rps"), GameKind.Rps, List.of(Constraint.Games), List.of(Warp.W1_Spawn))),
     W1_EarnScorePixelpop(new GamingTask("Score in Pixelpop", Region.W1_Overworld, List.of("pixel pop"), GameKind.Pixelpop, List.of(Constraint.Score), List.of(Warp.W1_Spawn))),
     W1_EarnTicketPixelpop(new GamingTask("Ticket for Pixelpop", Region.W1_Overworld, List.of("pixel pop"), GameKind.Pixelpop, List.of(Constraint.Ticket), List.of(Warp.W1_Spawn))),

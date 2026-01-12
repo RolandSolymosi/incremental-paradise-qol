@@ -1,10 +1,11 @@
 package com.incrementalclient.common.data.targets.abstractions;
 
 import com.incrementalclient.common.data.Region;
+import com.incrementalclient.common.data.World;
+import net.minecraft.block.Block;
 import net.minecraft.block.BlockState;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
 
 import java.util.Set;
 import java.util.function.Predicate;
@@ -25,7 +26,7 @@ public final class BlockTarget implements ITarget {
     @Override public String name() { return name; }
 
     @Override
-    public boolean matches(World world, BlockPos pos) {
+    public boolean matches(net.minecraft.world.World world, BlockPos pos) {
         var blockState = world.getBlockState(pos);
         if (blockState != null){
             return (region != null && region.isInRegion(world, pos)) && blocks.stream().anyMatch(blockState::isOf) && condition.test(blockState);
@@ -34,9 +35,8 @@ public final class BlockTarget implements ITarget {
         return false;
     }
 
-    @Override
-    public void highlight(MinecraftClient client) {
-        // Example: trigger your block outline/ghost render system
+    public boolean matches(World world, Block block){
+        return blocks.stream().anyMatch(b -> b.getTranslationKey().equals(block.getTranslationKey()) && world == this.region.getWorld());
     }
 
     public Set<net.minecraft.block.Block> getBlocks() { return blocks; }

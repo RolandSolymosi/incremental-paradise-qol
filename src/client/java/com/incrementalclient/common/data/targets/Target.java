@@ -1,14 +1,15 @@
 package com.incrementalclient.common.data.targets;
 
 import com.incrementalclient.common.data.Region;
+import com.incrementalclient.common.data.World;
 import com.incrementalclient.common.data.targets.abstractions.BlockTarget;
 import com.incrementalclient.common.data.targets.abstractions.EntityTarget;
 import com.incrementalclient.common.data.targets.abstractions.ITarget;
+import net.minecraft.block.Block;
 import net.minecraft.block.Blocks;
 import net.minecraft.entity.EntityType;
 import net.minecraft.state.property.Properties;
 import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -73,7 +74,7 @@ public enum Target {
         return BY_NAME.get(name);
     }
 
-    public static List<BlockTarget> find(World world, BlockPos pos) {
+    public static List<BlockTarget> find(net.minecraft.world.World world, BlockPos pos) {
         var block = world.getBlockState(pos);
         if (block != null) {
             var possibleTargets = BY_TYPE_BLOCK.get(block.getBlock());
@@ -82,6 +83,14 @@ public enum Target {
             }
         }
         return List.of();
+    }
+
+    public static Optional<BlockTarget> find(World world, Block block){
+        var targets =  BY_TYPE_BLOCK.getOrDefault(block, null);
+        if (targets != null){
+            return targets.stream().filter(p -> p.matches(world, block)).findFirst();
+        }
+        return Optional.empty();
     }
 
     public static List<EntityTarget> find(net.minecraft.entity.Entity entity) {
