@@ -20,25 +20,16 @@ public abstract class HudElement<T extends HudElement.ConfigurationBase> impleme
     protected boolean enabled = true;
     protected boolean scalable = true;
     protected boolean draggable = true;
-    protected boolean inBottomBarGroup = false; // If true, this element is part of the bottom bar group
-    protected BottomBarAlignment bottomBarAlignment = BottomBarAlignment.LEFT; // How to align within bottom bar
     
     // Sub-elements support (for complex elements)
     protected List<Vector2f> subElementDeltas = new ArrayList<>();
     protected final MinecraftClientAccessor mcAccessor;
-
-    /**
-     * Alignment options for elements in the bottom bar.
-     */
-    public enum BottomBarAlignment {
-        LEFT,   // Align to left side
-        CENTER, // Center in the available space
-        RIGHT   // Align to right side (before hotbar)
-    }
+    protected final HudManager hudManager;
 
     public HudElement(MinecraftClientAccessor mcAccessor, HudManager hudManager) {
         this.mcAccessor = mcAccessor;
-        hudManager.subscribe(new HudManager.HudRender(this));
+        this.hudManager = hudManager;
+        hudManager.subscribe(new HudManager.HudRender(this, hudManager));
     }
     
     public HudElement(MinecraftClientAccessor mcAccessor, HudManager hudManager, int subElementCount) {
@@ -49,15 +40,8 @@ public abstract class HudElement<T extends HudElement.ConfigurationBase> impleme
     }
     
     public Vector2f getCurrentPosition() {
-        Vector2f basePos = anchorPoint.add(deltaPosition);
-        
-        // If this element is in the bottom bar group, apply animation offset
-        if (inBottomBarGroup) {
-            float offset = getBottomBarAnimationOffset();
-            basePos = basePos.add(new Vector2f(0, offset));
-        }
-        
-        return basePos;
+        Vector2f baseAnchor = getAnchorPoint();
+        return baseAnchor.add(deltaPosition);
     }
     
     public abstract void render(RenderSettings renderSettings);
@@ -126,41 +110,6 @@ public abstract class HudElement<T extends HudElement.ConfigurationBase> impleme
         this.draggable = draggable;
     }
     
-    public boolean isInBottomBarGroup() {
-        return inBottomBarGroup;
-    }
-    
-    public void setInBottomBarGroup(boolean inBottomBarGroup) {
-        this.inBottomBarGroup = inBottomBarGroup;
-    }
-    
-    public BottomBarAlignment getBottomBarAlignment() {
-        return bottomBarAlignment;
-    }
-    
-    public void setBottomBarAlignment(BottomBarAlignment alignment) {
-        this.bottomBarAlignment = alignment;
-    }
-    
-    /**
-     * Gets the animation offset from the bottom bar (for elements in bottom bar group).
-     * This allows elements to move down when chat opens.
-     * This is implemented by BottomBarElement and accessed via reflection/static method.
-     */
-    public float getBottomBarAnimationOffset() {
-        if (!inBottomBarGroup) {
-            return 0;
-        }
-        // Access via class name to avoid circular dependency
-        try {
-            Class<?> bottomBarClass = Class.forName("com.incrementalclient.hud.BottomBarElement");
-            java.lang.reflect.Method method = bottomBarClass.getMethod("getAnimationOffset");
-            return (Float) method.invoke(null);
-        } catch (Exception e) {
-            return 0;
-        }
-    }
-    
     public boolean hasSubComponents() {
         return !subElementDeltas.isEmpty();
     }
@@ -217,6 +166,15 @@ public abstract class HudElement<T extends HudElement.ConfigurationBase> impleme
             .max()
             .orElse(0);
     }
+    
+    protected int getCenteredTextY(int y) {
+        return y + (HudConstants.BAR_ELEMENT_HEIGHT - HudConstants.TEXT_HEIGHT) / 2;
+    }
+    
+    protected void renderBarText(DrawContext context, TextRenderer textRenderer, Text text, int x, int y) {
+        int textY = getCenteredTextY(y);
+        context.drawText(textRenderer, text, x + 2, textY, 0xFFFFFFFF, true);
+    }
 
     @Override
     public void optionChanged(){
@@ -226,6 +184,10 @@ public abstract class HudElement<T extends HudElement.ConfigurationBase> impleme
     }
 
     public static final class HudConstants {
+        // Bar element constants
+        public static final int BAR_ELEMENT_HEIGHT = 22;
+        public static final int TEXT_HEIGHT = 9;
+        
         // Padding and spacing
         public static final int TEXT_PADDING_X = 2;
         public static final int TEXT_PADDING_Y = 5;

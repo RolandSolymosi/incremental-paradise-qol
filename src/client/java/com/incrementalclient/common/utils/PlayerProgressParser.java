@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 
 import java.time.LocalDate;
 import java.util.EnumMap;
-import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -30,22 +29,12 @@ public class PlayerProgressParser {
 
     /**
      * Parses the scoreboard text to extract all player progress information.
+     * Returns plain text - styling applied later by individual HUD elements.
      *
-     * @param scoreboardText Full concatenated scoreboard text
+     * @param scoreboardText Full concatenated scoreboard text (plain, for regex matching)
      * @return PlayerProgressSnapshot with all parsed data, or empty snapshot if parsing fails
      */
     public static PlayerProgressSnapshot parse(String scoreboardText) {
-        return parse(scoreboardText, null);
-    }
-
-    /**
-     * Parses the scoreboard text to extract all player progress information with styling preserved.
-     *
-     * @param scoreboardText Full concatenated scoreboard text (plain, for regex matching)
-     * @param scoreboardComponents List of styled Text components (for extracting styled area, rank, and layers)
-     * @return PlayerProgressSnapshot with all parsed data, or empty snapshot if parsing fails
-     */
-    public static PlayerProgressSnapshot parse(String scoreboardText, List<Text> scoreboardComponents) {
         if (scoreboardText == null || scoreboardText.trim().isEmpty()) {
             return createEmptySnapshot();
         }
@@ -56,10 +45,10 @@ public class PlayerProgressParser {
 
         try {
             LocalDate date = parseDate(cleanText);
-            Text area = parseStyledArea(cleanText, scoreboardComponents);
-            Text rank = parseStyledRank(cleanText, scoreboardComponents);
+            Text area = parseAreaAsText(cleanText);
+            Text rank = parseRankAsText(cleanText);
 
-            EnumMap<ProgressLayer, Text> layers = parseStyledProgressLayers(cleanText, scoreboardComponents);
+            EnumMap<ProgressLayer, Text> layers = parseProgressLayers(cleanText);
 
             int completedTasks = 0;
             int totalTasks = 0;
@@ -73,7 +62,7 @@ public class PlayerProgressParser {
                 }
             }
 
-            EnumMap<CurrencyType, CurrencyValue> currencies = parseStyledCurrencies(cleanText, scoreboardComponents);
+            EnumMap<CurrencyType, CurrencyValue> currencies = parseCurrenciesPlain(cleanText);
 
             return new PlayerProgressSnapshot(
                     date,
@@ -143,56 +132,10 @@ public class PlayerProgressParser {
     }
 
     /**
-     * Parses styled progress layers (Level, Prestige, Ascension, etc.) from scoreboard components.
+     * Parses progress layers (Level, Prestige, Ascension, etc.) from scoreboard text.
+     * Returns plain text - styling will be applied later.
      */
-    private static EnumMap<ProgressLayer, Text> parseStyledProgressLayers(String cleanText, List<Text> components) {
-        EnumMap<ProgressLayer, Text> layers = new EnumMap<>(ProgressLayer.class);
-
-        if (components == null || components.isEmpty()) {
-            // Fallback to plain text parsing
-            return parseProgressLayersPlain(cleanText);
-        }
-
-        // Build combined Text from all components
-        net.minecraft.text.MutableText combined = Text.literal("");
-        for (Text component : components) {
-            combined.append(component);
-        }
-
-        for (ProgressLayer layer : ProgressLayer.values()) {
-            // Create pattern that matches either full name or short name followed by a number
-            String[] variants = layer.getNameVariants();
-            StringBuilder patternBuilder = new StringBuilder();
-            patternBuilder.append("(?i)(");
-
-            for (int i = 0; i < variants.length; i++) {
-                if (i > 0) patternBuilder.append("|");
-                patternBuilder.append(Pattern.quote(variants[i]));
-            }
-
-            patternBuilder.append(")\\s+(\\d+)");
-
-            Pattern layerPattern = Pattern.compile(patternBuilder.toString());
-            Matcher matcher = layerPattern.matcher(cleanText);
-
-            if (matcher.find()) {
-                // Extract styled text from components
-                int startPos = matcher.start();
-                int endPos = matcher.end();
-                Text styledLayer = extractStyledTextFromComponents(cleanText, startPos, endPos, components);
-                if (styledLayer != null && !styledLayer.getString().isEmpty()) {
-                    layers.put(layer, styledLayer);
-                }
-            }
-        }
-
-        return layers;
-    }
-
-    /**
-     * Parses progress layers as plain Text (fallback when styled components not available).
-     */
-    private static EnumMap<ProgressLayer, Text> parseProgressLayersPlain(String text) {
+    private static EnumMap<ProgressLayer, Text> parseProgressLayers(String text) {
         EnumMap<ProgressLayer, Text> layers = new EnumMap<>(ProgressLayer.class);
 
         for (ProgressLayer layer : ProgressLayer.values()) {
@@ -221,127 +164,26 @@ public class PlayerProgressParser {
     }
 
     /**
-     * Parses styled area from scoreboard components.
+     * Parses area from scoreboard text as Text.
+     * Returns plain text - styling will be applied later.
      */
-    private static Text parseStyledArea(String cleanText, List<Text> components) {
-        if (components == null || components.isEmpty()) {
-            String areaStr = parseArea(cleanText);
-            return areaStr.isEmpty() ? Text.empty() : Text.literal(areaStr);
-        }
-
-        Matcher dateMatcher = DATE_PATTERN.matcher(cleanText);
-        if (dateMatcher.find()) {
-            int dateEnd = dateMatcher.end();
-            int statsIndex = cleanText.indexOf("Stats", dateEnd);
-            if (statsIndex > dateEnd) {
-                return extractStyledTextFromComponents(cleanText, dateEnd, statsIndex, components);
-            }
-        }
-        return Text.empty();
+    private static Text parseAreaAsText(String cleanText) {
+        String areaStr = parseArea(cleanText);
+        return areaStr.isEmpty() ? Text.empty() : Text.literal(areaStr);
     }
 
     /**
-     * Parses styled rank from scoreboard components.
+     * Parses rank from scoreboard text as Text.
+     * Returns plain text - styling will be applied later.
      */
-    private static Text parseStyledRank(String cleanText, List<Text> components) {
-        if (components == null || components.isEmpty()) {
-            String rankStr = parseRank(cleanText);
-            return rankStr.isEmpty() ? Text.empty() : Text.literal(rankStr);
-        }
-
-        Matcher rankMatcher = RANK_PATTERN.matcher(cleanText);
-        if (rankMatcher.find()) {
-            int rankStart = rankMatcher.start(1);
-            int rankEnd = rankMatcher.end(1);
-            return extractStyledTextFromComponents(cleanText, rankStart, rankEnd, components);
-        }
-        return Text.empty();
+    private static Text parseRankAsText(String cleanText) {
+        String rankStr = parseRank(cleanText);
+        return rankStr.isEmpty() ? Text.empty() : Text.literal(rankStr);
     }
 
     /**
-     * Extracts styled Text from components based on position in clean text.
-     * This is a simplified approach - finds the component containing the target text.
-     */
-    private static Text extractStyledTextFromComponents(String cleanText, int startPos, int endPos, List<Text> components) {
-        String targetSubstring = cleanText.substring(startPos, endPos).trim();
-        String cleanTarget = removeColorCodes(targetSubstring);
-        cleanTarget = cleanTarget.replaceAll("^[\\s\\-]+|[\\s\\-]+$", "").trim();
-
-        if (cleanTarget.isEmpty()) {
-            return Text.empty();
-        }
-
-        // Find component containing the target text and return it (preserves styling)
-        for (Text component : components) {
-            String componentClean = removeColorCodes(component.getString());
-            if (componentClean.contains(cleanTarget)) {
-                // Return the component as-is to preserve styling
-                // In the future, we could extract just the substring, but this preserves colors
-                return component.copy();
-            }
-        }
-
-        // Fallback: return plain text
-        return Text.literal(cleanTarget);
-    }
-
-    /**
-     * Parses styled currency values from scoreboard components.
-     * Preserves original formatting, decimal precision, and colors.
-     */
-    private static EnumMap<CurrencyType, CurrencyValue> parseStyledCurrencies(String cleanText, List<Text> components) {
-        EnumMap<CurrencyType, CurrencyValue> currencies = new EnumMap<>(CurrencyType.class);
-
-        if (components == null || components.isEmpty()) {
-            // Fallback to plain text parsing
-            return parseCurrenciesPlain(cleanText);
-        }
-
-        for (CurrencyType currency : CurrencyType.values()) {
-            String[] aliases = currency.getAliases();
-            StringBuilder patternBuilder = new StringBuilder();
-            patternBuilder.append("(?i)(");
-
-            for (int i = 0; i < aliases.length; i++) {
-                if (i > 0) patternBuilder.append("|");
-                patternBuilder.append(Pattern.quote(aliases[i]));
-            }
-
-            // Pattern to capture full number with decimals and suffixes (Qt, Qa, etc.)
-            patternBuilder.append(")\\s+([0-9.,]+[a-zA-Z]*)");
-
-            Pattern currencyPattern = Pattern.compile(patternBuilder.toString());
-            Matcher matcher = currencyPattern.matcher(cleanText);
-
-            if (matcher.find()) {
-                try {
-                    String valueStr = matcher.group(matcher.groupCount());
-                    // Parse with full precision and preserve original format
-                    ParsedNumber parsed = parseNumberWithSuffix(valueStr);
-
-                    // Extract styled text from components
-                    int currencyStart = matcher.start(); // Start of currency name
-                    int currencyEnd = matcher.end(); // End of value
-                    Text styledCurrencyText = extractStyledTextFromComponents(cleanText, currencyStart, currencyEnd, components);
-
-                    // Extract just the value portion (after currency name)
-                    // The styled text might include the currency name, so we need to extract just the value
-                    Text styledValue = extractCurrencyValueFromStyledText(styledCurrencyText, aliases);
-
-                    // Create CurrencyValue with styled text preserved
-                    CurrencyValue cv = CurrencyValue.of(parsed.doubleValue, parsed.originalFormat, styledValue);
-                    currencies.put(currency, cv);
-                } catch (Exception e) {
-                    // Ignore invalid numbers
-                }
-            }
-        }
-
-        return currencies;
-    }
-
-    /**
-     * Parses currency values from plain text (fallback when styled components not available).
+     * Parses currency values from scoreboard text.
+     * Returns plain text - styling will be applied later.
      */
     private static EnumMap<CurrencyType, CurrencyValue> parseCurrenciesPlain(String text) {
         EnumMap<CurrencyType, CurrencyValue> currencies = new EnumMap<>(CurrencyType.class);
@@ -374,36 +216,6 @@ public class PlayerProgressParser {
         }
 
         return currencies;
-    }
-
-    /**
-     * Extracts just the value portion from styled currency text.
-     * Removes the currency name prefix (e.g., "Gold 1000" -> "1000" with styling).
-     */
-    private static Text extractCurrencyValueFromStyledText(Text styledText, String[] currencyAliases) {
-        String text = styledText.getString();
-
-        // Find and remove currency name prefix
-        for (String alias : currencyAliases) {
-            String lowerText = text.toLowerCase();
-            String lowerAlias = alias.toLowerCase();
-            if (lowerText.startsWith(lowerAlias)) {
-                // Remove the currency name and following whitespace
-                int aliasEnd = alias.length();
-                while (aliasEnd < text.length() && Character.isWhitespace(text.charAt(aliasEnd))) {
-                    aliasEnd++;
-                }
-
-                // Extract the value portion (we need to preserve styling)
-                // Since we have the full styled text, we'll return it as-is for now
-                // The currency name styling will be part of it, but that's okay
-                // In the future, we could do more precise extraction
-                return styledText;
-            }
-        }
-
-        // If no currency name found, return as-is
-        return styledText;
     }
 
     /**
@@ -527,10 +339,10 @@ public class PlayerProgressParser {
     public static final class PlayerProgressSnapshot {
         // Context information
         public final LocalDate date;
-        public final Text area;  // Styled text preserved
-        public final Text rank;  // Styled text preserved
+        public final Text area;  // Plain text - styling should be applied later
+        public final Text rank;  // Plain text - styling should be applied later
 
-        // Progress layers (Level, Prestige, Ascension, etc.) - stored as styled Text
+        // Progress layers (Level, Prestige, Ascension, etc.) - plain text, styling should be applied later
         public final EnumMap<ProgressLayer, Text> layers;
 
         // Tasks

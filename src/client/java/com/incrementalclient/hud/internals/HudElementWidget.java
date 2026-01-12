@@ -13,14 +13,18 @@ public class HudElementWidget extends ClickableWidget {
     private final HudElement element;
     private final List<Integer> snapPointsX;
     private final List<Integer> snapPointsY;
+    private final int screenWidth;
+    private final int screenHeight;
     private boolean isDragging = false;
     private Vector2f dragStartOffset = new Vector2f(0, 0);
     
-    public HudElementWidget(HudElement element, List<Integer> snapPointsX, List<Integer> snapPointsY) {
+    public HudElementWidget(HudElement element, List<Integer> snapPointsX, List<Integer> snapPointsY, int screenWidth, int screenHeight) {
         super(0, 0, 0, 0, Text.empty());
         this.element = element;
         this.snapPointsX = snapPointsX;
         this.snapPointsY = snapPointsY;
+        this.screenWidth = screenWidth;
+        this.screenHeight = screenHeight;
         updateBounds();
     }
     
@@ -38,21 +42,17 @@ public class HudElementWidget extends ClickableWidget {
     public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
         updateBounds();
         
-        // Skip rendering widget for non-draggable elements (like bottom bar)
         if (!element.isDraggable()) {
             return;
         }
         
-        // Draw element outline (darker when not hovered)
         int color = isHovered() ? HudElement.HudConstants.WIDGET_HOVER_COLOR : HudElement.HudConstants.WIDGET_NORMAL_COLOR;
         context.fill(getX(), getY(), getX() + width, getY() + height, color);
         
-        // Draw border
         int borderColor = isDragging ? HudElement.HudConstants.WIDGET_BORDER_DRAGGING 
             : (isHovered() ? HudElement.HudConstants.WIDGET_BORDER_HOVER : HudElement.HudConstants.WIDGET_BORDER_NORMAL);
         context.drawBorder(getX(), getY(), width, height, borderColor);
         
-        // Draw element name label
         if (isHovered() || isDragging) {
             String name = element.getDisplayName();
             var textRenderer = net.minecraft.client.MinecraftClient.getInstance().textRenderer;
@@ -60,7 +60,6 @@ public class HudElementWidget extends ClickableWidget {
             int labelX = getX() + (width - nameWidth) / 2;
             int labelY = getY() - 12;
             
-            // Background for label
             context.fill(labelX - 2, labelY - 1, labelX + nameWidth + 2, labelY + 9, HudElement.HudConstants.TEXT_BACKGROUND);
             context.drawText(textRenderer, name, labelX, labelY, HudElement.HudConstants.TEXT_WHITE, false);
         }
@@ -68,20 +67,23 @@ public class HudElementWidget extends ClickableWidget {
     
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        updateBounds(); // Ensure bounds are up to date
+        if (!element.isDraggable()) {
+            return false;
+        }
+        
+        updateBounds();
         if (isMouseOver(mouseX, mouseY)) {
-            // Right-click to reset (only if draggable)
-            if (button == 1 && element.isDraggable()) {
+            if (button == 1) {
                 reset();
                 return true;
             }
-            // Left-click to drag (only if draggable)
-            if (button == 0 && element.isDraggable()) {
-                Vector2f currentPos = element.getCurrentPosition();
+            if (button == 0) {
+                Vector2f anchor = element.getAnchorPoint();
+                Vector2f currentDelta = element.getDeltaPosition();
                 dragStartOffset = new Vector2f(
-                    (float) (mouseX - currentPos.x),
-                    (float) (mouseY - currentPos.y)
-                );
+                    (float) (mouseX - anchor.x),
+                    (float) (mouseY - anchor.y)
+                ).subtract(currentDelta);
                 isDragging = true;
                 return true;
             }
@@ -92,7 +94,7 @@ public class HudElementWidget extends ClickableWidget {
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
         if (isDragging && element.isDraggable()) {
-            Vector2f anchor = element.getAnchorPointPosition();
+            Vector2f anchor = element.getAnchorPoint();
             Vector2f newDelta = new Vector2f(
                 (float) (mouseX - anchor.x - dragStartOffset.x),
                 (float) (mouseY - anchor.y - dragStartOffset.y)
@@ -101,11 +103,68 @@ public class HudElementWidget extends ClickableWidget {
             // Apply snap points
             newDelta = applySnapPoints(newDelta);
             
+            // Constrain to screen bounds
+            newDelta = constrainToScreenBounds(newDelta);
+            
             element.setDeltaPosition(newDelta);
             updateBounds();
             return true;
         }
         return super.mouseDragged(mouseX, mouseY, button, deltaX, deltaY);
+    }
+    
+    /**
+     * Applies snap points to the delta position.
+     */
+    private Vector2f applySnapPoints(Vector2f delta) {
+        Vector2f anchor = element.getAnchorPoint();
+        float currentX = anchor.x + delta.x;
+        float currentY = anchor.y + delta.y;
+        
+        float snappedX = currentX;
+        float snappedY = currentY;
+        float snapThreshold = HudElement.HudConstants.SNAP_THRESHOLD;
+        
+        // Snap to X snap points
+        for (int snapX : snapPointsX) {
+            if (Math.abs(currentX - snapX) < snapThreshold) {
+                snappedX = snapX;
+                break;
+            }
+        }
+        
+        // Snap to Y snap points
+        for (int snapY : snapPointsY) {
+            if (Math.abs(currentY - snapY) < snapThreshold) {
+                snappedY = snapY;
+                break;
+            }
+        }
+        
+        return new Vector2f(snappedX - anchor.x, snappedY - anchor.y);
+    }
+    
+    /**
+     * Constrains the element position to stay within screen bounds.
+     */
+    private Vector2f constrainToScreenBounds(Vector2f delta) {
+        Vector2f anchor = element.getAnchorPoint();
+        Vector2f bounds = element.getBoundingBox();
+        
+        float newX = anchor.x + delta.x;
+        float newY = anchor.y + delta.y;
+        
+        // Constrain X: element should not go outside screen (0 to screenWidth - bounds.x)
+        float minX = 0;
+        float maxX = screenWidth - bounds.x;
+        newX = Math.max(minX, Math.min(maxX, newX));
+        
+        // Constrain Y: element should not go outside screen (0 to screenHeight - bounds.y)
+        float minY = 0;
+        float maxY = screenHeight - bounds.y;
+        newY = Math.max(minY, Math.min(maxY, newY));
+        
+        return new Vector2f(newX - anchor.x, newY - anchor.y);
     }
     
     @Override
@@ -120,32 +179,6 @@ public class HudElementWidget extends ClickableWidget {
             return true;
         }
         return super.mouseReleased(mouseX, mouseY, button);
-    }
-    
-    private Vector2f applySnapPoints(Vector2f delta) {
-        Vector2f anchor = element.getAnchorPointPosition();
-        float currentX = anchor.x + delta.x;
-        float currentY = anchor.y + delta.y;
-        
-        float snappedX = currentX;
-        float snappedY = currentY;
-        float snapThreshold = HudElement.HudConstants.SNAP_THRESHOLD;
-        
-        for (int snapX : snapPointsX) {
-            if (Math.abs(currentX - snapX) < snapThreshold) {
-                snappedX = snapX;
-                break;
-            }
-        }
-        
-        for (int snapY : snapPointsY) {
-            if (Math.abs(currentY - snapY) < snapThreshold) {
-                snappedY = snapY;
-                break;
-            }
-        }
-        
-        return new Vector2f(snappedX - anchor.x, snappedY - anchor.y);
     }
     
     public void reset() {

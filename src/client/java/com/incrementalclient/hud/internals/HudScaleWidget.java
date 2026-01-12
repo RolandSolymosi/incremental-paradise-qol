@@ -12,9 +12,11 @@ public class HudScaleWidget extends ClickableWidget {
     private boolean isDragging = false;
     private float dragStartScale = 1.0f;
     private double dragStartY = 0;
+    private static final int WIDGET_WIDTH = 25;
+    private static final int WIDGET_HEIGHT = 10;
     
     public HudScaleWidget(HudElement<?> element, int x, int y) {
-        super(x, y, 35, 12, Text.empty());
+        super(x, y, WIDGET_WIDTH, WIDGET_HEIGHT, Text.empty());
         this.element = element;
     }
     
@@ -22,11 +24,9 @@ public class HudScaleWidget extends ClickableWidget {
     public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
         Vector2f pos = element.getCurrentPosition();
         Vector2f bounds = element.getBoundingBox();
-        // Position scale widget at bottom-right corner
-        this.setX((int) (pos.x + bounds.x - width - 2));
-        this.setY((int) (pos.y + bounds.y - height - 2));
+        this.setX((int) (pos.x + bounds.x + 2));
+        this.setY((int) (pos.y + WIDGET_HEIGHT + 2));
         
-        // Ensure we're within screen bounds
         if (getX() < 0) this.setX((int) pos.x);
         if (getY() < 0) this.setY((int) pos.y);
         
@@ -36,8 +36,7 @@ public class HudScaleWidget extends ClickableWidget {
         context.fill(getX(), getY(), getX() + width, getY() + height, bgColor);
         context.drawBorder(getX(), getY(), width, height, borderColor);
         
-        // Draw scale indicator
-        String scaleText = String.format("%.1fx", element.getScale());
+        String scaleText = String.format("%.1f", element.getScale());
         var textRenderer = net.minecraft.client.MinecraftClient.getInstance().textRenderer;
         int textX = getX() + (width - textRenderer.getWidth(scaleText)) / 2;
         int textY = getY() + (height - 8) / 2;
@@ -46,19 +45,16 @@ public class HudScaleWidget extends ClickableWidget {
     
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        // Update position before checking
         Vector2f pos = element.getCurrentPosition();
         Vector2f bounds = element.getBoundingBox();
-        this.setX((int) (pos.x + bounds.x - width - 2));
-        this.setY((int) (pos.y + bounds.y - height - 2));
+        this.setX((int) (pos.x + bounds.x + 2));
+        this.setY((int) (pos.y + WIDGET_HEIGHT + 2));
         
         if (isMouseOver(mouseX, mouseY)) {
-            // Right-click to reset scale
             if (button == 1) {
                 resetScale();
                 return true;
             }
-            // Left-click to drag
             if (button == 0) {
                 isDragging = true;
                 dragStartScale = element.getScale();
@@ -75,7 +71,6 @@ public class HudScaleWidget extends ClickableWidget {
             double deltaYTotal = dragStartY - mouseY;
             float scaleDelta = (float) (deltaYTotal * HudElement.HudConstants.SCALE_SENSITIVITY);
             float newScale = Math.max(HudElement.HudConstants.MIN_SCALE, Math.min(HudElement.HudConstants.MAX_SCALE, dragStartScale + scaleDelta));
-            // Round to increments for cleaner values
             newScale = Math.round(newScale / HudElement.HudConstants.SCALE_INCREMENT) * HudElement.HudConstants.SCALE_INCREMENT;
             element.setScale(newScale);
             return true;
@@ -94,11 +89,10 @@ public class HudScaleWidget extends ClickableWidget {
     
     @Override
     protected void appendClickableNarrations(NarrationMessageBuilder builder) {
-        // No narration needed
     }
     
     public void resetScale() {
-        element.setScale(1.0f); // Default scale
+        element.setScale(1.0f);
     }
 }
 

@@ -109,13 +109,18 @@ public abstract class InGameHud {
     /**
      * Modify hotbar position to be within the bottom bar (right side)
      * Using @Inject to modify matrix before renderHotbar is called
-     * Based on APEC's approach using matrix translation
+     * Only applies translation when activeBarMode is BOTTOM
      */
     @Inject(
         method = "renderHotbar",
         at = @At("HEAD")
     )
     private void onRenderHotbarStart(DrawContext context, RenderTickCounter tickCounter, CallbackInfo ci) {
+        // Only apply translation when bottom bar is active
+        if (hudManager.get().getConfiguration().getActiveBarMode() != HudManager.Configuration.ActiveBarMode.BOTTOM) {
+            return;
+        }
+        
         var window = mcAccessor.get().getWindow();
         if (window.isEmpty()) {
             return;
@@ -140,6 +145,11 @@ public abstract class InGameHud {
         at = @At("RETURN")
     )
     private void onRenderHotbarEnd(DrawContext context, RenderTickCounter tickCounter, CallbackInfo ci) {
+        // Only restore matrix when bottom bar is active
+        if (hudManager.get().getConfiguration().getActiveBarMode() != HudManager.Configuration.ActiveBarMode.BOTTOM) {
+            return;
+        }
+        
         var window = mcAccessor.get().getWindow();
         if (window.isEmpty()) {
             return;

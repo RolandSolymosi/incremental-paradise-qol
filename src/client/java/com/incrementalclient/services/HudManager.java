@@ -3,8 +3,11 @@ package com.incrementalclient.services;
 import com.incrementalclient.Main;
 import com.incrementalclient.abstractions.HudElement;
 import com.incrementalclient.abstractions.ObservableBase;
+import com.incrementalclient.hud.BottomBarElement;
+import com.incrementalclient.hud.TopBarElement;
 import com.incrementalclient.hud.internals.HudCustomizationScreen;
 import com.incrementalclient.interfaces.Configurable;
+import com.incrementalclient.interfaces.Configurable.Categories;
 import com.incrementalclient.interfaces.Observer;
 import com.incrementalclient.internals.MinecraftClientAccessor;
 import com.incrementalclient.internals.events.HudRenderCallbackObservable;
@@ -12,6 +15,8 @@ import dev.isxander.yacl3.api.ButtonOption;
 import dev.isxander.yacl3.api.Option;
 import dev.isxander.yacl3.api.OptionDescription;
 import dev.isxander.yacl3.api.controller.BooleanControllerBuilder;
+import dev.isxander.yacl3.api.controller.EnumControllerBuilder;
+import dev.isxander.yacl3.api.NameableEnum;
 import dev.isxander.yacl3.config.v2.api.SerialEntry;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.util.math.MatrixStack;
@@ -36,7 +41,7 @@ public class HudManager extends ObservableBase<Observer<HudManager.Event>, HudMa
                         Option.<Boolean>createBuilder()
                                 .name(Text.of("Toggle HUD on and off"))
                                 .description(OptionDescription.of(Text.of("Turn on and off the task HUD.")))
-                                .binding(true, () -> configuration.isHudEnabled, newVal -> configuration.isHudEnabled = newVal)
+                                .binding(configuration.isHudEnabled, () -> configuration.isHudEnabled, newVal -> configuration.isHudEnabled = newVal)
                                 .controller(BooleanControllerBuilder::create)
                                 .build()),
                 Categories.Hud.General.createConfig(100,
@@ -45,60 +50,70 @@ public class HudManager extends ObservableBase<Observer<HudManager.Event>, HudMa
                                 .description(OptionDescription.of(Text.of("Open the HUD customization screen to position and scale all HUD elements.")))
                                 .action((t, o) -> mcClient.setScreen(Main.SERVICE_PROVIDER.getService(HudCustomizationScreen.class)))
                                 .build()),
+                Categories.Hud.General.createConfig(200,
+                        Option.<Configuration.ActiveBarMode>createBuilder()
+                                .name(Text.of("Active Bar Mode"))
+                                .description(OptionDescription.of(Text.of("Bottom: Hotbar moves to bottom bar. Top: Hotbar stays in normal position. None: Hotbar stays in normal position.")))
+                                .binding(configuration.activeBarMode,
+                                        () -> configuration.activeBarMode,
+                                        newVal -> configuration.activeBarMode = newVal)
+                                .controller(opt -> EnumControllerBuilder.create(opt)
+                                        .enumClass(Configuration.ActiveBarMode.class))
+                                .build()),
                 Categories.Hud.Vanilla.createConfig(0,
                         Option.<Boolean>createBuilder()
                                 .name(Text.of("Hide vanilla scoreboard"))
                                 .description(OptionDescription.of(Text.of("Hides the vanilla scoreboard sidebar.")))
-                                .binding(false, () -> configuration.hideVanillaScoreboard, newVal -> configuration.hideVanillaScoreboard = newVal)
+                                .binding(configuration.hideVanillaScoreboard, () -> configuration.hideVanillaScoreboard, newVal -> configuration.hideVanillaScoreboard = newVal)
                                 .controller(BooleanControllerBuilder::create)
                                 .build()),
                 Categories.Hud.Vanilla.createConfig(100,
                         Option.<Boolean>createBuilder()
                                 .name(Text.of("Hide vanilla hearts"))
                                 .description(OptionDescription.of(Text.of("Hides the vanilla health hearts.")))
-                                .binding(false, () -> configuration.hideVanillaHearts, newVal -> configuration.hideVanillaHearts = newVal)
+                                .binding(configuration.hideVanillaHearts, () -> configuration.hideVanillaHearts, newVal -> configuration.hideVanillaHearts = newVal)
                                 .controller(BooleanControllerBuilder::create)
                                 .build()),
                 Categories.Hud.Vanilla.createConfig(200,
                         Option.<Boolean>createBuilder()
                                 .name(Text.of("Hide vanilla food"))
                                 .description(OptionDescription.of(Text.of("Hides the vanilla hunger/food bar.")))
-                                .binding(false, () -> configuration.hideVanillaFood, newVal -> configuration.hideVanillaFood = newVal)
+                                .binding(configuration.hideVanillaFood, () -> configuration.hideVanillaFood, newVal -> configuration.hideVanillaFood = newVal)
                                 .controller(BooleanControllerBuilder::create)
                                 .build()),
                 Categories.Hud.Vanilla.createConfig(300,
                         Option.<Boolean>createBuilder()
                                 .name(Text.of("Hide vanilla armor"))
                                 .description(OptionDescription.of(Text.of("Hides the vanilla armor indicators.")))
-                                .binding(false, () -> configuration.hideVanillaArmor, newVal -> configuration.hideVanillaArmor = newVal)
+                                .binding(configuration.hideVanillaArmor, () -> configuration.hideVanillaArmor, newVal -> configuration.hideVanillaArmor = newVal)
                                 .controller(BooleanControllerBuilder::create)
                                 .build()),
                 Categories.Hud.Vanilla.createConfig(400,
                         Option.<Boolean>createBuilder()
                                 .name(Text.of("Hide vanilla effects"))
                                 .description(OptionDescription.of(Text.of("Hides the vanilla potion effect icons.")))
-                                .binding(false, () -> configuration.hideVanillaEffects, newVal -> configuration.hideVanillaEffects = newVal)
+                                .binding(configuration.hideVanillaEffects, () -> configuration.hideVanillaEffects, newVal -> configuration.hideVanillaEffects = newVal)
                                 .controller(BooleanControllerBuilder::create)
                                 .build()),
                 Categories.Hud.Vanilla.createConfig(500,
                         Option.<Boolean>createBuilder()
                                 .name(Text.of("Hide vanilla overlay message"))
                                 .description(OptionDescription.of(Text.of("Hides the vanilla action bar overlay (health/mana display).")))
-                                .binding(false, () -> configuration.hideVanillaOverlayMessage, newVal -> configuration.hideVanillaOverlayMessage = newVal)
+                                .binding(configuration.hideVanillaOverlayMessage, () -> configuration.hideVanillaOverlayMessage, newVal -> configuration.hideVanillaOverlayMessage = newVal)
                                 .controller(BooleanControllerBuilder::create)
                                 .build()),
                 Categories.Hud.Vanilla.createConfig(600,
                         Option.<Boolean>createBuilder()
                                 .name(Text.of("Hide vanilla experience bar"))
                                 .description(OptionDescription.of(Text.of("Hides the vanilla experience bar.")))
-                                .binding(false, () -> configuration.hideVanillaExperienceBar, newVal -> configuration.hideVanillaExperienceBar = newVal)
+                                .binding(configuration.hideVanillaExperienceBar, () -> configuration.hideVanillaExperienceBar, newVal -> configuration.hideVanillaExperienceBar = newVal)
                                 .controller(BooleanControllerBuilder::create)
                                 .build()),
                 Categories.Hud.Vanilla.createConfig(700,
                         Option.<Boolean>createBuilder()
                                 .name(Text.of("Hide vanilla experience level"))
                                 .description(OptionDescription.of(Text.of("Hides the vanilla experience level number.")))
-                                .binding(false, () -> configuration.hideVanillaExperienceLevel, newVal -> configuration.hideVanillaExperienceLevel = newVal)
+                                .binding(configuration.hideVanillaExperienceLevel, () -> configuration.hideVanillaExperienceLevel, newVal -> configuration.hideVanillaExperienceLevel = newVal)
                                 .controller(BooleanControllerBuilder::create)
                                 .build())
         );
@@ -125,12 +140,16 @@ public class HudManager extends ObservableBase<Observer<HudManager.Event>, HudMa
     protected Comparator<Observer<HudManager.Event>> getComparator() {
         return (o1, o2) -> {
             if (o1 == o2) return 0;
-            if (o1 instanceof HudRender(HudElement<?> element) && element.isInBottomBarGroup()) {
-                return -1;
-            }
-            if (o2 instanceof HudRender(HudElement<?> element) && element.isInBottomBarGroup()) {
-                return 1;
-            }
+            // Check if elements are bars (BottomBarElement or TopBarElement)
+            boolean o1IsBar = o1 instanceof HudRender(HudElement<?> element1, HudManager hudManager) && 
+                              (element1 instanceof BottomBarElement || element1 instanceof TopBarElement);
+            boolean o2IsBar = o2 instanceof HudRender(HudElement<?> element2, HudManager hudManager) && 
+                              (element2 instanceof BottomBarElement || element2 instanceof TopBarElement);
+            
+            // Bars render first (return -1), other elements render after (return 0)
+            if (o1IsBar && !o2IsBar) return -1;
+            if (!o1IsBar && o2IsBar) return 1;
+            // Both are bars or both are not bars - same layer
             return 0;
         };
     }
@@ -155,10 +174,38 @@ public class HudManager extends ObservableBase<Observer<HudManager.Event>, HudMa
         return options;
     }
 
+    public static boolean shouldRenderBar(HudElement<?> element, Configuration config) {
+        if (element instanceof BottomBarElement) {
+            return config.getActiveBarMode() == Configuration.ActiveBarMode.BOTTOM;
+        } else if (element instanceof TopBarElement) {
+            return config.getActiveBarMode() == Configuration.ActiveBarMode.TOP;
+        }
+        return true; // Non-bar elements always render
+    }
+
     public static class Configuration {
+
+        public enum ActiveBarMode implements NameableEnum {
+            NONE("None"),
+            BOTTOM("Bottom Bar"),
+            TOP("Top Bar");
+
+            private final String displayName;
+
+            ActiveBarMode(String displayName) {
+                this.displayName = displayName;
+            }
+
+            @Override
+            public Text getDisplayName() {
+                return Text.of(displayName);
+            }
+        }
 
         @SerialEntry
         public boolean isHudEnabled = true;
+        @SerialEntry
+        public ActiveBarMode activeBarMode = ActiveBarMode.NONE;
         @SerialEntry
         public boolean hideVanillaScoreboard = false;
         @SerialEntry
@@ -178,6 +225,10 @@ public class HudManager extends ObservableBase<Observer<HudManager.Event>, HudMa
 
         public boolean isHudEnabled() {
             return isHudEnabled;
+        }
+
+        public ActiveBarMode getActiveBarMode() {
+            return activeBarMode;
         }
 
         public boolean isHideVanillaArmor() {
@@ -213,11 +264,16 @@ public class HudManager extends ObservableBase<Observer<HudManager.Event>, HudMa
         }
     }
 
-    public record HudRender(HudElement<?> element) implements Observer<Event> {
+    public record HudRender(HudElement<?> element, HudManager hudManager) implements Observer<Event> {
 
         @Override
         public void onEvent(Event event) {
-            if (element.isScalable() && !element.isInBottomBarGroup()) {
+            // Check if element is a bar and should be rendered based on activeBarMode
+            if (!shouldRenderBar(element, hudManager.getConfiguration())) {
+                return; // Skip rendering if bar is not active
+            }
+            
+            if (element.isScalable()) {
                 MatrixStack matrixStack = event.drawContext.getMatrices();
                 matrixStack.push();
                 matrixStack.scale(element.getScale(), element.getScale(), element.getScale());
