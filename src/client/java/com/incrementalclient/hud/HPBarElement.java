@@ -18,7 +18,6 @@ import java.util.List;
 
 public class HPBarElement extends HudElement<HPBarElement.Configuration> {
     private static final int BASE_BAR_WIDTH = 100; // Base width before applying Config hpBarSizeScale
-    private static final int TEXT_HEIGHT = 9; // Height for text
 
     private final HPBarElement.Configuration configuration = new Configuration();
 
@@ -114,65 +113,52 @@ public class HPBarElement extends HudElement<HPBarElement.Configuration> {
 
         var textRenderer = mcAccessor.getTextRenderer();
 
-        // Render HP text (e.g., "100/100")
-        String hpText = String.format("%.2f/%.2f", currentHealth, maxHealth);
-        if (absorption > 0) {
-            hpText += String.format(" (+%.2f)", absorption);
-        }
+        float totalHP = currentHealth + absorption;
+        float hpPercentage = maxHealth > 0 ? (totalHP / maxHealth) * 100.0f : 0.0f;
+        
+        String hpText = String.format("%.0f%%", hpPercentage);
         Text hpTextComponent = Text.literal(hpText);
 
-        // Draw background for text
-        int textWidth = textRenderer.get().getWidth(hpTextComponent);
-        int bgOpacity = 200; // Semi-transparent black background
-        int bgColor = ColorHelper.getArgb(bgOpacity, 0, 0, 0);
-        context.fill(x, y, x + textWidth + HudConstants.BACKGROUND_PADDING, y + TEXT_HEIGHT + 2, bgColor);
-
-        // Draw HP text
-        context.drawText(textRenderer.get(), hpTextComponent, x + 2, y + 2, 0xFFFFFFFF, false);
-
-        // Only render bar if display mode is BAR_AND_NUMBER
         if (displayMode == HPBarDisplayMode.BAR_AND_NUMBER) {
-            // Calculate bar position (below text)
-            int barY = y + TEXT_HEIGHT + 4;
+            int barY = y + (HudConstants.BAR_ELEMENT_HEIGHT - 1) / 2;
+            int barStartX = x;
 
-            float totalHP = currentHealth + absorption;
-            float fillRatio = Math.max(0, Math.min(1.0f, totalHP / maxHealth));
+            float fillRatio = Math.max(0, Math.min(1.0f, hpPercentage / 100.0f));
 
-            // Bar sizing (bar only, not text)
             double sizeScale = Math.max(0.4, Math.min(1.0, configuration.hpBarSizeScale));
             int barWidth = Math.max(40, (int) Math.round(BASE_BAR_WIDTH * sizeScale));
 
             int filledWidth = (int) (barWidth * fillRatio);
-            int shadowX = x + 2;
+            int shadowX = barStartX + 2;
             int shadowY = barY + 1;
             
-            // Draw shadow bar first (2 pixels to the right, 1 pixel below) - full width
-            // Dark green for filled portion, lighter black for unfilled portion
-            int darkGreenColor = ColorHelper.getArgb(255, 30, 100, 30); // Less saturated dark green for filled
-            int shadowUnfilledColor = ColorHelper.getArgb(255, 50, 50, 50); // Lighter black (dark gray) for unfilled
+            int darkGreenColor = ColorHelper.getArgb(255, 30, 100, 30);
+            int shadowUnfilledColor = ColorHelper.getArgb(255, 50, 50, 50);
             
-            // Draw filled portion of shadow (dark green)
             if (filledWidth > 0) {
                 context.fill(shadowX, shadowY, shadowX + filledWidth, shadowY + 1, darkGreenColor);
             }
-            // Draw unfilled portion of shadow (lighter black)
             if (filledWidth < barWidth) {
                 context.fill(shadowX + filledWidth, shadowY, shadowX + barWidth, shadowY + 1, shadowUnfilledColor);
             }
             
-            // Draw main bar (1 pixel tall) on top - full width
-            // Bright green for filled portion, darker gray for unfilled portion
-            int brightGreenColor = ColorHelper.getArgb(255, 40, 200, 40); // Less saturated bright green for filled
-            int lightGrayColor = ColorHelper.getArgb(255, 80, 80, 80); // Darker gray for unfilled
+            int brightGreenColor = ColorHelper.getArgb(255, 40, 200, 40);
+            int lightGrayColor = ColorHelper.getArgb(255, 80, 80, 80);
             
-            // Draw filled portion of main bar (bright green)
             if (filledWidth > 0) {
-                context.fill(x, barY, x + filledWidth, barY + 1, brightGreenColor);
+                context.fill(barStartX, barY, barStartX + filledWidth, barY + 1, brightGreenColor);
             }
-            // Draw unfilled portion of main bar (light gray)
             if (filledWidth < barWidth) {
-                context.fill(x + filledWidth, barY, x + barWidth, barY + 1, lightGrayColor);
+                context.fill(barStartX + filledWidth, barY, barStartX + barWidth, barY + 1, lightGrayColor);
             }
+            
+            int textX = barStartX + barWidth + 4;
+            int textY = y + (HudConstants.BAR_ELEMENT_HEIGHT - HudConstants.TEXT_HEIGHT) / 2;
+            
+            context.drawText(textRenderer.get(), hpTextComponent, textX, textY, 0xFFFFFFFF, true);
+        } else {
+            int textY = y + (HudConstants.BAR_ELEMENT_HEIGHT - HudConstants.TEXT_HEIGHT) / 2;
+            context.drawText(textRenderer.get(), hpTextComponent, x, textY, 0xFFFFFFFF, true);
         }
     }
 
@@ -182,12 +168,9 @@ public class HPBarElement extends HudElement<HPBarElement.Configuration> {
         int x = (int) pos.x;
         int y = (int) pos.y;
 
-        Vector2f placeholderSize = getBoundingBox();
-        int bgColor = ColorHelper.getArgb(200, 0, 0, 0);
-        context.fill(x, y, x + (int) placeholderSize.x, y + (int) placeholderSize.y, bgColor);
-
         TextRenderer textRenderer = mcAccessor.getTextRenderer().get();
-        context.drawText(textRenderer, Text.literal("HP Bar"), x + 2, y + 2, 0xFFFFFFFF, false);
+        int textY = y + (HudConstants.BAR_ELEMENT_HEIGHT - HudConstants.TEXT_HEIGHT) / 2;
+        context.drawText(textRenderer, Text.literal("HP Bar"), x, textY, 0xFFFFFFFF, true);
     }
 
     @Override
@@ -197,9 +180,10 @@ public class HPBarElement extends HudElement<HPBarElement.Configuration> {
         var window = mcAccessor.getWindow();
         if (window.isPresent()) {
             int screenHeight = window.get().getScaledHeight();
-            int bottomBarY = screenHeight - 22; // Bottom bar height
+            int bottomBarY = screenHeight - HudConstants.BAR_ELEMENT_HEIGHT; // Bottom bar height
             // Position HP bar above the bottom bar with some spacing
-            return new Vector2f(10, bottomBarY - getBoundingBox().y - 4);
+            // Use constant BAR_ELEMENT_HEIGHT instead of calling getBoundingBox().y
+            return new Vector2f(10, bottomBarY - HudConstants.BAR_ELEMENT_HEIGHT - 4);
         }
         return new Vector2f(10, 10);
     }
@@ -209,18 +193,17 @@ public class HPBarElement extends HudElement<HPBarElement.Configuration> {
         // Get display mode to determine bounding box
         HPBarDisplayMode displayMode = configuration.hpBarDisplayMode;
 
-        int textWidth = 100; // Approximate width for "100.00/100.00 (+10.00)"
-
+        var textRenderer = mcAccessor.getTextRenderer();
+        // Approximate text width for percentage (e.g., "100%")
+        int textWidth = textRenderer.isPresent() ? textRenderer.get().getWidth(Text.literal("100%")) : 40;
+        
         if (displayMode == HPBarDisplayMode.NUMBER_ONLY) {
-            // Only text, no bar
-            return new Vector2f(textWidth + HudConstants.BACKGROUND_PADDING, TEXT_HEIGHT + 2);
+            return new Vector2f(textWidth, HudConstants.BAR_ELEMENT_HEIGHT);
         } else {
-            // Text + bar (1 pixel tall bar with shadow)
             double sizeScale = Math.max(0.4, Math.min(1.0, configuration.hpBarSizeScale));
             int barWidth = Math.max(40, (int) Math.round(BASE_BAR_WIDTH * sizeScale));
-            int width = Math.max(textWidth, barWidth) + HudConstants.BACKGROUND_PADDING;
-            int height = TEXT_HEIGHT + 4 + 1 + 1; // Text + spacing + 1px bar + 1px shadow offset
-            return new Vector2f(width, height);
+            int width = barWidth + 4 + textWidth;
+            return new Vector2f(width, HudConstants.BAR_ELEMENT_HEIGHT);
         }
     }
 

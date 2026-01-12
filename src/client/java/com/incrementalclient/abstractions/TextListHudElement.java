@@ -124,7 +124,7 @@ public abstract class TextListHudElement<T extends TextListHudElement.Configurat
                 .mapToInt(this::getTextWidth)
                 .max()
                 .orElse(0);
-        int height = HudConstants.TEXT_PADDING_Y + (HudConstants.LINE_SPACING * texts.size());
+        int height = HudConstants.TEXT_PADDING_Y + (HudConstants.LINE_SPACING * texts.size()) + 2; // +2 for bottom padding
 
         return new Vector2f(maxWidth + HudConstants.BACKGROUND_PADDING, height);
     }

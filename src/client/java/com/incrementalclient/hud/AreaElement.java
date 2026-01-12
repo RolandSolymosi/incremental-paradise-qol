@@ -13,12 +13,12 @@ import net.minecraft.util.Formatting;
 
 import java.util.List;
 
-public class PlayerNameElement extends HudElement<PlayerNameElement.Configuration> {
+public class AreaElement extends HudElement<AreaElement.Configuration> {
 
-    private final PlayerNameElement.Configuration configuration = new Configuration();
+    private final AreaElement.Configuration configuration = new Configuration();
     private final GameInfoMonitor gameInfoMonitor;
 
-    public PlayerNameElement(
+    public AreaElement(
             GameInfoMonitor gameInfoMonitor,
             MinecraftClientAccessor mcAccessor,
             HudManager hudManager
@@ -44,12 +44,10 @@ public class PlayerNameElement extends HudElement<PlayerNameElement.Configuratio
             return;
         }
 
-        String playerName = player.get().getName().getString();
-
         var progressData = gameInfoMonitor.getPersistentProgressData();
-        Text rankText = Text.empty();
+        Text areaText = Text.empty();
         if (progressData != null) {
-            rankText = progressData.getRank();
+            areaText = progressData.getArea();
         }
 
         Vector2f pos = getCurrentPosition();
@@ -58,41 +56,25 @@ public class PlayerNameElement extends HudElement<PlayerNameElement.Configuratio
 
         var textRenderer = mcAccessor.getTextRenderer();
         if (textRenderer.isEmpty()) {
+            if (editMode) {
+                renderEditModePlaceholder(context);
+            }
             return;
         }
 
         Text displayText;
-        if (rankText != null && !rankText.getString().isEmpty()) {
-            String rankName = rankText.getString();
-            Formatting rankColor = getRankColor(rankName);
-            
-            displayText = Text.literal("[")
-                    .styled(style -> style.withColor(Formatting.GRAY))
-                    .append(Text.literal(rankName)
-                            .styled(style -> style.withColor(rankColor).withBold(true)))
-                    .append(Text.literal("] ")
-                            .styled(style -> style.withColor(Formatting.GRAY)))
-                    .append(Text.literal(playerName)
-                            .styled(style -> style.withColor(Formatting.GRAY)));
+        if (areaText != null && !areaText.getString().isEmpty()) {
+            displayText = Text.literal(areaText.getString())
+                    .styled(style -> style.withColor(Formatting.YELLOW));
         } else {
-            displayText = Text.literal(playerName)
-                    .styled(style -> style.withColor(Formatting.GRAY));
+            if (editMode) {
+                renderEditModePlaceholder(context);
+                return;
+            }
+            displayText = Text.literal("");
         }
 
         renderBarText(context, textRenderer.get(), displayText, x, y);
-    }
-
-    private Formatting getRankColor(String rankName) {
-        String rankLower = rankName.toLowerCase();
-        return switch (rankLower) {
-            case "explorer" -> Formatting.YELLOW;
-            case "navigator" -> Formatting.GREEN;
-            case "adventurer" -> Formatting.AQUA;
-            case "voyager" -> Formatting.LIGHT_PURPLE;
-            case "outlander" -> Formatting.DARK_PURPLE;
-            case "trailblazer" -> Formatting.GOLD;
-            default -> Formatting.WHITE;
-        };
     }
 
     private void renderEditModePlaceholder(DrawContext context) {
@@ -101,7 +83,9 @@ public class PlayerNameElement extends HudElement<PlayerNameElement.Configuratio
         int y = (int) pos.y;
 
         TextRenderer textRenderer = mcAccessor.getTextRenderer().get();
-        renderBarText(context, textRenderer, Text.literal("Player Name"), x, y);
+        Text placeholderText = Text.literal("Area")
+                .styled(style -> style.withColor(Formatting.YELLOW));
+        renderBarText(context, textRenderer, placeholderText, x, y);
     }
 
     @Override
@@ -116,36 +100,30 @@ public class PlayerNameElement extends HudElement<PlayerNameElement.Configuratio
             return new Vector2f(100, HudConstants.BAR_ELEMENT_HEIGHT); // Placeholder width
         }
 
-        var player = mcAccessor.getPlayer();
-        String playerName = player.map(p -> p.getName().getString()).orElse("PlayerName");
-        
         var progressData = gameInfoMonitor.getPersistentProgressData();
-        int rankWidth = 0;
+        int textWidth = 100; // Default minimum width for placeholder
         if (progressData != null) {
-            Text rankText = progressData.getRank();
-            if (rankText != null && !rankText.getString().isEmpty()) {
-                rankWidth = textRenderer.get().getWidth(rankText) + textRenderer.get().getWidth("[] ");
+            Text areaText = progressData.getArea();
+            if (areaText != null && !areaText.getString().isEmpty()) {
+                textWidth = textRenderer.get().getWidth(areaText);
             }
         }
-        
-        int nameWidth = textRenderer.get().getWidth(playerName);
-        int totalWidth = rankWidth + nameWidth;
 
-        return new Vector2f(totalWidth, HudConstants.BAR_ELEMENT_HEIGHT);
+        return new Vector2f(textWidth, HudConstants.BAR_ELEMENT_HEIGHT);
     }
 
     @Override
     public String getDisplayName() {
-        return "Player Name";
+        return "Area";
     }
 
     @Override
     public String getJsonSection() {
-        return "playerNameHud";
+        return "areaHud";
     }
 
     @Override
-    public PlayerNameElement.Configuration getConfiguration() {
+    public AreaElement.Configuration getConfiguration() {
         return configuration;
     }
 

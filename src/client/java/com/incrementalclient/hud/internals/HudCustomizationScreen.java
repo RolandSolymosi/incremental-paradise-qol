@@ -1,8 +1,11 @@
 package com.incrementalclient.hud.internals;
 
 import com.incrementalclient.abstractions.HudElement;
+import com.incrementalclient.hud.BottomBarElement;
+import com.incrementalclient.hud.TopBarElement;
 import com.incrementalclient.internals.MinecraftClientAccessor;
 import com.incrementalclient.services.ConfigHandler;
+import com.incrementalclient.services.HudManager;
 import com.incrementalclient.common.utils.Vector2f;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
@@ -16,41 +19,60 @@ public class HudCustomizationScreen extends Screen {
     private final Screen parent;
     private final HudElement<?>[] hudElements;
     private final ConfigHandler configHandler;
+    private final HudManager hudManager;
     private final List<Integer> snapPointsX = new ArrayList<>();
     private final List<Integer> snapPointsY = new ArrayList<>();
 
-    public HudCustomizationScreen(MinecraftClientAccessor mcAccessor, HudElement<?>[] hudElements, ConfigHandler configHandler) {
+    public HudCustomizationScreen(MinecraftClientAccessor mcAccessor, HudElement<?>[] hudElements, ConfigHandler configHandler, HudManager hudManager) {
         super(Text.literal("HUD Customization"));
         this.parent = mcAccessor.getScreen().orElse(null);
         this.hudElements = hudElements;
         this.configHandler = configHandler;
+        this.hudManager = hudManager;
     }
 
     @Override
     protected void init() {
-        // Notify elements that edit mode is entering
+        HudManager.Configuration.ActiveBarMode activeBarMode = hudManager.getConfiguration().getActiveBarMode();
+        
         for (HudElement<?> element : hudElements) {
             element.onEditModeEnter();
         }
 
         refreshSnapPoints();
 
-        // Create widgets for each element
-        // Order matters: toggle and scale widgets should be added AFTER element widget
-        // so they render on top and can be clicked
+        List<HudElement<?>> barsToAdd = new ArrayList<>();
+        List<HudElement<?>> otherElementsToAdd = new ArrayList<>();
+        
         for (HudElement<?> element : hudElements) {
-            // Add toggle widget first (will be rendered last, so on top)
+            if (!HudManager.shouldRenderBar(element, hudManager.getConfiguration())) {
+                continue;
+            }
+            
+            if (element instanceof BottomBarElement || element instanceof TopBarElement) {
+                barsToAdd.add(element);
+            } else {
+                otherElementsToAdd.add(element);
+            }
+        }
+        
+        for (HudElement<?> element : otherElementsToAdd) {
+            addDrawableChild(new HudElementWidget(element, snapPointsX, snapPointsY, width, height));
+        }
+        
+        for (HudElement<?> element : otherElementsToAdd) {
             addDrawableChild(new HudElementToggleWidget(element, 0, 0));
-            // Add scale widget
             if (element.isScalable()) {
                 Vector2f pos = element.getCurrentPosition();
                 addDrawableChild(new HudScaleWidget(element, (int) pos.x + 7, (int) pos.y + 7));
             }
-            // Add element widget last (will be rendered first, so behind other widgets)
-            addDrawableChild(new HudElementWidget(element, snapPointsX, snapPointsY));
         }
 
-        // Reset all button
+        int buttonY = 5;
+        if (activeBarMode == HudManager.Configuration.ActiveBarMode.TOP) {
+            buttonY = 27;
+        }
+        
         addDrawableChild(ButtonWidget.builder(
             Text.literal("Reset All"),
             button -> {
@@ -58,62 +80,46 @@ public class HudCustomizationScreen extends Screen {
                     element.resetDeltaPositions();
                     element.setScale(1.0f);
                 }
-                refreshSnapPoints();
             }
-        ).dimensions(width / 2 - 105, 5, 100, 20).build());
+        ).dimensions(width / 2 - 105, buttonY, 100, 20).build());
 
-        // Done button
         addDrawableChild(ButtonWidget.builder(
             Text.literal("Done"),
             button -> {
                 configHandler.save();
                 client.setScreen(parent);
             }
-        ).dimensions(width / 2 + 5, 5, 100, 20).build());
-
-        // Instructions text (rendered separately)
+        ).dimensions(width / 2 + 5, buttonY, 100, 20).build());
     }
 
     private void refreshSnapPoints() {
         snapPointsX.clear();
         snapPointsY.clear();
 
-        // Add screen edges
         snapPointsX.add(0);
         snapPointsX.add(width);
         snapPointsY.add(0);
         snapPointsY.add(height);
 
-        // Add screen center
-        snapPointsX.add(width / 2);
-        snapPointsY.add(height / 2);
-
-        // Add quarter points
-        snapPointsX.add(width / 4);
-        snapPointsX.add(width * 3 / 4);
-        snapPointsY.add(height / 4);
-        snapPointsY.add(height * 3 / 4);
-
-        // Add element positions
         for (HudElement<?> element : hudElements) {
+            if (element instanceof BottomBarElement || element instanceof TopBarElement) {
+                continue;
+            }
+            
             Vector2f pos = element.getCurrentPosition();
-            Vector2f bounds = element.getCurrentBoundingPoint();
-
-            snapPointsX.add((int) pos.x);
-            snapPointsY.add((int) pos.y);
-            snapPointsX.add((int) bounds.x);
-            snapPointsY.add((int) bounds.y);
-            snapPointsX.add((int) (pos.x + bounds.x / 2)); // Center of element
-            snapPointsY.add((int) (pos.y + bounds.y / 2));
+            Vector2f bounds = element.getBoundingBox();
+            int centerX = (int) (pos.x + bounds.x / 2);
+            int centerY = (int) (pos.y + bounds.y / 2);
+            
+            snapPointsX.add(centerX);
+            snapPointsY.add(centerY);
         }
     }
 
     @Override
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
-        // Render background
         renderBackground(context, mouseX, mouseY, delta);
 
-        // Render instructions
         String instructions = "Drag elements to move | Right-click to reset | Toggle ON/OFF to show/hide";
         var textRenderer = client.textRenderer;
         int textWidth = textRenderer.getWidth(instructions);
@@ -121,8 +127,26 @@ public class HudCustomizationScreen extends Screen {
         context.fill(textX - 5, height - 35, textX + textWidth + 5, height - 15, HudElement.HudConstants.TEXT_BACKGROUND);
         context.drawText(textRenderer, instructions, textX, height - 30, HudElement.HudConstants.TEXT_WHITE, false);
 
-        // Render HUD elements in edit mode
+        List<HudElement<?>> bars = new ArrayList<>();
+        List<HudElement<?>> otherElements = new ArrayList<>();
         for (var element : hudElements) {
+            if (element instanceof BottomBarElement || element instanceof TopBarElement) {
+                if (HudManager.shouldRenderBar(element, hudManager.getConfiguration())) {
+                    bars.add(element);
+                }
+            } else {
+                otherElements.add(element);
+            }
+        }
+        
+        renderElements(bars, context, delta);
+        renderElements(otherElements, context, delta);
+
+        super.render(context, mouseX, mouseY, delta);
+    }
+    
+    private void renderElements(List<HudElement<?>> elements, DrawContext context, float delta) {
+        for (var element : elements) {
             if (!element.isEnabled()) continue;
 
             net.minecraft.client.util.math.MatrixStack matrixStack = context.getMatrices();
@@ -133,13 +157,10 @@ public class HudCustomizationScreen extends Screen {
 
             matrixStack.pop();
         }
-
-        super.render(context, mouseX, mouseY, delta);
     }
 
     @Override
     public void renderBackground(DrawContext context, int mouseX, int mouseY, float delta) {
-        // Semi-transparent background
         context.fill(0, 0, width, height, HudElement.HudConstants.TEXT_BACKGROUND);
     }
     
