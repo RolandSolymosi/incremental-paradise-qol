@@ -37,6 +37,9 @@ public class GameInfoMonitor {
     // Persistent player progress data (accumulates across worlds)
     private final PlayerProgressData persistentProgressData = new PlayerProgressData();
     
+    // Current snapshot from the latest scoreboard parse (for current currencies only)
+    private PlayerProgressParser.PlayerProgressSnapshot currentSnapshot = null;
+    
     // Player stats (from action bar or directly from player)
     private float playerHealth = 0;
     private float playerMaxHealth = 20;
@@ -201,7 +204,6 @@ public class GameInfoMonitor {
      * Parses the collected scoreboard lines to extract player progress information.
      * This concatenates all lines, parses them, and merges with persistent data.
      * Values are accumulated across worlds (never lost when changing worlds).
-     * Passes styled Text components to preserve styling for area, rank, and layers.
      */
     private void parseScoreboardForProgress() {
         if (scoreboardLines.isEmpty()) {
@@ -211,8 +213,11 @@ public class GameInfoMonitor {
         // Concatenate all scoreboard lines into one string (for regex parsing)
         String fullText = String.join(" ", scoreboardLines);
         
-        // Parse using the PlayerProgressParser with styled components to preserve styling
-        var newSnapshot = PlayerProgressParser.parse(fullText, scoreboardComponents);
+        // Parse using the PlayerProgressParser (plain text - styling applied later)
+        var newSnapshot = PlayerProgressParser.parse(fullText);
+        
+        // Store current snapshot (for displaying only current currencies)
+        currentSnapshot = newSnapshot;
         
         // Merge with persistent data (accumulates values across worlds)
         if (!newSnapshot.isEmpty()) {
@@ -497,6 +502,29 @@ public class GameInfoMonitor {
      */
     public PlayerProgressParser.PlayerProgressSnapshot getLastProgressSnapshot() {
         return persistentProgressData.toSnapshot();
+    }
+    
+    /**
+     * Gets the current snapshot from the latest scoreboard parse.
+     * Returns only currencies that are currently on the scoreboard.
+     */
+    public PlayerProgressParser.PlayerProgressSnapshot getCurrentSnapshot() {
+        return currentSnapshot != null ? currentSnapshot : createEmptySnapshot();
+    }
+    
+    /**
+     * Creates an empty snapshot (for fallback).
+     */
+    private PlayerProgressParser.PlayerProgressSnapshot createEmptySnapshot() {
+        return new PlayerProgressParser.PlayerProgressSnapshot(
+                null,
+                Text.empty(),
+                Text.empty(),
+                new EnumMap<>(ProgressLayer.class),
+                0,
+                0,
+                new EnumMap<>(CurrencyType.class)
+        );
     }
 
     /**

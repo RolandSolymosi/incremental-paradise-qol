@@ -9,9 +9,11 @@ import net.minecraft.text.Text;
 
 public class HudElementToggleWidget extends ClickableWidget {
     private final HudElement element;
+    private static final int WIDGET_WIDTH = 30;
+    private static final int WIDGET_HEIGHT = 10;
     
     public HudElementToggleWidget(HudElement element, int x, int y) {
-        super(x, y, 60, 12, Text.empty());
+        super(x, y, WIDGET_WIDTH, WIDGET_HEIGHT, Text.empty());
         this.element = element;
     }
     
@@ -20,22 +22,18 @@ public class HudElementToggleWidget extends ClickableWidget {
         Vector2f pos = element.getCurrentPosition();
         Vector2f bounds = element.getBoundingBox();
         
-        // Position toggle button at top-right of element
-        this.setX((int) (pos.x + bounds.x - 60));
+        this.setX((int) (pos.x + bounds.x + 2));
         this.setY((int) pos.y);
         
-        // Ensure we're within screen bounds
         if (getX() < 0) this.setX((int) pos.x);
         if (getY() < 0) this.setY((int) pos.y);
         
-        // Draw toggle button
         int bgColor = element.isEnabled() ? HudElement.HudConstants.TOGGLE_ENABLED : HudElement.HudConstants.TOGGLE_DISABLED;
         int borderColor = isHovered() ? HudElement.HudConstants.WIDGET_BORDER_DRAGGING : HudElement.HudConstants.WIDGET_BORDER_HOVER;
         
         context.fill(getX(), getY(), getX() + width, getY() + height, bgColor);
         context.drawBorder(getX(), getY(), width, height, borderColor);
         
-        // Draw text
         String text = element.isEnabled() ? "ON" : "OFF";
         var textRenderer = net.minecraft.client.MinecraftClient.getInstance().textRenderer;
         int textX = getX() + (width - textRenderer.getWidth(text)) / 2;
@@ -45,10 +43,9 @@ public class HudElementToggleWidget extends ClickableWidget {
     
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        // Update position before checking
         Vector2f pos = element.getCurrentPosition();
         Vector2f bounds = element.getBoundingBox();
-        this.setX((int) (pos.x + bounds.x - 60));
+        this.setX((int) (pos.x + bounds.x + 2));
         this.setY((int) pos.y);
         
         if (isMouseOver(mouseX, mouseY) && button == 0) {
@@ -60,7 +57,6 @@ public class HudElementToggleWidget extends ClickableWidget {
     
     @Override
     protected void appendClickableNarrations(NarrationMessageBuilder builder) {
-        // No narration needed
     }
 }
 

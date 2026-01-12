@@ -15,16 +15,48 @@ import dev.isxander.yacl3.api.OptionDescription;
 import dev.isxander.yacl3.api.controller.DoubleSliderControllerBuilder;
 import dev.isxander.yacl3.config.v2.api.SerialEntry;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.client.util.Window;
+import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 import net.minecraft.util.math.ColorHelper;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 
 public class CurrencyElement extends HudElement<CurrencyElement.Configuration> {
-    private static final int SPACING = 8; // Spacing between currencies
+    private static final int LINE_SPACING = 2; // Spacing between currency rows
+    private static final int LINE_HEIGHT = 9; // Height of each line
+    
+    // Custom color RGB values
+    private static final int COLOR_BUBBLES_NAME = 0xC6C6FC;
+    private static final int COLOR_BUBBLES_VALUE = 0xADADFC;
+    private static final int COLOR_SHEEP_NAME = 0xFCFCFC;
+    private static final int COLOR_SHEEP_VALUE = 0xA8A8A8;
+    
+    // Fuel colors
+    private static final int COLOR_ROCKET_FUEL_NAME = 0x944A00;
+    private static final int COLOR_NATURAL_FUEL_NAME = 0x00A800;
+    private static final int COLOR_FOSSIL_FUEL_NAME = 0xA800A8;
+    private static final int COLOR_HYDRO_FUEL_NAME = 0x5454FC;
+    private static final int COLOR_FUEL_VALUE = 0xFCFCFC; // All fuel values use this color
+    
+    private static final int COLOR_TRANSCENDENCE_TOKENS = 0xFCA800;
+    
+    // Starbits gradient colors (one per letter: S, t, a, r, b, i, t, s)
+    private static final int[] STARBITS_GRADIENT = {
+        0x00FFFF, // S
+        0x01EEF9, // t
+        0x03DEF3, // a
+        0x05CEED, // r
+        0x07BEE8, // b
+        0x09ADE2, // i
+        0x0B9DDC, // t
+        0x0D8DD6  // s
+    };
+    
     private final GameInfoMonitor gameInfoMonitor;
     private final WorldMonitor worldMonitor;
 
@@ -42,11 +74,8 @@ public class CurrencyElement extends HudElement<CurrencyElement.Configuration> {
         super(uiAccessor, hudManager);
         this.gameInfoMonitor = gameInfoMonitor;
         this.worldMonitor = worldMonitor;
-        // This element is part of the bottom bar group
-        this.inBottomBarGroup = true;
-        this.bottomBarAlignment = BottomBarAlignment.CENTER; // Center in bottom bar by default
-        // Anchor point will be calculated relative to bottom bar
-        this.anchorPoint = new Vector2f(0, 0);
+        // Default anchor point (top-left corner)
+        this.anchorPoint = new Vector2f(10, 10);
 
         options = List.of(
                 Categories.Hud.Currency.createConfig(0,
@@ -74,30 +103,49 @@ public class CurrencyElement extends HudElement<CurrencyElement.Configuration> {
             return;
         }
 
-        // Get currency data from GameInfo
-        var progressData = gameInfoMonitor.getPersistentProgressData();
-        if (progressData == null) {
+        // Get current currency data from scoreboard (only currencies currently on scoreboard)
+        var currentSnapshot = gameInfoMonitor.getCurrentSnapshot();
+        if (currentSnapshot == null || currentSnapshot.currencies.isEmpty()) {
             if (editMode) {
                 renderEditModePlaceholder(context);
             }
             return;
         }
 
-        EnumMap<CurrencyType, CurrencyValue> currencies = progressData.getAllCurrencies();
-        if (currencies.isEmpty()) {
+        EnumMap<CurrencyType, CurrencyValue> currencies = currentSnapshot.currencies;
+
+        // Collect currency entries and sort by CurrencyType enum order
+        List<Map.Entry<CurrencyType, CurrencyValue>> currencyEntries = new ArrayList<>(currencies.entrySet());
+        currencyEntries.sort(Comparator.comparing(entry -> entry.getKey()));
+
+        if (currencyEntries.isEmpty()) {
             if (editMode) {
                 renderEditModePlaceholder(context);
             }
             return;
         }
 
-        // Collect currency texts (just the styled values, no names)
+        var window = mcAccessor.getWindow();
+        if (window.isEmpty()) {
+            return;
+        }
+
+        var textRenderer = mcAccessor.getTextRenderer();
+        if (textRenderer.isEmpty()) {
+            return;
+        }
+
+        // Build styled currency texts with colors
         List<Text> currencyTexts = new ArrayList<>();
-        for (var entry : currencies.entrySet()) {
+        int maxWidth = 0;
+        for (var entry : currencyEntries) {
+            CurrencyType currencyType = entry.getKey();
             CurrencyValue currencyValue = entry.getValue();
             if (currencyValue != null) {
-                // Just use the styled text, no prefix
-                currencyTexts.add(currencyValue.getStyledText().copy());
+                Text currencyText = buildCurrencyText(currencyType, currencyValue);
+                currencyTexts.add(currencyText);
+                int width = textRenderer.get().getWidth(currencyText);
+                maxWidth = Math.max(maxWidth, width);
             }
         }
 
@@ -108,69 +156,105 @@ public class CurrencyElement extends HudElement<CurrencyElement.Configuration> {
             return;
         }
 
-        var window = mcAccessor.getWindow();
+        // Calculate layout: vertical list (one currency per row)
+        int totalHeight = currencyTexts.size() * LINE_HEIGHT + (currencyTexts.size() - 1) * LINE_SPACING;
 
-        // Get bottom bar position and calculate our position relative to it
-        Vector2f bottomBarPos = getBottomBarPosition(window.get());
-        float animationOffset = getBottomBarAnimationOffset();
-
-        // Calculate position based on alignment within bottom bar
-        int x = (int) deltaPosition.x; // Use deltaPosition.x for X position (from dragging)
-        int bottomBarY = (int) (bottomBarPos.y + animationOffset);
-        int y = bottomBarY + (BottomBarElement.BAR_HEIGHT - 9) / 2; // Center vertically in bottom bar
-
-        var textRenderer = mcAccessor.getTextRenderer();
-        if (textRenderer.isEmpty()) {
-            return;
-        }
-
-        // Calculate total width
-        int totalWidth = 0;
-        for (int i = 0; i < currencyTexts.size(); i++) {
-            totalWidth += textRenderer.get().getWidth(currencyTexts.get(i));
-            if (i < currencyTexts.size() - 1) {
-                totalWidth += SPACING; // Add spacing between items
-            }
-        }
-
-        int height = 9; // Single line height
-
-        // Apply alignment
-        if (window.isEmpty()) {
-            return;
-        }
-        int screenWidth = window.get().getScaledWidth();
-        int infoAreaWidth = screenWidth - BottomBarElement.HOTBAR_WIDTH - BottomBarElement.PADDING * 3;
-
-        switch (bottomBarAlignment) {
-            case CENTER:
-                x = (int) (deltaPosition.x + infoAreaWidth / 2 - totalWidth / 2);
-                break;
-            case RIGHT:
-                x = (int) (deltaPosition.x + infoAreaWidth - totalWidth - HudConstants.TEXT_PADDING_X);
-                break;
-            case LEFT:
-            default:
-                x = (int) (deltaPosition.x + HudConstants.TEXT_PADDING_X);
-                break;
-        }
-
-        // Ensure we stay within bounds
-        x = Math.max(HudConstants.TEXT_PADDING_X, Math.min(x, screenWidth - BottomBarElement.HOTBAR_WIDTH - totalWidth - HudConstants.TEXT_PADDING_X));
+        // Get position from anchor point and delta position
+        Vector2f pos = getCurrentPosition();
+        int x = (int) pos.x;
+        int y = (int) pos.y;
 
         // Draw background
         int bgOpacity = getHudBackgroundOpacity();
         if (bgOpacity != 0) {
             int color = ColorHelper.getArgb(bgOpacity, 0, 0, 0);
-            context.fill(x, y, x + totalWidth + HudConstants.BACKGROUND_PADDING, y + height + HudConstants.TEXT_PADDING_Y, color);
+            context.fill(x, y, x + maxWidth + HudConstants.BACKGROUND_PADDING, y + totalHeight + HudConstants.TEXT_PADDING_Y, color);
         }
 
-        // Draw currencies horizontally
-        int currentX = x + HudConstants.TEXT_PADDING_X;
+        // Draw currencies in vertical list
+        int startX = x + HudConstants.TEXT_PADDING_X;
+        int currentY = y + 1;
         for (Text currencyText : currencyTexts) {
-            context.drawText(textRenderer.get(), currencyText, currentX, y + 1, 0xFFFFFFFF, true);
-            currentX += textRenderer.get().getWidth(currencyText) + SPACING;
+            context.drawText(textRenderer.get(), currencyText, startX, currentY, 0xFFFFFFFF, true);
+            currentY += LINE_HEIGHT + LINE_SPACING;
         }
+    }
+
+    /**
+     * Builds a styled Text for a currency with appropriate colors for name and value.
+     */
+    private Text buildCurrencyText(CurrencyType currencyType, CurrencyValue currencyValue) {
+        String currencyName = currencyType.getAliases()[0];
+        String valueString = currencyValue.getFormattedString();
+        
+        // Special handling for Starbits (gradient effect)
+        if (currencyType == CurrencyType.STARBITS) {
+            return buildStarbitsGradientText(currencyName, valueString);
+        }
+        
+        // Get colors for currency name and value
+        Text nameText = getCurrencyNameText(currencyType, currencyName);
+        Text valueText = getCurrencyValueText(currencyType, valueString);
+        
+        return Text.literal("").append(nameText).append(" ").append(valueText);
+    }
+    
+    /**
+     * Gets the styled Text for a currency name.
+     */
+    private Text getCurrencyNameText(CurrencyType currencyType, String name) {
+        return switch (currencyType) {
+            case GOLD -> Text.literal(name).styled(s -> s.withColor(Formatting.GOLD));
+            case PRESTIGE_TOKENS -> Text.literal(name).styled(s -> s.withColor(Formatting.AQUA));
+            case ASCENSION_TOKENS -> Text.literal(name).styled(s -> s.withColor(Formatting.RED));
+            case SILVER -> Text.literal(name).styled(s -> s.withColor(Formatting.DARK_GRAY));
+            case BUBBLES -> Text.literal(name).styled(s -> s.withColor(COLOR_BUBBLES_NAME));
+            case SHEEP -> Text.literal(name).styled(s -> s.withColor(COLOR_SHEEP_NAME));
+            case ROCKET_FUEL -> Text.literal(name).styled(s -> s.withColor(COLOR_ROCKET_FUEL_NAME));
+            case NATURAL_FUEL -> Text.literal(name).styled(s -> s.withColor(COLOR_NATURAL_FUEL_NAME));
+            case FOSSIL_FUEL -> Text.literal(name).styled(s -> s.withColor(COLOR_FOSSIL_FUEL_NAME));
+            case HYDRO_FUEL -> Text.literal(name).styled(s -> s.withColor(COLOR_HYDRO_FUEL_NAME));
+            case TRANSCENDENCE_TOKENS -> Text.literal(name).styled(s -> s.withColor(COLOR_TRANSCENDENCE_TOKENS));
+            default -> Text.literal(name);
+        };
+    }
+    
+    /**
+     * Gets the styled Text for a currency value.
+     */
+    private Text getCurrencyValueText(CurrencyType currencyType, String value) {
+        return switch (currencyType) {
+            case GOLD -> Text.literal(value).styled(s -> s.withColor(Formatting.YELLOW));
+            case PRESTIGE_TOKENS -> Text.literal(value).styled(s -> s.withColor(Formatting.AQUA));
+            case ASCENSION_TOKENS -> Text.literal(value).styled(s -> s.withColor(Formatting.RED));
+            case SILVER -> Text.literal(value).styled(s -> s.withColor(Formatting.GRAY));
+            case BUBBLES -> Text.literal(value).styled(s -> s.withColor(COLOR_BUBBLES_VALUE));
+            case SHEEP -> Text.literal(value).styled(s -> s.withColor(COLOR_SHEEP_VALUE));
+            case ROCKET_FUEL, NATURAL_FUEL, FOSSIL_FUEL, HYDRO_FUEL -> Text.literal(value).styled(s -> s.withColor(COLOR_FUEL_VALUE));
+            case TRANSCENDENCE_TOKENS -> Text.literal(value).styled(s -> s.withColor(COLOR_TRANSCENDENCE_TOKENS));
+            default -> Text.literal(value);
+        };
+    }
+    
+    /**
+     * Builds Starbits text with gradient effect (one color per letter).
+     */
+    private Text buildStarbitsGradientText(String name, String value) {
+        MutableText result = Text.literal("");
+        
+        // Apply gradient to currency name (one color per letter)
+        for (int i = 0; i < name.length() && i < STARBITS_GRADIENT.length; i++) {
+            char c = name.charAt(i);
+            int color = STARBITS_GRADIENT[i];
+            result.append(Text.literal(String.valueOf(c)).styled(s -> s.withColor(color)));
+        }
+        
+        // Add space and value (value uses the last gradient color)
+        result.append(" ");
+        int valueColor = STARBITS_GRADIENT[Math.min(STARBITS_GRADIENT.length - 1, name.length() - 1)];
+        result.append(Text.literal(value).styled(s -> s.withColor(valueColor)));
+        
+        return result;
     }
 
     private int getHudBackgroundOpacity(){
@@ -207,26 +291,10 @@ public class CurrencyElement extends HudElement<CurrencyElement.Configuration> {
         return worldMonitor.currentWorld() != World.BossArenas;
     }
 
-    /**
-     * Gets the bottom bar position for calculating relative positions.
-     */
-    private Vector2f getBottomBarPosition(Window window) {
-        if (window == null) {
-            return new Vector2f(0, 0);
-        }
-        int screenHeight = window.getScaledHeight();
-        return new Vector2f(0, screenHeight - BottomBarElement.BAR_HEIGHT);
-    }
-
     @Override
     public Vector2f getAnchorPoint() {
-        // Anchor point is relative to bottom bar
-        var window = mcAccessor.getWindow();
-        if (window.isPresent()) {
-            Vector2f bottomBarPos = getBottomBarPosition(window.get());
-            return bottomBarPos.add(deltaPosition);
-        }
-        return new Vector2f(0, 0);
+        // Default anchor point (top-left corner)
+        return new Vector2f(10, 10);
     }
 
     @Override
@@ -236,39 +304,41 @@ public class CurrencyElement extends HudElement<CurrencyElement.Configuration> {
         }
 
         var window = mcAccessor.getWindow();
-        if (window.isPresent()) {
+        if (window.isEmpty()) {
             return new Vector2f(HudConstants.PLACEHOLDER_WIDTH_MEDIUM, 15);
         }
 
-        var progressData = gameInfoMonitor.getPersistentProgressData();
-        if (progressData == null) {
+        var currentSnapshot = gameInfoMonitor.getCurrentSnapshot();
+        if (currentSnapshot == null || currentSnapshot.currencies.isEmpty()) {
             return new Vector2f(HudConstants.PLACEHOLDER_WIDTH_MEDIUM, 15);
         }
 
-        EnumMap<CurrencyType, CurrencyValue> currencies = progressData.getAllCurrencies();
-        if (currencies.isEmpty()) {
-            return new Vector2f(HudConstants.PLACEHOLDER_WIDTH_MEDIUM, 15);
-        }
+        EnumMap<CurrencyType, CurrencyValue> currencies = currentSnapshot.currencies;
 
         var textRenderer = mcAccessor.getTextRenderer();
-        int totalWidth = 0;
-        int count = 0;
+        if (textRenderer.isEmpty()) {
+            return new Vector2f(HudConstants.PLACEHOLDER_WIDTH_MEDIUM, 15);
+        }
 
-        for (var entry : currencies.entrySet()) {
+        // Collect currency entries and sort by CurrencyType enum order
+        List<Map.Entry<CurrencyType, CurrencyValue>> currencyEntries = new ArrayList<>(currencies.entrySet());
+        currencyEntries.sort(Comparator.comparing(entry -> entry.getKey()));
+
+        // Calculate layout: vertical list (one currency per row)
+        int maxWidth = 0;
+        for (var entry : currencyEntries) {
+            CurrencyType currencyType = entry.getKey();
             CurrencyValue currencyValue = entry.getValue();
             if (currencyValue != null) {
-                totalWidth += textRenderer.get().getWidth(currencyValue.getStyledText());
-                count++;
+                Text currencyText = buildCurrencyText(currencyType, currencyValue);
+                int width = textRenderer.get().getWidth(currencyText);
+                maxWidth = Math.max(maxWidth, width);
             }
         }
 
-        if (count > 0) {
-            totalWidth += SPACING * (count - 1); // Add spacing between items
-        }
+        int totalHeight = currencyEntries.size() * LINE_HEIGHT + (currencyEntries.size() - 1) * LINE_SPACING;
 
-        int height = 9 + HudConstants.TEXT_PADDING_Y;
-
-        return new Vector2f(totalWidth + HudConstants.BACKGROUND_PADDING, height);
+        return new Vector2f(maxWidth + HudConstants.BACKGROUND_PADDING, totalHeight + HudConstants.TEXT_PADDING_Y);
     }
 
     @Override
@@ -278,22 +348,8 @@ public class CurrencyElement extends HudElement<CurrencyElement.Configuration> {
 
     @Override
     public Vector2f getCurrentPosition() {
-        // Override to use bottom bar relative positioning
-        var window = mcAccessor.getWindow();
-        if (window.isEmpty()) {
-            return new Vector2f(0, 0);
-        }
-
-        Vector2f bottomBarPos = getBottomBarPosition(window.get());
-        float animationOffset = getBottomBarAnimationOffset();
-
-        // Y position is always relative to bottom bar (centered vertically)
-        int y = (int) (bottomBarPos.y + animationOffset + (BottomBarElement.BAR_HEIGHT - 9) / 2);
-
-        // X position uses deltaPosition for horizontal offset
-        int x = (int) deltaPosition.x;
-
-        return new Vector2f(x, y);
+        // Use anchor point + delta position for regular positioning
+        return anchorPoint.add(deltaPosition);
     }
 
     @Override

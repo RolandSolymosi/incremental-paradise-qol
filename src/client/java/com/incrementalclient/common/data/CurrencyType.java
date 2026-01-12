@@ -6,19 +6,19 @@ package com.incrementalclient.common.data;
  */
 public enum CurrencyType {
     GOLD("Gold"),
-    TICKETS("Tickets"),
-    PRESTIGE_TOKENS("Prestige Tokens", "Pr-T"),
-    ASCENSION_TOKENS("Ascension Tokens", "Asc-T"),
-    TRANSCENDENCE_TOKENS("Tr-Tokens", "Tr-T"),
     SILVER("Silver"),
     BUBBLES("Bubbles"),
-    SHEEP("Sheep"),
     SHIVERS("Shivers"),
     STARBITS("Starbits"),
+    SHEEP("Sheep"),
     ROCKET_FUEL("Rocket Fuel"),
     NATURAL_FUEL("Natural Fuel"),
     FOSSIL_FUEL("Fossil Fuel"),
-    HYDRO_FUEL("Hydro Fuel");
+    HYDRO_FUEL("Hydro Fuel"),
+    PRESTIGE_TOKENS("Prestige Tokens", "Pr-T"),
+    ASCENSION_TOKENS("Ascension Tokens", "Asc-T"),
+    TRANSCENDENCE_TOKENS("Tr-Tokens", "Tr-T"),
+    TICKETS("Tickets");
 
     private final String[] aliases;
 
