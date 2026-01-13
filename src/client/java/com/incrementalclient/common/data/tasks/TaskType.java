@@ -9,8 +9,8 @@ public enum TaskType {
     Combat("Combat", List.of(
             Pattern.compile("Kill (?:the )?(?<type>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)/(?<amount>[0-9.,]+[kmbt]?)"),
             Pattern.compile("Slay (?:the )?(?<type>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)/(?<amount>[0-9.,]+[kmbt]?)"),
-            Pattern.compile("Collect (?<amount>[0-9.,]+[kmbt]?) drops from (?<constraint>elite)?\\s*(?<type>.+) with (?<constraint2>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)"),
-            Pattern.compile("Collect (?<amount>[0-9.,]+[kmbt]?) drops from (?<constraint>elite)?\\s*(?<type>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)"))),
+            Pattern.compile("Collect (?<amount>[0-9.,]+[kmbt]?) drops from (?<constraint>Elite)?\\s*(?<type>.+) with (?<constraint2>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)"),
+            Pattern.compile("Collect (?<amount>[0-9.,]+[kmbt]?) drops from (?<constraint>Elite)?\\s*(?<type>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)"))),
     Mining("Mining", List.of(
             Pattern.compile("Collect (?<amount>[0-9.,]+[kmbt]?) (?<type>.+) from (?<constraint>Shiny) Ores \\(?(?<progress>[0-9.,]+[kmbt]?)"),
             Pattern.compile("Collect (?<amount>[0-9.,]+[kmbt]?) (?<constraint>Shiny)\\s*(?<type>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)"),

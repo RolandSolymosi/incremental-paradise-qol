@@ -28,7 +28,7 @@ public enum Task {
     W1_Applewood(new NormalTask("Applewood", Region.W1_Overworld, List.of("applewood"), null, TaskType.Foraging, DefaultWardrobe.Foraging, Tool.Axe, List.of(Target.W1_AppleTree), List.of(Warp.W1_Spawn))),
     W1_Apple(new NormalTask("Apple", Region.W1_Overworld, List.of("apple"), null, TaskType.Foraging, DefaultWardrobe.Foraging, Tool.Axe, List.of(Target.W1_AppleTree), List.of(Warp.W1_Spawn))),
     W1_LargeApple(new NormalTask("Large apple", Region.W1_Overworld, List.of("apples"), List.of(Constraint.Large), TaskType.Foraging, DefaultWardrobe.Foraging, Tool.Axe, List.of(Target.W1_AppleTree), List.of(Warp.W1_Spawn))),
-    W1_Palm(new NormalTask("", Region.W1_Overworld, List.of("palm"), null, TaskType.Foraging, DefaultWardrobe.Foraging, Tool.Axe, List.of(Target.W1_PalmTree), List.of(Warp.W1_Crab, Warp.W1_Spawn))),
+    W1_Palm(new NormalTask("Palm", Region.W1_Overworld, List.of("palm"), null, TaskType.Foraging, DefaultWardrobe.Foraging, Tool.Axe, List.of(Target.W1_PalmTree), List.of(Warp.W1_Crab, Warp.W1_Spawn))),
     W1_Coconut(new NormalTask("Coconut", Region.W1_Overworld, List.of("coconuts"), null, TaskType.Foraging, DefaultWardrobe.Foraging, Tool.Axe, List.of(Target.W1_PalmTree), List.of(Warp.W1_Crab, Warp.W1_Spawn))),
     W1_LargeCoconut(new NormalTask("Large coconut", Region.W1_Overworld, List.of("coconuts"), List.of(Constraint.Large), TaskType.Foraging, DefaultWardrobe.Foraging, Tool.Axe, List.of(Target.W1_PalmTree), List.of(Warp.W1_Crab, Warp.W1_Spawn))),
     W1_Ladybug(new NormalTask("Ladybug", Region.W1_Overworld, List.of("ladybugs"), null, TaskType.Foraging, DefaultWardrobe.Foraging, Tool.Axe, List.of(Target.W1_Ladybug), List.of(Warp.W1_Beetroot, Warp.W1_Spawn))),
@@ -112,7 +112,7 @@ public enum Task {
     W2_Koi(new NormalTask("Koi", Region.W2_Overworld, List.of("koi"), null, TaskType.Fishing, DefaultWardrobe.Fishing, Tool.Spear, null, List.of(Warp.W2_Spawn))),
     W2_Axolotl(new NormalTask("Axolotl", Region.W2_Overworld, List.of("axolotl"), null, TaskType.Fishing, DefaultWardrobe.Fishing, Tool.Spear, null, List.of(Warp.W2_Spawn))),
     W2_MagmaFish(new NormalTask("Magma fish", Region.W2_Infernal, List.of("magmafish"), null, TaskType.Fishing, DefaultWardrobe.Fishing, Tool.Spear, null, List.of(Warp.W2_Infernal, Warp.W2_Veil, Warp.W2_Lush, Warp.W2_Spawn))),
-    W2_MoltenJellyfish(new NormalTask("", Region.W2_Infernal, List.of("molten jellyfish"), null, TaskType.Fishing, DefaultWardrobe.Fishing, Tool.Spear, null, List.of(Warp.W2_Infernal, Warp.W2_Veil, Warp.W2_Lush, Warp.W2_Spawn))),
+    W2_MoltenJellyfish(new NormalTask("Molten jellyfish", Region.W2_Infernal, List.of("molten jellyfish"), null, TaskType.Fishing, DefaultWardrobe.Fishing, Tool.Spear, null, List.of(Warp.W2_Infernal, Warp.W2_Veil, Warp.W2_Lush, Warp.W2_Spawn))),
     W2_Bubbler(new NormalTask("Bubbler", Region.W2_Infernal, List.of("bubbler"), null, TaskType.Fishing, DefaultWardrobe.Fishing, Tool.Spear, null, List.of(Warp.W2_Infernal, Warp.W2_Veil, Warp.W2_Lush, Warp.W2_Spawn))),
     W2_AbyssalCrab(new NormalTask("Abyssal crab", Region.W2_Abyss, List.of("abyssal crabs"), null, TaskType.Fishing, DefaultWardrobe.CombatFishing, Tool.Spear, null, List.of(Warp.W2_Abyss, Warp.W2_Infernal, Warp.W2_Veil, Warp.W2_Lush, Warp.W2_Spawn))),
 
