@@ -1,9 +1,11 @@
 package com.incrementalclient.services;
 
+import com.incrementalclient.Main;
 import com.incrementalclient.abstractions.ObservableBase;
 import com.incrementalclient.interfaces.Observer;
 import com.incrementalclient.internals.events.ClientReceiveMessageEventsObservable;
 import net.minecraft.client.MinecraftClient;
+import net.minecraft.text.ClickEvent;
 import net.minecraft.text.Text;
 
 import java.util.Set;
@@ -45,7 +47,35 @@ public class ChatHandler extends ObservableBase<Observer<ChatHandler.Event>, Cha
 
     @Override
     public void onEvent(ClientReceiveMessageEventsObservable.Event result) {
+        // TODO: The current implementation is just the previous implementation, except done without mixins.
+        //   However, in my opinion, since ClientReceiveMessageEventsObservable.Event is no longer a record,
+        //   (and therefore no longer final), we might be safe to just make ChatHandler.Event equal to:
+        //   public class Event extends ClientReceiveMessageEventsObservable.Event { /*constructor here*/ }
+        //   Then, since that would make it a CancellableEvent, the filtering code that's done here
+        //   would be done by each listener to ChatHandler.
+        //   Upside: Each ChatHandler's listener could do MUCH more complicated conditions for filtering
+        //   if they wanted (not just limited to regex; could now use states from previous messages)
+        //   Downside: The filtering code would basically need to be rebuilt by each individual listener.
+
         notifyObservers(new Event(result.message(), result.overlay()));
+
+        var message = result.message();
+        for(var filter : this.getFilters()) {
+            if(filter.isEnabled()) {
+                // TODO: What is isFilterPlayerMessage?
+                //   Do you mean "shouldFilterPlayerMessage"? aka "whether this filter should filter messages
+                //   from players"?
+                // If statement copied directly from old ChatHud mixin.
+                if (filter.isFilterPlayerMessage() || message.getSiblings().stream().noneMatch(s -> s.getStyle().getClickEvent() instanceof ClickEvent.RunCommand(String command) && command.startsWith("/stats "))){
+                    if (filter.getRegex().matcher(message.getString()).find()){
+                        result.cancel();
+//                        Main.LOGGER.info("Cancelling CRMEO event");
+                        return;
+                    }
+                }
+            }
+        }
+//        Main.LOGGER.info("NOT Cancelling CRMEO event with {} filters", this.getFilters().size());
     }
 
     public record Event(Text message, boolean isOverlay) {

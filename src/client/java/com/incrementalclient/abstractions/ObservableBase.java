@@ -7,6 +7,8 @@ public abstract class ObservableBase<TObserver extends Observer<TResult>, TResul
 
     protected void notifyObservers(TResult result) {
         for (var observer : getListeners()) {
+            // TODO: Should this check for if result instanceof CancellableEvent?
+            //   The idea is that we could do "if result.isCancelled(), do not notify observers"
             observer.onEvent(result);
         }
     }
