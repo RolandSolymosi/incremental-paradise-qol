@@ -35,7 +35,11 @@ public enum Region {
     W4_Beta("Beta", World.World4, Warp.W4_Beta, List.of()),
     W4_Delta("Delta", World.World4, Warp.W4_Beta, List.of()),
 
-    WN1_Overworld("", World.WorldNightmare1, Warp.WN1_Spawn, List.of());
+    WN1_Overworld("", World.WorldNightmare1, Warp.WN1_Spawn, List.of()),
+    WN1_QuartzMine("Quartz", World.WorldNightmare1, Warp.WN1_Quartz, List.of()),
+    WN1_LapisMine("Lapis", World.WorldNightmare1, Warp.WN1_Lapis, List.of()),
+    WN1_NetherGoldMine("Nether Gold", World.WorldNightmare1, Warp.WN1_NetherGold, List.of()),
+    WN1_AncientDebrisMine("Ancient Debris", World.WorldNightmare1, Warp.WN1_Netherite, List.of());
 
     private final String name;
     private final World world;
