@@ -73,12 +73,13 @@ public enum Target {
     W2_Magmafish(new EntityTarget("magmafish", "Magmafish", List.of(Region.W2_Infernal), t -> true, EntityType.TROPICAL_FISH)),
     W2_MoltenJellyfish(new EntityTarget("moltenjellyfish", "Molten Jellyfish", List.of(Region.W2_Infernal), t -> true, EntityType.ARMOR_STAND)),
     W2_Bubbler(new EntityTarget("bubbler", "Bubbler", List.of(Region.W2_Infernal), t -> true, EntityType.ARMOR_STAND)),
+    W2_AbyssalCrab(new EntityTarget("abyssalcrab", "Abyssal Crab", List.of(Region.W2_Abyss), t -> true, EntityType.PIG)),
 
     // --- World 3 ---
     W3_Brightstone(new BlockTarget("brightstone", "Brightstone", List.of(Region.W3_Mine), t -> true, Blocks.SEA_LANTERN)),
     W3_Diamond(new BlockTarget("diamond", "Diamond", List.of(Region.W3_Mine), t -> true, Blocks.DEEPSLATE_DIAMOND_ORE)),
     W3_Emerald(new BlockTarget("emerald", "Emerald", List.of(Region.W3_Mine), t -> true, Blocks.DEEPSLATE_EMERALD_ORE)),
-    W3_Catsnapper(new EntityTarget("catsnapper", "Catsnapper", List.of(Region.W3_Overworld), t -> true, EntityType.ARMOR_STAND)),
+    W3_Capsnapper(new EntityTarget("capsnapper", "Capsnapper", List.of(Region.W3_Overworld), t -> true, EntityType.ARMOR_STAND)),
     W3_Baconwing(new EntityTarget("baconwing", "Baconwing", List.of(Region.W3_Sty), t -> true, EntityType.PLAYER)),
     W3_Camel(new EntityTarget("camel", "Camel", List.of(Region.W3_Beach), t -> true, EntityType.CAMEL)),
     W3_Djinn(new EntityTarget("djinn", "Djinn", List.of(Region.W3_Beach), t -> true, EntityType.SKELETON)),
@@ -91,6 +92,7 @@ public enum Target {
     W3_Soarfish(new EntityTarget("soarfish", "Soarfish", List.of(Region.W3_Beach), t -> true, EntityType.SALMON)),
     W3_LegendaryBettafly(new EntityTarget("legbettafly", "Legendary Bettafly", List.of(Region.W3_Sty), t -> true, EntityType.SALMON)),
     W3_LegendarySoarfish(new EntityTarget("legsoarfish", "Legendary Soarfish", List.of(Region.W3_Beach), t -> true, EntityType.SALMON)),
+    W3_Guardian(new EntityTarget("guardian", "Legendary Soarfish", List.of(Region.W3_Underside), t -> true, EntityType.GUARDIAN)),
 
     // --- World 4 ---
     W4_Cheddore(new BlockTarget("cheddore", "Cheddore", List.of(Region.W4_CityOutskirt), t -> true, Blocks.RAW_GOLD_BLOCK)),
@@ -99,6 +101,8 @@ public enum Target {
     W4_Slimecrust(new BlockTarget("slimecrust", "Slimecrust", List.of(Region.W4_Beta), t -> true, Blocks.LIME_TERRACOTTA, Blocks.GREEN_WOOL, Blocks.LIME_CONCRETE, Blocks.LIME_WOOL, Blocks.EMERALD_BLOCK)),
     W4_Voidshard(new BlockTarget("voidshard", "Voidshard", List.of(Region.W4_Beta), t -> true, Blocks.BLUE_TERRACOTTA, Blocks.PURPLE_WOOL, Blocks.PURPLE_CONCRETE, Blocks.PURPLE_CONCRETE_POWDER)),
     W4_Petrafin(new BlockTarget("petrafin", "Petrafin", List.of(Region.W4_Delta), t -> true, Blocks.DEAD_BRAIN_CORAL_BLOCK, Blocks.ORANGE_TERRACOTTA, Blocks.GREEN_TERRACOTTA, Blocks.PINK_TERRACOTTA, Blocks.LIME_TERRACOTTA, Blocks.YELLOW_TERRACOTTA, Blocks.ORANGE_CONCRETE)),
+    W4_Thornbeetle(new EntityTarget("thornbeetle", "Thornbeetle", List.of(Region.W4_Alpha), t -> true, EntityType.ARMOR_STAND)),
+    W4_Worm(new EntityTarget("worm", "Worm", List.of(Region.W4_Alpha), t -> true, EntityType.INTERACTION)),
     W4_Bat(new EntityTarget("bat", "Bat", List.of(Region.W4_Homestead), t -> true, EntityType.BAT)),
     W4_Rat(new EntityTarget("rat", "Rat", List.of(Region.W4_Sewer), t -> true, EntityType.SILVERFISH)),
     W4_Frog(new EntityTarget("frog", "Frog", List.of(Region.W4_Alpha), t -> true, EntityType.FROG)),
@@ -122,6 +126,7 @@ public enum Target {
     N1_Lapis(new BlockTarget("lapisore", "Lapis", List.of(Region.WN1_LapisMine), t -> true, Blocks.DEEPSLATE_LAPIS_ORE)),
     N1_NetherGold(new BlockTarget("nethergoldore", "Nether Gold", List.of(Region.WN1_NetherGoldMine), t -> true, Blocks.NETHER_GOLD_ORE)),
     N1_AncientDebris(new BlockTarget("ancientdebris", "Ancient Debris", List.of(Region.WN1_AncientDebrisMine), t -> true, Blocks.ANCIENT_DEBRIS)),
+    N1_Winkle(new EntityTarget("winkle", "Winkle", List.of(Region.WN1_Overworld), t -> true, EntityType.ARMOR_STAND)),
     N1_Piglin(new EntityTarget("piglin", "Piglin", List.of(Region.WN1_Overworld), t -> true, EntityType.PIGLIN)),
     N1_Bamboodle(new EntityTarget("bamboodle", "Bamboodle", List.of(Region.WN1_Overworld), t -> true, EntityType.PANDA)),
     N1_Firefox(new EntityTarget("firefox", "Firefox", List.of(Region.WN1_Overworld), t -> true, EntityType.FOX)),

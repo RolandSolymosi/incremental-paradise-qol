@@ -14,13 +14,8 @@ import com.incrementalclient.services.*;
 import com.incrementalclient.common.utils.dependencyInjection.ServiceCollection;
 import com.incrementalclient.common.utils.dependencyInjection.ServiceProvider;
 import net.fabricmc.api.ClientModInitializer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 public class Main implements ClientModInitializer {
-
-    public static final String MOD_ID = "incremental-paradise-qol";
-    public static final Logger LOGGER = LoggerFactory.getLogger(MOD_ID);
 
     public static final ServiceProvider SERVICE_PROVIDER = new ServiceCollection()
             // Low level Services (Minecraft Event and Mixin wrappers)
