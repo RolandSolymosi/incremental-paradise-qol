@@ -1,5 +1,6 @@
 package com.incrementalclient.hud;
 
+import com.google.common.base.Suppliers;
 import com.incrementalclient.abstractions.HudElement;
 import com.incrementalclient.common.CurrencyValue;
 import com.incrementalclient.common.data.CurrencyType;
@@ -25,6 +26,7 @@ import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 public class CurrencyElement extends HudElement<CurrencyElement.Configuration> {
     private static final int LINE_SPACING = 2; // Spacing between currency rows
@@ -62,7 +64,7 @@ public class CurrencyElement extends HudElement<CurrencyElement.Configuration> {
 
     private final CurrencyElement.Configuration configuration = new CurrencyElement.Configuration();
 
-    private final List<OptionPiece> options;
+    private final Supplier<List<OptionPiece>> options;
 
 
     public CurrencyElement(
@@ -77,15 +79,15 @@ public class CurrencyElement extends HudElement<CurrencyElement.Configuration> {
         // Default anchor point (top-left corner)
         this.anchorPoint = new Vector2f(10, 10);
 
-        options = List.of(
+        options = Suppliers.memoize(() -> List.of(
                 Categories.Hud.Currency.createConfig(0,
                         Option.<Double>createBuilder()
                                 .name(Text.of("Currency HUD background opacity"))
                                 .description(OptionDescription.of(Text.of("Set the opacity of the currency HUD background.")))
-                                .binding(0.3, () -> configuration.currencyHudBackgroundOpacity, newVal -> configuration.currencyHudBackgroundOpacity = newVal)
+                                .binding(configuration.currencyHudBackgroundOpacity, () -> configuration.currencyHudBackgroundOpacity, newVal -> configuration.currencyHudBackgroundOpacity = newVal)
                                 .controller(o -> DoubleSliderControllerBuilder.create(o).step(0.01).range(0.0, 1.0))
                                 .build())
-        );
+        ));
     }
 
     @Override
@@ -364,7 +366,7 @@ public class CurrencyElement extends HudElement<CurrencyElement.Configuration> {
 
     @Override
     public List<Configurable.OptionPiece> getOption() {
-        return options;
+        return options.get();
     }
 
 

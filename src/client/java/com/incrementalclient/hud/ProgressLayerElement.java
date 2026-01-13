@@ -1,5 +1,6 @@
 package com.incrementalclient.hud;
 
+import com.google.common.base.Suppliers;
 import com.incrementalclient.abstractions.HudElement;
 import com.incrementalclient.common.data.ProgressLayer;
 import com.incrementalclient.common.utils.Vector2f;
@@ -20,6 +21,7 @@ import java.util.Comparator;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Supplier;
 
 public class ProgressLayerElement extends HudElement<ProgressLayerElement.Configuration> {
     private static final int SPACING = 5; // Spacing between layers in the same row
@@ -42,7 +44,7 @@ public class ProgressLayerElement extends HudElement<ProgressLayerElement.Config
 
     private final ProgressLayerElement.Configuration configuration = new ProgressLayerElement.Configuration();
 
-    private final List<OptionPiece> options;
+    private final Supplier<List<OptionPiece>> options;
 
     public ProgressLayerElement(
             GameInfoMonitor gameInfoMonitor,
@@ -54,15 +56,15 @@ public class ProgressLayerElement extends HudElement<ProgressLayerElement.Config
         // Default anchor point (top-left corner)
         this.anchorPoint = new Vector2f(10, 10);
 
-        options = List.of(
+        options = Suppliers.memoize(() -> List.of(
                 Configurable.Categories.Hud.General.createConfig(1000,
                         Option.<Double>createBuilder()
                                 .name(Text.of("Progress Layer HUD background opacity"))
                                 .description(OptionDescription.of(Text.of("Set the opacity of the progress layer HUD background.")))
-                                .binding(0.3, () -> configuration.progressLayerHudBackgroundOpacity, newVal -> configuration.progressLayerHudBackgroundOpacity = newVal)
+                                .binding(configuration.progressLayerHudBackgroundOpacity, () -> configuration.progressLayerHudBackgroundOpacity, newVal -> configuration.progressLayerHudBackgroundOpacity = newVal)
                                 .controller(o -> DoubleSliderControllerBuilder.create(o).step(0.01).range(0.0, 1.0))
                                 .build())
-        );
+        ));
     }
 
     @Override
@@ -372,7 +374,7 @@ public class ProgressLayerElement extends HudElement<ProgressLayerElement.Config
 
     @Override
     public List<Configurable.OptionPiece> getOption() {
-        return options;
+        return options.get();
     }
 
     public static class Configuration extends HudElement.ConfigurationBase {

@@ -114,11 +114,6 @@ public class CompletedTasksElement extends HudElement<CompletedTasksElement.Conf
         return configuration;
     }
 
-    @Override
-    public List<Configurable.OptionPiece> getOption() {
-        return List.of();
-    }
-
     public static class Configuration extends HudElement.ConfigurationBase {
     }
 }

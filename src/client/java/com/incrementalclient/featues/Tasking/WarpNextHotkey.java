@@ -24,6 +24,7 @@ import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Supplier;
 
 public class WarpNextHotkey extends ListenableBase<Listener> implements Configurable<WarpNextHotkey.Configuration>, Observer<EndClientTickListenable> {
     private static final int MAX_WAIT = 20;
@@ -36,7 +37,7 @@ public class WarpNextHotkey extends ListenableBase<Listener> implements Configur
 
     private final WarpNextHotkey.Configuration configuration = new Configuration();
 
-    private final List<OptionPiece> options;
+    private final Supplier<List<OptionPiece>> options;
     private final KeyBindMonitor.KeyBindListener keyBindListener;
     private final InteractionScheduler<Void> interactionScheduler;
     private final InteractionScheduler.Builder<Void, Void> autoLevelUpTask;
@@ -108,7 +109,7 @@ public class WarpNextHotkey extends ListenableBase<Listener> implements Configur
         worldMonitor.subscribe(new WorldChangeObserver(this));
         tickListenable.subscribe(this);
 
-        options = List.of(Categories.Tasking.General.createConfig(100,
+        options = () -> List.of(Categories.Tasking.General.createConfig(100,
                         Option.<Integer>createBuilder()
                                 .name(Text.literal("Warp closest to Next Task"))
                                 .binding(
@@ -239,7 +240,7 @@ public class WarpNextHotkey extends ListenableBase<Listener> implements Configur
 
     @Override
     public List<OptionPiece> getOption() {
-        return options;
+        return options.get();
     }
 
     @Override

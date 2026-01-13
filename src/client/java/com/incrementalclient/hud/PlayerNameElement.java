@@ -149,11 +149,6 @@ public class PlayerNameElement extends HudElement<PlayerNameElement.Configuratio
         return configuration;
     }
 
-    @Override
-    public List<Configurable.OptionPiece> getOption() {
-        return List.of();
-    }
-
     public static class Configuration extends HudElement.ConfigurationBase {
     }
 }

@@ -1,5 +1,6 @@
 package com.incrementalclient.services;
 
+import com.google.common.base.Suppliers;
 import com.incrementalclient.Main;
 import com.incrementalclient.abstractions.HudElement;
 import com.incrementalclient.abstractions.ObservableBase;
@@ -23,20 +24,21 @@ import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 
 import java.util.*;
+import java.util.function.Supplier;
 
 public class HudManager extends ObservableBase<Observer<HudManager.Event>, HudManager.Event> implements Observer<HudRenderCallbackObservable.Event>, Configurable<HudManager.Configuration> {
     private final MinecraftClientAccessor mcClient;
 
     private final Configuration configuration = new Configuration();
 
-    private final List<OptionPiece> options;
+    private final Supplier<List<OptionPiece>> options;
 
     public HudManager(
             MinecraftClientAccessor mcClient,
             HudRenderCallbackObservable hudRenderCallbackObservable) {
         this.mcClient = mcClient;
 
-        options = List.of(
+        options = Suppliers.memoize(() -> List.of(
                 Categories.Hud.General.createConfig(0,
                         Option.<Boolean>createBuilder()
                                 .name(Text.of("Toggle HUD on and off"))
@@ -116,7 +118,7 @@ public class HudManager extends ObservableBase<Observer<HudManager.Event>, HudMa
                                 .binding(configuration.hideVanillaExperienceLevel, () -> configuration.hideVanillaExperienceLevel, newVal -> configuration.hideVanillaExperienceLevel = newVal)
                                 .controller(BooleanControllerBuilder::create)
                                 .build())
-        );
+        ));
 
         hudRenderCallbackObservable.subscribe(this);
     }
@@ -171,7 +173,7 @@ public class HudManager extends ObservableBase<Observer<HudManager.Event>, HudMa
 
     @Override
     public List<Configurable.OptionPiece> getOption() {
-        return options;
+        return options.get();
     }
 
     public static boolean shouldRenderBar(HudElement<?> element, Configuration config) {

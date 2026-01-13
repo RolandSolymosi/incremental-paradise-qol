@@ -1,5 +1,6 @@
 package com.incrementalclient.hud;
 
+import com.google.common.base.Suppliers;
 import com.incrementalclient.abstractions.HudElement;
 import com.incrementalclient.common.utils.Vector2f;
 import com.incrementalclient.internals.MinecraftClientAccessor;
@@ -15,13 +16,14 @@ import net.minecraft.text.Text;
 import net.minecraft.util.math.ColorHelper;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 public class HPBarElement extends HudElement<HPBarElement.Configuration> {
     private static final int BASE_BAR_WIDTH = 100; // Base width before applying Config hpBarSizeScale
 
     private final HPBarElement.Configuration configuration = new Configuration();
 
-    private final List<OptionPiece> options;
+    private final Supplier<List<OptionPiece>> options;
     private final GameInfoMonitor gameInfoMonitor;
 
     public HPBarElement(
@@ -32,7 +34,7 @@ public class HPBarElement extends HudElement<HPBarElement.Configuration> {
         super(mcAccessor, hudManager);
         this.gameInfoMonitor = gameInfoMonitor;
 
-        options = List.of(
+        options = Suppliers.memoize(() -> List.of(
                 Categories.Hud.HpBar.createConfig(0,
                         Option.<HPBarDisplayMode>createBuilder()
                                 .name(Text.of("HP Bar Display Mode"))
@@ -48,17 +50,17 @@ public class HPBarElement extends HudElement<HPBarElement.Configuration> {
                         Option.<Integer>createBuilder()
                                 .name(Text.of("HP Bar Render Scale"))
                                 .description(OptionDescription.of(Text.of("Controls aliasing vs smoothness of the bar edges. 1 = more pixelated, higher = smoother. Very high values can cost FPS. Changes apply instantly.")))
-                                .binding(2, () -> configuration.hpBarRenderScale, newVal -> configuration.hpBarRenderScale = newVal)
+                                .binding(configuration.hpBarRenderScale, () -> configuration.hpBarRenderScale, newVal -> configuration.hpBarRenderScale = newVal)
                                 .controller(o -> IntegerSliderControllerBuilder.create(o).step(1).range(1, 32))
                                 .build()),
                 Categories.Hud.HpBar.createConfig(2,
                         Option.<Double>createBuilder()
                                 .name(Text.of("HP Bar Size"))
                                 .description(OptionDescription.of(Text.of("Scales the bar only (not the text). Changes apply instantly.")))
-                                .binding(0.75, () -> configuration.hpBarSizeScale, newVal -> configuration.hpBarSizeScale = newVal)
+                                .binding(configuration.hpBarSizeScale, () -> configuration.hpBarSizeScale, newVal -> configuration.hpBarSizeScale = newVal)
                                 .controller(o -> DoubleSliderControllerBuilder.create(o).step(0.05).range(0.4, 1.0))
                                 .build())
-        );
+        ));
     }
 
     @Override
@@ -224,7 +226,7 @@ public class HPBarElement extends HudElement<HPBarElement.Configuration> {
 
     @Override
     public List<OptionPiece> getOption() {
-        return options;
+        return options.get();
     }
 
     public static class Configuration extends HudElement.ConfigurationBase {

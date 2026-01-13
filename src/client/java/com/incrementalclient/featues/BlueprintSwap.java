@@ -1,5 +1,6 @@
 package com.incrementalclient.featues;
 
+import com.google.common.base.Suppliers;
 import com.incrementalclient.common.data.skills.SkillCategory;
 import com.incrementalclient.common.utils.Utils;
 import com.incrementalclient.config.controllers.KeyBindController;
@@ -18,10 +19,11 @@ import org.lwjgl.glfw.GLFW;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Supplier;
 
 public class BlueprintSwap implements Configurable<BlueprintSwap.Configuration> {
 
-    private final List<OptionPiece> options;
+    private final Supplier<List<OptionPiece>> options;
     private final Configuration configuration = new Configuration();
     private final KeyBindMonitor.KeyBindListener meleeKeyBindListener;
     private final KeyBindMonitor.KeyBindListener rangedKeyBindListener;
@@ -40,7 +42,7 @@ public class BlueprintSwap implements Configurable<BlueprintSwap.Configuration> 
             CommandHandler commandHandler
     ) {
         this.interactionScheduler = interactionScheduler;
-        options = List.of(
+        options = Suppliers.memoize(() -> List.of(
                 Categories.Hotkeys.BlueprintSwap.createConfig(0,
                         Option.<Integer>createBuilder()
                                 .name(Text.literal("Swap Melee Blueprint"))
@@ -101,7 +103,7 @@ public class BlueprintSwap implements Configurable<BlueprintSwap.Configuration> 
                                 )
                                 .controller((option) -> () -> new KeyBindController(option))
                                 .build())
-        );
+        ));
         meleeKeyBindListener = new KeyBindMonitor.KeyBindListener(keyBindMonitor, new KeyBinding(
                 "Swap Melee Blueprint",
                 InputUtil.Type.KEYSYM,
@@ -236,7 +238,7 @@ public class BlueprintSwap implements Configurable<BlueprintSwap.Configuration> 
 
     @Override
     public List<OptionPiece> getOption() {
-        return options;
+        return options.get();
     }
 
     public static class Configuration {

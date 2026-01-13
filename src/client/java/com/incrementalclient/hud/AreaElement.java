@@ -127,11 +127,6 @@ public class AreaElement extends HudElement<AreaElement.Configuration> {
         return configuration;
     }
 
-    @Override
-    public List<Configurable.OptionPiece> getOption() {
-        return List.of();
-    }
-
     public static class Configuration extends HudElement.ConfigurationBase {
     }
 }

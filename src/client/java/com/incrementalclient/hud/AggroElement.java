@@ -111,11 +111,6 @@ public class AggroElement extends HudElement<AggroElement.Configuration> {
         return configuration;
     }
 
-    @Override
-    public List<Configurable.OptionPiece> getOption() {
-        return List.of();
-    }
-
     private Text buildAggroText(int level, int progressPercent) {
         return Text.literal("Aggro")
                 .styled(style -> style.withColor(Formatting.RED))

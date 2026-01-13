@@ -1,6 +1,7 @@
 package com.incrementalclient.services;
 
 import com.incrementalclient.interfaces.Observer;
+import com.incrementalclient.internals.MinecraftClientAccessor;
 import com.incrementalclient.internals.events.ClientCommandRegistrationCallbackObservable;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -13,20 +14,18 @@ import net.minecraft.util.Pair;
 import java.util.HashSet;
 
 public class CommandHandler implements Observer<ClientCommandRegistrationCallbackObservable.Event> {
-    private final MinecraftClient client;
-
     private final HashSet<CommandRegistration> commandRegistrations = new HashSet<>();
+    private final MinecraftClientAccessor minecraftClientAccessor;
 
-    public CommandHandler(ClientCommandRegistrationCallbackObservable clientCommandRegistrationCallbackObservable) {
+    public CommandHandler(ClientCommandRegistrationCallbackObservable clientCommandRegistrationCallbackObservable, MinecraftClientAccessor minecraftClientAccessor) {
+        this.minecraftClientAccessor = minecraftClientAccessor;
         clientCommandRegistrationCallbackObservable.subscribe(this);
-        client = MinecraftClient.getInstance();
     }
 
-    public boolean send(String command) {
-        if (client.player != null) {
-            return client.player.networkHandler.sendCommand(command);
-        }
-        return false;
+    public void send(String command) {
+        minecraftClientAccessor.getClient().execute(() -> {
+            minecraftClientAccessor.getNetworkHandler().get().sendCommand(command);
+        });
     }
 
     public boolean register(CommandRegistration registration) {

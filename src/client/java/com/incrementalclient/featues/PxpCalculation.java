@@ -1,6 +1,7 @@
 package com.incrementalclient.featues;
 
 
+import com.google.common.base.Suppliers;
 import com.incrementalclient.interfaces.Configurable;
 import com.incrementalclient.internals.MinecraftClientAccessor;
 import com.incrementalclient.services.CommandHandler;
@@ -18,6 +19,7 @@ import net.minecraft.text.Text;
 import java.util.List;
 import java.util.OptionalInt;
 import java.util.Set;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -48,7 +50,7 @@ public class PxpCalculation implements Configurable<PxpCalculation.Configuration
 
     private final Configuration configuration = new Configuration();
 
-    private final List<OptionPiece> options;
+    private final Supplier<List<OptionPiece>> options;
     private final MinecraftClientAccessor minecraftClientAccessor;
 
     public PxpCalculation(
@@ -59,11 +61,11 @@ public class PxpCalculation implements Configurable<PxpCalculation.Configuration
 
         commandHandler.register(new CommandHandler.CommandRegistration("pxpcalc", this::sumPetXpValue));
 
-        options = List.of(Categories.Misc.PetXp.createConfig(0,
+        options = Suppliers.memoize(() -> List.of(Categories.Misc.PetXp.createConfig(0,
                         Option.<Integer>createBuilder()
                                 .name(Text.of("Legendary Pet Value"))
                                 .description(OptionDescription.of(Text.of("The PXP value of a legendary pet")))
-                                .binding(75, () -> configuration.legendaryPxpValue, newVal -> configuration.legendaryPxpValue = newVal)
+                                .binding( configuration.legendaryPxpValue, () -> configuration.legendaryPxpValue, newVal -> configuration.legendaryPxpValue = newVal)
                                 .controller(opt -> IntegerFieldControllerBuilder.create(opt)
                                         .min(50).max(500))
                                 .build()),
@@ -71,10 +73,10 @@ public class PxpCalculation implements Configurable<PxpCalculation.Configuration
                         Option.<Integer>createBuilder()
                                 .name(Text.of("Mythic Pet Value"))
                                 .description(OptionDescription.of(Text.of("The PXP value of a mythic pet")))
-                                .binding(500, () -> configuration.mythicPxpValue, newVal -> configuration.mythicPxpValue = newVal)
+                                .binding(configuration.mythicPxpValue, () -> configuration.mythicPxpValue, newVal -> configuration.mythicPxpValue = newVal)
                                 .controller(opt -> IntegerFieldControllerBuilder.create(opt)
                                         .min(500).max(10000))
-                                .build()));
+                                .build())));
     }
 
     public int sumPetXpValue() {
@@ -131,7 +133,7 @@ public class PxpCalculation implements Configurable<PxpCalculation.Configuration
 
     @Override
     public List<OptionPiece> getOption() {
-        return options;
+        return options.get();
     }
 
     @Override

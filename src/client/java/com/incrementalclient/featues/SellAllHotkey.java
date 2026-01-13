@@ -1,5 +1,6 @@
 package com.incrementalclient.featues;
 
+import com.google.common.base.Suppliers;
 import com.incrementalclient.config.controllers.KeyBindController;
 import com.incrementalclient.interfaces.Configurable;
 import com.incrementalclient.services.CommandHandler;
@@ -12,6 +13,7 @@ import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 public class SellAllHotkey implements Configurable<SellAllHotkey.Configuration> {
 
@@ -19,7 +21,7 @@ public class SellAllHotkey implements Configurable<SellAllHotkey.Configuration> 
 
     private final Configuration configuration = new Configuration();
 
-    private final List<OptionPiece> options;
+    private final Supplier<List<OptionPiece>> options;
     private final KeyBindMonitor.KeyBindListener keyBindListener;
 
     public SellAllHotkey(
@@ -34,7 +36,7 @@ public class SellAllHotkey implements Configurable<SellAllHotkey.Configuration> 
                 "Incremental QOL"
         ), this::sellAll);
 
-        options = List.of(Categories.Hotkeys.Bank.createConfig(1,
+        options = Suppliers.memoize(() -> List.of(Categories.Hotkeys.Bank.createConfig(1,
                 Option.<Integer>createBuilder()
                         .name(Text.literal("Sell all"))
                         .binding(
@@ -44,7 +46,7 @@ public class SellAllHotkey implements Configurable<SellAllHotkey.Configuration> 
                         )
                         .controller((option) -> () -> new KeyBindController(option))
                         .build())
-        );
+        ));
     }
 
     private void sellAll() {
@@ -63,7 +65,7 @@ public class SellAllHotkey implements Configurable<SellAllHotkey.Configuration> 
 
     @Override
     public List<OptionPiece> getOption() {
-        return options;
+        return options.get();
     }
 
     @Override

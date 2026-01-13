@@ -57,4 +57,8 @@ public class MinecraftClientAccessor {
     public Optional<ClientPlayNetworkHandler> getNetworkHandler() {
         return Optional.ofNullable(client.getNetworkHandler());
     }
+
+    public MinecraftClient getClient(){
+        return client;
+    }
 }

@@ -1,5 +1,6 @@
 package com.incrementalclient.featues;
 
+import com.google.common.base.Suppliers;
 import com.incrementalclient.config.controllers.KeyBindController;
 import com.incrementalclient.interfaces.Configurable;
 import com.incrementalclient.internals.MinecraftClientAccessor;
@@ -16,10 +17,11 @@ import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
 
 import java.util.List;
+import java.util.function.Supplier;
 
 public class DepositHotkey implements Configurable<DepositHotkey.Configuration> {
 
-    private final List<OptionPiece> options;
+    private final Supplier<List<OptionPiece>> options;
     private final Configuration configuration = new Configuration();
     private final KeyBindMonitor.KeyBindListener keyBindListener;
     private final InteractionScheduler<Void> interactionScheduler;
@@ -32,7 +34,7 @@ public class DepositHotkey implements Configurable<DepositHotkey.Configuration> 
             CommandHandler commandHandler
     ) {
         this.interactionScheduler = interactionScheduler;
-        options = List.of(Categories.Hotkeys.Bank.createConfig(0,
+        options = Suppliers.memoize(() -> List.of(Categories.Hotkeys.Bank.createConfig(0,
                 Option.<Integer>createBuilder()
                         .name(Text.literal("Deposit all"))
                         .binding(
@@ -41,7 +43,7 @@ public class DepositHotkey implements Configurable<DepositHotkey.Configuration> 
                                 v -> configuration.keybind = v
                         )
                         .controller((option) -> () -> new KeyBindController(option))
-                        .build()));
+                        .build())));
         keyBindListener = new KeyBindMonitor.KeyBindListener(keyBindMonitor, new KeyBinding(
                 "Deposit",
                 InputUtil.Type.KEYSYM,
@@ -111,7 +113,7 @@ public class DepositHotkey implements Configurable<DepositHotkey.Configuration> 
 
     @Override
     public List<OptionPiece> getOption() {
-        return options;
+        return options.get();
     }
 
     public static class Configuration {
