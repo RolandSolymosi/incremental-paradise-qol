@@ -155,13 +155,21 @@ public class TaskMonitor extends ObservableBase<Observer<List<TaskMonitor.TaskSt
                     if (taskType.isPresent()) {
                         var taskName = cleanTaskName(itemStack.getName().getString());
                         if (taskType.get() == TaskType.Quest || taskType.get() == TaskType.Tutorial) {
-                            return new TaskState(taskName, "", "", taskType.get(), null, new String[0], slotId, false, false, "", "", null);
+                            var taskState = new TaskState(taskName, "", "", taskType.get(), null, new String[0], slotId, false, false, "", "", null);
+                            if (isCompletedBook(itemStack)){
+                                taskState.completeIfOngoing();
+                            }
+                            return taskState;
                         } else {
                             String description = blocks.size() > 1 ? blocks.get(1) : "";
                             for (Pattern pattern : taskType.get().getPatterns()) {
                                 var taskMatch = tryMatchTaskByFullInfo(pattern, description);
                                 if (taskMatch != null) {
-                                    return new TaskState(taskName, description, taskMatch.taskTarget, taskType.get(), taskMatch.task, taskMatch.constraintParameters.toArray(new String[0]), slotId, isTicketTask(blocks.getFirst()), isSocialiteTask(blocks.getFirst()), taskMatch.amount, taskMatch.progress, pattern);
+                                    var taskState = new TaskState(taskName, description, taskMatch.taskTarget, taskType.get(), taskMatch.task, taskMatch.constraintParameters.toArray(new String[0]), slotId, isTicketTask(blocks.getFirst()), isSocialiteTask(blocks.getFirst()), taskMatch.amount, taskMatch.progress, pattern);
+                                    if (isCompletedBook(itemStack)){
+                                        taskState.completeIfOngoing();
+                                    }
+                                    return taskState;
                                 }
                             }
                         }
@@ -169,6 +177,10 @@ public class TaskMonitor extends ObservableBase<Observer<List<TaskMonitor.TaskSt
                 }
             }
             return null;
+        }
+
+        private static boolean isCompletedBook(ItemStack stack){
+            return stack.getItem().getName().getString().contains("Written");
         }
 
         private static TaskMatch tryMatchTaskByFullInfo(Pattern pattern, String description) {
@@ -305,7 +317,7 @@ public class TaskMonitor extends ObservableBase<Observer<List<TaskMonitor.TaskSt
         }
 
         private UpdateState isChanged(String progress){
-            if (!progress.equals(current)) {
+            if (!isCompleted && !progress.equals(current)) {
                 current = progress;
                 if (current.equals(required)) {
                     isCompleted = true;
