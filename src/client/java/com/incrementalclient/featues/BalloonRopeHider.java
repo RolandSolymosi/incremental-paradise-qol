@@ -70,7 +70,7 @@ public class BalloonRopeHider implements Configurable<BalloonRopeHider.Configura
 
     static public class Configuration {
         @SerialEntry
-        private boolean isHidden = true;
+        public boolean isHidden = true;
 
     }
 }

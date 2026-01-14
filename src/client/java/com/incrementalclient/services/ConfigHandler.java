@@ -197,23 +197,26 @@ public class ConfigHandler {
     }
 
     private void load() {
-        if (!Files.exists(configPath)) return;
+        if (Files.exists(configPath)) {
+            try {
+                String content = Files.readString(configPath);
+                JsonObject root = gson.fromJson(content, JsonObject.class);
+                if (root == null) return;
 
-        try {
-            String content = Files.readString(configPath);
-            JsonObject root = gson.fromJson(content, JsonObject.class);
-            if (root == null) return;
-
-            for (Configurable<?> conf : configurableServices) {
-                String section = conf.getJsonSection();
-                if (root.has(section)) {
-                    var classes = conf.getConfiguration().getClass();
-                    Object loadedData = gson.fromJson(root.get(section), conf.getConfiguration().getClass());
-                    conf.copyFrom(loadedData);
+                for (Configurable<?> conf : configurableServices) {
+                    String section = conf.getJsonSection();
+                    if (root.has(section)) {
+                        var classes = conf.getConfiguration().getClass();
+                        Object loadedData = gson.fromJson(root.get(section), conf.getConfiguration().getClass());
+                        conf.copyFrom(loadedData);
+                    }
                 }
+            } catch (Exception e) {
+                System.err.println("[Config] Failed to load config: " + e.getMessage());
             }
-        } catch (Exception e) {
-            System.err.println("[Config] Failed to load config: " + e.getMessage());
+        } else if (ConfigMigrator.hasOldConfig()) {
+            ConfigMigrator.convertOldConfig(configurableServices);
+
         }
     }
 
