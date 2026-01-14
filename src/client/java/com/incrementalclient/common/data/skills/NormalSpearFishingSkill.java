@@ -3,6 +3,7 @@ package com.incrementalclient.common.data.skills;
 
 import dev.isxander.yacl3.api.NameableEnum;
 import net.minecraft.text.Text;
+import org.jetbrains.annotations.NotNull;
 
 public enum NormalSpearFishingSkill implements Skill {
     SpoonBender("Spoon Bender"),
@@ -35,5 +36,10 @@ public enum NormalSpearFishingSkill implements Skill {
 
     public String getName() {
         return name;
+    }
+
+    @Override
+    public @NotNull SkillCategory getCategory() {
+        return SkillCategory.SpearFishing;
     }
 }

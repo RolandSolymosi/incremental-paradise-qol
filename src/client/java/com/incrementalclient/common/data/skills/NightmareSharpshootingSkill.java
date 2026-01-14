@@ -1,8 +1,10 @@
 package com.incrementalclient.common.data.skills;
 
 
+import com.incrementalclient.common.data.World;
 import dev.isxander.yacl3.api.NameableEnum;
 import net.minecraft.text.Text;
+import org.jetbrains.annotations.NotNull;
 
 public enum NightmareSharpshootingSkill implements Skill {
     PeaShooter("Pea Shooter", 0),
@@ -39,5 +41,15 @@ public enum NightmareSharpshootingSkill implements Skill {
 
     public String getName() {
         return name;
+    }
+
+    @Override
+    public @NotNull SkillCategory getCategory() {
+        return SkillCategory.Sharpshooting;
+    }
+
+    @Override
+    public @NotNull World.Realm getRealm() {
+        return World.Realm.Nightmare;
     }
 }

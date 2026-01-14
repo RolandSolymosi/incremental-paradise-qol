@@ -3,6 +3,7 @@ package com.incrementalclient.common.data.skills;
 
 import dev.isxander.yacl3.api.NameableEnum;
 import net.minecraft.text.Text;
+import org.jetbrains.annotations.NotNull;
 
 public enum NormalForagingSkill implements Skill {
     Timberstrike("Timberstrike"),
@@ -34,5 +35,10 @@ public enum NormalForagingSkill implements Skill {
 
     public String getName() {
         return name;
+    }
+
+    @Override
+    public @NotNull SkillCategory getCategory() {
+        return SkillCategory.Foraging;
     }
 }

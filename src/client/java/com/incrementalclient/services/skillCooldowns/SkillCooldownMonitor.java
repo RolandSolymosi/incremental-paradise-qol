@@ -1,5 +1,7 @@
 package com.incrementalclient.services.skillCooldowns;
 
+import com.incrementalclient.common.data.skills.NormalCombatSkill;
+import com.incrementalclient.common.data.skills.NormalMiningSkill;
 import com.incrementalclient.common.data.skills.Skill;
 import com.incrementalclient.common.utils.NumberParser;
 import com.incrementalclient.interfaces.Observer;
@@ -12,6 +14,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.regex.Matcher;

@@ -1,8 +1,10 @@
 package com.incrementalclient.common.data.skills;
 
 
+import com.incrementalclient.common.data.World;
 import dev.isxander.yacl3.api.NameableEnum;
 import net.minecraft.text.Text;
+import org.jetbrains.annotations.NotNull;
 
 public enum NightmareSpearFishingSkill implements Skill {
     FishSenses("Fish Senses",0),
@@ -42,5 +44,15 @@ public enum NightmareSpearFishingSkill implements Skill {
 
     public String getName() {
         return name;
+    }
+
+    @Override
+    public @NotNull SkillCategory getCategory() {
+        return SkillCategory.SpearFishing;
+    }
+
+    @Override
+    public @NotNull World.Realm getRealm() {
+        return World.Realm.Nightmare;
     }
 }

@@ -3,6 +3,7 @@ package com.incrementalclient.common.data.skills;
 
 import dev.isxander.yacl3.api.NameableEnum;
 import net.minecraft.text.Text;
+import org.jetbrains.annotations.NotNull;
 
 public enum NormalExcavationSkill implements Skill {
     SeismicResonance("Seismic Resonance"),
@@ -26,5 +27,10 @@ public enum NormalExcavationSkill implements Skill {
 
     public String getName() {
         return name;
+    }
+
+    @Override
+    public @NotNull SkillCategory getCategory() {
+        return SkillCategory.Excavation;
     }
 }
