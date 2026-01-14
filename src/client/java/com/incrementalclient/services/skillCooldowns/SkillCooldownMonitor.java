@@ -1,8 +1,6 @@
 package com.incrementalclient.services.skillCooldowns;
 
-import com.incrementalclient.common.data.skills.NormalCombatSkill;
-import com.incrementalclient.common.data.skills.NormalMiningSkill;
-import com.incrementalclient.common.data.skills.Skill;
+import com.incrementalclient.common.data.skills.*;
 import com.incrementalclient.common.utils.NumberParser;
 import com.incrementalclient.interfaces.Observer;
 import com.incrementalclient.services.ChatHandler;
@@ -39,6 +37,16 @@ public class SkillCooldownMonitor implements Observer<ChatHandler.Event> {
             Map.entry("Ricochet", RicochetCooldown::new)
     );
 
+    // Mapping of [Skill Name -> Skill Category]
+    // Initialized at runtime (see constructor) using info from each skill.
+    // Treat it as immutable after constructor - aka, as if it had Collections.unmodifiableMap().
+    // TODO: Should this be in its own util class? Or maybe a SkillUtils singleton?
+    private final Map<String, SkillCategory> skillCategoryMap = new HashMap<>();
+
+    // Mapping of [Skill Category -> Currently active skill]
+    // Unlike the previous map, not immutable.
+    private final Map<SkillCategory, SkillCooldown> currentlyActiveSkills = new HashMap<>();
+
     // Note: I anticipate regex might not be the best solution here, since for two regexes we put a wildcard
     // at the start followed by two lines of text
     private static final Pattern skillActivated = Pattern.compile(startPiece + "Activated (?<skill>.+)!");
@@ -53,6 +61,26 @@ public class SkillCooldownMonitor implements Observer<ChatHandler.Event> {
         this.chatHandler = chatHandler;
         chatHandler.subscribe(this);
         worldMonitor.subscribe(this::onWorldChange);
+
+        // TODO: Should this go into a Util class instead of here?
+        //   Okay, I tried, and it wasn't working because I was having issues with generics and "var" wasn't working.
+        //   Leaving it here for now.
+        var allSkills = List.of(
+                NormalCombatSkill.class, NightmareCombatSkill.class,
+                NormalFarmingSkill.class, NightmareFarmingSkill.class,
+                NormalForagingSkill.class, NightmareForagingSkill.class,
+                NormalMiningSkill.class, NightmareMiningSkill.class,
+                NormalSharpshootingSkill.class, NightmareSharpshootingSkill.class,
+                NormalSpearFishingSkill.class, NightmareSpearFishingSkill.class,
+                NormalExcavationSkill.class
+        );
+        for(var skill : allSkills) {
+            for(var skillUpg : skill.getEnumConstants()) {
+                if(skillUpg.isActiveUpgrade()) {
+                    skillCategoryMap.put(skillUpg.getName(), skillUpg.getCategory());
+                }
+            }
+        }
     }
 
     @Override

@@ -52,4 +52,9 @@ public enum NightmareMiningSkill implements Skill {
     public @NotNull World.Realm getRealm() {
         return World.Realm.Nightmare;
     }
+
+    @Override
+    public boolean isActiveUpgrade() {
+        return this == Shatterpoint;
+    }
 }

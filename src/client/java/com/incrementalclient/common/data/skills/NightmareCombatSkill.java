@@ -55,4 +55,9 @@ public enum NightmareCombatSkill implements Skill {
     public @NotNull World.Realm getRealm() {
         return World.Realm.Nightmare;
     }
+
+    @Override
+    public boolean isActiveUpgrade() {
+        return this == DevilsGambit;
+    }
 }

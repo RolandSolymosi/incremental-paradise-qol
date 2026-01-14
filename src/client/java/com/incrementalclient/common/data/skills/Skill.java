@@ -9,4 +9,6 @@ public interface Skill extends NameableEnum {
     @NotNull SkillCategory getCategory();
     // Note: getRealm not used right now; may be used later.
     @NotNull World.Realm getRealm();
+
+    boolean isActiveUpgrade();
 }

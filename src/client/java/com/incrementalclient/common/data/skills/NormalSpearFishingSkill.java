@@ -1,6 +1,7 @@
 package com.incrementalclient.common.data.skills;
 
 
+import com.incrementalclient.common.data.World;
 import dev.isxander.yacl3.api.NameableEnum;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
@@ -24,9 +25,15 @@ public enum NormalSpearFishingSkill implements Skill {
     ;
 
     private final String name;
+    private final boolean active;
+
+    NormalSpearFishingSkill(String name, boolean active) {
+        this.name = name;
+        this.active = active;
+    }
 
     NormalSpearFishingSkill(String name) {
-        this.name = name;
+        this(name, false);
     }
 
     @Override
@@ -41,5 +48,15 @@ public enum NormalSpearFishingSkill implements Skill {
     @Override
     public @NotNull SkillCategory getCategory() {
         return SkillCategory.SpearFishing;
+    }
+
+    @Override
+    public @NotNull World.Realm getRealm() {
+        return World.Realm.Normal;
+    }
+
+    @Override
+    public boolean isActiveUpgrade() {
+        return active;
     }
 }
