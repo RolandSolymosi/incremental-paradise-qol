@@ -67,14 +67,14 @@ public class SkillCooldownMonitor implements Observer<ChatHandler.Event> {
             skill.onActivate();
             filterFound = true;
 
-            this.chatHandler.sendChatMessage(Text.literal("Skill's new HUD line: ").append(skill.getHudTextLine()));
+//            this.chatHandler.sendChatMessage(Text.literal("Skill's new HUD line: ").append(skill.getHudTextLine()));
         } else if((matcher = skillEnded.matcher(text)).find()) {
             var skillName = matcher.group("skill");
             var skill = getSkillCooldown(skillName);
             skill.onSkillEnd();
             filterFound = true;
 
-            this.chatHandler.sendChatMessage(Text.literal("Skill's new HUD line: ").append(skill.getHudTextLine()));
+//            this.chatHandler.sendChatMessage(Text.literal("Skill's new HUD line: ").append(skill.getHudTextLine()));
         } else if((matcher = skillOnCooldown.matcher(text)).find()) {
             var skillName = matcher.group("skill");
             var skill = getSkillCooldown(skillName);
@@ -89,19 +89,20 @@ public class SkillCooldownMonitor implements Observer<ChatHandler.Event> {
                 chatHandler.sendChatMessage(Text.literal("Couldn't understand cooldown of " + cooldownString + " seconds."));
             }
 
-            this.chatHandler.sendChatMessage(Text.literal("Skill's new HUD line: ").append(skill.getHudTextLine()));
+//            this.chatHandler.sendChatMessage(Text.literal("Skill's new HUD line: ").append(skill.getHudTextLine()));
         } else if((matcher = skillReady.matcher(text)).find()) {
             var skillName = matcher.group("skill");
             var skill = getSkillCooldown(skillName);
             skill.onReady();
             filterFound = true;
 
-            this.chatHandler.sendChatMessage(Text.literal("Skill's new HUD line: ").append(skill.getHudTextLine()));
+//            this.chatHandler.sendChatMessage(Text.literal("Skill's new HUD line: ").append(skill.getHudTextLine()));
         }
 
-        if(filterFound) {
-            result.cancel();
-        }
+        // TODO: Uncomment when config element (to toggle this) is implemented
+//        if(filterFound) {
+//            result.cancel();
+//        }
     }
 
     public void onWorldChange(WorldMonitor.Event event) {
