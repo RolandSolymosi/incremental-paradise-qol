@@ -7,9 +7,9 @@ import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 
 public enum NormalForagingSkill implements Skill {
-    Timberstrike("Timberstrike"),
-    LuckyGathering("Lucky Gathering"),
-    BuzzingAssault("Buzzing Assault"),
+    Timberstrike("Timberstrike", true),
+    LuckyGathering("Lucky Gathering", true),
+    BuzzingAssault("Buzzing Assault", true),
     KeySeeker("Key Seeker"),
     WideChop("Wide Chop"),
     Stockpile("Stockpile"),

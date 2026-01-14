@@ -7,8 +7,8 @@ import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 
 public enum NormalSharpshootingSkill implements Skill {
-    ExplosiveArrow("Explosive Arrow"),
-    SwarmSurfer("Swarm Surfer"),
+    ExplosiveArrow("Explosive Arrow", true),
+    SwarmSurfer("Swarm Surfer", true),
     Hawkeye("Hawkeye"),
     Assassin("Assassin"),
     FullForce("Full Force"),

@@ -7,9 +7,9 @@ import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 
 public enum NormalFarmingSkill implements Skill {
-    Harvester("Harvester"),
-    CropChomp("Crop Chomp"),
-    Pollinate("Pollinate"),
+    Harvester("Harvester", true),
+    CropChomp("Crop Chomp", true),
+    Pollinate("Pollinate", true),
     KeySeeker("Key Seeker"),
     ChainReaction("Chain Reaction"),
     FarmingCapacity("Farming Capacity"),

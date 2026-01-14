@@ -7,9 +7,9 @@ import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 
 public enum NormalSpearFishingSkill implements Skill {
-    SpoonBender("Spoon Bender"),
-    Wavestreak("Wavestreak"),
-    Beenado("Beenado"),
+    SpoonBender("Spoon Bender", true),
+    Wavestreak("Wavestreak", true),
+    Beenado("Beenado", true),
     KeySeeker("Key Seeker"),
     HomingHarpoon("Homing Harpoon"),
     PiercingBlow("Piercing Blow"),

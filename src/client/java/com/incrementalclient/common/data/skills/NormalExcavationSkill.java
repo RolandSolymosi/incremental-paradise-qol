@@ -7,7 +7,7 @@ import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 
 public enum NormalExcavationSkill implements Skill {
-    SeismicResonance("Seismic Resonance"),
+    SeismicResonance("Seismic Resonance", true),
     FeatherDuster("Feather Duster"),
     ExperiencedManager("Experienced Manager"),
     AncientJackpot("Ancient Jackpot"),

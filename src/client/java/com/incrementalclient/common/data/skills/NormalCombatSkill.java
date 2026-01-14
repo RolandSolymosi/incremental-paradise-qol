@@ -7,9 +7,9 @@ import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 
 public enum NormalCombatSkill implements Skill {
-    SweepingStrike("Sweeping Strike"),
-    RhinoCharge("Rhino Charge"),
-    BeeStorm("Bee Storm"),
+    SweepingStrike("Sweeping Strike", true),
+    RhinoCharge("Rhino Charge", true),
+    BeeStorm("Bee Storm", true),
     KeySeeker("Key Seeker"),
     CrushingBlow("Crushing Blow"),
     Surge("Surge"),

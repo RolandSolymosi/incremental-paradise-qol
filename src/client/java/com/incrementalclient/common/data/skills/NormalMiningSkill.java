@@ -7,9 +7,9 @@ import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 
 public enum NormalMiningSkill implements Skill {
-    Ricochet("Ricochet"),
-    CondensedStrike("Condensed Strike"),
-    WingsOfWealth("Wings of Wealth"),
+    Ricochet("Ricochet", true),
+    CondensedStrike("Condensed Strike", true),
+    WingsOfWealth("Wings of Wealth", true),
     KeySeeker("Key Seeker"),
     Cascade("Cascade"),
     TreasureHunter("Treasure Hunter"),
