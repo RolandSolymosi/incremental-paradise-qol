@@ -14,24 +14,11 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
 
 public class ChatHandler extends ObservableBase<Observer<ChatHandler.Event>, ChatHandler.Event> implements Observer<ClientReceiveMessageEventsObservable.Event> {
-    private final Set<ChatFilter> filters = ConcurrentHashMap.newKeySet();
     private final MinecraftClientAccessor minecraftClientAccessor;
 
     public ChatHandler(ClientReceiveMessageEventsObservable clientReceiveMessageEventsObservable, MinecraftClientAccessor minecraftClientAccessor) {
         this.minecraftClientAccessor = minecraftClientAccessor;
         clientReceiveMessageEventsObservable.subscribe(this);
-    }
-
-    public Set<ChatFilter> getFilters(){
-        return filters;
-    }
-
-    public void registerFilter(ChatFilter filter){
-        filters.add(filter);
-    }
-
-    public void removeFilter(ChatFilter filter){
-        filters.remove(filter);
     }
 
     public void sendChatMessage(Text message) {
@@ -52,16 +39,6 @@ public class ChatHandler extends ObservableBase<Observer<ChatHandler.Event>, Cha
 
     @Override
     public void onEvent(ClientReceiveMessageEventsObservable.Event result) {
-        // TODO: The current implementation is just the previous implementation, except done without mixins.
-        //   However, in my opinion, since ClientReceiveMessageEventsObservable.Event is no longer a record,
-        //   (and therefore no longer final), we might be safe to just make ChatHandler.Event equal to:
-        //   public class Event extends ClientReceiveMessageEventsObservable.Event { /*constructor here*/ }
-        //   Then, since that would make it a CancellableEvent, the filtering code that's done here
-        //   would be done by each listener to ChatHandler.
-        //   Upside: Each ChatHandler's listener could do MUCH more complicated conditions for filtering
-        //   if they wanted (not just limited to regex; could now use states from previous messages)
-        //   Downside: The filtering code would basically need to be rebuilt by each individual listener.
-
         var event = new Event(result.message(), result.overlay());
         notifyObservers(event);
         if(event.isCancelled()) {
@@ -75,6 +52,8 @@ public class ChatHandler extends ObservableBase<Observer<ChatHandler.Event>, Cha
         }
     }
 
+    // TODO: Remove? This was used for an old idea (involving mixins), but the new method is more generally applicable.
+    //   This ONLY works with regex, new system is regex + others.
     public static final class ChatFilter{
         private final Pattern regex;
         private boolean enabled;

@@ -31,11 +31,6 @@ public class ItemTargetMonitor implements Observer<ChatHandler.Event> {
             ClientPlayConnectionObservable clientPlayConnectionObservable
     ) {
         chatHandler.subscribe(this);
-        chatHandler.registerFilter(currentlyTrackingList);
-        chatHandler.registerFilter(itemList);
-        chatHandler.registerFilter(nowTracking);
-        chatHandler.registerFilter(removedTracking);
-        chatHandler.registerFilter(itemTrackingProgress);
 
         clientPlayConnectionObservable.subscribe((e)->
         {
