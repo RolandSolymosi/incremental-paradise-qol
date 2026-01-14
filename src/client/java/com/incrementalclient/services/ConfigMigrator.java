@@ -13,6 +13,7 @@ import com.incrementalclient.common.data.tasks.*;
 import com.incrementalclient.featues.Tasking.*;
 import com.incrementalclient.featues.AutoSkill;
 import com.incrementalclient.featues.BalloonRopeHider;
+import com.incrementalclient.featues.PxpCalculation;
 import com.incrementalclient.hud.TaskTrackerElement;
 
 import java.util.HashMap;
@@ -40,6 +41,8 @@ public class ConfigMigrator {
                 conf.copyFrom(convertTaskTrackerElement(oldConfig));
             } else if (conf instanceof AutoSkill) {
                 conf.copyFrom(convertAutoSkill(oldConfig));
+            } else if (conf instanceof PxpCalulation) {
+                conf.copyFrom(convertPxpCalulation(oldConfig));
             }
         }
     }
@@ -148,6 +151,14 @@ public class ConfigMigrator {
         newSkillLevel.level = skillLevel.get(previousSkill);
         result.add(newSkillLevel);
         return result;
+    }
+
+    public static PxpCalculation.Configuration convertPxpCalculation(OldConfig oldConfig) {
+        PxpCalculation.Configuration conf = new PxpCalculation.Configuration();
+        conf.enabled = oldConfig.autoSkillLeveling;
+        conf.legendaryPxpValue = oldConfig.legendaryPxpValue;
+        conf.mythicPxpValue = oldConfig.mythicPxpValue;
+        return conf;
     }
 
     public static class OldConfig {
