@@ -99,6 +99,13 @@ public class SkillCooldownMonitor implements Observer<ChatHandler.Event> {
             filterFound = true;
 
 //            this.chatHandler.sendChatMessage(Text.literal("Skill's new HUD line: ").append(skill.getHudTextLine()));
+
+            // Only worth updating the "currently active skill" after one gets used.
+            // One just got used, so update the currently active skill
+            SkillCategory category = skillCategoryMap.getOrDefault(skillName, null);
+            if(category != null) {
+                currentlyActiveSkills.put(category, skill);
+            }
         } else if((matcher = skillEnded.matcher(text)).find()) {
             var skillName = matcher.group("skill");
             var skill = getSkillCooldown(skillName);
