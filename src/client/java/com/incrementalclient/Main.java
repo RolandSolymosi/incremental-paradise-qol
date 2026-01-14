@@ -13,6 +13,7 @@ import com.incrementalclient.internals.events.*;
 import com.incrementalclient.services.*;
 import com.incrementalclient.common.utils.dependencyInjection.ServiceCollection;
 import com.incrementalclient.common.utils.dependencyInjection.ServiceProvider;
+import com.incrementalclient.services.skillCooldowns.SkillCooldownMonitor;
 import net.fabricmc.api.ClientModInitializer;
 
 public class Main implements ClientModInitializer {
@@ -45,6 +46,7 @@ public class Main implements ClientModInitializer {
             .addObservable(ActiveConsumableMonitor.class)
             .addObservable(ShinyOreMonitor.class)
             .addSingleton(ItemTargetMonitor.class)
+            .addSingleton(SkillCooldownMonitor.class)
             // Features
             .addSingleton(SellAllHotkey.class).forwardSingleton(Configurable.class, SellAllHotkey.class)
             .addSingleton(DepositHotkey.class).forwardSingleton(Configurable.class, DepositHotkey.class)
