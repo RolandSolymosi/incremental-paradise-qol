@@ -144,22 +144,9 @@ public class SkillCooldownMonitor implements Observer<ChatHandler.Event> {
     }
 
     public void onWorldChange(WorldMonitor.Event event) {
-        // TODO: Do we want to just wipe the entire skill cooldown menu on world change
-        //   or do we want to have a skillCooldown.onWorldChange() function?
-        //   Current method:
-        //   - Current and max cooldowns lost when world changes
-        //   - Only fixed when the user uses an active skill while it's on cooldown
-        //   - More adaptable to skill cooldown buffs/debuffs (ex alpha weathers temporarily changing cooldowns
-        //     then going to another world won't cause lingering bugs)\
-        //   - Will never show nm cooldowns in normal world, and vice versa
-        //   onWorldChange() method:
-        //   - Current and max cooldowns remembered when world changes
-        //   - Will need to update cooldowns when entering boss world (azryn, tqb, root)
-        //   - Potential confusion with Alpha (skill cooldown weathers)
-        //   - If too many skill cooldowns end up on the list (ex buying new active skills), need to handle removing
-        //     old ones from the list
-        //   - Need to split NM skills vs w1-4 skills and have different HUD output based on current world
-        this.skillCooldowns.clear();
+        // It's possible this isn't necessary,
+        // since the chat already sends a message out for [Skill is over!] when you change worlds.
+        this.skillCooldowns.values().forEach(SkillCooldown::onChangeWorld);
     }
 
     private SkillCooldown getSkillCooldown(String skillName) {
