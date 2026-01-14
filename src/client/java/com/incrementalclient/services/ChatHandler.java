@@ -62,28 +62,17 @@ public class ChatHandler extends ObservableBase<Observer<ChatHandler.Event>, Cha
         //   if they wanted (not just limited to regex; could now use states from previous messages)
         //   Downside: The filtering code would basically need to be rebuilt by each individual listener.
 
-        notifyObservers(new Event(result.message(), result.overlay()));
-
-        var message = result.message();
-        for(var filter : this.getFilters()) {
-            if(filter.isEnabled()) {
-                // TODO: What is isFilterPlayerMessage?
-                //   Do you mean "shouldFilterPlayerMessage"? aka "whether this filter should filter messages
-                //   from players"?
-                // If statement copied directly from old ChatHud mixin.
-                if (filter.isFilterPlayerMessage() || message.getSiblings().stream().noneMatch(s -> s.getStyle().getClickEvent() instanceof ClickEvent.RunCommand(String command) && command.startsWith("/stats "))){
-                    if (filter.getRegex().matcher(message.getString()).find()){
-                        result.cancel();
-//                        Main.LOGGER.info("Cancelling CRMEO event");
-                        return;
-                    }
-                }
-            }
+        var event = new Event(result.message(), result.overlay());
+        notifyObservers(event);
+        if(event.isCancelled()) {
+            result.cancel();
         }
-//        Main.LOGGER.info("NOT Cancelling CRMEO event with {} filters", this.getFilters().size());
     }
 
-    public record Event(Text message, boolean isOverlay) {
+    public static class Event extends ClientReceiveMessageEventsObservable.Event {
+        public Event(Text message, boolean isOverlay) {
+            super(message, isOverlay);
+        }
     }
 
     public static final class ChatFilter{

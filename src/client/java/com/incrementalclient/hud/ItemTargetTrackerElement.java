@@ -5,21 +5,15 @@ import com.incrementalclient.abstractions.TextListHudElement;
 import com.incrementalclient.common.utils.TextUtils;
 import com.incrementalclient.common.utils.Vector2f;
 import com.incrementalclient.internals.MinecraftClientAccessor;
-import com.incrementalclient.internals.events.ClientPlayConnectionObservable;
-import com.incrementalclient.services.ActiveConsumableMonitor;
-import com.incrementalclient.services.CommandHandler;
 import com.incrementalclient.services.HudManager;
 import com.incrementalclient.services.ItemTargetMonitor;
 import dev.isxander.yacl3.api.Option;
 import dev.isxander.yacl3.api.OptionDescription;
 import dev.isxander.yacl3.api.controller.BooleanControllerBuilder;
-import dev.isxander.yacl3.api.controller.ColorControllerBuilder;
 import dev.isxander.yacl3.api.controller.DoubleSliderControllerBuilder;
 import dev.isxander.yacl3.config.v2.api.SerialEntry;
-import net.fabricmc.fabric.api.client.networking.v1.ClientPlayConnectionEvents;
 import net.minecraft.text.Text;
 
-import java.awt.*;
 import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -118,7 +112,7 @@ public class ItemTargetTrackerElement extends TextListHudElement<ItemTargetTrack
     @Override
     public void optionChanged(){
         super.optionChanged();
-        itemTargetMonitor.shouldFilterChat(configuration.filterMessages);
+        itemTargetMonitor.setShouldFilterChat(configuration.filterMessages);
     }
 
 
