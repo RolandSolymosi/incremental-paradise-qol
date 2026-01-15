@@ -41,8 +41,12 @@ public class ConfigMigrator {
                 conf.copyFrom(convertTaskTrackerElement(oldConfig));
             } else if (conf instanceof AutoSkill) {
                 conf.copyFrom(convertAutoSkill(oldConfig));
-            } else if (conf instanceof PxpCalulation) {
-                conf.copyFrom(convertPxpCalulation(oldConfig));
+            } else if (conf instanceof PxpCalculation) {
+                conf.copyFrom(convertPxpCalculation(oldConfig));
+            } else if (conf instanceof PxpCalculation) {
+                conf.copyFrom(convertPxpCalculation(oldConfig));
+            } else if (conf instanceof TaskingOverrides) {
+                conf.copyFrom(convertTaskingOverrides(oldConfig));
             }
         }
     }
@@ -155,10 +159,48 @@ public class ConfigMigrator {
 
     public static PxpCalculation.Configuration convertPxpCalculation(OldConfig oldConfig) {
         PxpCalculation.Configuration conf = new PxpCalculation.Configuration();
-        conf.enabled = oldConfig.autoSkillLeveling;
         conf.legendaryPxpValue = oldConfig.legendaryPxpValue;
         conf.mythicPxpValue = oldConfig.mythicPxpValue;
         return conf;
+    }
+
+    public static TaskingOverrides.Configuration convertTaskingOverrides(OldConfig oldConfig) {
+        TaskingOverrides.Configuration conf = new TaskingOverrides.Configuration();
+
+        // See if majority of tasks were skipped or not skipped
+        var oldTaskOverrides = oldConfig.taskOverrides;
+        int skipCount = 0;
+        for (Task task : oldTaskOverrides.keySet()) {
+            if (oldTaskOverrides.get(task).skip_ticket_task)
+                skipCount += 1;
+        }
+
+        boolean defaultSkip = skipCount >= oldTaskOverrides.size() / 2;
+
+        for (var overrideEntry : oldTaskOverrides.entrySet()) {
+            TaskingOverrides.Configuration.Override convertedOverride = convertOldOverride(overrideEntry, defaultSkip);
+            if (convertedOverride != null) {
+                conf.overrides.add(convertedOverride);
+            }
+        }
+
+        return conf;
+    }
+
+    public static TaskingOverrides.Configuration.Override convertOldOverride(Map.Entry<Task, OldConfig.Overrides> oldOverride, boolean defaultSkip) {
+        OldConfig.Overrides overrides = oldOverride.getValue();
+        if (overrides.warp.isEmpty() && overrides.pet.isEmpty() && overrides.wardrobe.isEmpty() && overrides.skip_ticket_task == defaultSkip) {
+            return null;
+        }
+        var newOverride = new TaskingOverrides.Configuration.Override();
+        newOverride.task = oldOverride.getKey();
+        newOverride.warp = overrides.warp;
+        newOverride.pet = overrides.pet;
+        newOverride.wardrobe = overrides.wardrobe;
+        // Change to the default behaviour next
+        newOverride.skipTicket = overrides.skip_ticket_task;
+
+        return newOverride;
     }
 
     public static class OldConfig {
@@ -166,7 +208,7 @@ public class ConfigMigrator {
             public String warp;
             public String wardrobe;
             public String pet;
-            public Boolean skipTicketTask;
+            public Boolean skip_ticket_task;
         }
 
         public boolean loggingEnabled;
