@@ -14,6 +14,7 @@ import com.incrementalclient.featues.Tasking.*;
 import com.incrementalclient.featues.AutoSkill;
 import com.incrementalclient.featues.BalloonRopeHider;
 import com.incrementalclient.featues.PxpCalculation;
+import com.incrementalclient.featues.CommandAliases;
 import com.incrementalclient.hud.TaskTrackerElement;
 
 import java.util.HashMap;
@@ -25,6 +26,7 @@ import java.nio.file.Path;
 
 public class ConfigMigrator {
     public static final Path oldConfigPath = FabricLoader.getInstance().getConfigDir().resolve("incremental-qol.json5");
+    public static final Path aliasPath = FabricLoader.getInstance().getConfigDir().resolve("incremental_paradise_aliases.json");
 
     public static boolean hasOldConfig() {
         return Files.exists(oldConfigPath);
@@ -49,6 +51,11 @@ public class ConfigMigrator {
                 conf.copyFrom(convertTaskingOverrides(oldConfig));
             } else if (conf instanceof WarpNextHotkey) {
                 conf.copyFrom(convertWarpNextHotkey(oldConfig));
+            } else if (conf instanceof CommandAliases) {
+                var oldAliases = parseOldAliases();
+                if (oldAliases != null) {
+                    conf.copyFrom(convertAliases(oldAliases));
+                }
             }
         }
     }
@@ -72,6 +79,23 @@ public class ConfigMigrator {
 
             OldConfig loadedData = gson.fromJson(root, ConfigMigrator.OldConfig.class);
             return loadedData;
+        } catch (Exception e) {
+            System.err.println("[Config] Failed to load config: " + e.getMessage());
+        }
+        return null;
+    }
+
+    public static HashMap<String, String> parseOldAliases() {
+        try {
+            Gson gson = new GsonBuilder()
+                    .setStrictness(Strictness.LENIENT)
+                    .setPrettyPrinting()
+                    .create();
+
+            String content = Files.readString(ConfigMigrator.aliasPath);
+            var aliases = gson.fromJson(content, HashMap.class);
+            if (aliases == null) return null;
+            return aliases;
         } catch (Exception e) {
             System.err.println("[Config] Failed to load config: " + e.getMessage());
         }
@@ -215,6 +239,12 @@ public class ConfigMigrator {
         WarpNextHotkey.Configuration conf = new WarpNextHotkey.Configuration();
         conf.autoLevelUp = oldConfig.autoLevelUp;
         conf.warpOnAutoLevelUp = oldConfig.warpOnAutoLevelUp;
+        return conf;
+    }
+
+    public static CommandAliases.Configuration convertAliases(HashMap<String, String> oldAliases) {
+        CommandAliases.Configuration conf = new CommandAliases.Configuration();
+        conf.command = oldAliases;
         return conf;
     }
 
