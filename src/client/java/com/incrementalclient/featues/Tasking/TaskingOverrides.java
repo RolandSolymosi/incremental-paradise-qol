@@ -4,6 +4,7 @@ import com.google.common.base.Suppliers;
 import com.incrementalclient.abstractions.ListenableBase;
 import com.incrementalclient.common.data.tasks.Constraint;
 import com.incrementalclient.common.data.tasks.Task;
+import com.incrementalclient.common.data.Tool;
 import com.incrementalclient.common.utils.TextUtils;
 import com.incrementalclient.config.controllers.ComplexTypeController;
 import com.incrementalclient.config.InsertableListOption;
@@ -58,9 +59,7 @@ public class TaskingOverrides extends ListenableBase<Listener> implements Comple
                                                 .name(Text.of("Task"))
                                                 .binding(opt.task, () -> opt.task, val -> opt.task = val)
                                                 .controller(t -> EnumDropdownControllerBuilder.create(t)
-                                                        .formatValue(v -> Text.of(v.getDescriptor().names().getFirst() + (!v.getDescriptor().constraints().isEmpty()
-                                                                ? "[ "+ v.getDescriptor().constraints().stream().map(Constraint::getName).collect(Collectors.joining(", "))+ " ]"
-                                                                : "")))
+                                                        .formatValue(v -> Text.of(v.getDescriptor().displayName()))
                                                 )
                                                 .build())
                                         .option(Option.<String>createBuilder()
@@ -78,10 +77,12 @@ public class TaskingOverrides extends ListenableBase<Listener> implements Comple
                                                 .binding(opt.pet, () -> opt.pet, val -> opt.pet = val)
                                                 .controller(StringControllerBuilder::create)
                                                 .build())
-                                        .option(Option.<Integer>createBuilder()
-                                                .name(Text.of("Tool slot"))
-                                                .binding(opt.toolSlotId, () -> opt.toolSlotId, val -> opt.toolSlotId = val)
-                                                .controller(i -> IntegerSliderControllerBuilder.create(i).step(1).range(-1, 7))
+                                        .option(Option.<Tool>createBuilder()
+                                                .name(Text.of("Tool"))
+                                                .binding(opt.tool, () -> opt.tool, val -> opt.tool = val)
+                                                .controller(t -> EnumDropdownControllerBuilder.create(t)
+                                                        .formatValue(v -> Text.of(v.name()))
+                                                )
                                                 .build())
                                         .option(Option.<Boolean>createBuilder()
                                                 .name(Text.of("Invert Ticket task skip rule"))
@@ -143,17 +144,18 @@ public class TaskingOverrides extends ListenableBase<Listener> implements Comple
             @SerialEntry
             public String warp = "";
             @SerialEntry
-            public int toolSlotId = -1;
+            public Tool tool = Tool.Default;
             @SerialEntry
             public boolean skipTicket = false;
         }
     }
 
     private Text getTextProvider(Configuration.Override override) {
-        return TextUtils.textColor(override.task.name() +
+        return TextUtils.textColor(override.task.getDescriptor().displayName() +
                 (override.wardrobe.isEmpty() ? "" : ", Wardrobe: " + override.wardrobe) +
                 (override.warp.isEmpty() ? "" : ", Warp: " + override.warp) +
-                (override.pet.isEmpty() ? "" : ", Pet: " + override.pet),
+                (override.pet.isEmpty() ? "" : ", Pet: " + override.pet) +
+                (override.tool == Tool.Default ? "" : ", Tool: " + override.tool.name()),
                 override.skipTicket ? 0xf698ff : 0xff9898);
     }
 }

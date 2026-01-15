@@ -53,6 +53,11 @@ public final class GamingTask implements ITask {
         return displayName;
     }
 
+    @Override
+    public String displayName() {
+        return displayName;
+    }
+
     public GameKind game() {
         return game;
     }
