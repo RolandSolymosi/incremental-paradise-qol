@@ -216,6 +216,7 @@ public class ConfigHandler {
             }
         } else if (ConfigMigrator.hasOldConfig()) {
             ConfigMigrator.convertOldConfig(configurableServices);
+            save();
 
         }
     }

@@ -16,6 +16,7 @@ import com.incrementalclient.featues.BalloonRopeHider;
 import com.incrementalclient.featues.PxpCalculation;
 import com.incrementalclient.featues.CommandAliases;
 import com.incrementalclient.hud.TaskTrackerElement;
+import com.incrementalclient.hud.ConsumableTimerElement;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -51,6 +52,8 @@ public class ConfigMigrator {
                 conf.copyFrom(convertTaskingOverrides(oldConfig));
             } else if (conf instanceof WarpNextHotkey) {
                 conf.copyFrom(convertWarpNextHotkey(oldConfig));
+            } else if (conf instanceof ConsumableTimerElement) {
+                conf.copyFrom(convertConsumableTimerElement(oldConfig));
             } else if (conf instanceof CommandAliases) {
                 var oldAliases = parseOldAliases();
                 if (oldAliases != null) {
@@ -144,6 +147,20 @@ public class ConfigMigrator {
         conf.targetColor = oldConfig.targetColor.getRGB() & 0xFFFFFF;
         conf.completeColor = oldConfig.completeColor.getRGB() & 0xFFFFFF;
         conf.ticketColor = oldConfig.ticketColor.getRGB() & 0xFFFFFF;
+        return conf;
+    }
+
+    public static ConsumableTimerElement.Configuration convertConsumableTimerElement(OldConfig oldConfig) {
+        ConsumableTimerElement.Configuration conf = new ConsumableTimerElement.Configuration();
+        conf.isConsumableHudEnabled = oldConfig.isConsumableHudEnabled;
+        // NOTE: Consider removing these 3 if the hud is redesigned
+        conf.deltaX = oldConfig.consumableHudPosX;
+        conf.deltaY = oldConfig.consumableHudPosY;
+        conf.scale = (float) oldConfig.consumableHudScale;
+        conf.consumableHudBackgroundOpacity = oldConfig.consumableHudBackgroundOpacity;
+        // TODO: Add the hide on boss fight when feature is readded
+        conf.consumableTimerColor = oldConfig.consumableTimerColor.getRGB() & 0xFFFFFF;
+        conf.consumableTimeColor = oldConfig.consumableTimeColor.getRGB() & 0xFFFFFF;
         return conf;
     }
 
