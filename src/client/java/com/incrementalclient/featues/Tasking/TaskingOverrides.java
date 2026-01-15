@@ -4,6 +4,7 @@ import com.google.common.base.Suppliers;
 import com.incrementalclient.abstractions.ListenableBase;
 import com.incrementalclient.common.data.tasks.Constraint;
 import com.incrementalclient.common.data.tasks.Task;
+import com.incrementalclient.common.utils.TextUtils;
 import com.incrementalclient.config.controllers.ComplexTypeController;
 import com.incrementalclient.config.InsertableListOption;
 import com.incrementalclient.interfaces.ComplexConfigurable;
@@ -48,7 +49,7 @@ public class TaskingOverrides extends ListenableBase<Listener> implements Comple
                 .description(OptionDescription.of(Text.of("Options to override the default behaviour per task")))
                 .insertEntriesAtEnd(false)
                 .customController(o -> ComplexTypeController.create(o, screenAccessor)
-                        .textProvider(opt -> Text.of((opt.task == null ? "N/A" : opt.task.name())))
+                        .textProvider(opt -> (opt.task == null ? Text.of("Invalid Task Override") : getTextProvider(opt)))
                         .screenFactory(opt -> YetAnotherConfigLib.createBuilder()
                                 .title(Text.of("Edit Override Settings"))
                                 .category(ConfigCategory.createBuilder()
@@ -146,5 +147,13 @@ public class TaskingOverrides extends ListenableBase<Listener> implements Comple
             @SerialEntry
             public boolean skipTicket = false;
         }
+    }
+
+    private Text getTextProvider(Configuration.Override override) {
+        return TextUtils.textColor(override.task.name() +
+                (override.wardrobe.isEmpty() ? "" : ", Wardrobe: " + override.wardrobe) +
+                (override.warp.isEmpty() ? "" : ", Warp: " + override.warp) +
+                (override.pet.isEmpty() ? "" : ", Pet: " + override.pet),
+                override.skipTicket ? 0xf698ff : 0xff9898);
     }
 }
