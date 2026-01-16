@@ -11,6 +11,7 @@ import com.incrementalclient.config.InsertableListOption;
 import com.incrementalclient.interfaces.ComplexConfigurable;
 import com.incrementalclient.interfaces.Listener;
 import com.incrementalclient.internals.MinecraftClientAccessor;
+import com.incrementalclient.featues.Tasking.TicketTaskOverride;
 import dev.isxander.yacl3.api.*;
 import dev.isxander.yacl3.api.controller.BooleanControllerBuilder;
 import dev.isxander.yacl3.api.controller.EnumDropdownControllerBuilder;
@@ -84,10 +85,12 @@ public class TaskingOverrides extends ListenableBase<Listener> implements Comple
                                                         .formatValue(v -> Text.of(v.name()))
                                                 )
                                                 .build())
-                                        .option(Option.<Boolean>createBuilder()
-                                                .name(Text.of("Invert Ticket task skip rule"))
+                                        .option(Option.<TicketTaskOverride>createBuilder()
+                                                .name(Text.of("Ticket task Skip Behavior"))
                                                 .binding(opt.skipTicket, () -> opt.skipTicket, val -> opt.skipTicket = val)
-                                                .controller(BooleanControllerBuilder::create)
+                                                .controller(t -> EnumDropdownControllerBuilder.create(t)
+                                                        .formatValue(v -> Text.of(v.name()))
+                                                )
                                                 .build())
                                         .build())
                                 .save(this::notifyListeners))
@@ -97,6 +100,10 @@ public class TaskingOverrides extends ListenableBase<Listener> implements Comple
                 .collapsed(true)
                 .build()
         ));
+    }
+
+    public TicketTaskOverride getTicketTaskOverride(Task task) {
+        return overrides.get(task) != null ? overrides.get(task).skipTicket : TicketTaskOverride.Default;
     }
 
     @Override
@@ -146,16 +153,21 @@ public class TaskingOverrides extends ListenableBase<Listener> implements Comple
             @SerialEntry
             public Tool tool = Tool.Default;
             @SerialEntry
-            public boolean skipTicket = false;
+            public TicketTaskOverride skipTicket = TicketTaskOverride.Default;
         }
     }
 
     private Text getTextProvider(Configuration.Override override) {
+        int overrideColor = switch (override.skipTicket) {
+            case TicketTaskOverride.Default -> 0xFFFFFF;
+            case TicketTaskOverride.Skipped -> 0xf698ff;
+            case TicketTaskOverride.NotSkipped -> 0xff9898;
+        };
         return TextUtils.textColor(override.task.getDescriptor().displayName() +
                 (override.wardrobe.isEmpty() ? "" : ", Wardrobe: " + override.wardrobe) +
                 (override.warp.isEmpty() ? "" : ", Warp: " + override.warp) +
                 (override.pet.isEmpty() ? "" : ", Pet: " + override.pet) +
                 (override.tool == Tool.Default ? "" : ", Tool: " + override.tool.name()),
-                override.skipTicket ? 0xf698ff : 0xff9898);
+                overrideColor);
     }
 }
