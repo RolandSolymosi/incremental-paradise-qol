@@ -19,7 +19,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class SkillCooldownMonitor implements Observer<ChatHandler.Event> {
-    // TODO: Hud element for SkillCooldown instances. Not here, would be a different class in hud package.
     // Note the startPiece includes a spacebar.
     private static final String startPiece = "\uD83D\uDD27 ";
 
