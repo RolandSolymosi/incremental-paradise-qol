@@ -149,7 +149,7 @@ public class SkillCooldownMonitor implements Observer<ChatHandler.Event> {
         this.skillCooldowns.values().forEach(SkillCooldown::onChangeWorld);
     }
 
-    private SkillCooldown getSkillCooldown(String skillName) {
+    private @NotNull SkillCooldown getSkillCooldown(String skillName) {
         var ret = this.skillCooldowns.getOrDefault(skillName, null);
         if(ret != null) {
             // skill is already in skillCooldowns map, so it's already been defined
@@ -165,5 +165,9 @@ public class SkillCooldownMonitor implements Observer<ChatHandler.Event> {
         var skillCooldown = skillConstructor.apply(skillName);
         this.skillCooldowns.put(skillName, skillCooldown);
         return skillCooldown;
+    }
+
+    public Map<SkillCategory, SkillCooldown> getCurrentlyActiveSkills() {
+        return currentlyActiveSkills;
     }
 }
