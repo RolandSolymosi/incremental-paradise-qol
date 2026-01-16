@@ -23,6 +23,7 @@ public class SkillCooldownMonitor implements Observer<ChatHandler.Event> {
     private static final String startPiece = "\uD83D\uDD27 ";
 
     private final ChatHandler chatHandler;
+    private boolean filterChat = true;
 
     // TODO: After writing "SkillCooldown" too many times I started getting confused.
     //  Maybe a better variable name would be good?
@@ -136,10 +137,9 @@ public class SkillCooldownMonitor implements Observer<ChatHandler.Event> {
 //            this.chatHandler.sendChatMessage(Text.literal("Skill's new HUD line: ").append(skill.getHudTextLine()));
         }
 
-        // TODO: Uncomment when config element (to toggle this) is implemented
-//        if(filterFound) {
-//            result.cancel();
-//        }
+        if(this.filterChat && filterFound) {
+            result.cancel();
+        }
     }
 
     public void onWorldChange(WorldMonitor.Event event) {
@@ -168,5 +168,9 @@ public class SkillCooldownMonitor implements Observer<ChatHandler.Event> {
 
     public Map<SkillCategory, SkillCooldown> getCurrentlyActiveSkills() {
         return currentlyActiveSkills;
+    }
+
+    public void setFilterChat(boolean filterChat) {
+        this.filterChat = filterChat;
     }
 }

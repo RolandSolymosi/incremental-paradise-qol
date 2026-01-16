@@ -51,6 +51,9 @@ public class SkillCooldownElement extends TextListHudElement<SkillCooldownElemen
         options = Suppliers.memoize(() -> List.of(
                 // TODO: This needs everything that ItemTargetTrackerElement got.
         ));
+
+        // Force update filterMessages value
+        this.skillCooldownMonitor.setFilterChat(getConfiguration().filterMessages);
     }
 
     @Override
@@ -110,6 +113,12 @@ public class SkillCooldownElement extends TextListHudElement<SkillCooldownElemen
     @Override
     public List<OptionPiece> getOption() {
         return super.getOption();
+    }
+
+    @Override
+    public void optionChanged() {
+        super.optionChanged();
+        this.skillCooldownMonitor.setFilterChat(getConfiguration().filterMessages);
     }
 
     public static class Configuration extends HudElement.ConfigurationBase {
