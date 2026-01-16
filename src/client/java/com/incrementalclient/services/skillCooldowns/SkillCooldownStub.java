@@ -39,6 +39,6 @@ public class SkillCooldownStub extends SkillCooldown {
 
     @Override
     public Text getHudTextLine() {
-        return Text.of("");
+        return Text.literal(this.skillName).append(": Unimplemented");
     }
 }
