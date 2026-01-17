@@ -37,6 +37,8 @@ public class CurrencyElement extends HudElement<CurrencyElement.Configuration> {
     private static final int COLOR_BUBBLES_VALUE = 0xADADFC;
     private static final int COLOR_SHEEP_NAME = 0xFCFCFC;
     private static final int COLOR_SHEEP_VALUE = 0xA8A8A8;
+    private static final int COLOR_TICKET_NAME = 0x8845D1;
+    private static final int COLOR_TICKET_VALUE = 0xCF90E0;
     
     // Fuel colors
     private static final int COLOR_ROCKET_FUEL_NAME = 0x944A00;
@@ -207,6 +209,7 @@ public class CurrencyElement extends HudElement<CurrencyElement.Configuration> {
     private Text getCurrencyNameText(CurrencyType currencyType, String name) {
         return switch (currencyType) {
             case GOLD -> Text.literal(name).styled(s -> s.withColor(Formatting.GOLD));
+            case TICKETS -> Text.literal(name).styled(s -> s.withColor(COLOR_TICKET_NAME));
             case PRESTIGE_TOKENS -> Text.literal(name).styled(s -> s.withColor(Formatting.AQUA));
             case ASCENSION_TOKENS -> Text.literal(name).styled(s -> s.withColor(Formatting.RED));
             case SILVER -> Text.literal(name).styled(s -> s.withColor(Formatting.DARK_GRAY));
@@ -227,6 +230,7 @@ public class CurrencyElement extends HudElement<CurrencyElement.Configuration> {
     private Text getCurrencyValueText(CurrencyType currencyType, String value) {
         return switch (currencyType) {
             case GOLD -> Text.literal(value).styled(s -> s.withColor(Formatting.YELLOW));
+            case TICKETS -> Text.literal(value).styled(s -> s.withColor(COLOR_TICKET_VALUE));
             case PRESTIGE_TOKENS -> Text.literal(value).styled(s -> s.withColor(Formatting.AQUA));
             case ASCENSION_TOKENS -> Text.literal(value).styled(s -> s.withColor(Formatting.RED));
             case SILVER -> Text.literal(value).styled(s -> s.withColor(Formatting.GRAY));
