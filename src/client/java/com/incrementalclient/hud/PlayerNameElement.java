@@ -91,6 +91,8 @@ public class PlayerNameElement extends HudElement<PlayerNameElement.Configuratio
             case "voyager" -> Formatting.LIGHT_PURPLE;
             case "outlander" -> Formatting.DARK_PURPLE;
             case "trailblazer" -> Formatting.GOLD;
+            case "qa" -> Formatting.BLUE;
+            case "mod" -> Formatting.DARK_GREEN;
             default -> Formatting.WHITE;
         };
     }
