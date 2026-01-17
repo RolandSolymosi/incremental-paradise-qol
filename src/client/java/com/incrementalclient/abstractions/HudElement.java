@@ -186,7 +186,8 @@ public abstract class HudElement<T extends HudElement.ConfigurationBase> impleme
     public static final class HudConstants {
         // Bar element constants
         public static final int BAR_ELEMENT_HEIGHT = 22;
-        public static final int TEXT_HEIGHT = 9;
+        // The actual font is 9 however 6 looks more centered
+        public static final int TEXT_HEIGHT = 6;
         
         // Padding and spacing
         public static final int TEXT_PADDING_X = 2;
