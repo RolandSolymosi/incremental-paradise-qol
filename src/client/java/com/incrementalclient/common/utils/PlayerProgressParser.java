@@ -187,6 +187,7 @@ public class PlayerProgressParser {
      */
     private static EnumMap<CurrencyType, CurrencyValue> parseCurrenciesPlain(String text) {
         EnumMap<CurrencyType, CurrencyValue> currencies = new EnumMap<>(CurrencyType.class);
+        text = text.replace('‐', '-').replace('–', '-').replace('—', '-');
 
         for (CurrencyType currency : CurrencyType.values()) {
             String[] aliases = currency.getAliases();
