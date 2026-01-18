@@ -54,7 +54,7 @@ public class SkillCooldownMonitor implements Observer<ChatHandler.Event> {
     // at the start followed by two lines of text
     private static final Pattern skillActivated = Pattern.compile(startPiece + "Activated (?<skill>.+)!");
     private static final Pattern skillEnded = Pattern.compile(startPiece + "(?<skill>.+) is over!");
-    private static final Pattern skillOnCooldown = Pattern.compile(startPiece + "(?<skill>.+) is on cooldown for another (?<cooldown>" + NumberParser.NumberPattern.pattern() + ") seconds!");
+    private static final Pattern skillOnCooldown = Pattern.compile(startPiece + "(?<skill>.+) is on cooldown for another (?<cooldown>" + NumberParser.NumberPattern.pattern() + ") seconds.");
     private static final Pattern skillReady = Pattern.compile(startPiece + "(?<skill>.+) is ready to use.");
 
     public SkillCooldownMonitor(
