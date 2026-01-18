@@ -1,0 +1,33 @@
+package com.incrementalclient.services.skillCooldowns;
+
+import net.minecraft.text.Text;
+
+public class InstantSkillCooldown extends NormalSkillCooldown {
+    public InstantSkillCooldown(String skillName) {
+        super(skillName);
+    }
+
+    @Override
+    protected Text getActiveTextLine() {
+        // Shouldn't be entering the active state as an instant skill.
+        return super.UNKNOWN_STATE_TEXT;
+    }
+
+    @Override
+    public void onActivate() {
+        // Instant skills go on cooldown immediately.
+        onEnterCooldown();
+    }
+
+    @Override
+    public void onSkillEnd() {
+        // Shouldn't be possible; instant skills don't announce that they're "over".
+        // Still, putting a fallback in.
+        onEnterCooldown();
+    }
+
+    @Override
+    public void onChangeWorld() {
+
+    }
+}

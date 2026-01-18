@@ -62,6 +62,12 @@ public abstract class NormalSkillCooldown implements SkillCooldown {
         this.state = STATE.READY;
     }
 
+    @Override
+    public void onCooldown(double cooldownTime) {
+        // TODO: Time trackers to measure how long the cooldown is.
+        //   This function can be used to more quickly update those time trackers.
+    }
+
     private enum STATE {
         UNKNOWN,
         ACTIVE,
