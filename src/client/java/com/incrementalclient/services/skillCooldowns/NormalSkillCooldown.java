@@ -42,12 +42,14 @@ public abstract class NormalSkillCooldown implements SkillCooldown {
 
     @Override
     public Text getHudTextLine() {
-        return switch (this.state) {
+        var skillInfo = switch (this.state) {
             case READY -> READY_STATE_TEXT;
             case ACTIVE -> getActiveTextLine();
             case COOLDOWN -> getCooldownTextLine();
             default -> UNKNOWN_STATE_TEXT;
         };
+
+        return Text.literal(this.skillName).append(": ").append(skillInfo);
     }
 
     protected abstract Text getActiveTextLine();
