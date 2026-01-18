@@ -2,6 +2,10 @@ package com.incrementalclient.services.skillCooldowns;
 
 import net.minecraft.text.Text;
 
+/**
+ * This represents a skill that has an "instantaneous" effect.
+ * Examples are Rhino Charge, Buzzing Assault, and Explosive Arrow.
+ */
 public class InstantSkillCooldown extends NormalSkillCooldown {
     public InstantSkillCooldown(String skillName) {
         super(skillName);
