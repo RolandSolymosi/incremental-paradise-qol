@@ -6,9 +6,9 @@ import com.incrementalclient.abstractions.HudElement;
 import com.incrementalclient.abstractions.ObservableBase;
 import com.incrementalclient.hud.BottomBarElement;
 import com.incrementalclient.hud.TopBarElement;
+import com.incrementalclient.hud.ScoreboardReplacementBar.ScoreboardReplacementBarElement;
 import com.incrementalclient.hud.internals.HudCustomizationScreen;
 import com.incrementalclient.interfaces.Configurable;
-import com.incrementalclient.interfaces.Configurable.Categories;
 import com.incrementalclient.interfaces.Observer;
 import com.incrementalclient.internals.MinecraftClientAccessor;
 import com.incrementalclient.internals.events.HudRenderCallbackObservable;
@@ -33,6 +33,8 @@ public class HudManager extends ObservableBase<Observer<HudManager.Event>, HudMa
 
     private final Supplier<List<OptionPiece>> options;
 
+    private int barHeight = 0;
+
     public HudManager(
             MinecraftClientAccessor mcClient,
             HudRenderCallbackObservable hudRenderCallbackObservable) {
@@ -52,21 +54,21 @@ public class HudManager extends ObservableBase<Observer<HudManager.Event>, HudMa
                                 .description(OptionDescription.of(Text.of("Open the HUD customization screen to position and scale all HUD elements.")))
                                 .action((t, o) -> mcClient.setScreen(Main.SERVICE_PROVIDER.getService(HudCustomizationScreen.class)))
                                 .build()),
-                Categories.Hud.General.createConfig(200,
-                        Option.<Configuration.ActiveBarMode>createBuilder()
-                                .name(Text.of("Active Bar Mode"))
-                                .description(OptionDescription.of(Text.of("Bottom: Hotbar moves to bottom bar. Top: Hotbar stays in normal position. None: Hotbar stays in normal position.")))
-                                .binding(configuration.activeBarMode,
-                                        () -> configuration.activeBarMode,
-                                        newVal -> configuration.activeBarMode = newVal)
-                                .controller(opt -> EnumControllerBuilder.create(opt)
-                                        .enumClass(Configuration.ActiveBarMode.class))
-                                .build()),
-                Categories.Hud.Vanilla.createConfig(0,
+//                Categories.Hud.General.createConfig(200,
+//                        Option.<Configuration.ActiveBarMode>createBuilder()
+//                                .name(Text.of("Active Bar Mode"))
+//                                .description(OptionDescription.of(Text.of("Bottom: Hotbar moves to bottom bar. Top: Hotbar stays in normal position. None: Hotbar stays in normal position.")))
+//                                .binding(configuration.activeBarMode,
+//                                        () -> configuration.activeBarMode,
+//                                        newVal -> configuration.activeBarMode = newVal)
+//                                .controller(opt -> EnumControllerBuilder.create(opt)
+//                                        .enumClass(Configuration.ActiveBarMode.class))
+//                                .build()),
+                Categories.Hud.General.createConfig(300,
                         Option.<Boolean>createBuilder()
-                                .name(Text.of("Hide vanilla scoreboard"))
-                                .description(OptionDescription.of(Text.of("Hides the vanilla scoreboard sidebar.")))
-                                .binding(configuration.hideVanillaScoreboard, () -> configuration.hideVanillaScoreboard, newVal -> configuration.hideVanillaScoreboard = newVal)
+                                .name(Text.of("Replace scoreboard with bar"))
+                                .description(OptionDescription.of(Text.of("Replaces the vanilla scoreboard with a top bar")))
+                                .binding(true, () -> configuration.barScoreboardReplacement, newVal -> configuration.barScoreboardReplacement = newVal)
                                 .controller(BooleanControllerBuilder::create)
                                 .build()),
                 Categories.Hud.Vanilla.createConfig(100,
@@ -181,8 +183,18 @@ public class HudManager extends ObservableBase<Observer<HudManager.Event>, HudMa
             return config.getActiveBarMode() == Configuration.ActiveBarMode.BOTTOM;
         } else if (element instanceof TopBarElement) {
             return config.getActiveBarMode() == Configuration.ActiveBarMode.TOP;
+        } else if (element instanceof ScoreboardReplacementBarElement) {
+            return config.getBarScoreboardReplacement();
         }
         return true; // Non-bar elements always render
+    }
+
+    public int getBarHeight() {
+        return barHeight;
+    }
+
+    public void setBarHeight(int barHeight) {
+        this.barHeight = barHeight;
     }
 
     public static class Configuration {
@@ -209,6 +221,8 @@ public class HudManager extends ObservableBase<Observer<HudManager.Event>, HudMa
         @SerialEntry
         public ActiveBarMode activeBarMode = ActiveBarMode.NONE;
         @SerialEntry
+        public boolean barScoreboardReplacement = true;
+        @SerialEntry
         public boolean hideVanillaScoreboard = false;
         @SerialEntry
         public boolean hideVanillaHearts = false;
@@ -231,6 +245,10 @@ public class HudManager extends ObservableBase<Observer<HudManager.Event>, HudMa
 
         public ActiveBarMode getActiveBarMode() {
             return activeBarMode;
+        }
+
+        public boolean getBarScoreboardReplacement() {
+            return barScoreboardReplacement;
         }
 
         public boolean isHideVanillaArmor() {

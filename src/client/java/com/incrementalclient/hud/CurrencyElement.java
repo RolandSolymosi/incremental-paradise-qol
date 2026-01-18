@@ -21,6 +21,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 import net.minecraft.util.math.ColorHelper;
 
+import java.util.Collections;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.EnumMap;
@@ -121,6 +122,7 @@ public class CurrencyElement extends HudElement<CurrencyElement.Configuration> {
         // Collect currency entries and sort by CurrencyType enum order
         List<Map.Entry<CurrencyType, CurrencyValue>> currencyEntries = new ArrayList<>(currencies.entrySet());
         currencyEntries.sort(Comparator.comparing(entry -> entry.getKey()));
+        Collections.reverse(currencyEntries);
 
         if (currencyEntries.isEmpty()) {
             if (editMode) {
@@ -175,20 +177,28 @@ public class CurrencyElement extends HudElement<CurrencyElement.Configuration> {
             context.fill(x, y, x + maxWidth + HudConstants.BACKGROUND_PADDING, y + totalHeight + HudConstants.TEXT_PADDING_Y, color);
         }
 
-        // Draw currencies in vertical list
-        int startX = x + HudConstants.TEXT_PADDING_X;
-        int currentY = y + 1;
-        for (Text currencyText : currencyTexts) {
-            context.drawText(textRenderer.get(), currencyText, startX, currentY, 0xFFFFFFFF, true);
-            currentY += LINE_HEIGHT + LINE_SPACING;
+//        // Draw currencies in vertical list
+//        int startX = x + HudConstants.TEXT_PADDING_X;
+//        int currentY = y + 1;
+//        for (Text currencyText : currencyTexts) {
+//            context.drawText(textRenderer.get(), currencyText, startX, currentY, 0xFFFFFFFF, true);
+//            currentY += LINE_HEIGHT + LINE_SPACING;
+//        }
+        MutableText currencyText = Text.literal("");
+
+        for (int i = 0; i < currencyTexts.size(); i++) {
+            Text currentCurrencyText = currencyTexts.get(i);
+            currencyText.append(currentCurrencyText).append(" ");
         }
+
+        renderBarText(context, textRenderer.get(), currencyText, x, y);
     }
 
     /**
      * Builds a styled Text for a currency with appropriate colors for name and value.
      */
     private Text buildCurrencyText(CurrencyType currencyType, CurrencyValue currencyValue) {
-        String currencyName = currencyType.getAliases()[0];
+        String currencyName = currencyType.getAliases()[currencyType.getAliases().length-1];
         String valueString = currencyValue.getFormattedString();
         
         // Special handling for Starbits (gradient effect)

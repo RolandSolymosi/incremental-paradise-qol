@@ -14,10 +14,12 @@ import dev.isxander.yacl3.api.controller.DoubleSliderControllerBuilder;
 import dev.isxander.yacl3.config.v2.api.SerialEntry;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.text.Text;
+import net.minecraft.text.MutableText;
 import net.minecraft.util.math.ColorHelper;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -25,21 +27,21 @@ import java.util.function.Supplier;
 
 public class ProgressLayerElement extends HudElement<ProgressLayerElement.Configuration> {
     private static final int SPACING = 5; // Spacing between layers in the same row
-    
+
     // Layer name colors
     private static final int COLOR_LEVEL_NAME = 0x00A800;
     private static final int COLOR_PRESTIGE_NAME = 0x00A8A8;
     private static final int COLOR_ASCENSION_NAME = 0xA80000;
     private static final int COLOR_TRANSCENDENCE_NAME = 0xFCA800;
     private static final int COLOR_NIGHTMARE_NAME = 0x540054;
-    
+
     // Layer value colors
     private static final int COLOR_LEVEL_VALUE = 0x54FC54;
     private static final int COLOR_PRESTIGE_VALUE = 0x54FCFC;
     private static final int COLOR_ASCENSION_VALUE = 0xFC5454;
     private static final int COLOR_TRANSCENDENCE_VALUE = 0xFCFC54;
     private static final int COLOR_NIGHTMARE_VALUE = 0xA800A8;
-    
+
     private final GameInfoMonitor gameInfoMonitor;
 
     private final ProgressLayerElement.Configuration configuration = new ProgressLayerElement.Configuration();
@@ -102,6 +104,7 @@ public class ProgressLayerElement extends HudElement<ProgressLayerElement.Config
         // Collect layer entries and sort by ProgressLayer enum order
         List<Map.Entry<ProgressLayer, Text>> layerEntries = new ArrayList<>(layers.entrySet());
         layerEntries.sort(Comparator.comparing(entry -> entry.getKey()));
+        Collections.reverse(layerEntries);
 
         // Build styled layer texts with colors
         List<Text> layerTexts = new ArrayList<>();
@@ -172,29 +175,38 @@ public class ProgressLayerElement extends HudElement<ProgressLayerElement.Config
             context.fill(x, y, x + maxRowWidth + HudConstants.BACKGROUND_PADDING, y + totalHeight + HudConstants.TEXT_PADDING_Y, color);
         }
 
-        // Draw layers in 2-column layout (each row's items positioned relative to each other)
-        int startX = x + HudConstants.TEXT_PADDING_X;
-        int currentY = y + 1;
+//        // Draw layers in 2-column layout (each row's items positioned relative to each other)
+//        int startX = x + HudConstants.TEXT_PADDING_X;
+//        int currentY = y + 1;
+//        for (int i = 0; i < layerTexts.size(); i++) {
+//            int col = i % itemsPerRow;
+//            Text layerText = layerTexts.get(i);
+//
+//            int currentX = startX;
+//            if (col == 1) {
+//                // Position second item right after first item in the same row
+//                Text firstItemText = layerTexts.get(i - 1);
+//                int firstItemWidth = textRenderer.get().getWidth(firstItemText);
+//                currentX = startX + firstItemWidth + SPACING;
+//            }
+//
+//            context.drawText(textRenderer.get(), layerText, currentX, currentY, 0xFFFFFFFF, true);
+//
+//            // Move to next row after 2 items
+//            if (col == 1) {
+//                currentY += lineHeight + rowSpacing;
+//            }
+        MutableText layerText = Text.literal("");
+
         for (int i = 0; i < layerTexts.size(); i++) {
-            int col = i % itemsPerRow;
-            Text layerText = layerTexts.get(i);
-            
-            int currentX = startX;
-            if (col == 1) {
-                // Position second item right after first item in the same row
-                Text firstItemText = layerTexts.get(i - 1);
-                int firstItemWidth = textRenderer.get().getWidth(firstItemText);
-                currentX = startX + firstItemWidth + SPACING;
-            }
-            
-            context.drawText(textRenderer.get(), layerText, currentX, currentY, 0xFFFFFFFF, true);
-            
-            // Move to next row after 2 items
-            if (col == 1) {
-                currentY += lineHeight + rowSpacing;
-            }
+            Text currentLayerText = layerTexts.get(i);
+            layerText.append(currentLayerText).append(" ");
         }
+
+        renderBarText(context, textRenderer.get(), layerText, x, y);
+//        context.drawText(textRenderer.get(), layerText, x, y, 0xFFFFFFFF, true);
     }
+
 
     /**
      * Builds a styled Text for a layer with appropriate colors for name and value.
@@ -208,16 +220,16 @@ public class ProgressLayerElement extends HudElement<ProgressLayerElement.Config
             // No space found, just return the text with name color
             return Text.literal(layerString).styled(s -> s.withColor(getLayerNameColor(layerType)));
         }
-        
+
         String layerName = layerString.substring(0, lastSpaceIndex);
         String layerValue = layerString.substring(lastSpaceIndex + 1);
-        
+
         Text nameText = Text.literal(layerName).styled(s -> s.withColor(getLayerNameColor(layerType)));
         Text valueText = Text.literal(layerValue).styled(s -> s.withColor(getLayerValueColor(layerType)));
-        
+
         return Text.literal("").append(nameText).append(" ").append(valueText);
     }
-    
+
     /**
      * Gets the color for a layer name based on the layer type.
      */
@@ -230,7 +242,7 @@ public class ProgressLayerElement extends HudElement<ProgressLayerElement.Config
             case NIGHTMARE -> COLOR_NIGHTMARE_NAME;
         };
     }
-    
+
     /**
      * Gets the color for a layer value based on the layer type.
      */
@@ -244,7 +256,7 @@ public class ProgressLayerElement extends HudElement<ProgressLayerElement.Config
         };
     }
 
-    private int getHudBackgroundOpacity(){
+    private int getHudBackgroundOpacity() {
         return (int) (getConfiguration().progressLayerHudBackgroundOpacity * 255);
     }
 

@@ -82,7 +82,7 @@ public class ItemTargetTrackerElement extends TextListHudElement<ItemTargetTrack
 
     @Override
     protected int getBackgroundOpacity() {
-        return (int) (getConfiguration().hudBackgroundOpacity * 255);
+        return (int) (0);
     }
 
     @Override
@@ -128,7 +128,7 @@ public class ItemTargetTrackerElement extends TextListHudElement<ItemTargetTrack
         @SerialEntry
         public boolean filterMessages = true;
         @SerialEntry
-        public double hudBackgroundOpacity = 0.3;
+        public double hudBackgroundOpacity = 0.0;
     }
 }
 

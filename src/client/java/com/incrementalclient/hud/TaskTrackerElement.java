@@ -170,7 +170,7 @@ public class TaskTrackerElement extends TextListHudElement<TaskTrackerElement.Co
         MutableText displayText = Text.literal("")
                 .append(getLocation(taskState))
                 .append(TextUtils.textColor(" " + taskState.getTaskType().name() + ": ", textColor))
-                .append(TextUtils.textColorUnderline(isQuestOrTutorial(taskState) ? taskState.getName() : taskState.getDisplayName(), taskState.isSocialite() ? socialiteColor : taskColor));
+                .append(TextUtils.textColor(isQuestOrTutorial(taskState) ? taskState.getName() : taskState.getDisplayName(), taskState.isSocialite() ? socialiteColor : taskColor, true, false));
 
 
         if (!isQuestOrTutorial(taskState)) {

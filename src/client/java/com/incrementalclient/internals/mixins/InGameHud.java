@@ -47,7 +47,7 @@ public abstract class InGameHud {
 
     @Inject(method = "renderScoreboardSidebar", at = @At("HEAD"), cancellable = true)
     private void renderScoreboardSidebar(DrawContext context, RenderTickCounter tickCounter, CallbackInfo ci) {
-        if (hudManager.get().getConfiguration().isHideVanillaScoreboard()) {
+        if (hudManager.get().getConfiguration().getBarScoreboardReplacement()) {
             ci.cancel();
         }
     }
