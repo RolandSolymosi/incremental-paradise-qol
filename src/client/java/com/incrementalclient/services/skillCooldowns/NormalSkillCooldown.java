@@ -1,12 +1,17 @@
 package com.incrementalclient.services.skillCooldowns;
 
+import com.incrementalclient.common.utils.DurationEstimator;
+import com.incrementalclient.common.utils.Utils;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+
+import java.time.Duration;
 
 public abstract class NormalSkillCooldown implements SkillCooldown {
 
     protected final String skillName;
     private STATE state;
+    private final DurationEstimator cooldownEstimator = new DurationEstimator();
 
     // copy() is used here to make it immutable.
     private final Text READY_STATE_TEXT = Text.literal("Ready!").formatted(Formatting.BLUE).copy();
@@ -36,8 +41,8 @@ public abstract class NormalSkillCooldown implements SkillCooldown {
     // For other skills, this is done after some time (see: spoon bender, only enters cd later)
     // It's up to the subclass to call this function when it's needed.
     protected void onEnterCooldown() {
-        // TODO: Time trackers to measure how long the cooldown is
         this.state = STATE.COOLDOWN;
+        cooldownEstimator.start();
     }
 
     @Override
@@ -55,19 +60,29 @@ public abstract class NormalSkillCooldown implements SkillCooldown {
     protected abstract Text getActiveTextLine();
 
     protected Text getCooldownTextLine() {
-        // TODO: "On cooldown for <X> seconds"
-        return UNKNOWN_COOLDOWN_TEXT;
+        var remainingDuration = cooldownEstimator.getEstimatedRemainingDuration();
+        if(remainingDuration == null) {
+            return UNKNOWN_COOLDOWN_TEXT;
+        }
+        else {
+            return Text.literal("On cooldown for ")
+                    .append(Utils.formatDurationSeconds(remainingDuration))
+                    .append(" seconds")
+                    .formatted(Formatting.RED);
+        }
     }
 
     @Override
     public void onReady() {
         this.state = STATE.READY;
+        cooldownEstimator.stop();
     }
 
     @Override
     public void onCooldown(double cooldownTime) {
-        // TODO: Time trackers to measure how long the cooldown is.
-        //   This function can be used to more quickly update those time trackers.
+        // note that ofSeconds would require casting to long, which would cut off decimal points
+        // so doing this lets us keep 3 decimal points, and I don't think we have precision past millis.
+        cooldownEstimator.estimateStopsIn(Duration.ofMillis((long) (cooldownTime * 1000)));
     }
 
     private enum STATE {
