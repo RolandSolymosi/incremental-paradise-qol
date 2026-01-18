@@ -3,15 +3,19 @@ package com.incrementalclient.services.skillCooldowns;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 
-// skillName should be constant ("Ricochet") but skillName is still used throughout the class
-// to keep things consistent (esp with more SkillCoooldown classes later on)
-public class RicochetCooldown extends SkillCooldown {
+// skillName should be constant ("Ricochet") but the SkillCooldownMonitor expects a one-arg constructor
+// so to keep things consistent, it'll be getting that. (Note: Landscaping is the same form, so this could be
+// reused for landscaping too, theoretically. The problem is that landscaping doesn't say when it activates, and
+// nobody really cares about that one anyway.)
+public class RicochetCooldown implements SkillCooldown {
+
+    private final String skillName;
 
     private int numActive = 0;
     private int maxActive = 0;
 
     public RicochetCooldown(String skillName) {
-        super(skillName);
+        this.skillName = skillName;
     }
 
     @Override

@@ -6,10 +6,12 @@ import net.minecraft.text.Text;
 /**
  * This is a stub class, purely so that SkillCooldownMonitor doesn't have to handle "null" type skill cooldowns.
  */
-public class SkillCooldownStub extends SkillCooldown {
+public class SkillCooldownStub implements SkillCooldown {
+
+    private final String skillName;
 
     public SkillCooldownStub(String skillName) {
-        super(skillName);
+        this.skillName = skillName;
     }
 
     @Override
