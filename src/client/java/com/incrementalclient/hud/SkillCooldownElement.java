@@ -39,7 +39,7 @@ public class SkillCooldownElement extends TextListHudElement<SkillCooldownElemen
             Map.entry(SkillCategory.Excavation, "\uD83E\uDD96")
     );
 
-    protected SkillCooldownElement(
+    public SkillCooldownElement(
             MinecraftClientAccessor uiAccessor,
             HudManager hudManager,
             SkillCooldownMonitor skillCooldownMonitor
