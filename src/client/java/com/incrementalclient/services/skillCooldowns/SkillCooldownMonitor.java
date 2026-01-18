@@ -90,16 +90,11 @@ public class SkillCooldownMonitor implements Observer<ChatHandler.Event> {
         boolean filterFound = false;
 
         Matcher matcher;
-        // TODO Remove the ChatHandler prints. They're only here temporarily while a HUD element doesn't exist.
-        //   Related note: the ChatHandler prints dont work at all, either. I don't know why, and it's not important
-        //   if a HUD element is created for them.
         if((matcher = skillActivated.matcher(text)).find()) {
             var skillName = matcher.group("skill");
             var skill = getSkillCooldown(skillName);
             skill.onActivate();
             filterFound = true;
-
-//            this.chatHandler.sendChatMessage(Text.literal("Skill's new HUD line: ").append(skill.getHudTextLine()));
 
             // Only worth updating the "currently active skill" after one gets used.
             // One just got used, so update the currently active skill
@@ -112,8 +107,6 @@ public class SkillCooldownMonitor implements Observer<ChatHandler.Event> {
             var skill = getSkillCooldown(skillName);
             skill.onSkillEnd();
             filterFound = true;
-
-//            this.chatHandler.sendChatMessage(Text.literal("Skill's new HUD line: ").append(skill.getHudTextLine()));
         } else if((matcher = skillOnCooldown.matcher(text)).find()) {
             var skillName = matcher.group("skill");
             var skill = getSkillCooldown(skillName);
@@ -127,15 +120,11 @@ public class SkillCooldownMonitor implements Observer<ChatHandler.Event> {
                 // TODO Maybe put this into a util class?
                 chatHandler.sendChatMessage(Text.literal("Couldn't understand cooldown of " + cooldownString + " seconds."));
             }
-
-//            this.chatHandler.sendChatMessage(Text.literal("Skill's new HUD line: ").append(skill.getHudTextLine()));
         } else if((matcher = skillReady.matcher(text)).find()) {
             var skillName = matcher.group("skill");
             var skill = getSkillCooldown(skillName);
             skill.onReady();
             filterFound = true;
-
-//            this.chatHandler.sendChatMessage(Text.literal("Skill's new HUD line: ").append(skill.getHudTextLine()));
         }
 
         if(this.filterChat && filterFound) {
@@ -158,7 +147,6 @@ public class SkillCooldownMonitor implements Observer<ChatHandler.Event> {
 
         var skillConstructor = skillCooldownConstructors.getOrDefault(skillName, null);
         if(skillConstructor == null) {
-            this.chatHandler.sendChatMessage(Text.literal("Warning: SkillCooldownStub created for skill " + skillName));
             skillConstructor = SkillCooldownStub::new;
         }
 
