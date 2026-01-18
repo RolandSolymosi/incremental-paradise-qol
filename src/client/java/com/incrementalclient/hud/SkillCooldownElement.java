@@ -19,8 +19,6 @@ import java.util.stream.Collectors;
 
 public class SkillCooldownElement extends TextListHudElement<SkillCooldownElement.Configuration> {
 
-    // TODO: This is not tested.
-
     private final Configuration configuration = new Configuration();
 
     private final SkillCooldownMonitor skillCooldownMonitor;

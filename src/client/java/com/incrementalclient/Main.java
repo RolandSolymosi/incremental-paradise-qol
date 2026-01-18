@@ -45,7 +45,7 @@ public class Main implements ClientModInitializer {
             .addSingleton(InteractionScheduler.class)
             .addObservable(ActiveConsumableMonitor.class)
             .addObservable(ShinyOreMonitor.class)
-            .addSingleton(ItemTargetMonitor.class)
+//            .addSingleton(ItemTargetMonitor.class)
             .addSingleton(SkillCooldownMonitor.class)
             // Features
             .addSingleton(SellAllHotkey.class).forwardSingleton(Configurable.class, SellAllHotkey.class)
