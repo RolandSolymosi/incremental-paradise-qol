@@ -73,7 +73,7 @@ public class Main implements ClientModInitializer {
             .addSingleton(ProgressLayerElement.class).forwardSingleton(Configurable.class, ProgressLayerElement.class).forwardSingleton(HudElement.class, ProgressLayerElement.class)
             .addSingleton(CompletedTasksElement.class).forwardSingleton(Configurable.class, CompletedTasksElement.class).forwardSingleton(HudElement.class, CompletedTasksElement.class)
             .addSingleton(AggroElement.class).forwardSingleton(Configurable.class, AggroElement.class).forwardSingleton(HudElement.class, AggroElement.class)
-            .addSingleton(ItemTargetTrackerElement.class).forwardSingleton(Configurable.class, ItemTargetTrackerElement.class).forwardSingleton(HudElement.class, ItemTargetTrackerElement.class)
+//            .addSingleton(ItemTargetTrackerElement.class).forwardSingleton(Configurable.class, ItemTargetTrackerElement.class).forwardSingleton(HudElement.class, ItemTargetTrackerElement.class)
             .addSingleton(SkillCooldownElement.class).forwardSingleton(Configurable.class, SkillCooldownElement.class).forwardSingleton(HudElement.class, SkillCooldownElement.class)
             .buildServiceProvider();
 
