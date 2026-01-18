@@ -36,7 +36,8 @@ public class SkillCooldownMonitor implements Observer<ChatHandler.Event> {
     private final Map<String, Function<String, SkillCooldown>> skillCooldownConstructors = Map.ofEntries(
             Map.entry("Ricochet", RicochetCooldown::new),
             Map.entry("Pollinate", InstantSkillCooldown::new),
-            Map.entry("Buzzing Assault", VariableDurationNormalSkill::new)
+            Map.entry("Buzzing Assault", VariableDurationNormalSkill::new),
+            Map.entry("Spoon Bender", FixedDurationNormalSkill::new)
     );
 
     // Mapping of [Skill Name -> Skill Category]
