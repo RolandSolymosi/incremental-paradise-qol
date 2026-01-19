@@ -8,6 +8,10 @@ import com.incrementalclient.common.utils.Vector2f;
 import com.incrementalclient.internals.MinecraftClientAccessor;
 import com.incrementalclient.services.HudManager;
 import com.incrementalclient.services.skillCooldowns.SkillCooldownMonitor;
+import dev.isxander.yacl3.api.Option;
+import dev.isxander.yacl3.api.OptionDescription;
+import dev.isxander.yacl3.api.controller.BooleanControllerBuilder;
+import dev.isxander.yacl3.api.controller.DoubleSliderControllerBuilder;
 import dev.isxander.yacl3.config.v2.api.SerialEntry;
 import net.minecraft.text.Text;
 
@@ -47,11 +51,34 @@ public class SkillCooldownElement extends TextListHudElement<SkillCooldownElemen
         this.anchorPoint = new Vector2f(10, 10);
 
         options = Suppliers.memoize(() -> List.of(
-                // TODO: This needs everything that ItemTargetTrackerElement got.
+                Categories.Hud.SkillCooldown.createConfig(0,
+                        Option.<Boolean>createBuilder()
+                                .name(Text.of("Toggle Item Target HUD on and off"))
+                                .description(OptionDescription.of(Text.of("Turn on and off the skill cooldown tracker HUD.")))
+                                .binding(configuration.isHudEnabled, () -> configuration.isHudEnabled, newVal -> configuration.isHudEnabled = newVal)
+                                .controller(BooleanControllerBuilder::create)
+                                .build()
+                ),
+                Categories.Hud.SkillCooldown.createConfig(1,
+                        Option.<Boolean>createBuilder()
+                                .name(Text.of("Filter message"))
+                                .description(OptionDescription.of(Text.of("Toggle if skill cooldown tracker should filter message or not. If the skill cooldown tracker is disabled, it won't filter messages anyway.")))
+                                .binding(configuration.filterMessages, () -> configuration.filterMessages, newVal -> configuration.filterMessages = newVal)
+                                .controller(BooleanControllerBuilder::create)
+                                .build()
+                ),
+                Categories.Hud.SkillCooldown.createConfig(2,
+                        Option.<Double>createBuilder()
+                                .name(Text.of("Consumable HUD background opacity"))
+                                .description(OptionDescription.of(Text.of("Set the opacity of the consumable HUD background.")))
+                                .binding(configuration.hudBackgroundOpacity, () -> configuration.hudBackgroundOpacity, newVal -> configuration.hudBackgroundOpacity = newVal)
+                                .controller(o -> DoubleSliderControllerBuilder.create(o).step(0.01).range(0.0, 1.0))
+                                .build()
+                )
         ));
 
         // Force update filterMessages value
-        this.skillCooldownMonitor.setFilterChat(getConfiguration().filterMessages);
+        updateMonitor();
     }
 
     @Override
@@ -110,13 +137,17 @@ public class SkillCooldownElement extends TextListHudElement<SkillCooldownElemen
 
     @Override
     public List<OptionPiece> getOption() {
-        return super.getOption();
+        return options.get();
     }
 
     @Override
     public void optionChanged() {
         super.optionChanged();
-        this.skillCooldownMonitor.setFilterChat(getConfiguration().filterMessages);
+        updateMonitor();
+    }
+
+    private void updateMonitor() {
+        this.skillCooldownMonitor.setFilterChat(getConfiguration().isHudEnabled && getConfiguration().filterMessages);
     }
 
     public static class Configuration extends HudElement.ConfigurationBase {
