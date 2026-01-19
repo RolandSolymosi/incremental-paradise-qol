@@ -29,24 +29,25 @@ public class SkillCooldownMonitor implements Observer<ChatHandler.Event> {
 
     // TODO: After writing "SkillCooldown" too many times I started getting confused.
     //  Maybe a better variable name would be good?
-    // Mapping from SkillName -> SkillCooldown instance
-    private final Map<String, SkillCooldown> skillCooldowns = new HashMap<>();
+    // Mapping from Skill -> SkillCooldown instance
+    private final Map<Skill, SkillCooldown> skillCooldowns = new HashMap<>();
 
     // Each function is a SkillCooldown constructor
-    // Mapping from SkillName -> SkillCooldown constructor for that skill
+    // Mapping from Skill -> SkillCooldown constructor for that skill
     // (It is expected that many constructors will appear many times, ex buzzing assault and beestorm)
-    private final Map<String, Function<String, SkillCooldown>> skillCooldownConstructors = Map.ofEntries(
-            Map.entry("Ricochet", RicochetCooldown::new),
-            Map.entry("Pollinate", InstantSkillCooldown::new),
-            Map.entry("Buzzing Assault", VariableDurationNormalSkill::new),
-            Map.entry("Spoon Bender", FixedDurationNormalSkill::new)
+    private final Map<Skill, Function<String, SkillCooldown>> skillCooldownConstructors = Map.ofEntries(
+            // TODO finish
+            Map.entry(NormalMiningSkill.Ricochet, RicochetCooldown::new),
+            Map.entry(NormalFarmingSkill.Pollinate, InstantSkillCooldown::new),
+            Map.entry(NormalForagingSkill.BuzzingAssault, VariableDurationNormalSkill::new),
+            Map.entry(NormalSpearFishingSkill.SpoonBender, FixedDurationNormalSkill::new)
     );
 
-    // Mapping of [Skill Name -> Skill Category]
+    // Mapping of [Skill Name -> Active Skill Upg]
     // Initialized at runtime (see constructor) using info from each skill.
     // Treat it as immutable after constructor - aka, as if it had Collections.unmodifiableMap().
-    // TODO: Should this be in its own util class? Or maybe a SkillUtils singleton?
-    private final Map<String, SkillCategory> skillCategoryMap = new HashMap<>();
+    // TODO: Should this be in its own util class? Or maybe a SkillUtils or SkillsManager singleton?
+    private final Map<String, Skill> skillNameMap = new HashMap<>();
 
     // Mapping of [Skill Category -> Currently active skill]
     // Unlike the previous map, not immutable.
@@ -86,7 +87,7 @@ public class SkillCooldownMonitor implements Observer<ChatHandler.Event> {
         for(var skill : allSkills) {
             for(var skillUpg : skill.getEnumConstants()) {
                 if(skillUpg.isActiveUpgrade()) {
-                    skillCategoryMap.put(skillUpg.getName(), skillUpg.getCategory());
+                    skillNameMap.put(skillUpg.getName(), skillUpg);
                 }
             }
         }
@@ -100,30 +101,33 @@ public class SkillCooldownMonitor implements Observer<ChatHandler.Event> {
         Matcher matcher;
         if((matcher = skillActivated.matcher(text)).find()) {
             var skillName = matcher.group("skill");
-            var skill = getSkillCooldown(skillName);
-            skill.onActivate();
+            var skill = skillNameMap.getOrDefault(skillName, null);
+            var skillCooldown = getSkillCooldown(skill);
+            skillCooldown.onActivate();
             filterFound = true;
 
             // Only worth updating the "currently active skill" after one gets used.
             // One just got used, so update the currently active skill
-            SkillCategory category = skillCategoryMap.getOrDefault(skillName, null);
-            if(category != null) {
-                currentlyActiveSkills.put(category, skill);
+            if(skill != null) {
+                SkillCategory category = skill.getCategory();
+                currentlyActiveSkills.put(category, skillCooldown);
             }
         } else if((matcher = skillEnded.matcher(text)).find()) {
             var skillName = matcher.group("skill");
-            var skill = getSkillCooldown(skillName);
-            skill.onSkillEnd();
+            var skill = skillNameMap.getOrDefault(skillName, null);
+            var skillCooldown = getSkillCooldown(skill);
+            skillCooldown.onSkillEnd();
             filterFound = true;
 
             test |= 1;
         } else if((matcher = skillOnCooldown.matcher(text)).find()) {
             var skillName = matcher.group("skill");
-            var skill = getSkillCooldown(skillName);
+            var skill = skillNameMap.getOrDefault(skillName, null);
+            var skillCooldown = getSkillCooldown(skill);
             String cooldownString = matcher.group("cooldown");
             try {
                 var cooldown = Double.parseDouble(cooldownString);
-                skill.onCooldown(cooldown);
+                skillCooldown.onCooldown(cooldown);
                 // note that here, filterFound only applies if parseDouble works
                 filterFound = true;
             } catch (NumberFormatException nfe) {
@@ -132,8 +136,9 @@ public class SkillCooldownMonitor implements Observer<ChatHandler.Event> {
             }
         } else if((matcher = skillReady.matcher(text)).find()) {
             var skillName = matcher.group("skill");
-            var skill = getSkillCooldown(skillName);
-            skill.onReady();
+            var skill = skillNameMap.getOrDefault(skillName, null);
+            var skillCooldown = getSkillCooldown(skill);
+            skillCooldown.onReady();
             filterFound = true;
         }
 
@@ -167,20 +172,20 @@ public class SkillCooldownMonitor implements Observer<ChatHandler.Event> {
         }
     }
 
-    private @NotNull SkillCooldown getSkillCooldown(String skillName) {
-        var ret = this.skillCooldowns.getOrDefault(skillName, null);
+    private @NotNull SkillCooldown getSkillCooldown(Skill skill) {
+        var ret = this.skillCooldowns.getOrDefault(skill, null);
         if(ret != null) {
             // skill is already in skillCooldowns map, so it's already been defined
             return ret;
         }
 
-        var skillConstructor = skillCooldownConstructors.getOrDefault(skillName, null);
+        var skillConstructor = skillCooldownConstructors.getOrDefault(skill, null);
         if(skillConstructor == null) {
             skillConstructor = SkillCooldownStub::new;
         }
 
-        var skillCooldown = skillConstructor.apply(skillName);
-        this.skillCooldowns.put(skillName, skillCooldown);
+        var skillCooldown = skillConstructor.apply(skill.getName());
+        this.skillCooldowns.put(skill, skillCooldown);
         return skillCooldown;
     }
 
