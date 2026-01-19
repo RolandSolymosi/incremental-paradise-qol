@@ -160,7 +160,9 @@ public class SkillCooldownMonitor implements Observer<ChatHandler.Event> {
                 // note that here, filterFound only applies if parseDouble works
                 filterFound = true;
             } catch (NumberFormatException nfe) {
-                // TODO Maybe put this into a util class?
+                // This could go into a util class, but there aren't many things in this game which are
+                // decimal outputs. If we get another decimal output to deal with, then this should
+                // go into that util class.
                 chatHandler.sendChatMessage(Text.literal("Couldn't understand cooldown of " + cooldownString + " seconds."));
             }
         } else if((matcher = skillReady.matcher(text)).find()) {
