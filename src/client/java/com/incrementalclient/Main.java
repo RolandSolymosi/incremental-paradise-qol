@@ -20,6 +20,7 @@ public class Main implements ClientModInitializer {
 
     public static final ServiceProvider SERVICE_PROVIDER = new ServiceCollection()
             // Low level Services (Minecraft Event and Mixin wrappers)
+            .addListenable(StartClientTickListenable.class)
             .addListenable(EndClientTickListenable.class)
             .addObservable(HudRenderCallbackObservable.class)
             .addObservable(ClientCommandRegistrationCallbackObservable.class)

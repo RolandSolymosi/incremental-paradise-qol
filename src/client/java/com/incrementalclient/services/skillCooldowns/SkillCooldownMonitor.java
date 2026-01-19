@@ -3,6 +3,8 @@ package com.incrementalclient.services.skillCooldowns;
 import com.incrementalclient.common.data.skills.*;
 import com.incrementalclient.common.utils.NumberParser;
 import com.incrementalclient.interfaces.Observer;
+import com.incrementalclient.internals.events.EndClientTickListenable;
+import com.incrementalclient.internals.events.StartClientTickListenable;
 import com.incrementalclient.services.ChatHandler;
 import com.incrementalclient.services.WorldMonitor;
 import net.minecraft.network.message.SentMessage;
@@ -57,13 +59,17 @@ public class SkillCooldownMonitor implements Observer<ChatHandler.Event> {
     private static final Pattern skillOnCooldown = Pattern.compile(startPiece + "(?<skill>.+) is on cooldown for another (?<cooldown>" + NumberParser.NumberPattern.pattern() + ") seconds.");
     private static final Pattern skillReady = Pattern.compile(startPiece + "(?<skill>.+) is ready to use.");
 
+    private int test = 0;
+
     public SkillCooldownMonitor(
             ChatHandler chatHandler,
-            WorldMonitor worldMonitor
+            WorldMonitor worldMonitor,
+            StartClientTickListenable startClientTickListenable
     ) {
         this.chatHandler = chatHandler;
         chatHandler.subscribe(this);
         worldMonitor.subscribe(this::onWorldChange);
+        startClientTickListenable.subscribe(this::onTickStart);
 
         // TODO: Should this go into a Util class instead of here?
         //   Okay, I tried, and it wasn't working because I was having issues with generics and "var" wasn't working.
@@ -109,6 +115,8 @@ public class SkillCooldownMonitor implements Observer<ChatHandler.Event> {
             var skill = getSkillCooldown(skillName);
             skill.onSkillEnd();
             filterFound = true;
+
+            test |= 1;
         } else if((matcher = skillOnCooldown.matcher(text)).find()) {
             var skillName = matcher.group("skill");
             var skill = getSkillCooldown(skillName);
@@ -130,7 +138,7 @@ public class SkillCooldownMonitor implements Observer<ChatHandler.Event> {
         }
 
         if(this.filterChat && filterFound) {
-            result.cancel();
+//            result.cancel();
         }
     }
 
@@ -138,6 +146,25 @@ public class SkillCooldownMonitor implements Observer<ChatHandler.Event> {
         // It's possible this isn't necessary,
         // since the chat already sends a message out for [Skill is over!] when you change worlds.
         this.skillCooldowns.values().forEach(SkillCooldown::onChangeWorld);
+
+        test |= 2;
+    }
+
+    public void onTickStart() {
+        /*
+        Order of operations is:
+        - Chat event, aka onEvent(ChatHandler.Event)
+        - End client tick
+        - Client change world event (onWorldChange)
+        - Start of next client tick
+        Therefore, if we want to detect the difference between "skill is over due to time" and "skill is over due to
+        world change", we MUST put the check at onTickStart! onTickEnd WILL NOT WORK for this situation!
+         */
+        // This method has to be done because <Skill is over!> message is sent BEFORE a world change is detected.
+        if(test != 0) {
+            this.chatHandler.sendChatMessage(Text.of("test variable was " + test));
+            test = 0;
+        }
     }
 
     private @NotNull SkillCooldown getSkillCooldown(String skillName) {
