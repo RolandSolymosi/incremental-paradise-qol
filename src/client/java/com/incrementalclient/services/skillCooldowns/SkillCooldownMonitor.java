@@ -60,8 +60,6 @@ public class SkillCooldownMonitor implements Observer<ChatHandler.Event> {
     private static final Pattern skillOnCooldown = Pattern.compile(startPiece + "(?<skill>.+) is on cooldown for another (?<cooldown>" + NumberParser.NumberPattern.pattern() + ") seconds.");
     private static final Pattern skillReady = Pattern.compile(startPiece + "(?<skill>.+) is ready to use.");
 
-    private int test = 0;
-
     public SkillCooldownMonitor(
             ChatHandler chatHandler,
             WorldMonitor worldMonitor,
@@ -118,8 +116,6 @@ public class SkillCooldownMonitor implements Observer<ChatHandler.Event> {
             var skillCooldown = getSkillCooldown(skill);
             skillCooldown.onSkillEnd();
             filterFound = true;
-
-            test |= 1;
         } else if((matcher = skillOnCooldown.matcher(text)).find()) {
             var skillName = matcher.group("skill");
             var skill = skillNameMap.getOrDefault(skillName, null);
@@ -148,11 +144,10 @@ public class SkillCooldownMonitor implements Observer<ChatHandler.Event> {
     }
 
     public void onWorldChange(WorldMonitor.Event event) {
-        // It's possible this isn't necessary,
-        // since the chat already sends a message out for [Skill is over!] when you change worlds.
+        // TODO implement
+        //   Needed so skills can tell the difference between <skill ended due to duration>
+        //   and <skill ended due to world change>
         this.skillCooldowns.values().forEach(SkillCooldown::onChangeWorld);
-
-        test |= 2;
     }
 
     public void onTickStart() {
@@ -166,10 +161,6 @@ public class SkillCooldownMonitor implements Observer<ChatHandler.Event> {
         world change", we MUST put the check at onTickStart! onTickEnd WILL NOT WORK for this situation!
          */
         // This method has to be done because <Skill is over!> message is sent BEFORE a world change is detected.
-        if(test != 0) {
-            this.chatHandler.sendChatMessage(Text.of("test variable was " + test));
-            test = 0;
-        }
     }
 
     private @NotNull SkillCooldown getSkillCooldown(Skill skill) {
