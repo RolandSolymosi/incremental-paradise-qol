@@ -1,5 +1,7 @@
 package com.incrementalclient.services.skillCooldowns;
 
+import com.incrementalclient.common.utils.DurationEstimator;
+import com.incrementalclient.common.utils.Utils;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
@@ -10,8 +12,7 @@ import net.minecraft.util.Formatting;
  * Examples are Spoon Bender and Harvester.
  */
 public class FixedDurationNormalSkill extends NormalSkillCooldown {
-    // TODO: Until we start estimating the duration, this is functionally the same as VariableDurationNormalSkill.
-    //   Skill duration estimation is possible with onActivate and onSkillEnd.
+    private DurationEstimator durationEstimator = new DurationEstimator();
 
     public FixedDurationNormalSkill(String skillName) {
         super(skillName);
@@ -19,20 +20,28 @@ public class FixedDurationNormalSkill extends NormalSkillCooldown {
 
     @Override
     protected Text getActiveTextLine() {
-        // TODO: Estimate the remaining active duration
-        return Text.literal("Active!").formatted(Formatting.GREEN).copy();
+        var remainingDuration = durationEstimator.getEstimatedRemainingDuration();
+        if(remainingDuration == null) {
+            return Text.literal("Active!").formatted(Formatting.GREEN).copy();
+        }
+        else {
+            return Text.literal("Active for " + Utils.formatDurationSeconds(remainingDuration) + " seconds")
+                    .formatted(Formatting.GREEN);
+        }
     }
 
     @Override
     public void onActivate() {
         // When activated: Enters the "Active" state (ie the skill is running)
         onEnterActiveDuration();
+        durationEstimator.start();
     }
 
     @Override
     public void onSkillEnd() {
         // When over: Goes on cooldown.
         onEnterCooldown();
+        durationEstimator.stop();
     }
 
     @Override
