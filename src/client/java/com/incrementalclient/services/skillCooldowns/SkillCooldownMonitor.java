@@ -28,8 +28,6 @@ public class SkillCooldownMonitor implements Observer<ChatHandler.Event> {
     private final ChatHandler chatHandler;
     private boolean filterChat = true;
 
-    // TODO: After writing "SkillCooldown" too many times I started getting confused.
-    //  Maybe a better variable name would be good?
     // Mapping from Skill -> SkillCooldown instance
     private final Map<Skill, SkillCooldown> skillCooldowns = new HashMap<>();
 
