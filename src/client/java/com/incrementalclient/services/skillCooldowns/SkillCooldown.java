@@ -25,7 +25,9 @@ public interface SkillCooldown {
 
     // Examples:
     // 🔧 Ricochet is over!
-    void onSkillEnd();
+    // The boolean is for whether the skill is ending because of a world change (warp 1, warp 2, enter bossworld, etc)
+    // or because of some other reason (usually ending because the duration ended)
+    void onSkillEnd(boolean worldChange);
 
     // Examples:
     // 🔧 Condensed Strike is on cooldown for another 16.2 seconds.
@@ -36,12 +38,6 @@ public interface SkillCooldown {
     // Examples:
     // 🔧 Condensed Strike is ready to use.
     void onReady();
-
-    // Note about this:
-    // - For skills with a duration, it ends the duration (buzzing assault, bee storm)
-    // - However, it does NOT reset the cooldown!
-    // See the large note in SkillCooldownMonitor.onWorldChange() about whether this is a good idea or not.
-    void onChangeWorld();
 
     // How this SkillCooldown will appear in text on the HUD.
     Text getHudTextLine();

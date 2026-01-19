@@ -13,6 +13,7 @@ import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -89,6 +90,9 @@ public class SkillCooldownMonitor implements Observer<ChatHandler.Event> {
     // Unlike the previous map, not immutable.
     private final Map<SkillCategory, SkillCooldown> currentlyActiveSkills = new HashMap<>();
 
+    // Skill cooldowns which ended this tick - don't yet know if it was because of world change or not, though.
+    private final List<SkillCooldown> cooldownsEnding = new ArrayList<>();
+
     // Note: I anticipate regex might not be the best solution here, since for two regexes we put a wildcard
     // at the start followed by two lines of text
     private static final Pattern skillActivated = Pattern.compile(startPiece + "Activated (?<skill>.+)!");
@@ -147,7 +151,7 @@ public class SkillCooldownMonitor implements Observer<ChatHandler.Event> {
             var skillName = matcher.group("skill");
             var skill = skillNameMap.getOrDefault(skillName, null);
             var skillCooldown = getSkillCooldown(skill);
-            skillCooldown.onSkillEnd();
+            cooldownsEnding.add(skillCooldown);
             filterFound = true;
         } else if((matcher = skillOnCooldown.matcher(text)).find()) {
             var skillName = matcher.group("skill");
@@ -174,15 +178,14 @@ public class SkillCooldownMonitor implements Observer<ChatHandler.Event> {
         }
 
         if(this.filterChat && filterFound) {
-//            result.cancel();
+            result.cancel();
         }
     }
 
     public void onWorldChange(WorldMonitor.Event event) {
-        // TODO implement
-        //   Needed so skills can tell the difference between <skill ended due to duration>
-        //   and <skill ended due to world change>
-        this.skillCooldowns.values().forEach(SkillCooldown::onChangeWorld);
+        // Cooldowns ending because of a world change
+        cooldownsEnding.forEach(cooldown -> cooldown.onSkillEnd(true));
+        cooldownsEnding.clear();
     }
 
     public void onTickStart() {
@@ -195,7 +198,9 @@ public class SkillCooldownMonitor implements Observer<ChatHandler.Event> {
         Therefore, if we want to detect the difference between "skill is over due to time" and "skill is over due to
         world change", we MUST put the check at onTickStart! onTickEnd WILL NOT WORK for this situation!
          */
-        // This method has to be done because <Skill is over!> message is sent BEFORE a world change is detected.
+        // Cooldowns ending, and NOT because of a world change
+        cooldownsEnding.forEach(cooldown -> cooldown.onSkillEnd(false));
+        cooldownsEnding.clear();
     }
 
     private @NotNull SkillCooldown getSkillCooldown(Skill skill) {

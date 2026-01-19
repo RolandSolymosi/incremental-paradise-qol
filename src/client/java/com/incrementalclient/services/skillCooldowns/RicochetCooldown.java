@@ -27,7 +27,7 @@ public class RicochetCooldown implements SkillCooldown {
     }
 
     @Override
-    public void onSkillEnd() {
+    public void onSkillEnd(boolean worldChange) {
         numActive--;
     }
 
@@ -39,11 +39,6 @@ public class RicochetCooldown implements SkillCooldown {
     @Override
     public void onReady() {
         // "Ricochet is ready" is not a message ("Ricochet is over!" is the equivalent)
-    }
-
-    @Override
-    public void onChangeWorld() {
-
     }
 
     @Override

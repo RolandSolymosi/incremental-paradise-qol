@@ -20,7 +20,7 @@ public class SkillCooldownStub implements SkillCooldown {
     }
 
     @Override
-    public void onSkillEnd() {
+    public void onSkillEnd(boolean worldChange) {
 
     }
 
@@ -31,11 +31,6 @@ public class SkillCooldownStub implements SkillCooldown {
 
     @Override
     public void onReady() {
-
-    }
-
-    @Override
-    public void onChangeWorld() {
 
     }
 

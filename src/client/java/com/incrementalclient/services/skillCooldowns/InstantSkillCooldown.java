@@ -24,14 +24,9 @@ public class InstantSkillCooldown extends NormalSkillCooldown {
     }
 
     @Override
-    public void onSkillEnd() {
+    public void onSkillEnd(boolean worldChange) {
         // Shouldn't be possible; instant skills don't announce that they're "over".
         // Still, putting a fallback in.
         onEnterCooldown();
-    }
-
-    @Override
-    public void onChangeWorld() {
-
     }
 }

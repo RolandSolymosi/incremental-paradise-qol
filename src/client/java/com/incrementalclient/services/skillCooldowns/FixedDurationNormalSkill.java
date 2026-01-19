@@ -38,14 +38,9 @@ public class FixedDurationNormalSkill extends NormalSkillCooldown {
     }
 
     @Override
-    public void onSkillEnd() {
+    public void onSkillEnd(boolean worldChange) {
         // When over: Goes on cooldown.
         onEnterCooldown();
         durationEstimator.stop();
-    }
-
-    @Override
-    public void onChangeWorld() {
-
     }
 }

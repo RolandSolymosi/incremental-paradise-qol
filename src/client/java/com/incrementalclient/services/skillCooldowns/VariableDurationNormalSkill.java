@@ -28,13 +28,8 @@ public class VariableDurationNormalSkill extends NormalSkillCooldown {
     }
 
     @Override
-    public void onSkillEnd() {
+    public void onSkillEnd(boolean worldChange) {
         // When over: Goes on cooldown.
         onEnterCooldown();
-    }
-
-    @Override
-    public void onChangeWorld() {
-
     }
 }
