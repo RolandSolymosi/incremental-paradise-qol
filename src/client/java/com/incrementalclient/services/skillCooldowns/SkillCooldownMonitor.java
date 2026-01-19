@@ -36,11 +36,47 @@ public class SkillCooldownMonitor implements Observer<ChatHandler.Event> {
     // Mapping from Skill -> SkillCooldown constructor for that skill
     // (It is expected that many constructors will appear many times, ex buzzing assault and beestorm)
     private final Map<Skill, Function<String, SkillCooldown>> skillCooldownConstructors = Map.ofEntries(
-            // TODO finish
-            Map.entry(NormalMiningSkill.Ricochet, RicochetCooldown::new),
+            // TODO nm skills
+            // Combat skills
+            Map.entry(NormalCombatSkill.SweepingStrike, InstantSkillCooldown::new),
+            Map.entry(NormalCombatSkill.RhinoCharge, InstantSkillCooldown::new),
+            Map.entry(NormalCombatSkill.BeeStorm, VariableDurationNormalSkill::new),
+
+            // Excavation (brush) skills
+            // This isn't technically an instant skill, but <Seismic Resonance is over!> is not stated in chat.
+            Map.entry(NormalExcavationSkill.SeismicResonance, InstantSkillCooldown::new),
+
+            // Farming skills
+            // Harvester isn't technically an instant, but <Harvester is over!> is not stated in chat.
+            Map.entry(NormalFarmingSkill.Harvester, InstantSkillCooldown::new),
+            Map.entry(NormalFarmingSkill.CropChomp, InstantSkillCooldown::new),
             Map.entry(NormalFarmingSkill.Pollinate, InstantSkillCooldown::new),
+
+            // Foraging skills
+            // Timberstrike's weird, since sometimes its cooldown will instantly come back.
+            // However, I don't care to deal with that case - it only happens if you miss your axe.
+            Map.entry(NormalForagingSkill.Timberstrike, InstantSkillCooldown::new),
+            Map.entry(NormalForagingSkill.LuckyGathering, FixedDurationNormalSkill::new),
             Map.entry(NormalForagingSkill.BuzzingAssault, VariableDurationNormalSkill::new),
-            Map.entry(NormalSpearFishingSkill.SpoonBender, FixedDurationNormalSkill::new)
+
+            // Mining skills
+            Map.entry(NormalMiningSkill.Ricochet, RicochetCooldown::new),
+            Map.entry(NormalMiningSkill.CondensedStrike, InstantSkillCooldown::new),
+            // Wings of Wealth is weird, since it has the <X is over!> message despite being instant,
+            // AND like timberstrike it comes back instantly if it hits nothing.
+            // However, nobody uses this skill, so I'm fine with just giving it an InstantSkillCooldown.
+            Map.entry(NormalMiningSkill.WingsOfWealth, InstantSkillCooldown::new),
+
+            // Sharpshooting skills
+            Map.entry(NormalSharpshootingSkill.ExplosiveArrow, InstantSkillCooldown::new),
+            // SwarmSurfer is technically a VariableDuration, but since it doesn't have <Swarm Surfer is over!>
+            // it's closer to an Instant skill.
+            Map.entry(NormalSharpshootingSkill.SwarmSurfer, InstantSkillCooldown::new),
+
+            // Spearfishing skills
+            Map.entry(NormalSpearFishingSkill.SpoonBender, FixedDurationNormalSkill::new),
+            Map.entry(NormalSpearFishingSkill.Wavestreak, FixedDurationNormalSkill::new),
+            Map.entry(NormalSpearFishingSkill.Beenado, FixedDurationNormalSkill::new)
     );
 
     // Mapping of [Skill Name -> Active Skill Upg]
