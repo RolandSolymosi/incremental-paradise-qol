@@ -106,9 +106,6 @@ public class SkillCooldownMonitor implements Observer<ChatHandler.Event> {
         worldMonitor.subscribe(this::onWorldChange);
         startClientTickListenable.subscribe(this::onTickStart);
 
-        // TODO: Should this go into a Util class instead of here?
-        //   Okay, I tried, and it wasn't working because I was having issues with generics and "var" wasn't working.
-        //   Leaving it here for now.
         var allSkills = List.of(
                 NormalCombatSkill.class, NightmareCombatSkill.class,
                 NormalFarmingSkill.class, NightmareFarmingSkill.class,
