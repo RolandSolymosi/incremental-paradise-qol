@@ -41,6 +41,14 @@ public class FixedDurationNormalSkill extends NormalSkillCooldown {
     public void onSkillEnd(boolean worldChange) {
         // When over: Goes on cooldown.
         onEnterCooldown();
-        durationEstimator.stop();
+        if(worldChange) {
+            // start-end measurement now has a "corrupted end"
+            // so don't bother
+            durationEstimator.clearStart();
+        }
+        else {
+            // start-end measurement is accurate
+            durationEstimator.stop();
+        }
     }
 }

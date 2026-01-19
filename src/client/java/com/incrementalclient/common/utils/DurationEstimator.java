@@ -42,6 +42,14 @@ public class DurationEstimator {
     }
 
     /**
+     * Can be called if the current duration estimate is now "corrupted" ex if it gets interrupted
+     * so now the start-to-end measurement won't work
+     */
+    public void clearStart() {
+        lastStart = null;
+    }
+
+    /**
      * Call when we estimate the duration to end after some time.
      * @param futureEstimate How far in the future we estimate the duration to end in.
      */
@@ -71,5 +79,9 @@ public class DurationEstimator {
             return null;
         }
         return remainingDuration;
+    }
+
+    public Duration getEstimate() {
+        return estimate;
     }
 }
