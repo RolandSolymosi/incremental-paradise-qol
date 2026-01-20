@@ -89,7 +89,12 @@ public class DurationEstimator {
             // avoid ArithmeticException
             return 0.6f;
         }
-        return getEstimatedRemainingDuration().dividedBy(this.estimate);
+        var remainingDuration = getEstimatedRemainingDuration();
+        if(remainingDuration == null) {
+            // avoid NullPointerException
+            return 0.4f;
+        }
+        return remainingDuration.dividedBy(this.estimate);
     }
 
     public Duration getEstimate() {
