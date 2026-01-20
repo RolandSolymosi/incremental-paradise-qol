@@ -53,7 +53,7 @@ public class SkillCooldownElement extends TextListHudElement<SkillCooldownElemen
         options = Suppliers.memoize(() -> List.of(
                 Categories.Hud.SkillCooldown.createConfig(0,
                         Option.<Boolean>createBuilder()
-                                .name(Text.of("Toggle Item Target HUD on and off"))
+                                .name(Text.of("Toggle Skill Cooldown HUD on and off"))
                                 .description(OptionDescription.of(Text.of("Turn on and off the skill cooldown tracker HUD.")))
                                 .binding(configuration.isHudEnabled, () -> configuration.isHudEnabled, newVal -> configuration.isHudEnabled = newVal)
                                 .controller(BooleanControllerBuilder::create)
@@ -61,13 +61,21 @@ public class SkillCooldownElement extends TextListHudElement<SkillCooldownElemen
                 ),
                 Categories.Hud.SkillCooldown.createConfig(1,
                         Option.<Boolean>createBuilder()
-                                .name(Text.of("Filter message"))
-                                .description(OptionDescription.of(Text.of("Toggle if skill cooldown tracker should filter message or not. If the skill cooldown tracker is disabled, it won't filter messages anyway.")))
-                                .binding(configuration.filterMessages, () -> configuration.filterMessages, newVal -> configuration.filterMessages = newVal)
+                                .name(Text.of("Toggle Skill Item-cooldown on and off"))
+                                .description(OptionDescription.of(Text.of("Turn on and off whether items in the hotbar get a cooldown.")))
+                                .binding(configuration.isItemCooldownOverrideEnabled, () -> configuration.isItemCooldownOverrideEnabled, newVal -> configuration.isItemCooldownOverrideEnabled = newVal)
                                 .controller(BooleanControllerBuilder::create)
                                 .build()
                 ),
                 Categories.Hud.SkillCooldown.createConfig(2,
+                        Option.<Boolean>createBuilder()
+                                .name(Text.of("Filter message"))
+                                .description(OptionDescription.of(Text.of("Toggle if skill cooldown tracker should filter message or not. If the skill cooldown HUD and item cooldown are both disabled, it won't filter messages anyway.")))
+                                .binding(configuration.filterMessages, () -> configuration.filterMessages, newVal -> configuration.filterMessages = newVal)
+                                .controller(BooleanControllerBuilder::create)
+                                .build()
+                ),
+                Categories.Hud.SkillCooldown.createConfig(3,
                         Option.<Double>createBuilder()
                                 .name(Text.of("Consumable HUD background opacity"))
                                 .description(OptionDescription.of(Text.of("Set the opacity of the consumable HUD background.")))
@@ -148,12 +156,22 @@ public class SkillCooldownElement extends TextListHudElement<SkillCooldownElemen
     }
 
     private void updateMonitor() {
-        this.skillCooldownMonitor.setFilterChat(getConfiguration().isHudEnabled && getConfiguration().filterMessages);
+        this.skillCooldownMonitor.setOverrideItemCooldowns(getConfiguration().isItemCooldownOverrideEnabled);
+
+        var isActive = getConfiguration().isHudEnabled || getConfiguration().isItemCooldownOverrideEnabled;
+        if(isActive) {
+            this.skillCooldownMonitor.setFilterChat(getConfiguration().filterMessages);
+        }
+        else {
+            this.skillCooldownMonitor.setFilterChat(false);
+        }
     }
 
     public static class Configuration extends HudElement.ConfigurationBase {
         @SerialEntry
         public boolean isHudEnabled = true;
+        @SerialEntry
+        public boolean isItemCooldownOverrideEnabled = true;
         @SerialEntry
         public boolean filterMessages = true;
         @SerialEntry

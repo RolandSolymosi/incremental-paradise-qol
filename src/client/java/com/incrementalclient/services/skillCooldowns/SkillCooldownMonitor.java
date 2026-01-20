@@ -3,6 +3,7 @@ package com.incrementalclient.services.skillCooldowns;
 import com.incrementalclient.common.data.skills.*;
 import com.incrementalclient.common.utils.NumberParser;
 import com.incrementalclient.interfaces.Observer;
+import com.incrementalclient.internals.ItemCooldownWrapper;
 import com.incrementalclient.internals.events.EndClientTickListenable;
 import com.incrementalclient.internals.events.StartClientTickListenable;
 import com.incrementalclient.services.ChatHandler;
@@ -24,6 +25,9 @@ import java.util.regex.Pattern;
 public class SkillCooldownMonitor implements Observer<ChatHandler.Event> {
     // Note the startPiece includes a spacebar.
     private static final String startPiece = "\uD83D\uDD27 ";
+
+    private final ItemCooldownWrapper itemCooldownWrapper;
+    private boolean overrideItemCooldowns = true;
 
     private final ChatHandler chatHandler;
     private boolean filterChat = true;
@@ -99,10 +103,12 @@ public class SkillCooldownMonitor implements Observer<ChatHandler.Event> {
     private static final Pattern skillReady = Pattern.compile(startPiece + "(?<skill>.+) is ready to use.");
 
     public SkillCooldownMonitor(
+            ItemCooldownWrapper itemCooldownWrapper,
             ChatHandler chatHandler,
             WorldMonitor worldMonitor,
             StartClientTickListenable startClientTickListenable
     ) {
+        this.itemCooldownWrapper = itemCooldownWrapper;
         this.chatHandler = chatHandler;
         chatHandler.subscribe(this);
         worldMonitor.subscribe(this::onWorldChange);
@@ -199,6 +205,8 @@ public class SkillCooldownMonitor implements Observer<ChatHandler.Event> {
         // Cooldowns ending, and NOT because of a world change
         cooldownsEnding.forEach(cooldown -> cooldown.onSkillEnd(false));
         cooldownsEnding.clear();
+
+        // Update cooldowns now
     }
 
     private @NotNull SkillCooldown getSkillCooldown(Skill skill) {
@@ -220,6 +228,10 @@ public class SkillCooldownMonitor implements Observer<ChatHandler.Event> {
 
     public Map<SkillCategory, SkillCooldown> getCurrentlyActiveSkills() {
         return currentlyActiveSkills;
+    }
+
+    public void setOverrideItemCooldowns(boolean overrideItemCooldowns) {
+        this.overrideItemCooldowns = overrideItemCooldowns;
     }
 
     public void setFilterChat(boolean filterChat) {
