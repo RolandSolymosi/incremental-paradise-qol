@@ -104,7 +104,7 @@ public class DurationEstimator {
         if(denominator == 0) {
             return 0.2f;
         }
-        return (float) (numerator/denominator);
+        return numerator/denominator;
     }
 
     public Duration getEstimate() {
