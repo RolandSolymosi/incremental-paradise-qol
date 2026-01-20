@@ -2,6 +2,8 @@ package com.incrementalclient.services.skillCooldowns;
 
 import net.minecraft.text.Text;
 
+import java.util.Optional;
+
 /**
  * This represents a skill that has an "instantaneous" effect.
  * Examples are Rhino Charge, Buzzing Assault, and Explosive Arrow.
@@ -15,6 +17,12 @@ public class InstantSkillCooldown extends NormalSkillCooldown {
     protected Text getActiveTextLine() {
         // Shouldn't be entering the active state as an instant skill.
         return super.UNKNOWN_STATE_TEXT;
+    }
+
+    @Override
+    public Optional<Float> getActiveCooldownFraction() {
+        // Shouldn't be entering the active state as an instant skill.
+        return Optional.empty();
     }
 
     @Override

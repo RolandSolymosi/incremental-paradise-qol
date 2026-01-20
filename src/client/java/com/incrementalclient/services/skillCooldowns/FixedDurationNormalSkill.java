@@ -5,6 +5,8 @@ import com.incrementalclient.common.utils.Utils;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
+import java.util.Optional;
+
 /**
  * This represents a skill that we can reasonably assume will have the same duration every time.
  * Note that this isn't always true, as skill durations can be affected by modifiers and changing worlds,
@@ -28,6 +30,11 @@ public class FixedDurationNormalSkill extends NormalSkillCooldown {
             return Text.literal("Active for " + Utils.formatDurationSeconds(remainingDuration) + " seconds")
                     .formatted(Formatting.GREEN);
         }
+    }
+
+    @Override
+    public Optional<Float> getActiveCooldownFraction() {
+        return Optional.of(durationEstimator.getEstimatedRemainingFraction());
     }
 
     @Override

@@ -3,6 +3,8 @@ package com.incrementalclient.services.skillCooldowns;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 
+import java.util.Optional;
+
 // skillName should be constant ("Ricochet") but the SkillCooldownMonitor expects a one-arg constructor
 // so to keep things consistent, it'll be getting that. (Note: Landscaping is the same form, so this could be
 // reused for landscaping too, theoretically. The problem is that landscaping doesn't say when it activates, and
@@ -48,5 +50,12 @@ public class RicochetCooldown implements SkillCooldown {
                 .append(String.valueOf(numActive))
                 .append("/")
                 .append(String.valueOf(maxActive));
+    }
+
+    @Override
+    public Optional<Float> getCooldownFraction() {
+        float numerator = numActive;
+        float denominator = maxActive;
+        return Optional.of(numerator/denominator);
     }
 }

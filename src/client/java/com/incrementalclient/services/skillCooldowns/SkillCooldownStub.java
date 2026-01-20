@@ -3,6 +3,8 @@ package com.incrementalclient.services.skillCooldowns;
 import com.incrementalclient.Main;
 import net.minecraft.text.Text;
 
+import java.util.Optional;
+
 /**
  * This is a stub class, purely so that SkillCooldownMonitor doesn't have to handle "null" type skill cooldowns.
  */
@@ -37,5 +39,10 @@ public class SkillCooldownStub implements SkillCooldown {
     @Override
     public Text getHudTextLine() {
         return Text.literal(this.skillName).append(": Unimplemented");
+    }
+
+    @Override
+    public Optional<Float> getCooldownFraction() {
+        return Optional.empty();
     }
 }

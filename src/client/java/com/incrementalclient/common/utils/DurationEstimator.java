@@ -81,6 +81,17 @@ public class DurationEstimator {
         return remainingDuration;
     }
 
+    /**
+     * The proportion of the duration that's already elapsed - note the fraction
+     */
+    public float getEstimatedRemainingFraction() {
+        if(this.estimate.isZero()) {
+            // avoid ArithmeticException
+            return 0.6f;
+        }
+        return getEstimatedRemainingDuration().dividedBy(this.estimate);
+    }
+
     public Duration getEstimate() {
         return estimate;
     }

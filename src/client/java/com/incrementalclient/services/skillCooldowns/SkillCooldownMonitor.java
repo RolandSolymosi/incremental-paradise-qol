@@ -205,6 +205,27 @@ public class SkillCooldownMonitor implements Observer<ChatHandler.Event> {
         cooldownsEnding.clear();
 
         // Update cooldowns now
+        if(this.overrideItemCooldowns) {
+            for (SkillCategory activeCategory : currentlyActiveSkills.keySet()) {
+                // First, get active category's item type
+                var activeItemType = ItemType.fromSkillCategory(activeCategory);
+                if(activeItemType == ItemType.UNKNOWN) {
+                    return;
+                }
+
+                // Next, get active category's cooldown fraction
+                var activeSkillCooldown = currentlyActiveSkills.get(activeCategory);
+                var activeCooldownFraction = activeSkillCooldown.getCooldownFraction();
+
+                // Finally, override item cooldowns
+                if(activeCooldownFraction.isPresent()) {
+                    this.itemCooldownWrapper.setItemCooldown(activeItemType, activeCooldownFraction.get());
+                }
+                else {
+                    this.itemCooldownWrapper.clearItemCooldown(activeItemType);
+                }
+            }
+        }
     }
 
     private @NotNull SkillCooldown getSkillCooldown(Skill skill) {

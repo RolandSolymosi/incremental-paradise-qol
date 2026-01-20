@@ -6,6 +6,7 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
 import java.time.Duration;
+import java.util.Optional;
 
 public abstract class NormalSkillCooldown implements SkillCooldown {
 
@@ -83,6 +84,24 @@ public abstract class NormalSkillCooldown implements SkillCooldown {
         // note that ofSeconds would require casting to long, which would cut off decimal points
         // so doing this lets us keep 3 decimal points, and I don't think we have precision past millis.
         cooldownEstimator.estimateStopsIn(Duration.ofMillis((long) (cooldownTime * 1000)));
+    }
+
+    @Override
+    public Optional<Float> getCooldownFraction() {
+        return switch (this.state) {
+            case UNKNOWN, READY -> Optional.empty();
+            case ACTIVE -> getActiveCooldownFraction();
+            case COOLDOWN -> getCooldownStateCooldownFraction();
+        };
+    }
+
+    // Effectively getCooldownFraction (see docs from SkillCooldown) but only for the active state of this
+    public abstract Optional<Float> getActiveCooldownFraction();
+
+    // getCooldownFraction for specifically cooldownState
+    // getCooldownCooldownFraction was confusing to me
+    public Optional<Float> getCooldownStateCooldownFraction() {
+        return Optional.of(cooldownEstimator.getEstimatedRemainingFraction());
     }
 
     private enum STATE {

@@ -2,6 +2,8 @@ package com.incrementalclient.services.skillCooldowns;
 
 import net.minecraft.text.Text;
 
+import java.util.Optional;
+
 /**
  * The basic form for all skill cooldowns as used by SkillCooldownMonitor.
  * MOST skill cooldowns fall into one of two forms:
@@ -41,4 +43,10 @@ public interface SkillCooldown {
 
     // How this SkillCooldown will appear in text on the HUD.
     Text getHudTextLine();
+
+    /**
+     * @return The active cooldown fraction that this skill's related item should have. If an empty optional
+     * is returned, then the cooldown override is disabled (cleared) and the default functionality is restored.
+     */
+    Optional<Float> getCooldownFraction();
 }

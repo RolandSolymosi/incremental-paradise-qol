@@ -3,6 +3,8 @@ package com.incrementalclient.services.skillCooldowns;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
 
+import java.util.Optional;
+
 /**
  * This represents a skill that has an effect over a duration, but a frequently changing duration.
  * Examples are Buzzing Assault, Bee Storm, and (kind of) Swarm Surfer.
@@ -19,6 +21,12 @@ public class VariableDurationNormalSkill extends NormalSkillCooldown {
     @Override
     protected Text getActiveTextLine() {
         return ACTIVE_TEXT_LINE;
+    }
+
+    @Override
+    public Optional<Float> getActiveCooldownFraction() {
+        // Variable duration - no point estimating
+        return Optional.empty();
     }
 
     @Override
