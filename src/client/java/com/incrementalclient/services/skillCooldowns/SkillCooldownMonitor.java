@@ -128,6 +128,7 @@ public class SkillCooldownMonitor implements Observer<ChatHandler.Event> {
                 }
             }
         }
+        skillNameMap.put("Devils Gambit", NightmareCombatSkill.DevilsGambit);
     }
 
     @Override
@@ -235,12 +236,15 @@ public class SkillCooldownMonitor implements Observer<ChatHandler.Event> {
             return ret;
         }
 
-        var skillConstructor = skillCooldownConstructors.getOrDefault(skill, null);
-        if(skillConstructor == null) {
-            skillConstructor = SkillCooldownStub::new;
+        SkillCooldown skillCooldown;
+        if(skill == null) {
+            skillCooldown = new SkillCooldownStub("Null skill");
+        }
+        else {
+            var skillConstructor = skillCooldownConstructors.getOrDefault(skill, SkillCooldownStub::new);
+            skillCooldown = skillConstructor.apply(skill.getName());
         }
 
-        var skillCooldown = skillConstructor.apply(skill.getName());
         this.skillCooldowns.put(skill, skillCooldown);
         return skillCooldown;
     }
