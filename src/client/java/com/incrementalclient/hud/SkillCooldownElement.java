@@ -89,6 +89,7 @@ public class SkillCooldownElement extends TextListHudElement<SkillCooldownElemen
         // Unrelated question: Why does ItemTargetTrackerElement use the collector version instead of Stream.toList()?
         // I did it here just to copy but I don't know why it was done.
         return this.skillCooldownMonitor.getCurrentlyActiveSkills().keySet().stream()
+                .sorted()
                 .map(this::renderSkill)
                 .filter(Objects::nonNull)
                 .collect(Collectors.toList());
