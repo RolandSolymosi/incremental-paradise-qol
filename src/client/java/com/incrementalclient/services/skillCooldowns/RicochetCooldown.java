@@ -1,6 +1,5 @@
 package com.incrementalclient.services.skillCooldowns;
 
-import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
 
 import java.util.Optional;
@@ -57,5 +56,10 @@ public class RicochetCooldown implements SkillCooldown {
         float numerator = numActive;
         float denominator = maxActive;
         return Optional.of(numerator/denominator);
+    }
+
+    @Override
+    public void onUseRecharged() {
+        numActive--;
     }
 }

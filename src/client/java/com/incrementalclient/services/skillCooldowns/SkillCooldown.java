@@ -41,6 +41,12 @@ public interface SkillCooldown {
     // 🔧 Condensed Strike is ready to use.
     void onReady();
 
+    // There is ONE example of this.
+    // 🔧 A use of Pea Shooter has recharged.
+    default void onUseRecharged() {
+
+    }
+
     // How this SkillCooldown will appear in text on the HUD.
     Text getHudTextLine();
 

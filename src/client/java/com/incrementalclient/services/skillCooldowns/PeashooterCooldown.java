@@ -1,0 +1,87 @@
+package com.incrementalclient.services.skillCooldowns;
+
+import com.incrementalclient.common.utils.DurationEstimator;
+import com.incrementalclient.common.utils.Utils;
+import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
+
+import java.time.Duration;
+import java.util.Optional;
+
+public class PeashooterCooldown implements SkillCooldown {
+    private final String skillName;
+
+    private int numActive;
+    private int maxActive;
+
+    private final DurationEstimator cooldownEstimator = new DurationEstimator();
+
+    public PeashooterCooldown(String skillName) {
+        this.skillName = skillName;
+    }
+
+    @Override
+    public void onActivate() {
+        numActive++;
+        if(maxActive < numActive) {
+            maxActive = numActive;
+        }
+    }
+
+    @Override
+    public void onSkillEnd(boolean worldChange) {
+        // funny enough won't be called on a world change
+        numActive--;
+    }
+
+    @Override
+    public void onCooldown(double cooldownTime) {
+        cooldownEstimator.createStartIfNotExist();
+        cooldownEstimator.estimateStopsIn(Duration.ofMillis((long) (1000 * cooldownTime)));
+    }
+
+    @Override
+    public void onReady() {
+        cooldownEstimator.stop();
+        cooldownEstimator.clearStart();
+    }
+
+    @Override
+    public Text getHudTextLine() {
+        var out = Text.literal(skillName).append(": ");
+        if(getNumActive() == 0) {
+            out.append(Text.literal(Utils.formatDurationSeconds(cooldownEstimator.getEstimatedRemainingDuration())).formatted(Formatting.GOLD));
+        }
+        else {
+            out.append(String.valueOf(numActive))
+                    .append("/")
+                    .append(String.valueOf(maxActive));
+        }
+        return out;
+    }
+
+    @Override
+    public Optional<Float> getCooldownFraction() {
+        if(getNumActive() == 0) {
+            return Optional.of(cooldownEstimator.getEstimatedRemainingFraction());
+        }
+        else {
+            float numerator = getNumActive();
+            float denominator = maxActive;
+            return Optional.of(numerator / denominator);
+        }
+    }
+
+    @Override
+    public void onUseRecharged() {
+        SkillCooldown.super.onUseRecharged();
+    }
+
+    private int getNumActive() {
+        // something weird happened once and i dont care to fix it
+        if(numActive < 0) {
+            numActive = 0;
+        }
+        return numActive;
+    }
+}

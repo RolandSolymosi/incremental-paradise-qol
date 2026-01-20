@@ -50,6 +50,16 @@ public class DurationEstimator {
     }
 
     /**
+     * Equivalent to start() if a start does not already exist.
+     * This function was made purely because Axe Juggling is weird.
+     */
+    public void createStartIfNotExist() {
+        if(lastStart == null) {
+            lastStart = Instant.now();
+        }
+    }
+
+    /**
      * Call when we estimate the duration to end after some time.
      * @param futureEstimate How far in the future we estimate the duration to end in.
      */
