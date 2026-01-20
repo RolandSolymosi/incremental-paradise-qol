@@ -5,15 +5,11 @@ import com.incrementalclient.common.data.skills.*;
 import com.incrementalclient.common.utils.NumberParser;
 import com.incrementalclient.interfaces.Observer;
 import com.incrementalclient.internals.ItemCooldownWrapper;
-import com.incrementalclient.internals.events.EndClientTickListenable;
 import com.incrementalclient.internals.events.StartClientTickListenable;
 import com.incrementalclient.services.ChatHandler;
 import com.incrementalclient.services.WorldMonitor;
-import net.minecraft.network.message.SentMessage;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.function.Function;
@@ -188,6 +184,12 @@ public class SkillCooldownMonitor implements Observer<ChatHandler.Event> {
             var skill = skillNameMap.getOrDefault(skillName, null);
             var skillCooldown = getSkillCooldown(skill);
             skillCooldown.onReady();
+            filterFound = true;
+        } else if((matcher = skillUseRecharged.matcher(text)).find()) {
+            var skillName = matcher.group("skill");
+            var skill = skillNameMap.getOrDefault(skillName, null);
+            var skillCooldown = getSkillCooldown(skill);
+            skillCooldown.onUseRecharged();
             filterFound = true;
         }
 
