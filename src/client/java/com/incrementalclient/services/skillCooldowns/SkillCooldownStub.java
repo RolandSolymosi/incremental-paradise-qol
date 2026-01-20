@@ -17,6 +17,11 @@ public class SkillCooldownStub implements SkillCooldown {
     }
 
     @Override
+    public String getSkillName() {
+        return skillName;
+    }
+
+    @Override
     public void onActivate() {
 
     }
@@ -38,7 +43,7 @@ public class SkillCooldownStub implements SkillCooldown {
 
     @Override
     public Text getHudTextLine() {
-        return Text.literal(this.skillName).append(": Unimplemented");
+        return Text.of("Unimplemented");
     }
 
     @Override

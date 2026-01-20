@@ -20,6 +20,11 @@ public class RicochetCooldown implements SkillCooldown {
     }
 
     @Override
+    public String getSkillName() {
+        return skillName;
+    }
+
+    @Override
     public void onActivate() {
         numActive++;
         if(maxActive < numActive) {
@@ -44,9 +49,7 @@ public class RicochetCooldown implements SkillCooldown {
 
     @Override
     public Text getHudTextLine() {
-        return Text.literal(skillName)
-                .append(": ")
-                .append(String.valueOf(numActive))
+        return Text.literal(String.valueOf(numActive))
                 .append("/")
                 .append(String.valueOf(maxActive));
     }

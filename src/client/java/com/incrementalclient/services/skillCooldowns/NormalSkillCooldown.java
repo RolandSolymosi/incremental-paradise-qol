@@ -31,6 +31,11 @@ public abstract class NormalSkillCooldown implements SkillCooldown {
         this.state = STATE.UNKNOWN;
     }
 
+    @Override
+    public String getSkillName() {
+        return skillName;
+    }
+
     // Some skills are active for a duration (buzzing assault, spoon bender). This signals to NormalSkillCooldown
     // that that is the case.
     // Note: Not all skills will call this function! For example Condensed Strike and Rhino Charge won't use this!
@@ -48,14 +53,12 @@ public abstract class NormalSkillCooldown implements SkillCooldown {
 
     @Override
     public Text getHudTextLine() {
-        var skillInfo = switch (this.state) {
+        return switch (this.state) {
             case READY -> READY_STATE_TEXT;
             case ACTIVE -> getActiveTextLine();
             case COOLDOWN -> getCooldownTextLine();
             default -> UNKNOWN_STATE_TEXT;
         };
-
-        return Text.literal(this.skillName).append(": ").append(skillInfo);
     }
 
     protected abstract Text getActiveTextLine();

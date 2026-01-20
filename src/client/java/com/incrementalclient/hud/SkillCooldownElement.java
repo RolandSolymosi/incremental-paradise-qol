@@ -41,6 +41,8 @@ public class SkillCooldownElement extends TextListHudElement<SkillCooldownElemen
             Map.entry(SkillCategory.Excavation, "\uD83E\uDD96")
     );
 
+    private boolean showFullSkillName = true;
+
     public SkillCooldownElement(
             MinecraftClientAccessor uiAccessor,
             HudManager hudManager,
@@ -72,6 +74,14 @@ public class SkillCooldownElement extends TextListHudElement<SkillCooldownElemen
                                 .name(Text.of("Filter message"))
                                 .description(OptionDescription.of(Text.of("Toggle if skill cooldown tracker should filter message or not. If the skill cooldown HUD and item cooldown are both disabled, it won't filter messages anyway.")))
                                 .binding(configuration.filterMessages, () -> configuration.filterMessages, newVal -> configuration.filterMessages = newVal)
+                                .controller(BooleanControllerBuilder::create)
+                                .build()
+                ),
+                Categories.Hud.SkillCooldown.createConfig(2,
+                        Option.<Boolean>createBuilder()
+                                .name(Text.of("HUD full skill names"))
+                                .description(OptionDescription.of(Text.of("Whether the HUD should show the full skill name, or just the emoji. The emoji will show either way.")))
+                                .binding(configuration.showFullSkillNames, () -> configuration.showFullSkillNames, newVal -> configuration.showFullSkillNames = newVal)
                                 .controller(BooleanControllerBuilder::create)
                                 .build()
                 ),
@@ -110,8 +120,13 @@ public class SkillCooldownElement extends TextListHudElement<SkillCooldownElemen
             return null;
         }
 
-        return Text.literal(emojiMap.get(category))
-                .append(cooldown.getHudTextLine());
+        var out = Text.literal(emojiMap.get(category));
+        if(this.showFullSkillName) {
+            out.append(cooldown.getSkillName());
+            out.append(": ");
+        }
+        out.append(cooldown.getHudTextLine());
+        return out;
     }
 
     @Override
@@ -156,6 +171,7 @@ public class SkillCooldownElement extends TextListHudElement<SkillCooldownElemen
     }
 
     private void updateMonitor() {
+        this.showFullSkillName = getConfiguration().showFullSkillNames;
         this.skillCooldownMonitor.setOverrideItemCooldowns(getConfiguration().isItemCooldownOverrideEnabled);
 
         var isActive = getConfiguration().isHudEnabled || getConfiguration().isItemCooldownOverrideEnabled;
@@ -174,6 +190,8 @@ public class SkillCooldownElement extends TextListHudElement<SkillCooldownElemen
         public boolean isItemCooldownOverrideEnabled = true;
         @SerialEntry
         public boolean filterMessages = true;
+        @SerialEntry
+        public boolean showFullSkillNames = true;
         @SerialEntry
         public double hudBackgroundOpacity = 0.3;
     }

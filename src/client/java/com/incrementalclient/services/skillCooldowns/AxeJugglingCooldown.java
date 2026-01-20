@@ -25,6 +25,11 @@ public class AxeJugglingCooldown implements SkillCooldown {
     }
 
     @Override
+    public String getSkillName() {
+        return skillName;
+    }
+
+    @Override
     public void onActivate() {
         // Failsafe just to be double-sure.
         cooldownEstimator.clearStart();
@@ -58,12 +63,11 @@ public class AxeJugglingCooldown implements SkillCooldown {
 
     @Override
     public Text getHudTextLine() {
-        var out = Text.literal(this.skillName).append(": ");
         return switch (this.state) {
-            case UNKNOWN -> out.append("Unknown");
-            case ACTIVE -> out.append("Active?");
-            case COOLDOWN -> out.append(getCooldownTextLine());
-            case READY -> out.append(Text.literal("Ready!").formatted(Formatting.GOLD));
+            case UNKNOWN -> Text.of("Unknown");
+            case ACTIVE -> Text.of("Active?");
+            case COOLDOWN -> Text.of(getCooldownTextLine());
+            case READY -> Text.of(Text.literal("Ready!").formatted(Formatting.GOLD));
         };
     }
 

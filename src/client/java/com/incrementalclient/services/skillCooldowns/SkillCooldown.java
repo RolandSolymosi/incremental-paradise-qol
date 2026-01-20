@@ -20,6 +20,13 @@ public interface SkillCooldown {
     // The skill's name is not in the message.
 
     // Examples:
+    // "Ricochet"
+    // "Condensed Strike"
+    // "Bee Storm"
+    // etc.
+    String getSkillName();
+
+    // Examples:
     // 🔧 Activated Ricochet!
     // 🔧 Activated Condensed Strike!
     // 🔧 Activated Bee Storm!

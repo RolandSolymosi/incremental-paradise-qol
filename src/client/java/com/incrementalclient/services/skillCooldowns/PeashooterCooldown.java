@@ -21,6 +21,11 @@ public class PeashooterCooldown implements SkillCooldown {
     }
 
     @Override
+    public String getSkillName() {
+        return skillName;
+    }
+
+    @Override
     public void onActivate() {
         numActive++;
         if(maxActive < numActive) {
@@ -48,16 +53,15 @@ public class PeashooterCooldown implements SkillCooldown {
 
     @Override
     public Text getHudTextLine() {
-        var out = Text.literal(skillName).append(": ");
         if(getNumActive() == 0) {
-            out.append(Text.literal(Utils.formatDurationSeconds(cooldownEstimator.getEstimatedRemainingDuration())).formatted(Formatting.GOLD));
+            return Text.literal(Utils.formatDurationSeconds(cooldownEstimator.getEstimatedRemainingDuration()))
+                    .formatted(Formatting.GOLD);
         }
         else {
-            out.append(String.valueOf(numActive))
+            return Text.literal(String.valueOf(numActive))
                     .append("/")
                     .append(String.valueOf(maxActive));
         }
-        return out;
     }
 
     @Override
