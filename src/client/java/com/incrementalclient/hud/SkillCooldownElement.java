@@ -77,7 +77,7 @@ public class SkillCooldownElement extends TextListHudElement<SkillCooldownElemen
                                 .controller(BooleanControllerBuilder::create)
                                 .build()
                 ),
-                Categories.Hud.SkillCooldown.createConfig(2,
+                Categories.Hud.SkillCooldown.createConfig(3,
                         Option.<Boolean>createBuilder()
                                 .name(Text.of("HUD full skill names"))
                                 .description(OptionDescription.of(Text.of("Whether the HUD should show the full skill name, or just the emoji. The emoji will show either way.")))
@@ -85,7 +85,7 @@ public class SkillCooldownElement extends TextListHudElement<SkillCooldownElemen
                                 .controller(BooleanControllerBuilder::create)
                                 .build()
                 ),
-                Categories.Hud.SkillCooldown.createConfig(3,
+                Categories.Hud.SkillCooldown.createConfig(4,
                         Option.<Double>createBuilder()
                                 .name(Text.of("Consumable HUD background opacity"))
                                 .description(OptionDescription.of(Text.of("Set the opacity of the consumable HUD background.")))
