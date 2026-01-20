@@ -17,7 +17,7 @@ public class ItemCooldownWrapper {
     private final Map<ItemType, Float> itemTypeCooldown = new HashMap<>();
 
     public ItemCooldownWrapper() {
-        
+
     }
 
     public Optional<Float> getItemCooldown(ItemStack stack) {

@@ -1,5 +1,6 @@
 package com.incrementalclient.common.data;
 
+import com.incrementalclient.common.data.skills.SkillCategory;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.ItemStack;
 import org.jetbrains.annotations.NotNull;
@@ -50,5 +51,19 @@ public enum ItemType {
         var bukkitValues = bukkitValuesOptional.get();
         var itemTypeString = bukkitValues.getString("prisoncore:itemtype", "unknown");
         return itemTypeMap.getOrDefault(itemTypeString, UNKNOWN);
+    }
+
+    public static @NotNull ItemType fromSkillCategory(SkillCategory category) {
+        return switch (category) {
+            case Combat -> TOOL_SWORD;
+            case Mining -> TOOL_PICK;
+            case Foraging -> TOOL_AXE;
+            case Farming -> TOOL_HOE;
+            case SpearFishing -> TOOL_SPEAR;
+            // tonic isn't here because, well, no skill category for that
+            case Sharpshooting -> TOOL_BOW;
+            case Excavation -> TOOL_BRUSH;
+            default -> UNKNOWN;
+        };
     }
 }
