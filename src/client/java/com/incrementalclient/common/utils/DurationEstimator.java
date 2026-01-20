@@ -94,7 +94,17 @@ public class DurationEstimator {
             // avoid NullPointerException
             return 0.4f;
         }
-        return remainingDuration.dividedBy(this.estimate);
+
+        // No, Duration.dividedBy does not work here. It only returns integers. (Longs, technically.)
+        // Therefore, this workaround is needed.
+        // (Needing more precision than millis or more than 2^63 millis - 292MYrs - isn't necessary.)
+        float numerator = remainingDuration.toMillis();
+        float denominator = this.estimate.toMillis();
+        // last check, but not that necessary:
+        if(denominator == 0) {
+            return 0.2f;
+        }
+        return (float) (numerator/denominator);
     }
 
     public Duration getEstimate() {
