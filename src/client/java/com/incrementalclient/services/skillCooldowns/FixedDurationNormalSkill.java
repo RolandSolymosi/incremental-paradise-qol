@@ -27,7 +27,7 @@ public class FixedDurationNormalSkill extends NormalSkillCooldown {
             return Text.literal("Active!").formatted(Formatting.GREEN).copy();
         }
         else {
-            return Text.literal("Active for " + Utils.formatDurationSeconds(remainingDuration) + " seconds")
+            return Text.literal(Utils.formatDurationSeconds(remainingDuration))
                     .formatted(Formatting.GREEN);
         }
     }

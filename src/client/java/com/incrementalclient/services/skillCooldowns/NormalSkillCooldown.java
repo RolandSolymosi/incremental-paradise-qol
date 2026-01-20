@@ -16,7 +16,7 @@ public abstract class NormalSkillCooldown implements SkillCooldown {
 
     // copy() is used here to make it immutable.
     private final Text READY_STATE_TEXT = Text.literal("Ready!").formatted(Formatting.GOLD).copy();
-    private final Text UNKNOWN_COOLDOWN_TEXT = Text.literal("On cooldown...").formatted(Formatting.RED).copy();
+    private final Text UNKNOWN_COOLDOWN_TEXT = Text.literal("Cooldown...").formatted(Formatting.RED).copy();
     // Unknown state is available to subclasses specifically for InstantActiveSkillCooldown
     protected final Text UNKNOWN_STATE_TEXT = Text.literal("Unknown skill state").formatted(Formatting.RED).copy();
 
@@ -66,9 +66,7 @@ public abstract class NormalSkillCooldown implements SkillCooldown {
             return UNKNOWN_COOLDOWN_TEXT;
         }
         else {
-            return Text.literal("On cooldown for ")
-                    .append(Utils.formatDurationSeconds(remainingDuration))
-                    .append(" seconds")
+            return Text.literal(Utils.formatDurationSeconds(remainingDuration))
                     .formatted(Formatting.RED);
         }
     }
