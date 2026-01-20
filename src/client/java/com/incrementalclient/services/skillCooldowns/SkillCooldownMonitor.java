@@ -37,7 +37,6 @@ public class SkillCooldownMonitor implements Observer<ChatHandler.Event> {
     // Mapping from Skill -> SkillCooldown constructor for that skill
     // (It is expected that many constructors will appear many times, ex buzzing assault and beestorm)
     private final Map<Skill, Function<String, SkillCooldown>> skillCooldownConstructors = Map.ofEntries(
-            // TODO nm skills
             // Combat skills
             Map.entry(NormalCombatSkill.SweepingStrike, InstantSkillCooldown::new),
             Map.entry(NormalCombatSkill.RhinoCharge, InstantSkillCooldown::new),
