@@ -101,10 +101,13 @@ public class DurationEstimator {
         float numerator = remainingDuration.toMillis();
         float denominator = this.estimate.toMillis();
         // last check, but not that necessary:
-        if(denominator == 0) {
-            return 0.2f;
+        if(numerator <= 0 || denominator <= 0) {
+            // ok, so numerator can be negative if the estimate is wrong. definitely possible with alpha weathers
+            // denom shouldnt ever be negative, but it can be 0 if an estimate hasnt been made yet
+            return 0.0f;
         }
-        return numerator/denominator;
+        float ret = numerator/denominator;
+        return Math.clamp(ret, 0.0f, 1.0f);
     }
 
     public Duration getEstimate() {
