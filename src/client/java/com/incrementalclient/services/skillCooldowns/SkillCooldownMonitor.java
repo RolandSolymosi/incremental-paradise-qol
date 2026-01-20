@@ -21,8 +21,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class SkillCooldownMonitor implements Observer<ChatHandler.Event> {
-    // Note the startPiece includes a spacebar.
-    private static final String startPiece = "\uD83D\uDD27 ";
 
     private final ItemCooldownWrapper itemCooldownWrapper;
     private boolean overrideItemCooldowns = true;
@@ -103,6 +101,8 @@ public class SkillCooldownMonitor implements Observer<ChatHandler.Event> {
     // Skill cooldowns which ended this tick - don't yet know if it was because of world change or not, though.
     private final List<SkillCooldown> cooldownsEnding = new ArrayList<>();
 
+    // Note the startPiece includes a spacebar.
+    private static final String startPiece = "\uD83D\uDD27 ";
     // Note: I anticipate regex might not be the best solution here, since for two regexes we put a wildcard
     // at the start followed by two lines of text
     private static final Pattern skillActivated = Pattern.compile(startPiece + "Activated (?<skill>.+)!");
