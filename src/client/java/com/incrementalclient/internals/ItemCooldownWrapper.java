@@ -17,8 +17,7 @@ public class ItemCooldownWrapper {
     private final Map<ItemType, Float> itemTypeCooldown = new HashMap<>();
 
     public ItemCooldownWrapper() {
-        // TODO remove this, it's for debugging
-        setItemCooldown(ItemType.UNKNOWN, 0.5f);
+        
     }
 
     public Optional<Float> getItemCooldown(ItemStack stack) {
