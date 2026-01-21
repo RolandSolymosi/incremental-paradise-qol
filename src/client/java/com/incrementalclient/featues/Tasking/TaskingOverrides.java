@@ -162,7 +162,7 @@ public class TaskingOverrides extends ListenableBase<Listener> implements Comple
     private Text getTextProvider(Configuration.Override override) {
         MutableText textProvider = Text.literal("");
 
-        // Figure out better colors
+        // TODO: Figure out better colors
         getConditionText(textProvider, true, "Task", override.task.getDescriptor().displayName(), 0xFA3B1, 0x12c4d5);
         getConditionText(textProvider, !override.wardrobe.isEmpty(), "Wardrobe", override.wardrobe, 0x8C351A, 0xb04221);
         getConditionText(textProvider, !override.warp.isEmpty(), "Warp", override.warp, 0x009A21, 0x00be29);
