@@ -250,13 +250,13 @@ public class SkillCooldownMonitor {
     }
 
     public void onScreenArrived(ScreenCapture.Screen screen) {
-        this.chatHandler.sendChatMessage("Screen arrived");
+//        this.chatHandler.sendChatMessage("Screen arrived");
         // Check for expected screen size
         var contents = screen.contents();
         if(contents.size() != 81) {
             // All skill screens have 45 slots (9 wide, 5 high)
             // Including the inventory (4 more rows) this is a total of 81.
-            this.chatHandler.sendChatMessage("Not 81 slots, instead " + contents.size());
+//            this.chatHandler.sendChatMessage("Not 81 slots, instead " + contents.size());
             return;
         }
         // Theoretically, I could check for the stained glass panes
@@ -268,7 +268,7 @@ public class SkillCooldownMonitor {
         // Check for expected screen name
         var expectedCategory = SkillCategory.findByName(screen.title().getString()).orElse(null);
         if(expectedCategory == null) {
-            this.chatHandler.sendChatMessage("Bad category:" + screen.title().getString());
+//            this.chatHandler.sendChatMessage("Bad category:" + screen.title().getString());
             return;
         }
 
@@ -276,18 +276,18 @@ public class SkillCooldownMonitor {
         var abilityInfoStack = screen.contents().get(20);
         if(abilityInfoStack == null || abilityInfoStack.getItem() != Items.BEACON) {
             // Not ability info slot
-            this.chatHandler.sendChatMessage("Ability info slot isn't at slot 20");
+//            this.chatHandler.sendChatMessage("Ability info slot isn't at slot 20");
             return;
         }
         var abilityInfoStackName = abilityInfoStack.getName();
         if(!abilityInfoStackName.getString().equals("Abilities")) {
-            this.chatHandler.sendChatMessage("Ability info slot isn't named right");
+//            this.chatHandler.sendChatMessage("Ability info slot isn't named right");
             return;
         }
 
         var abilityInfoStackLore = abilityInfoStack.get(DataComponentTypes.LORE);
         if(abilityInfoStackLore == null) {
-            this.chatHandler.sendChatMessage("Ability stack had no lore");
+//            this.chatHandler.sendChatMessage("Ability stack had no lore");
             return;
         }
         var abilityStackLines = abilityInfoStackLore.lines().stream().map(Text::getString).toList();
@@ -301,35 +301,35 @@ public class SkillCooldownMonitor {
         // We have a LOT of checks already, I'll just check line count and lines 2 and 4 and move on
         // UPDATE: Empty lines aren't empty, they have a whitespace character (just a space) in them.
         if(abilityStackLines.size() != 5) {
-            this.chatHandler.sendChatMessage("Ability stack didn't have 5 lore lines");
+//            this.chatHandler.sendChatMessage("Ability stack didn't have 5 lore lines");
             return;
         }
         var lineTwo = abilityStackLines.get(1).strip();
         if(!lineTwo.isEmpty()) {
-            this.chatHandler.sendChatMessage("Ability line index 1 wasn't empty, was instead \"" + lineTwo + "\" with length " + lineTwo.length());
+//            this.chatHandler.sendChatMessage("Ability line index 1 wasn't empty, was instead \"" + lineTwo + "\" with length " + lineTwo.length());
             return;
         }
         var lineFour = abilityStackLines.get(3).strip();
         if(!lineFour.isEmpty()) {
-            this.chatHandler.sendChatMessage("Ability line index 3 wasn't empty, was instead \"" + lineFour + "\" with length " + lineFour.length());
+//            this.chatHandler.sendChatMessage("Ability line index 3 wasn't empty, was instead \"" + lineFour + "\" with length " + lineFour.length());
             return;
         }
 
         var equippedSkillLine = abilityStackLines.get(2);
         var matcher = loreEquippedSkill.matcher(equippedSkillLine);
         if(!matcher.find()) {
-            this.chatHandler.sendChatMessage("Regex matcher failed");
+//            this.chatHandler.sendChatMessage("Regex matcher failed");
             return;
         }
         var skillNameFound = matcher.group("skill");
         if(skillNameFound.equals("None")) {
             // confirmed from testing in-game this is what it says
-            this.chatHandler.sendChatMessage("No skill found");
+//            this.chatHandler.sendChatMessage("No skill found");
             return;
         }
         var skillFound = skillNameMap.get(skillNameFound);
         if(skillFound.getCategory() != expectedCategory) {
-            this.chatHandler.sendChatMessage("Category mismatch");
+//            this.chatHandler.sendChatMessage("Category mismatch");
             return;
         }
         var skillCooldown = getSkillCooldown(skillFound);
