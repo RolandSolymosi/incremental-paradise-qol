@@ -177,9 +177,9 @@ public class WarpNextHotkey extends ListenableBase<Listener> implements Configur
                                 commandHandler.send(gamingTask.game().getCommand());
                             }
                             return;
-                        } else {
-                            chatHandler.sendChatMessage(Text.literal("No being lazy with the quests and tutorials, go complete them!"));
                         }
+                    } else if (nextUnfinishedTask.get().getTaskType() == TaskType.Quest || nextUnfinishedTask.get().getTaskType() == TaskType.Tutorial) {
+                        chatHandler.sendChatMessage(Text.literal("No being lazy with the quests and tutorials, go complete them!"));
                     } else {
                         chatHandler.sendChatMessage(Text.literal("The task was not correctly identified, send task description to Devs (QoL channel)."));
                     }
