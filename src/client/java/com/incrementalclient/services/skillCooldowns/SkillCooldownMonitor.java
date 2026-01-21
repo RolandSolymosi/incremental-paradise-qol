@@ -3,11 +3,13 @@ package com.incrementalclient.services.skillCooldowns;
 import com.incrementalclient.common.data.ItemType;
 import com.incrementalclient.common.data.skills.*;
 import com.incrementalclient.common.utils.NumberParser;
-import com.incrementalclient.interfaces.Observer;
 import com.incrementalclient.internals.ItemCooldownWrapper;
+import com.incrementalclient.internals.ScreenCapture;
 import com.incrementalclient.internals.events.StartClientTickListenable;
 import com.incrementalclient.services.ChatHandler;
 import com.incrementalclient.services.WorldMonitor;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.item.Items;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
 
@@ -107,12 +109,18 @@ public class SkillCooldownMonitor {
     private static final Pattern skillReady = Pattern.compile(startPiece + "(?<skill>.+) is ready to use.");
     private static final Pattern skillUseRecharged = Pattern.compile(startPiece + "A use of (?<skill>.+) has charged.");
 
+    // Still regex (so grouping with the other regex) but this is for screen item lore regex
+    // NOT chat regex/skill regex, which is what is above here.
+    private static final Pattern loreEquippedSkill = Pattern.compile("^Equipped: (?<skill>.+)\\z");
+
     public SkillCooldownMonitor(
+            ScreenCapture screenCapture,
             ItemCooldownWrapper itemCooldownWrapper,
             ChatHandler chatHandler,
             WorldMonitor worldMonitor,
             StartClientTickListenable startClientTickListenable
     ) {
+        screenCapture.subscribe(this::onScreenArrived);
         this.itemCooldownWrapper = itemCooldownWrapper;
         this.chatHandler = chatHandler;
         chatHandler.subscribe(this::onChatMessageReceived);
@@ -239,6 +247,74 @@ public class SkillCooldownMonitor {
                 }
             }
         }
+    }
+
+    public void onScreenArrived(ScreenCapture.Screen screen) {
+        // Check for expected screen size
+        var contents = screen.contents();
+        if(contents.size() != 45) {
+            // All skill screens have 45 slots (9 wide, 4 high)
+            return;
+        }
+        // Theoretically, I could check for the stained glass panes
+        // and that everything is exactly correct.
+        // However: That would probably take unnecessary computing power
+        // and is honestly kinda overkill.
+        // Therefore, I'm not doing that.
+
+        // Check for expected screen name
+        var expectedCategory = SkillCategory.findByName(screen.title().getString()).orElse(null);
+        if(expectedCategory == null) {
+            return;
+        }
+
+        // Slot 20 (note zero-indexed, so row3 slot3) should be a beacon with the active ability information
+        var abilityInfoStack = screen.contents().get(20);
+        if(abilityInfoStack == null || abilityInfoStack.getItem() != Items.BEACON) {
+            // Not ability info slot
+            return;
+        }
+        var abilityInfoStackName = abilityInfoStack.getName();
+        if(!abilityInfoStackName.getString().equals("Abilities")) {
+            return;
+        }
+
+        var abilityInfoStackLore = abilityInfoStack.get(DataComponentTypes.LORE);
+        if(abilityInfoStackLore == null) {
+            return;
+        }
+        var abilityStackLines = abilityInfoStackLore.lines().stream().map(Text::getString).toList();
+        // Expected lines:
+        // Drop your [TOOL] to activate abilities
+        // [EMPTY LINE]
+        // Equipped: [SKILL NAME]
+        // [EMPTY LINE]
+        // Click to view [CATEGORY] abilities
+        //
+        // We have a LOT of checks already, I'll just check lines 2 and 4 and move on
+        if(!abilityStackLines.get(1).isEmpty()) {
+            return;
+        }
+        if(!abilityStackLines.get(3).isEmpty()) {
+            return;
+        }
+
+        var equippedSkillLine = abilityStackLines.get(2);
+        var matcher = loreEquippedSkill.matcher(equippedSkillLine);
+        if(!matcher.find()) {
+            return;
+        }
+        var skillNameFound = matcher.group("skill");
+        if(skillNameFound.equals("None")) {
+            // confirmed from testing in-game this is what it says
+            return;
+        }
+        var skillFound = skillNameMap.get(skillNameFound);
+        if(skillFound.getCategory() != expectedCategory) {
+            return;
+        }
+        var skillCooldown = getSkillCooldown(skillFound);
+        currentlyActiveSkills.put(expectedCategory, skillCooldown);
     }
 
     private @NotNull SkillCooldown getSkillCooldown(Skill skill) {
