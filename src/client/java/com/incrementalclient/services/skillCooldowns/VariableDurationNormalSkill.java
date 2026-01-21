@@ -30,14 +30,19 @@ public class VariableDurationNormalSkill extends NormalSkillCooldown {
     }
 
     @Override
-    public void onActivate() {
+    public SkillAction onActivate() {
         // When activated: Enters the "Active" state (ie the skill is running)
         onEnterActiveDuration();
+
+        return SkillAction.NONE;
     }
 
     @Override
-    public void onSkillEnd(boolean worldChange) {
+    public SkillAction onSkillEnd(boolean worldChange) {
         // When over: Goes on cooldown.
         onEnterCooldown();
+
+        // Refresh the cooldown
+        return SkillAction.DROP_SKILL_ITEM;
     }
 }

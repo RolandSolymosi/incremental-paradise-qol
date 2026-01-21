@@ -26,17 +26,23 @@ public class PeashooterCooldown implements SkillCooldown {
     }
 
     @Override
-    public void onActivate() {
+    public SkillAction onActivate() {
         numActive++;
         if(maxActive < numActive) {
             maxActive = numActive;
         }
+
+        // Dropping the item could force-spawn another (can't tell if it would), so don't try
+        return SkillAction.NONE;
     }
 
     @Override
-    public void onSkillEnd(boolean worldChange) {
+    public SkillAction onSkillEnd(boolean worldChange) {
         // funny enough won't be called on a world change
         numActive--;
+
+        // Dropping the item could force-spawn another (can't tell if) so don't try
+        return SkillAction.NONE;
     }
 
     @Override

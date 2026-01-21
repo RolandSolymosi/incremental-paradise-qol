@@ -31,16 +31,19 @@ public class AxeJugglingCooldown implements SkillCooldown {
     }
 
     @Override
-    public void onActivate() {
+    public SkillAction onActivate() {
         // Failsafe just to be double-sure.
         cooldownEstimator.clearStart();
 
         this.state = STATE.ACTIVE;
+        // Cooldown isn't available until you fail one, not when you activate one.
+        return SkillAction.NONE;
     }
 
     @Override
-    public void onSkillEnd(boolean worldChange) {
+    public SkillAction onSkillEnd(boolean worldChange) {
         // Doesn't get called for axe juggling, so ignorable.
+        return SkillAction.NONE;
     }
 
     @Override

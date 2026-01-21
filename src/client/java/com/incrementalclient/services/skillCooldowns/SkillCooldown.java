@@ -30,13 +30,13 @@ public interface SkillCooldown {
     // 🔧 Activated Ricochet!
     // 🔧 Activated Condensed Strike!
     // 🔧 Activated Bee Storm!
-    void onActivate();
+    SkillAction onActivate();
 
     // Examples:
     // 🔧 Ricochet is over!
     // The boolean is for whether the skill is ending because of a world change (warp 1, warp 2, enter bossworld, etc)
     // or because of some other reason (usually ending because the duration ended)
-    void onSkillEnd(boolean worldChange);
+    SkillAction onSkillEnd(boolean worldChange);
 
     // Examples:
     // 🔧 Condensed Strike is on cooldown for another 16.2 seconds.
@@ -62,4 +62,12 @@ public interface SkillCooldown {
      * is returned, then the cooldown override is disabled (cleared) and the default functionality is restored.
      */
     Optional<Float> getCooldownFraction();
+
+    /**
+     * The action to take after a specific function is called. The primary usecase for this is to drop a skill item
+     * right as the skill ends, to forcibly refresh the cooldown so it can be looked at.
+     */
+    enum SkillAction {
+        NONE, DROP_SKILL_ITEM;
+    }
 }

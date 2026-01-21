@@ -38,14 +38,16 @@ public class FixedDurationNormalSkill extends NormalSkillCooldown {
     }
 
     @Override
-    public void onActivate() {
+    public SkillAction onActivate() {
         // When activated: Enters the "Active" state (ie the skill is running)
         onEnterActiveDuration();
         durationEstimator.start();
+        // Dropping item here won't refresh cooldown
+        return SkillAction.NONE;
     }
 
     @Override
-    public void onSkillEnd(boolean worldChange) {
+    public SkillAction onSkillEnd(boolean worldChange) {
         // When over: Goes on cooldown.
         onEnterCooldown();
         if(worldChange) {
@@ -57,5 +59,8 @@ public class FixedDurationNormalSkill extends NormalSkillCooldown {
             // start-end measurement is accurate
             durationEstimator.stop();
         }
+
+        // Refresh cooldown timer
+        return SkillAction.DROP_SKILL_ITEM;
     }
 }

@@ -25,16 +25,22 @@ public class RicochetCooldown implements SkillCooldown {
     }
 
     @Override
-    public void onActivate() {
+    public SkillAction onActivate() {
         numActive++;
         if(maxActive < numActive) {
             maxActive = numActive;
         }
+
+        // Ricochet doesn't have a real "cooldown" mechanism so no action needed
+        return SkillAction.NONE;
     }
 
     @Override
-    public void onSkillEnd(boolean worldChange) {
+    public SkillAction onSkillEnd(boolean worldChange) {
         numActive--;
+
+        // Ricochet doens't have a real cooldown mechanism so no action needed
+        return SkillAction.NONE;
     }
 
     @Override

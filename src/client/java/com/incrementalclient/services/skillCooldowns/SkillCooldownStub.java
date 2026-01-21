@@ -22,13 +22,13 @@ public class SkillCooldownStub implements SkillCooldown {
     }
 
     @Override
-    public void onActivate() {
-
+    public SkillAction onActivate() {
+        return SkillAction.NONE;
     }
 
     @Override
-    public void onSkillEnd(boolean worldChange) {
-
+    public SkillAction onSkillEnd(boolean worldChange) {
+        return SkillAction.NONE;
     }
 
     @Override
