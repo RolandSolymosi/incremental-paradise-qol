@@ -16,7 +16,7 @@ import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class SkillCooldownMonitor implements Observer<ChatHandler.Event> {
+public class SkillCooldownMonitor {
 
     private final ItemCooldownWrapper itemCooldownWrapper;
     private boolean overrideItemCooldowns = true;
