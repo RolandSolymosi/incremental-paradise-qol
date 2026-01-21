@@ -115,7 +115,7 @@ public class SkillCooldownMonitor implements Observer<ChatHandler.Event> {
     ) {
         this.itemCooldownWrapper = itemCooldownWrapper;
         this.chatHandler = chatHandler;
-        chatHandler.subscribe(this);
+        chatHandler.subscribe(this::onChatMessageReceived);
         worldMonitor.subscribe(this::onWorldChange);
         startClientTickListenable.subscribe(this::onTickStart);
 
@@ -138,8 +138,7 @@ public class SkillCooldownMonitor implements Observer<ChatHandler.Event> {
         skillNameMap.put("Devils Gambit", NightmareCombatSkill.DevilsGambit);
     }
 
-    @Override
-    public void onEvent(ChatHandler.Event result) {
+    public void onChatMessageReceived(ChatHandler.Event result) {
         var text = result.message().getString();
         boolean filterFound = false;
 
