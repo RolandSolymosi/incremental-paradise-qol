@@ -299,16 +299,19 @@ public class SkillCooldownMonitor {
         // Click to view [CATEGORY] abilities
         //
         // We have a LOT of checks already, I'll just check line count and lines 2 and 4 and move on
+        // UPDATE: Empty lines aren't empty, they have a whitespace character (just a space) in them.
         if(abilityStackLines.size() != 5) {
             this.chatHandler.sendChatMessage("Ability stack didn't have 5 lore lines");
             return;
         }
-        if(!abilityStackLines.get(1).isEmpty()) {
-            this.chatHandler.sendChatMessage("Ability line 1 wasn't empty");
+        var lineTwo = abilityStackLines.get(1).strip();
+        if(!lineTwo.isEmpty()) {
+            this.chatHandler.sendChatMessage("Ability line index 1 wasn't empty, was instead \"" + lineTwo + "\" with length " + lineTwo.length());
             return;
         }
-        if(!abilityStackLines.get(3).isEmpty()) {
-            this.chatHandler.sendChatMessage("Ability line 3 wasn't empty");
+        var lineFour = abilityStackLines.get(3).strip();
+        if(!lineFour.isEmpty()) {
+            this.chatHandler.sendChatMessage("Ability line index 3 wasn't empty, was instead \"" + lineFour + "\" with length " + lineFour.length());
             return;
         }
 
