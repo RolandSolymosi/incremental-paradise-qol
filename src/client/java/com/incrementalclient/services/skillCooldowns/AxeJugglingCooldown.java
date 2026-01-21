@@ -16,12 +16,13 @@ import java.util.Optional;
 public class AxeJugglingCooldown implements SkillCooldown {
     // will always be "Axe Juggling" but leaving it like this for convention
     private final String skillName;
-    private STATE state = STATE.UNKNOWN;
+    private STATE state;
 
     private final DurationEstimator cooldownEstimator = new DurationEstimator();
 
     public AxeJugglingCooldown(String skillName) {
         this.skillName = skillName;
+        this.state = STATE.READY;
     }
 
     @Override
@@ -64,7 +65,6 @@ public class AxeJugglingCooldown implements SkillCooldown {
     @Override
     public Text getHudTextLine() {
         return switch (this.state) {
-            case UNKNOWN -> Text.of("Unknown");
             case ACTIVE -> Text.of("Active?");
             case COOLDOWN -> Text.of(getCooldownTextLine());
             case READY -> Text.of(Text.literal("Ready!").formatted(Formatting.GOLD));
@@ -92,7 +92,6 @@ public class AxeJugglingCooldown implements SkillCooldown {
     // but I don't want to make that one non-private
     // and this is a really different skill regardless
     private enum STATE {
-        UNKNOWN,
         ACTIVE,
         COOLDOWN,
         READY

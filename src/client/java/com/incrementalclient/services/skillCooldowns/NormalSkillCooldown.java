@@ -28,7 +28,7 @@ public abstract class NormalSkillCooldown implements SkillCooldown {
      */
     public NormalSkillCooldown(String skillName) {
         this.skillName = skillName;
-        this.state = STATE.UNKNOWN;
+        this.state = STATE.READY;
     }
 
     @Override
@@ -90,7 +90,7 @@ public abstract class NormalSkillCooldown implements SkillCooldown {
     @Override
     public Optional<Float> getCooldownFraction() {
         return switch (this.state) {
-            case UNKNOWN, READY -> Optional.empty();
+            case READY -> Optional.empty();
             case ACTIVE -> getActiveCooldownFraction();
             case COOLDOWN -> getCooldownStateCooldownFraction();
         };
@@ -106,7 +106,6 @@ public abstract class NormalSkillCooldown implements SkillCooldown {
     }
 
     private enum STATE {
-        UNKNOWN,
         ACTIVE,
         COOLDOWN,
         READY

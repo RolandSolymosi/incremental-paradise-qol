@@ -11,8 +11,8 @@ import java.util.Optional;
 public class PeashooterCooldown implements SkillCooldown {
     private final String skillName;
 
-    private int numActive;
-    private int maxActive;
+    private int numActive = 0;
+    private int maxActive = 1;
 
     private final DurationEstimator cooldownEstimator = new DurationEstimator();
 

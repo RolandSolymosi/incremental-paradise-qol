@@ -13,7 +13,7 @@ public class RicochetCooldown implements SkillCooldown {
     private final String skillName;
 
     private int numActive = 0;
-    private int maxActive = 0;
+    private int maxActive = 1;
 
     public RicochetCooldown(String skillName) {
         this.skillName = skillName;
