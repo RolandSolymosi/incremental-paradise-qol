@@ -97,7 +97,7 @@ public class SkillCooldownMonitor {
     private final Map<SkillCategory, SkillCooldown> currentlyActiveSkills = new HashMap<>();
 
     // Skill cooldowns which ended this tick - don't yet know if it was because of world change or not, though.
-    private final List<SkillCooldown> cooldownsEnding = new ArrayList<>();
+    private final List<SkillCooldownInfo> cooldownsEnding = new ArrayList<>();
 
     // Note the startPiece includes a spacebar.
     private static final String startPiece = "\uD83D\uDD27 ";
@@ -158,7 +158,8 @@ public class SkillCooldownMonitor {
         Matcher matcher;
         if((matcher = skillActivated.matcher(text)).find()) {
             var skillInfo = this.getSkillInfoFromName(matcher.group("skill"));
-            skillInfo.cooldown().onActivate();
+            var action = skillInfo.cooldown().onActivate();
+            performSkillAction(action, skillInfo.skill);
             filterFound = true;
 
             // Only worth updating the "currently active skill" after one gets used.
@@ -169,7 +170,7 @@ public class SkillCooldownMonitor {
             }
         } else if((matcher = skillEnded.matcher(text)).find()) {
             var skillInfo = this.getSkillInfoFromName(matcher.group("skill"));
-            cooldownsEnding.add(skillInfo.cooldown);
+            cooldownsEnding.add(skillInfo);
             filterFound = true;
         } else if((matcher = skillOnCooldown.matcher(text)).find()) {
             var skillInfo = this.getSkillInfoFromName(matcher.group("skill"));
@@ -202,7 +203,10 @@ public class SkillCooldownMonitor {
 
     public void onWorldChange(WorldMonitor.Event event) {
         // Cooldowns ending because of a world change
-        cooldownsEnding.forEach(cooldown -> cooldown.onSkillEnd(true));
+        cooldownsEnding.forEach(skillInfo -> performSkillAction(
+                skillInfo.cooldown.onSkillEnd(true),
+                skillInfo.skill
+        ));
         cooldownsEnding.clear();
     }
 
@@ -217,7 +221,10 @@ public class SkillCooldownMonitor {
         world change", we MUST put the check at onTickStart! onTickEnd WILL NOT WORK for this situation!
          */
         // Cooldowns ending, and NOT because of a world change
-        cooldownsEnding.forEach(cooldown -> cooldown.onSkillEnd(false));
+        cooldownsEnding.forEach(skillInfo -> performSkillAction(
+                skillInfo.cooldown.onSkillEnd(false),
+                skillInfo.skill
+        ));
         cooldownsEnding.clear();
 
         // Update cooldowns now
