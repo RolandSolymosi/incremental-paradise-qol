@@ -29,6 +29,10 @@ public class ChatHandler extends ObservableBase<Observer<ChatHandler.Event>, Cha
         });
     }
 
+    public void sendChatMessage(String message) {
+        this.sendChatMessage(Text.of(message));
+    }
+
     public void sendOverlayMessage(Text message) {
         if (message == null || message.getString().isEmpty()) return;
         if (minecraftClientAccessor.getPlayer().isEmpty()) return;

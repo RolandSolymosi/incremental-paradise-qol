@@ -250,10 +250,14 @@ public class SkillCooldownMonitor {
     }
 
     public void onScreenArrived(ScreenCapture.Screen screen) {
+        this.chatHandler.sendChatMessage("Screen arrived");
         // Check for expected screen size
         var contents = screen.contents();
-        if(contents.size() != 45) {
+        if(contents.size() != 46) {
             // All skill screens have 45 slots (9 wide, 4 high)
+            // Yes, I know it says 46. 46 wasn't working.
+            // I tested it. I don't know why 45 wasn't working.
+            this.chatHandler.sendChatMessage("Not 45 slots, instead " + contents.size());
             return;
         }
         // Theoretically, I could check for the stained glass panes
@@ -265,6 +269,7 @@ public class SkillCooldownMonitor {
         // Check for expected screen name
         var expectedCategory = SkillCategory.findByName(screen.title().getString()).orElse(null);
         if(expectedCategory == null) {
+            this.chatHandler.sendChatMessage("Wrong category");
             return;
         }
 
@@ -272,15 +277,18 @@ public class SkillCooldownMonitor {
         var abilityInfoStack = screen.contents().get(20);
         if(abilityInfoStack == null || abilityInfoStack.getItem() != Items.BEACON) {
             // Not ability info slot
+            this.chatHandler.sendChatMessage("Ability info slot isn't at slot 20");
             return;
         }
         var abilityInfoStackName = abilityInfoStack.getName();
         if(!abilityInfoStackName.getString().equals("Abilities")) {
+            this.chatHandler.sendChatMessage("Ability info slot isn't named right");
             return;
         }
 
         var abilityInfoStackLore = abilityInfoStack.get(DataComponentTypes.LORE);
         if(abilityInfoStackLore == null) {
+            this.chatHandler.sendChatMessage("Ability stack had no lore");
             return;
         }
         var abilityStackLines = abilityInfoStackLore.lines().stream().map(Text::getString).toList();
@@ -291,26 +299,35 @@ public class SkillCooldownMonitor {
         // [EMPTY LINE]
         // Click to view [CATEGORY] abilities
         //
-        // We have a LOT of checks already, I'll just check lines 2 and 4 and move on
+        // We have a LOT of checks already, I'll just check line count and lines 2 and 4 and move on
+        if(abilityStackLines.size() != 5) {
+            this.chatHandler.sendChatMessage("Ability stack didn't have 5 lore lines");
+            return;
+        }
         if(!abilityStackLines.get(1).isEmpty()) {
+            this.chatHandler.sendChatMessage("Ability line 1 wasn't empty");
             return;
         }
         if(!abilityStackLines.get(3).isEmpty()) {
+            this.chatHandler.sendChatMessage("Ability line 3 wasn't empty");
             return;
         }
 
         var equippedSkillLine = abilityStackLines.get(2);
         var matcher = loreEquippedSkill.matcher(equippedSkillLine);
         if(!matcher.find()) {
+            this.chatHandler.sendChatMessage("Regex matcher failed");
             return;
         }
         var skillNameFound = matcher.group("skill");
         if(skillNameFound.equals("None")) {
             // confirmed from testing in-game this is what it says
+            this.chatHandler.sendChatMessage("No skill found");
             return;
         }
         var skillFound = skillNameMap.get(skillNameFound);
         if(skillFound.getCategory() != expectedCategory) {
+            this.chatHandler.sendChatMessage("Category mismatch");
             return;
         }
         var skillCooldown = getSkillCooldown(skillFound);
