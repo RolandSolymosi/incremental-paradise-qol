@@ -4,6 +4,7 @@ import com.incrementalclient.common.utils.DurationEstimator;
 import com.incrementalclient.common.utils.Utils;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;
 import java.util.Optional;
@@ -26,7 +27,7 @@ public class PeashooterCooldown implements SkillCooldown {
     }
 
     @Override
-    public SkillAction onActivate() {
+    public @NotNull SkillAction onActivate() {
         numActive++;
         if(maxActive < numActive) {
             maxActive = numActive;
@@ -37,7 +38,7 @@ public class PeashooterCooldown implements SkillCooldown {
     }
 
     @Override
-    public SkillAction onSkillEnd(boolean worldChange) {
+    public @NotNull SkillAction onSkillEnd(boolean worldChange) {
         // funny enough won't be called on a world change
         numActive--;
 

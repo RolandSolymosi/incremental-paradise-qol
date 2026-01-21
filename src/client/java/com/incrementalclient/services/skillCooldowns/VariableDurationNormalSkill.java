@@ -2,6 +2,7 @@ package com.incrementalclient.services.skillCooldowns;
 
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
@@ -30,7 +31,7 @@ public class VariableDurationNormalSkill extends NormalSkillCooldown {
     }
 
     @Override
-    public SkillAction onActivate() {
+    public @NotNull SkillAction onActivate() {
         // When activated: Enters the "Active" state (ie the skill is running)
         onEnterActiveDuration();
 
@@ -38,7 +39,7 @@ public class VariableDurationNormalSkill extends NormalSkillCooldown {
     }
 
     @Override
-    public SkillAction onSkillEnd(boolean worldChange) {
+    public @NotNull SkillAction onSkillEnd(boolean worldChange) {
         // When over: Goes on cooldown.
         onEnterCooldown();
 

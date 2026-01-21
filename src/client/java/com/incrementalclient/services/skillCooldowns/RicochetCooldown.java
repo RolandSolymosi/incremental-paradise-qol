@@ -1,6 +1,7 @@
 package com.incrementalclient.services.skillCooldowns;
 
 import net.minecraft.text.Text;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
@@ -25,7 +26,7 @@ public class RicochetCooldown implements SkillCooldown {
     }
 
     @Override
-    public SkillAction onActivate() {
+    public @NotNull SkillAction onActivate() {
         numActive++;
         if(maxActive < numActive) {
             maxActive = numActive;
@@ -36,7 +37,7 @@ public class RicochetCooldown implements SkillCooldown {
     }
 
     @Override
-    public SkillAction onSkillEnd(boolean worldChange) {
+    public @NotNull SkillAction onSkillEnd(boolean worldChange) {
         numActive--;
 
         // Ricochet doens't have a real cooldown mechanism so no action needed

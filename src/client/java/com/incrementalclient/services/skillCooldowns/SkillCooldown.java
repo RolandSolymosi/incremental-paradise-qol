@@ -1,6 +1,7 @@
 package com.incrementalclient.services.skillCooldowns;
 
 import net.minecraft.text.Text;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
@@ -30,13 +31,13 @@ public interface SkillCooldown {
     // 🔧 Activated Ricochet!
     // 🔧 Activated Condensed Strike!
     // 🔧 Activated Bee Storm!
-    SkillAction onActivate();
+    @NotNull SkillAction onActivate();
 
     // Examples:
     // 🔧 Ricochet is over!
     // The boolean is for whether the skill is ending because of a world change (warp 1, warp 2, enter bossworld, etc)
     // or because of some other reason (usually ending because the duration ended)
-    SkillAction onSkillEnd(boolean worldChange);
+    @NotNull SkillAction onSkillEnd(boolean worldChange);
 
     // Examples:
     // 🔧 Condensed Strike is on cooldown for another 16.2 seconds.

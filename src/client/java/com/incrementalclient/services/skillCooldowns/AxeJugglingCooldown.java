@@ -4,6 +4,7 @@ import com.incrementalclient.common.utils.DurationEstimator;
 import com.incrementalclient.common.utils.Utils;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
+import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;
 import java.util.Optional;
@@ -31,7 +32,7 @@ public class AxeJugglingCooldown implements SkillCooldown {
     }
 
     @Override
-    public SkillAction onActivate() {
+    public @NotNull SkillAction onActivate() {
         // Failsafe just to be double-sure.
         cooldownEstimator.clearStart();
 
@@ -41,7 +42,7 @@ public class AxeJugglingCooldown implements SkillCooldown {
     }
 
     @Override
-    public SkillAction onSkillEnd(boolean worldChange) {
+    public @NotNull SkillAction onSkillEnd(boolean worldChange) {
         // Doesn't get called for axe juggling, so ignorable.
         return SkillAction.NONE;
     }

@@ -1,6 +1,7 @@
 package com.incrementalclient.services.skillCooldowns;
 
 import net.minecraft.text.Text;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 import java.util.function.Function;
@@ -45,7 +46,7 @@ public class InstantSkillCooldown extends NormalSkillCooldown {
     }
 
     @Override
-    public SkillAction onActivate() {
+    public @NotNull SkillAction onActivate() {
         // Instant skills go on cooldown immediately.
         onEnterCooldown();
         // Action when activated: activationAction
@@ -53,7 +54,7 @@ public class InstantSkillCooldown extends NormalSkillCooldown {
     }
 
     @Override
-    public SkillAction onSkillEnd(boolean worldChange) {
+    public @NotNull SkillAction onSkillEnd(boolean worldChange) {
         // Shouldn't be possible; instant skills don't announce that they're "over".
         // Still, putting a fallback in.
         onEnterCooldown();

@@ -1,7 +1,7 @@
 package com.incrementalclient.services.skillCooldowns;
 
-import com.incrementalclient.Main;
 import net.minecraft.text.Text;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Optional;
 
@@ -22,12 +22,12 @@ public class SkillCooldownStub implements SkillCooldown {
     }
 
     @Override
-    public SkillAction onActivate() {
+    public @NotNull SkillAction onActivate() {
         return SkillAction.NONE;
     }
 
     @Override
-    public SkillAction onSkillEnd(boolean worldChange) {
+    public @NotNull SkillAction onSkillEnd(boolean worldChange) {
         return SkillAction.NONE;
     }
 
