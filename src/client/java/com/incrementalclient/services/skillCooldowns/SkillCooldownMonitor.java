@@ -113,6 +113,8 @@ public class SkillCooldownMonitor {
     // NOT chat regex/skill regex, which is what is above here.
     private static final Pattern loreEquippedSkill = Pattern.compile("^Equipped: (?<skill>.+)\\z");
 
+    // Section: Constructor
+
     public SkillCooldownMonitor(
             ScreenCapture screenCapture,
             ItemCooldownWrapper itemCooldownWrapper,
@@ -145,6 +147,9 @@ public class SkillCooldownMonitor {
         }
         skillNameMap.put("Devils Gambit", NightmareCombatSkill.DevilsGambit);
     }
+
+    // Section: Event functions. Basically, onEvent(EventType). AKA the functions used in the constructor
+    // for listenable.subscribe()
 
     public void onChatMessageReceived(ChatHandler.Event result) {
         var text = result.message().getString();
@@ -336,6 +341,8 @@ public class SkillCooldownMonitor {
         currentlyActiveSkills.put(expectedCategory, skillCooldown);
     }
 
+    // Other helper functions used by the onEvent functions
+
     private @NotNull SkillCooldown getSkillCooldown(Skill skill) {
         var ret = this.skillCooldowns.getOrDefault(skill, null);
         if(ret != null) {
@@ -355,6 +362,23 @@ public class SkillCooldownMonitor {
         this.skillCooldowns.put(skill, skillCooldown);
         return skillCooldown;
     }
+
+    private void performSkillAction(@NotNull SkillCooldown.SkillAction action, Skill skill) {
+        if(action == SkillCooldown.SkillAction.NONE) {
+            return;
+        }
+        else if(action == SkillCooldown.SkillAction.DROP_SKILL_ITEM) {
+            var category = skill.getCategory();
+            var itemType = ItemType.fromSkillCategory(category);
+            if (itemType == ItemType.UNKNOWN) {
+                return;
+            }
+            // TODO Drop the item
+        }
+        // No other SkillActions right now.
+    }
+
+    // Functions used by the HUD element (not used by the event functions)
 
     public Map<SkillCategory, SkillCooldown> getCurrentlyActiveSkills() {
         return currentlyActiveSkills;
