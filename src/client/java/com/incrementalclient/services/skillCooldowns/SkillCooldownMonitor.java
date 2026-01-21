@@ -157,51 +157,41 @@ public class SkillCooldownMonitor {
 
         Matcher matcher;
         if((matcher = skillActivated.matcher(text)).find()) {
-            var skillName = matcher.group("skill");
-            var skill = skillNameMap.getOrDefault(skillName, null);
-            var skillCooldown = getSkillCooldown(skill);
-            skillCooldown.onActivate();
+            var skillInfo = this.getSkillInfoFromName(matcher.group("skill"));
+            skillInfo.cooldown().onActivate();
             filterFound = true;
 
             // Only worth updating the "currently active skill" after one gets used.
             // One just got used, so update the currently active skill
-            if(skill != null) {
-                SkillCategory category = skill.getCategory();
-                currentlyActiveSkills.put(category, skillCooldown);
+            if(skillInfo.skill != null) {
+                SkillCategory category = skillInfo.skill.getCategory();
+                currentlyActiveSkills.put(category, skillInfo.cooldown);
             }
         } else if((matcher = skillEnded.matcher(text)).find()) {
-            var skillName = matcher.group("skill");
-            var skill = skillNameMap.getOrDefault(skillName, null);
-            var skillCooldown = getSkillCooldown(skill);
-            cooldownsEnding.add(skillCooldown);
+            var skillInfo = this.getSkillInfoFromName(matcher.group("skill"));
+            cooldownsEnding.add(skillInfo.cooldown);
             filterFound = true;
         } else if((matcher = skillOnCooldown.matcher(text)).find()) {
-            var skillName = matcher.group("skill");
-            var skill = skillNameMap.getOrDefault(skillName, null);
-            var skillCooldown = getSkillCooldown(skill);
-            String cooldownString = matcher.group("cooldown");
+            var skillInfo = this.getSkillInfoFromName(matcher.group("skill"));
+            String cooldownTimeString = matcher.group("cooldown");
             try {
-                var cooldown = Double.parseDouble(cooldownString);
-                skillCooldown.onCooldown(cooldown);
+                var cooldown = Double.parseDouble(cooldownTimeString);
+                skillInfo.cooldown.onCooldown(cooldown);
                 // note that here, filterFound only applies if parseDouble works
                 filterFound = true;
             } catch (NumberFormatException nfe) {
                 // This could go into a util class, but there aren't many things in this game which are
                 // decimal outputs. If we get another decimal output to deal with, then this should
                 // go into that util class.
-                chatHandler.sendChatMessage(Text.literal("Couldn't understand cooldown of " + cooldownString + " seconds."));
+                chatHandler.sendChatMessage(Text.literal("Couldn't understand cooldown of " + cooldownTimeString + " seconds."));
             }
         } else if((matcher = skillReady.matcher(text)).find()) {
-            var skillName = matcher.group("skill");
-            var skill = skillNameMap.getOrDefault(skillName, null);
-            var skillCooldown = getSkillCooldown(skill);
-            skillCooldown.onReady();
+            var skillInfo = this.getSkillInfoFromName(matcher.group("skill"));
+            skillInfo.cooldown.onReady();
             filterFound = true;
         } else if((matcher = skillUseRecharged.matcher(text)).find()) {
-            var skillName = matcher.group("skill");
-            var skill = skillNameMap.getOrDefault(skillName, null);
-            var skillCooldown = getSkillCooldown(skill);
-            skillCooldown.onUseRecharged();
+            var skillInfo = this.getSkillInfoFromName(matcher.group("skill"));
+            skillInfo.cooldown.onUseRecharged();
             filterFound = true;
         }
 
@@ -332,13 +322,12 @@ public class SkillCooldownMonitor {
 //            this.chatHandler.sendChatMessage("No skill found");
             return;
         }
-        var skillFound = skillNameMap.get(skillNameFound);
-        if(skillFound.getCategory() != expectedCategory) {
+        var skillInfo = this.getSkillInfoFromName(skillNameFound);
+        if(skillInfo.skill.getCategory() != expectedCategory) {
 //            this.chatHandler.sendChatMessage("Category mismatch");
             return;
         }
-        var skillCooldown = getSkillCooldown(skillFound);
-        currentlyActiveSkills.put(expectedCategory, skillCooldown);
+        currentlyActiveSkills.put(expectedCategory, skillInfo.cooldown);
     }
 
     // Other helper functions used by the onEvent functions
@@ -376,6 +365,16 @@ public class SkillCooldownMonitor {
             // TODO Drop the item
         }
         // No other SkillActions right now.
+    }
+
+    // SkillCooldownInfo functions (basically helper functions)
+    private record SkillCooldownInfo(String skillName, Skill skill, SkillCooldown cooldown) {
+    }
+
+    private SkillCooldownInfo getSkillInfoFromName(String skillName) {
+        var skill = skillNameMap.get(skillName);
+        var skillCooldown = getSkillCooldown(skill);
+        return new SkillCooldownInfo(skillName, skill, skillCooldown);
     }
 
     // Functions used by the HUD element (not used by the event functions)
