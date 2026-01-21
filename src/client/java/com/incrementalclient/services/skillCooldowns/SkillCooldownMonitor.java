@@ -253,11 +253,10 @@ public class SkillCooldownMonitor {
         this.chatHandler.sendChatMessage("Screen arrived");
         // Check for expected screen size
         var contents = screen.contents();
-        if(contents.size() != 46) {
-            // All skill screens have 45 slots (9 wide, 4 high)
-            // Yes, I know it says 46. 46 wasn't working.
-            // I tested it. I don't know why 45 wasn't working.
-            this.chatHandler.sendChatMessage("Not 45 slots, instead " + contents.size());
+        if(contents.size() != 81) {
+            // All skill screens have 45 slots (9 wide, 5 high)
+            // Including the inventory (4 more rows) this is a total of 81.
+            this.chatHandler.sendChatMessage("Not 81 slots, instead " + contents.size());
             return;
         }
         // Theoretically, I could check for the stained glass panes
@@ -269,7 +268,7 @@ public class SkillCooldownMonitor {
         // Check for expected screen name
         var expectedCategory = SkillCategory.findByName(screen.title().getString()).orElse(null);
         if(expectedCategory == null) {
-            this.chatHandler.sendChatMessage("Wrong category");
+            this.chatHandler.sendChatMessage("Bad category:" + screen.title().getString());
             return;
         }
 
