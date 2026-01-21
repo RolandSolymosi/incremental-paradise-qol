@@ -253,34 +253,34 @@ public class AutoSwapLoadout implements Configurable<AutoSwapLoadout.Configurati
         public int keybind = GLFW.GLFW_KEY_N;
 
         @SerialEntry
-        private boolean enableWardrobeSwap = true;
+        public boolean enableWardrobeSwap = true;
         @SerialEntry
-        private boolean enableToolSwap = true;
+        public boolean enableToolSwap = true;
 
         @SerialEntry
-        private String combatWardrobeName = "1";
+        public String combatWardrobeName = "1";
         @SerialEntry
-        private int meleeWeaponSlot = 0;
+        public int meleeWeaponSlot = 0;
         @SerialEntry
-        private int rangedWeaponSlot = 5;
+        public int rangedWeaponSlot = 5;
 
         @SerialEntry
-        private String miningWardrobeName = "2";
+        public String miningWardrobeName = "2";
         @SerialEntry
-        private int miningWeaponSlot = 1;
+        public int miningWeaponSlot = 1;
         @SerialEntry
-        private String foragingWardrobeName = "3";
+        public String foragingWardrobeName = "3";
         @SerialEntry
-        private int foragingWeaponSlot = 2;
+        public int foragingWeaponSlot = 2;
         @SerialEntry
-        private String farmingWardrobeName = "4";
+        public String farmingWardrobeName = "4";
         @SerialEntry
-        private int farmingWeaponSlot = 3;
+        public int farmingWeaponSlot = 3;
         @SerialEntry
-        private String fishingWardrobeName = "5";
+        public String fishingWardrobeName = "5";
         @SerialEntry
-        private String combatFishingWardrobeName = "6";
+        public String combatFishingWardrobeName = "6";
         @SerialEntry
-        private int fishingWeaponSlot = 4;
+        public int fishingWeaponSlot = 4;
     }
 }
