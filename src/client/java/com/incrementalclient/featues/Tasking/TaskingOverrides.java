@@ -4,11 +4,14 @@ import com.google.common.base.Suppliers;
 import com.incrementalclient.abstractions.ListenableBase;
 import com.incrementalclient.common.data.tasks.Constraint;
 import com.incrementalclient.common.data.tasks.Task;
+import com.incrementalclient.common.data.Tool;
+import com.incrementalclient.common.utils.TextUtils;
 import com.incrementalclient.config.controllers.ComplexTypeController;
 import com.incrementalclient.config.InsertableListOption;
 import com.incrementalclient.interfaces.ComplexConfigurable;
 import com.incrementalclient.interfaces.Listener;
 import com.incrementalclient.internals.MinecraftClientAccessor;
+import com.incrementalclient.featues.Tasking.TicketTaskOverride;
 import dev.isxander.yacl3.api.*;
 import dev.isxander.yacl3.api.controller.BooleanControllerBuilder;
 import dev.isxander.yacl3.api.controller.EnumDropdownControllerBuilder;
@@ -48,7 +51,7 @@ public class TaskingOverrides extends ListenableBase<Listener> implements Comple
                 .description(OptionDescription.of(Text.of("Options to override the default behaviour per task")))
                 .insertEntriesAtEnd(false)
                 .customController(o -> ComplexTypeController.create(o, screenAccessor)
-                        .textProvider(opt -> Text.of((opt.task == null ? "N/A" : opt.task.name())))
+                        .textProvider(opt -> (opt.task == null ? Text.of("Invalid Task Override") : getTextProvider(opt)))
                         .screenFactory(opt -> YetAnotherConfigLib.createBuilder()
                                 .title(Text.of("Edit Override Settings"))
                                 .category(ConfigCategory.createBuilder()
@@ -57,9 +60,7 @@ public class TaskingOverrides extends ListenableBase<Listener> implements Comple
                                                 .name(Text.of("Task"))
                                                 .binding(opt.task, () -> opt.task, val -> opt.task = val)
                                                 .controller(t -> EnumDropdownControllerBuilder.create(t)
-                                                        .formatValue(v -> Text.of(v.getDescriptor().names().getFirst() + (!v.getDescriptor().constraints().isEmpty()
-                                                                ? "[ "+ v.getDescriptor().constraints().stream().map(Constraint::getName).collect(Collectors.joining(", "))+ " ]"
-                                                                : "")))
+                                                        .formatValue(v -> Text.of(v.getDescriptor().displayName()))
                                                 )
                                                 .build())
                                         .option(Option.<String>createBuilder()
@@ -77,15 +78,19 @@ public class TaskingOverrides extends ListenableBase<Listener> implements Comple
                                                 .binding(opt.pet, () -> opt.pet, val -> opt.pet = val)
                                                 .controller(StringControllerBuilder::create)
                                                 .build())
-                                        .option(Option.<Integer>createBuilder()
-                                                .name(Text.of("Tool slot"))
-                                                .binding(opt.toolSlotId, () -> opt.toolSlotId, val -> opt.toolSlotId = val)
-                                                .controller(i -> IntegerSliderControllerBuilder.create(i).step(1).range(-1, 7))
+                                        .option(Option.<Tool>createBuilder()
+                                                .name(Text.of("Tool"))
+                                                .binding(opt.tool, () -> opt.tool, val -> opt.tool = val)
+                                                .controller(t -> EnumDropdownControllerBuilder.create(t)
+                                                        .formatValue(v -> Text.of(v.name()))
+                                                )
                                                 .build())
-                                        .option(Option.<Boolean>createBuilder()
-                                                .name(Text.of("Invert Ticket task skip rule"))
+                                        .option(Option.<TicketTaskOverride>createBuilder()
+                                                .name(Text.of("Ticket task Skip Behavior"))
                                                 .binding(opt.skipTicket, () -> opt.skipTicket, val -> opt.skipTicket = val)
-                                                .controller(BooleanControllerBuilder::create)
+                                                .controller(t -> EnumDropdownControllerBuilder.create(t)
+                                                        .formatValue(v -> Text.of(v.name()))
+                                                )
                                                 .build())
                                         .build())
                                 .save(this::notifyListeners))
@@ -95,6 +100,10 @@ public class TaskingOverrides extends ListenableBase<Listener> implements Comple
                 .collapsed(true)
                 .build()
         ));
+    }
+
+    public TicketTaskOverride getTicketTaskOverride(Task task) {
+        return overrides.get(task) != null ? overrides.get(task).skipTicket : TicketTaskOverride.Default;
     }
 
     @Override
@@ -142,9 +151,23 @@ public class TaskingOverrides extends ListenableBase<Listener> implements Comple
             @SerialEntry
             public String warp = "";
             @SerialEntry
-            public int toolSlotId = -1;
+            public Tool tool = Tool.Default;
             @SerialEntry
-            public boolean skipTicket = false;
+            public TicketTaskOverride skipTicket = TicketTaskOverride.Default;
         }
+    }
+
+    private Text getTextProvider(Configuration.Override override) {
+        int overrideColor = switch (override.skipTicket) {
+            case TicketTaskOverride.Default -> 0xFFFFFF;
+            case TicketTaskOverride.Skipped -> 0xf698ff;
+            case TicketTaskOverride.NotSkipped -> 0xff9898;
+        };
+        return TextUtils.textColor(override.task.getDescriptor().displayName() +
+                (override.wardrobe.isEmpty() ? "" : ", Wardrobe: " + override.wardrobe) +
+                (override.warp.isEmpty() ? "" : ", Warp: " + override.warp) +
+                (override.pet.isEmpty() ? "" : ", Pet: " + override.pet) +
+                (override.tool == Tool.Default ? "" : ", Tool: " + override.tool.name()),
+                overrideColor);
     }
 }

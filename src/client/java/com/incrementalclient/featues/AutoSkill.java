@@ -18,7 +18,6 @@ import dev.isxander.yacl3.config.v2.api.SerialEntry;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.component.DataComponentTypes;
-import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
 
@@ -177,8 +176,8 @@ public class AutoSkill extends ListenableBase<Listener> implements ComplexConfig
                 Categories.SkillLeveling.createConfig(600,
                         createSkillOption(
                                 "Normal Fishing",
-                                () -> configuration.normalFishing,
-                                (v) -> configuration.normalFishing = v,
+                                () -> configuration.normalSpearFishing,
+                                (v) -> configuration.normalSpearFishing = v,
                                 () -> {
                                     var newSkill = new Configuration.SkillLevel<NormalSpearFishingSkill>();
                                     newSkill.skill = NormalSpearFishingSkill.SpoonBender;
@@ -199,8 +198,8 @@ public class AutoSkill extends ListenableBase<Listener> implements ComplexConfig
                 Categories.SkillLeveling.createConfig(800,
                         createSkillOption(
                                 "Normal Excavating",
-                                () -> configuration.normalExcavating,
-                                (v) -> configuration.normalExcavating = v,
+                                () -> configuration.normalExcavation,
+                                (v) -> configuration.normalExcavation = v,
                                 () -> {
                                     var newSkill = new Configuration.SkillLevel<NormalExcavationSkill>();
                                     newSkill.skill = NormalExcavationSkill.SeismicResonance;
@@ -254,8 +253,8 @@ public class AutoSkill extends ListenableBase<Listener> implements ComplexConfig
                 Categories.SkillLeveling.createConfig(1300,
                         createSkillOption(
                                 "Nightmare Fishing",
-                                () -> configuration.nightmareFishing,
-                                (v) -> configuration.nightmareFishing = v,
+                                () -> configuration.nightmareSpearFishing,
+                                (v) -> configuration.nightmareSpearFishing = v,
                                 () -> {
                                     var newSkill = new Configuration.SkillLevel<NightmareSpearFishingSkill>();
                                     newSkill.skill = NightmareSpearFishingSkill.FishSenses;
@@ -388,7 +387,7 @@ public class AutoSkill extends ListenableBase<Listener> implements ComplexConfig
                 case SkillCategory.Mining -> configuration.nightmareMining;
                 case SkillCategory.Foraging -> configuration.nightmareForaging;
                 case SkillCategory.Farming -> configuration.nightmareFarming;
-                case SkillCategory.SpearFishing -> configuration.nightmareFishing;
+                case SkillCategory.SpearFishing -> configuration.nightmareSpearFishing;
                 case SkillCategory.Sharpshooting -> configuration.nightmareSharpshooting;
                 case Excavation -> null;
             };
@@ -398,9 +397,9 @@ public class AutoSkill extends ListenableBase<Listener> implements ComplexConfig
                 case SkillCategory.Mining -> configuration.normalMining;
                 case SkillCategory.Foraging -> configuration.normalForaging;
                 case SkillCategory.Farming -> configuration.normalFarming;
-                case SkillCategory.SpearFishing -> configuration.normalFishing;
+                case SkillCategory.SpearFishing -> configuration.normalSpearFishing;
                 case SkillCategory.Sharpshooting -> configuration.normalSharpshooting;
-                case SkillCategory.Excavation -> configuration.normalExcavating;
+                case SkillCategory.Excavation -> configuration.normalExcavation;
             };
         }
     }
@@ -478,11 +477,11 @@ public class AutoSkill extends ListenableBase<Listener> implements ComplexConfig
         @SerialEntry
         public List<SkillLevel<NormalFarmingSkill>> normalFarming = new java.util.ArrayList<>();
         @SerialEntry
-        public List<SkillLevel<NormalSpearFishingSkill>> normalFishing = new java.util.ArrayList<>();
+        public List<SkillLevel<NormalSpearFishingSkill>> normalSpearFishing = new java.util.ArrayList<>();
         @SerialEntry
         public List<SkillLevel<NormalSharpshootingSkill>> normalSharpshooting = new java.util.ArrayList<>();
         @SerialEntry
-        public List<SkillLevel<NormalExcavationSkill>> normalExcavating = new java.util.ArrayList<>();
+        public List<SkillLevel<NormalExcavationSkill>> normalExcavation = new java.util.ArrayList<>();
 
         @SerialEntry
         public List<SkillLevel<NightmareCombatSkill>> nightmareCombat = new java.util.ArrayList<>();
@@ -493,7 +492,7 @@ public class AutoSkill extends ListenableBase<Listener> implements ComplexConfig
         @SerialEntry
         public List<SkillLevel<NightmareFarmingSkill>> nightmareFarming = new java.util.ArrayList<>();
         @SerialEntry
-        public List<SkillLevel<NightmareSpearFishingSkill>> nightmareFishing = new java.util.ArrayList<>();
+        public List<SkillLevel<NightmareSpearFishingSkill>> nightmareSpearFishing = new java.util.ArrayList<>();
         @SerialEntry
         public List<SkillLevel<NightmareSharpshootingSkill>> nightmareSharpshooting = new java.util.ArrayList<>();
 

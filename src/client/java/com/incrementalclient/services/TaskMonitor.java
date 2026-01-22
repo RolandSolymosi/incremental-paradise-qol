@@ -155,7 +155,7 @@ public class TaskMonitor extends ObservableBase<Observer<List<TaskMonitor.TaskSt
                     if (taskType.isPresent()) {
                         var taskName = cleanTaskName(itemStack.getName().getString());
                         if (taskType.get() == TaskType.Quest || taskType.get() == TaskType.Tutorial) {
-                            var taskState = new TaskState(taskName, "", "", taskType.get(), null, new String[0], slotId, false, false, "", "", null);
+                            var taskState = new TaskState(taskName, "", "", taskType.get(), null, new String[0], slotId, false, false, "?", "", null);
                             if (isCompletedBook(itemStack)){
                                 taskState.completeIfOngoing();
                             }
@@ -294,7 +294,7 @@ public class TaskMonitor extends ObservableBase<Observer<List<TaskMonitor.TaskSt
             this.isSocialite = isSocialite;
             this.required = required;
             this.current = current;
-            this.taskPattern = Pattern.compile(taskPattern.pattern().replace("(?<type>.+)", taskTarget));
+            this.taskPattern = taskPattern != null ? Pattern.compile(taskPattern.pattern().replace("(?<type>.+)", taskTarget)) : null;
             this.nonTrackedPattern = Pattern.compile(Pattern.quote(this.name) + " \\(?(?<progress>[0-9.,]+[kmbt]?)");
         }
 

@@ -143,8 +143,8 @@ public class PxpCalculation implements Configurable<PxpCalculation.Configuration
 
     static public class Configuration {
         @SerialEntry
-        private int legendaryPxpValue = 75;
+        public int legendaryPxpValue = 75;
         @SerialEntry
-        private int mythicPxpValue = 500;
+        public int mythicPxpValue = 500;
     }
 }
