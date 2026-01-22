@@ -45,6 +45,11 @@ public final class NormalTask implements ITask {
     }
 
     @Override
+    public String displayName() {
+        return displayName;
+    }
+
+    @Override
     public ImmutableList<String> names() {
         return names;
     }

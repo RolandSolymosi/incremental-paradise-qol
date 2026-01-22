@@ -7,7 +7,8 @@ public enum Tool {
     Hoe(3),
     Spear(4),
     Bow(5),
-    Brush(6);;
+    Brush(6),
+    Default(7);
 
     private final int value;
 

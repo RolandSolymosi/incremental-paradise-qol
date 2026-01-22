@@ -15,5 +15,6 @@ public sealed interface ITask permits NormalTask, GamingTask {
     ImmutableList<Warp> warps();
     TaskType taskType();
     String displayName(String[] parameters);
+    String displayName();
     Region getRegion();
 }
