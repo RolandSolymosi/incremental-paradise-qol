@@ -14,6 +14,7 @@ import com.incrementalclient.featues.CommandAliases;
 import com.incrementalclient.featues.PxpCalculation;
 import com.incrementalclient.featues.Tasking.AutoSwapLoadout;
 import com.incrementalclient.featues.Tasking.TaskingOverrides;
+import com.incrementalclient.featues.Tasking.TicketTaskOverride;
 import com.incrementalclient.featues.Tasking.WarpNextHotkey;
 import com.incrementalclient.hud.ConsumableTimerElement;
 import com.incrementalclient.hud.TaskTrackerElement;
@@ -249,8 +250,7 @@ public class ConfigMigrator {
         newOverride.warp = overrides.warp;
         newOverride.pet = overrides.pet;
         newOverride.wardrobe = overrides.wardrobe;
-        // Change to the default behaviour next
-        newOverride.skipTicket = overrides.skip_ticket_task;
+        newOverride.skipTicket = overrides.skip_ticket_task == defaultSkip ? TicketTaskOverride.Default : TicketTaskOverride.booleanToEnum(overrides.skip_ticket_task);
 
         return newOverride;
     }
