@@ -31,6 +31,8 @@ public class SkillCooldownMonitor {
     private final ChatHandler chatHandler;
     private boolean filterChat = true;
 
+    private final SkillCooldownInteractionManager skillCooldownInteractionManager;
+
     // Mapping from Skill -> SkillCooldown instance
     private final Map<Skill, SkillCooldown> skillCooldowns = new HashMap<>();
 
@@ -129,7 +131,8 @@ public class SkillCooldownMonitor {
             ItemCooldownWrapper itemCooldownWrapper,
             ChatHandler chatHandler,
             WorldMonitor worldMonitor,
-            StartClientTickListenable startClientTickListenable
+            StartClientTickListenable startClientTickListenable,
+            SkillCooldownInteractionManager skillCooldownInteractionManager
     ) {
 
         screenCapture.subscribe(this::onScreenArrived);
@@ -139,6 +142,7 @@ public class SkillCooldownMonitor {
         chatHandler.subscribe(this::onChatMessageReceived);
         worldMonitor.subscribe(this::onWorldChange);
         startClientTickListenable.subscribe(this::onTickStart);
+        this.skillCooldownInteractionManager = skillCooldownInteractionManager;
 
         var allSkills = List.of(
                 NormalCombatSkill.class, NightmareCombatSkill.class,
