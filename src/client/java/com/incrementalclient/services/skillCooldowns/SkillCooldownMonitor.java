@@ -388,7 +388,7 @@ public class SkillCooldownMonitor {
                 I looked around. It might be possible to implement this technology, but it is a lot of work for
                 what is (in my opinion) not a lot of gain. Especially given that I'm pretty sure dropping an item
                 interrupts both spear-throw and bow-fire actions, resetting them so you have to charge them again.
-                
+
                 If you still insist on trying to do it, look into ClickSlotC2SPacket with SlotActionType.THROW.
                  */
                 var selectedStack = player.getInventory().getSelectedStack();
