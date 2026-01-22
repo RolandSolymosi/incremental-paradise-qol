@@ -1,6 +1,7 @@
 package com.incrementalclient.services.skillCooldowns;
 
 import com.incrementalclient.common.data.ItemType;
+import com.incrementalclient.common.data.World;
 import com.incrementalclient.common.data.skills.*;
 import com.incrementalclient.common.utils.NumberParser;
 import com.incrementalclient.internals.ItemCooldownWrapper;
@@ -99,6 +100,9 @@ public class SkillCooldownMonitor {
     // Mapping of [Skill Category -> Currently active skill]
     // Unlike the previous map, not immutable.
     private final Map<SkillCategory, SkillCooldown> currentlyActiveSkills = new HashMap<>();
+
+    // Mapping of [Realm -> currentlyActiveSkills map for that realm]
+    private final Map<World.Realm, Map<SkillCategory, SkillCooldown>> realmActiveSkills = new HashMap<>();
 
     // Skill cooldowns which ended this tick - don't yet know if it was because of world change or not, though.
     private final List<SkillCooldownInfo> cooldownsEnding = new ArrayList<>();
@@ -215,6 +219,39 @@ public class SkillCooldownMonitor {
                 skillInfo.skill
         ));
         cooldownsEnding.clear();
+
+        var fromRealm = event.from().getRealm();
+        var toRealm = event.to().getRealm();
+        if(fromRealm == null || toRealm == null) {
+            // shouldn't really be possible but failsafe since we cant use @NullMarked
+            return;
+        }
+
+        if(!isEqualSkillRealm(fromRealm, toRealm)) {
+            // Changing realms
+            // FROM-REALM ACTIONS (ACTIONS FOR THE REALM WE ARE LEAVING)
+            // Save old skills and load in new skills
+            var fromRealmSkillMap = realmActiveSkills.getOrDefault(fromRealm, new HashMap<>());
+            // Update the skillMap for the from-realm
+            fromRealmSkillMap.putAll(currentlyActiveSkills);
+            // then save it back again
+            realmActiveSkills.put(fromRealm, fromRealmSkillMap);
+
+            // Clear the active skills: They aren't the active ones anymore
+            currentlyActiveSkills.clear();
+
+            // TO-REALM ACTIONS (ACTIONS FOR THE REALM WE ARE ENTERING)
+            var toRealmSkillMap = realmActiveSkills.getOrDefault(toRealm, null);
+            if(toRealmSkillMap == null) {
+                // TODO: Use /skills to load in all the skills of the new realm.
+                //   This is the part where we actually say "Hey, do /skills",
+                //   the rest of the code here just controls logic for when we want that
+                toRealmSkillMap = new HashMap<>();
+            }
+            // Note: toRealmSkillMap is now guaranteed not-null
+            // load toRealmSkillMap in to the active skills
+            currentlyActiveSkills.putAll(toRealmSkillMap);
+        }
     }
 
     public void onTickStart() {
@@ -399,6 +436,25 @@ public class SkillCooldownMonitor {
             });
         }
         // No other SkillActions right now.
+    }
+
+    // For the purposes of skills, are these two realms equal?
+    // Notably, Hub and Normal realms are the same realm for skill info.
+    private boolean isEqualSkillRealm(World.Realm a, World.Realm b) {
+        if(a == b) {
+            // well they are literally the same realm so yes theyre the same skill realm too
+            return true;
+        }
+        var aIsHubOrNormal = (a == World.Realm.Hub) || (a == World.Realm.Normal);
+        var bIsHubOrNormal = (b == World.Realm.Hub) || (b == World.Realm.Normal);
+        //noinspection RedundantIfStatement: ide can figure it out + left this way for readability
+        if(aIsHubOrNormal && bIsHubOrNormal) {
+            return true;
+        }
+
+        // no other edge cases to check
+        // and we already checked a == b earlier: it was false
+        return false;
     }
 
     // SkillCooldownInfo functions (basically helper functions)
