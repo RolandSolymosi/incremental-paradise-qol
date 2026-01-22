@@ -141,27 +141,23 @@ public class WarpNextHotkey extends ListenableBase<Listener> implements Configur
                                 .build()),
                 Categories.Tasking.General.createConfig(103,
                         Option.<Boolean>createBuilder()
-                                .name(Text.literal("Ticket Task Skip Default"))
+                                .name(Text.literal("Toggle ticket task skip's base rule (Override will behave as opposite then)"))
                                 .binding(
                                         configuration.ticketTastkDefaultSkip,
                                         () -> configuration.ticketTastkDefaultSkip,
                                         v -> configuration.ticketTastkDefaultSkip = v
                                 )
-                                .controller(b -> BooleanControllerBuilder.create(b)
-                                        .valueFormatter(val -> val ? Text.of("Skipped") : Text.of("Not Skipped")))
+                                .controller(BooleanControllerBuilder::create)
                                 .build()));
     }
 
     private void warpNext() {
         if (ongoingWarp.compareAndSet(false, true)) {
             if (worldMonitor.currentWorld() != World.BossArenas) {
-                var nextUnfinishedTask = taskMonitor.getTaskList().stream().filter(p -> !p.isCompleted() &&
-                        // http://32x8.com/sop5_____A-B-C-D-E_____m_1-2-4-9-10-12-17-20-25_____d_0-3-5-6-7-8-11-13-14-15-16-19-21-22-23-24-27-29-30-31_____option-0_____899788866575856596687
-                        (!p.isTicket() ||
-                                (!configuration.ticketTastkDefaultSkip && taskingOverrides.getTicketTaskOverride(p.getTask()) != TicketTaskOverride.Skipped) ||
-                                taskingOverrides.getTicketTaskOverride(p.getTask()) == TicketTaskOverride.NotSkipped)
-                        )
-                                .findFirst();
+                var nextUnfinishedTask = taskMonitor.getTaskList().stream().filter(p -> !p.isCompleted() && (!p.isTicket() ||
+                        ((!configuration.ticketTastkDefaultSkip && (!taskingOverrides.getOverrides().containsKey(p.getTask()) || !taskingOverrides.getOverrides().get(p.getTask()).skipTicket))) ||
+                        (configuration.ticketTastkDefaultSkip && (taskingOverrides.getOverrides().containsKey(p.getTask()) && taskingOverrides.getOverrides().get(p.getTask()).skipTicket))
+                )).findFirst();
                 if (nextUnfinishedTask.isPresent()) {
                     var task = nextUnfinishedTask.get().getTask();
                     if (task != null) {
