@@ -4,11 +4,13 @@ import com.incrementalclient.common.data.ItemType;
 import com.incrementalclient.common.data.skills.*;
 import com.incrementalclient.common.utils.NumberParser;
 import com.incrementalclient.internals.ItemCooldownWrapper;
+import com.incrementalclient.internals.MinecraftClientAccessor;
 import com.incrementalclient.internals.ScreenCapture;
 import com.incrementalclient.internals.events.StartClientTickListenable;
 import com.incrementalclient.services.ChatHandler;
 import com.incrementalclient.services.WorldMonitor;
 import net.minecraft.component.DataComponentTypes;
+import net.minecraft.item.ItemStack;
 import net.minecraft.item.Items;
 import net.minecraft.text.Text;
 import org.jetbrains.annotations.NotNull;
@@ -19,6 +21,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class SkillCooldownMonitor {
+
+    private final MinecraftClientAccessor minecraftClientAccessor;
 
     private final ItemCooldownWrapper itemCooldownWrapper;
     private boolean overrideItemCooldowns = true;
@@ -117,12 +121,15 @@ public class SkillCooldownMonitor {
 
     public SkillCooldownMonitor(
             ScreenCapture screenCapture,
+            MinecraftClientAccessor minecraftClientAccessor,
             ItemCooldownWrapper itemCooldownWrapper,
             ChatHandler chatHandler,
             WorldMonitor worldMonitor,
             StartClientTickListenable startClientTickListenable
     ) {
+
         screenCapture.subscribe(this::onScreenArrived);
+        this.minecraftClientAccessor = minecraftClientAccessor;
         this.itemCooldownWrapper = itemCooldownWrapper;
         this.chatHandler = chatHandler;
         chatHandler.subscribe(this::onChatMessageReceived);
@@ -365,11 +372,31 @@ public class SkillCooldownMonitor {
         }
         else if(action == SkillCooldown.SkillAction.DROP_SKILL_ITEM) {
             var category = skill.getCategory();
-            var itemType = ItemType.fromSkillCategory(category);
-            if (itemType == ItemType.UNKNOWN) {
+            var targetItemType = ItemType.fromSkillCategory(category);
+            if (targetItemType == ItemType.UNKNOWN) {
                 return;
             }
-            // TODO Drop the item
+            // itemType gotten, now drop it
+            // Note: This code will only drop the 1st instance of itemType. If autodrop code is needed again,
+            // then it'll get its own manager that can select whether to drop one or all.
+            minecraftClientAccessor.getPlayer().ifPresent(player -> {
+                /*
+                Note: Yes, it is possible to trigger a skill even if you aren't holding an item.
+                Don't believe me? Hold your pickaxe out, open your inventory, mouse over your spear, and press Q.
+                This will drop your SPEAR, and activate your SPEAR ability.
+
+                I looked around. It might be possible to implement this technology, but it is a lot of work for
+                what is (in my opinion) not a lot of gain. Especially given that I'm pretty sure dropping an item
+                interrupts both spear-throw and bow-fire actions, resetting them so you have to charge them again.
+                
+                If you still insist on trying to do it, look into ClickSlotC2SPacket with SlotActionType.THROW.
+                 */
+                var selectedStack = player.getInventory().getSelectedStack();
+                var selectedStackType = ItemType.getItemType(selectedStack);
+                if(selectedStackType == targetItemType) {
+                    player.dropSelectedItem(false);
+                }
+            });
         }
         // No other SkillActions right now.
     }
