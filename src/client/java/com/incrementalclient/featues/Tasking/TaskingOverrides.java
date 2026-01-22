@@ -162,13 +162,12 @@ public class TaskingOverrides extends ListenableBase<Listener> implements Comple
     private Text getTextProvider(Configuration.Override override) {
         MutableText textProvider = Text.literal("");
 
-        // TODO: Figure out better colors
-        getConditionText(textProvider, true, "Task", override.task.getDescriptor().displayName(), 0xFA3B1, 0x12c4d5);
-        getConditionText(textProvider, !override.wardrobe.isEmpty(), "Wardrobe", override.wardrobe, 0x8C351A, 0xb04221);
-        getConditionText(textProvider, !override.warp.isEmpty(), "Warp", override.warp, 0x009A21, 0x00be29);
-        getConditionText(textProvider, !override.pet.isEmpty(), "Pet", override.pet, 0x949F00, 0xb5c300);
-        getConditionText(textProvider, override.tool != Tool.Default, "Tool", override.tool.name(), 0x7F8593,0x9da5b7);
-        getConditionText(textProvider, override.skipTicket != TicketTaskOverride.Default, "TT", override.skipTicket.getName(), 0x8845D1, 0x9e50f5);
+        getConditionText(textProvider, true, "Task", override.task.getDescriptor().displayName(), 0x0077aa, 0x55ccff);
+        getConditionText(textProvider, !override.wardrobe.isEmpty(), "Wardrobe", override.wardrobe, 0xaa3b00, 0xff9155);
+        getConditionText(textProvider, !override.warp.isEmpty(), "Warp", override.warp, 0x06aa00, 0x5bff55);
+        getConditionText(textProvider, !override.pet.isEmpty(), "Pet", override.pet, 0x9faa00, 0xf4ff55);
+        getConditionText(textProvider, override.tool != Tool.Default, "Tool", override.tool.name(), 0x0033aa,0x5588ff);
+        getConditionText(textProvider, override.skipTicket != TicketTaskOverride.Default, "TT", override.skipTicket.getName(), 0x8845D1, 0xCF90E0);
 
         return textProvider;
     }
