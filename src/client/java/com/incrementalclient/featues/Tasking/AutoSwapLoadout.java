@@ -192,7 +192,9 @@ public class AutoSwapLoadout implements Configurable<AutoSwapLoadout.Configurati
                                 commandHandler.send("pet " + pet);
                             }
                         }
-                        var slot = getSlotToDefault((override == null || override.tool == Tool.Default ? normalTask.tool() : override.tool));
+                        var slot = override != null && override.toolSlotId >= 0
+                                ? override.toolSlotId
+                                : getSlotToDefault(normalTask.tool());
                         if (configuration.enableToolSwap) {
                             hotbarHandler.swapActiveHotbarSlot(slot);
                         }
