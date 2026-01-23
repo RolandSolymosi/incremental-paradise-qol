@@ -69,8 +69,8 @@ public class HudCustomizationScreen extends Screen {
         }
 
         int buttonY = 5;
-        if (activeBarMode == HudManager.Configuration.ActiveBarMode.TOP) {
-            buttonY = 27;
+        if (hudManager.getConfiguration().getBarScoreboardReplacement()) {
+            buttonY += hudManager.getBarHeight();
         }
         
         addDrawableChild(ButtonWidget.builder(
