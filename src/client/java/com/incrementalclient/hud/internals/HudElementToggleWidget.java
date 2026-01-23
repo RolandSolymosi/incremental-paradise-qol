@@ -11,7 +11,7 @@ public class HudElementToggleWidget extends ClickableWidget {
     private final HudElement element;
     private static final int WIDGET_WIDTH = 30;
     private static final int WIDGET_HEIGHT = 10;
-    
+
     public HudElementToggleWidget(HudElement element, int x, int y) {
         super(x, y, WIDGET_WIDTH, WIDGET_HEIGHT, Text.empty());
         this.element = element;
@@ -21,8 +21,8 @@ public class HudElementToggleWidget extends ClickableWidget {
     public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
         Vector2f pos = element.getCurrentPosition();
         Vector2f bounds = element.getBoundingBox();
-        
-        this.setX((int) (pos.x + bounds.x + 2));
+
+        Utils.setScreenSideXPos(this, element);
         this.setY((int) pos.y);
         
         if (getX() < 0) this.setX((int) pos.x);
@@ -45,7 +45,7 @@ public class HudElementToggleWidget extends ClickableWidget {
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         Vector2f pos = element.getCurrentPosition();
         Vector2f bounds = element.getBoundingBox();
-        this.setX((int) (pos.x + bounds.x + 2));
+        Utils.setScreenSideXPos(this, element);
         this.setY((int) pos.y);
         
         if (isMouseOver(mouseX, mouseY) && button == 0) {
@@ -54,7 +54,7 @@ public class HudElementToggleWidget extends ClickableWidget {
         }
         return super.mouseClicked(mouseX, mouseY, button);
     }
-    
+
     @Override
     protected void appendClickableNarrations(NarrationMessageBuilder builder) {
     }

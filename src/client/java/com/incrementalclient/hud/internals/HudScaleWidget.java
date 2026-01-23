@@ -24,7 +24,7 @@ public class HudScaleWidget extends ClickableWidget {
     public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
         Vector2f pos = element.getCurrentPosition();
         Vector2f bounds = element.getBoundingBox();
-        this.setX((int) (pos.x + bounds.x + 2));
+        Utils.setScreenSideXPos(this, element);
         this.setY((int) (pos.y + WIDGET_HEIGHT + 2));
         
         if (getX() < 0) this.setX((int) pos.x);
@@ -47,7 +47,7 @@ public class HudScaleWidget extends ClickableWidget {
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
         Vector2f pos = element.getCurrentPosition();
         Vector2f bounds = element.getBoundingBox();
-        this.setX((int) (pos.x + bounds.x + 2));
+        Utils.setScreenSideXPos(this, element);
         this.setY((int) (pos.y + WIDGET_HEIGHT + 2));
         
         if (isMouseOver(mouseX, mouseY)) {
