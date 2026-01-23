@@ -168,11 +168,12 @@ public class WarpNextHotkey extends ListenableBase<Listener> implements Configur
                         if (task.getDescriptor().taskType() != TaskType.Quest && task.getDescriptor().taskType() != TaskType.Tutorial) {
                             var override = taskingOverrides.getOverrides().get(task);
                             if (override != null && !override.warp.isEmpty()) {
-                                commandHandler.send(override.warp);
-                                return;
+                                commandHandler.send("warp " + override.warp);
+                                ongoingWarp.set(false);
+                            } else {
+                                currentTask = task.getDescriptor();
+                                commandHandler.send(currentTask.warps().get(warpIndex).getWarpCommand());
                             }
-                            currentTask = task.getDescriptor();
-                            commandHandler.send(currentTask.warps().get(warpIndex).getWarpCommand());
                             if (task.getDescriptor() instanceof GamingTask gamingTask) {
                                 commandHandler.send(gamingTask.game().getCommand());
                             }
