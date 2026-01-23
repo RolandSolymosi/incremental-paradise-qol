@@ -45,10 +45,6 @@ public class HudCustomizationScreen extends Screen {
         List<HudElement<?>> otherElementsToAdd = new ArrayList<>();
         
         for (HudElement<?> element : hudElements) {
-            if (!HudManager.shouldRenderBar(element, hudManager.getConfiguration())) {
-                continue;
-            }
-            
             if (element instanceof BottomBarElement || element instanceof TopBarElement) {
                 barsToAdd.add(element);
             } else {
