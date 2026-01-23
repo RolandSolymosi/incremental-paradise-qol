@@ -4,26 +4,27 @@ import com.google.common.base.Suppliers;
 import com.incrementalclient.Main;
 import com.incrementalclient.abstractions.HudElement;
 import com.incrementalclient.abstractions.ObservableBase;
+import com.incrementalclient.common.utils.Vector2f;
 import com.incrementalclient.hud.BottomBarElement;
-import com.incrementalclient.hud.TopBarElement;
 import com.incrementalclient.hud.ScoreboardReplacementBar.ScoreboardReplacementBarElement;
+import com.incrementalclient.hud.TopBarElement;
 import com.incrementalclient.hud.internals.HudCustomizationScreen;
 import com.incrementalclient.interfaces.Configurable;
 import com.incrementalclient.interfaces.Observer;
 import com.incrementalclient.internals.MinecraftClientAccessor;
 import com.incrementalclient.internals.events.HudRenderCallbackObservable;
 import dev.isxander.yacl3.api.ButtonOption;
+import dev.isxander.yacl3.api.NameableEnum;
 import dev.isxander.yacl3.api.Option;
 import dev.isxander.yacl3.api.OptionDescription;
 import dev.isxander.yacl3.api.controller.BooleanControllerBuilder;
-import dev.isxander.yacl3.api.controller.EnumControllerBuilder;
-import dev.isxander.yacl3.api.NameableEnum;
 import dev.isxander.yacl3.config.v2.api.SerialEntry;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
 import java.util.function.Supplier;
 
 public class HudManager extends ObservableBase<Observer<HudManager.Event>, HudManager.Event> implements Observer<HudRenderCallbackObservable.Event>, Configurable<HudManager.Configuration> {
@@ -296,7 +297,10 @@ public class HudManager extends ObservableBase<Observer<HudManager.Event>, HudMa
             if (element.isScalable()) {
                 MatrixStack matrixStack = event.drawContext.getMatrices();
                 matrixStack.push();
+                Vector2f pos = element.getDeltaPosition();
+                matrixStack.translate(pos.x, pos.y, 0);
                 matrixStack.scale(element.getScale(), element.getScale(), element.getScale());
+                matrixStack.translate(-pos.x, -pos.y, 0);
 
                 element.render(new HudElement.RenderSettings(event.drawContext, 1.0f, false));
 
