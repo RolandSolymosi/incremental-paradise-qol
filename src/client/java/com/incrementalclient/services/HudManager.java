@@ -186,7 +186,7 @@ public class HudManager extends ObservableBase<Observer<HudManager.Event>, HudMa
         } else if (element instanceof ScoreboardReplacementBarElement) {
             return config.getBarScoreboardReplacement();
         }
-        return true; // Non-bar elements always render
+        return element.isEnabled(); // Non-bar elements always render
     }
 
     public int getBarHeight() {
