@@ -147,7 +147,7 @@ public class HudCustomizationScreen extends Screen {
 
             net.minecraft.client.util.math.MatrixStack matrixStack = context.getMatrices();
             matrixStack.push();
-            Vector2f pos = element.getDeltaPosition();
+            Vector2f pos = element.getCurrentPosition();
             matrixStack.translate(pos.x, pos.y, 0);
             matrixStack.scale(element.getScale(), element.getScale(), element.getScale());
             matrixStack.translate(-pos.x, -pos.y, 0);
