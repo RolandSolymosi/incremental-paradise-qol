@@ -111,10 +111,10 @@ public enum Task {
     Salmon(new NormalTask("Salmon", Region.W2_Overworld, List.of("salmon"), null, TaskType.Fishing, DefaultWardrobe.Fishing, Tool.Spear, List.of(Target.W2_Salmon), List.of(Warp.W2_Spawn))),
     Koi(new NormalTask("Koi", Region.W2_Overworld, List.of("koi"), null, TaskType.Fishing, DefaultWardrobe.Fishing, Tool.Spear, List.of(Target.W2_Koi), List.of(Warp.W2_Spawn))),
     Axolotl(new NormalTask("Axolotl", Region.W2_Overworld, List.of("axolotl"), null, TaskType.Fishing, DefaultWardrobe.Fishing, Tool.Spear, List.of(Target.W2_Axolotl), List.of(Warp.W2_Spawn))),
-    MagmaFish(new NormalTask("Magma fish", Region.W2_Infernal, List.of("magmafish"), null, TaskType.Fishing, DefaultWardrobe.Fishing, Tool.Spear, List.of(Target.W2_Magmafish), List.of(Warp.W2_Infernal, Warp.W2_Veil, Warp.W2_Lush, Warp.W2_Spawn))),
+    MagmaFish(new NormalTask("Magmafish", Region.W2_Infernal, List.of("magmafish"), null, TaskType.Fishing, DefaultWardrobe.Fishing, Tool.Spear, List.of(Target.W2_Magmafish), List.of(Warp.W2_Infernal, Warp.W2_Veil, Warp.W2_Lush, Warp.W2_Spawn))),
     MoltenJellyfish(new NormalTask("Molten Jellyfish", Region.W2_Infernal, List.of("molten jellyfish"), null, TaskType.Fishing, DefaultWardrobe.Fishing, Tool.Spear, List.of(Target.W2_MoltenJellyfish), List.of(Warp.W2_Infernal, Warp.W2_Veil, Warp.W2_Lush, Warp.W2_Spawn))),
     Bubbler(new NormalTask("Bubbler", Region.W2_Infernal, List.of("bubbler"), null, TaskType.Fishing, DefaultWardrobe.Fishing, Tool.Spear, List.of(Target.W2_Bubbler), List.of(Warp.W2_Infernal, Warp.W2_Veil, Warp.W2_Lush, Warp.W2_Spawn))),
-    AbyssalCrab(new NormalTask("Abyssal crab", Region.W2_Abyss, List.of("abyssal crabs"), null, TaskType.Fishing, DefaultWardrobe.CombatFishing, Tool.Spear, List.of(Target.W2_AbyssalCrab), List.of(Warp.W2_Abyss, Warp.W2_Infernal, Warp.W2_Veil, Warp.W2_Lush, Warp.W2_Spawn))),
+    AbyssalCrab(new NormalTask("Abyssal Crab", Region.W2_Abyss, List.of("abyssal crabs"), null, TaskType.Fishing, DefaultWardrobe.CombatFishing, Tool.Spear, List.of(Target.W2_AbyssalCrab), List.of(Warp.W2_Abyss, Warp.W2_Infernal, Warp.W2_Veil, Warp.W2_Lush, Warp.W2_Spawn))),
 
     Blackjack(new GamingTask("Play 21", Region.W2_Overworld, List.of("21"), GameKind.Blackjack, List.of(Constraint.Games), List.of(Warp.W2_Spawn))),
     SilverMoney(new NormalTask("Silver from selling items", Region.W2_Overworld, List.of("silver from selling items"), null, TaskType.Mining, DefaultWardrobe.Mining, Tool.Pickaxe, null, List.of(Warp.W2_Infernal, Warp.W2_Veil, Warp.W2_Lush, Warp.W2_Spawn))),
