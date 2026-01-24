@@ -96,7 +96,7 @@ public class CompletedTasksElement extends HudElement<CompletedTasksElement.Conf
         Text displayText = Text.literal("Completed Tasks " + completedTasks + "/" + totalTasks);
         int textWidth = textRenderer.get().getWidth(displayText);
 
-        return new Vector2f(Math.max(150, textWidth), HudConstants.BAR_ELEMENT_HEIGHT);
+        return new Vector2f(Math.max(150, textWidth) * scale, HudConstants.BAR_ELEMENT_HEIGHT * scale);
     }
 
     @Override

@@ -190,7 +190,7 @@ public class HPBarElement extends HudElement<HPBarElement.Configuration> {
             double sizeScale = Math.max(0.4, Math.min(1.0, configuration.hpBarSizeScale));
             int barWidth = Math.max(40, (int) Math.round(BASE_BAR_WIDTH * sizeScale));
             int width = barWidth + 4 + textWidth;
-            return new Vector2f(width, HudConstants.BAR_ELEMENT_HEIGHT);
+            return new Vector2f(width * scale, HudConstants.BAR_ELEMENT_HEIGHT * scale);
         }
     }
 

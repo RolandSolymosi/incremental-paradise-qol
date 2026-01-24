@@ -93,7 +93,7 @@ public class AggroElement extends HudElement<AggroElement.Configuration> {
         Text displayText = Text.literal(displayTextString);
         int textWidth = textRenderer.get().getWidth(displayText);
 
-        return new Vector2f(textWidth, HudConstants.BAR_ELEMENT_HEIGHT);
+        return new Vector2f(textWidth * scale, HudConstants.BAR_ELEMENT_HEIGHT * scale);
     }
 
     @Override
