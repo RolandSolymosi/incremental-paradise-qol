@@ -31,7 +31,7 @@ public enum TaskType {
             Pattern.compile("Collect (?<amount>[0-9.,]+[kmbt]?) (?<type>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)"))),
     Misc("Misc", List.of(
             Pattern.compile("Clean (?<amount>[0-9.,]+[kmbt]?) (?<type>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)"),
-            Pattern.compile("Repair (?<amount>[0-9.,]+[kmbt]?) (?<type>.+) in .+\\(?(?<progress>[0-9.,]+[kmbt]?)"),
+            Pattern.compile("Repair (?<amount>[0-9.,]+[kmbt]?) (?<type>.+) in the Abyss \\(?(?<progress>[0-9.,]+[kmbt]?)"),
             Pattern.compile("Sell (?<amount>[0-9.,]+[kmbt]?) (?<type>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)"),
             Pattern.compile("Gain (?<amount>[0-9.,]+[kmbt]?) (?<type>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)"),
             Pattern.compile("Loot (?<amount>[0-9.,]+[kmbt]?) (?<type>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)"))),
