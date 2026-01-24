@@ -3,6 +3,7 @@ package com.incrementalclient.hud.internals;
 import com.incrementalclient.abstractions.HudElement;
 import com.incrementalclient.common.utils.Vector2f;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
 import net.minecraft.client.gui.widget.ClickableWidget;
 import net.minecraft.text.Text;
@@ -101,7 +102,9 @@ public class HudElementWidget extends ClickableWidget {
             );
             
             // Apply snap points
-            newDelta = applySnapPoints(newDelta);
+            if (!Screen.hasShiftDown()) {
+                newDelta = applySnapPoints(newDelta);
+            }
             
             // Constrain to screen bounds
             newDelta = constrainToScreenBounds(newDelta);
