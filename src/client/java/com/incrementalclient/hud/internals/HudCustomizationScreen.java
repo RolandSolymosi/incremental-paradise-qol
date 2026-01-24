@@ -116,7 +116,7 @@ public class HudCustomizationScreen extends Screen {
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         renderBackground(context, mouseX, mouseY, delta);
 
-        String instructions = "Drag elements to move | Right-click to reset | Toggle ON/OFF to show/hide";
+        String instructions = "Drag elements to move (Shift to disable snapping) | Right-click to reset | Toggle ON/OFF to show/hide";
         var textRenderer = client.textRenderer;
         int textWidth = textRenderer.getWidth(instructions);
         int textX = (width - textWidth) / 2;
