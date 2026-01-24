@@ -104,7 +104,7 @@ public enum Task {
     Garlic(new NormalTask("Garlic", Region.W2_Overworld, List.of("garlic"), null, TaskType.Farming, DefaultWardrobe.Farming, Tool.Hoe, null, List.of(Warp.W2_Garlic, Warp.W2_Spawn))),
     Corn(new NormalTask("Corn", Region.W2_Overworld, List.of("corn"), null, TaskType.Farming, DefaultWardrobe.Farming, Tool.Hoe, null, List.of(Warp.W2_Corn, Warp.W2_Spawn))),
     Shy(new NormalTask("Shy", Region.W2_Veil, List.of("shy"), null, TaskType.Farming, DefaultWardrobe.Farming, Tool.Hoe, null, List.of(Warp.W2_Veil, Warp.W2_Lush, Warp.W2_Spawn))),
-    LavaFruit(new NormalTask("Lava fruit", Region.W2_Infernal, List.of("lavafruit"), null, TaskType.Farming, DefaultWardrobe.Farming, Tool.Hoe, null, List.of(Warp.W2_Infernal, Warp.W2_Veil, Warp.W2_Lush, Warp.W2_Spawn))),
+    LavaFruit(new NormalTask("Lavafruit", Region.W2_Infernal, List.of("lavafruit"), null, TaskType.Farming, DefaultWardrobe.Farming, Tool.Hoe, null, List.of(Warp.W2_Infernal, Warp.W2_Veil, Warp.W2_Lush, Warp.W2_Spawn))),
     Twine(new NormalTask("Twine", Region.W2_Abyss, List.of("twine"), null, TaskType.Farming, DefaultWardrobe.Farming, Tool.Hoe, null, List.of(Warp.W2_Abyss, Warp.W2_Infernal, Warp.W2_Veil, Warp.W2_Lush, Warp.W2_Spawn))),
     AdvancedCrops(new NormalTask("Advanced Crops", Region.W2_Overworld, List.of("advanced crops"), null, TaskType.Farming, DefaultWardrobe.Farming, Tool.Hoe, null, List.of(Warp.W2_Garlic, Warp.W2_Spawn))),
 
