@@ -228,7 +228,7 @@ public class AutoSwapLoadout implements Configurable<AutoSwapLoadout.Configurati
 
     @Override
     public String getJsonSection() {
-        return "warpNext";
+        return "autoSwapLoadout";
     }
 
     @Override
