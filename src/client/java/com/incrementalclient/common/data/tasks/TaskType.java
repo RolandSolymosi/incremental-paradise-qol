@@ -20,7 +20,7 @@ public enum TaskType {
             Pattern.compile("Collect (?<amount>[0-9.,]+[kmbt]?) (?<constraint>Large)?\\s*(?<type>.+) with (?<constraint2>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)"),
             Pattern.compile("Collect (?<amount>[0-9.,]+[kmbt]?) (?<constraint>Large)?\\s*(?<type>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)"))),
     Farming("Farming", List.of(
-            Pattern.compile("Harvest (?<amount>[0-9.,]+[kmbt]?) (?<type>.+) with (?<parameter>[0-9]++ |)(?<constraint>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)"),
+            Pattern.compile("Harvest (?<amount>[0-9.,]+[kmbt]?) (?<type>.+) with (?<parameter>[0-9])\\+ (?<constraint>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)"),
             Pattern.compile("Harvest (?<amount>[0-9.,]+[kmbt]?) (?<type>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)"))),
     Fishing("Fishing", List.of(
             Pattern.compile("Spear [0-9.,]+ (?<type>.+) (?<constraint>in a row without missing) (?<amount>[0-9.,]+[kmbt]?).+\\((?<progress>[0-9.,]+[kmbt]?)"),
