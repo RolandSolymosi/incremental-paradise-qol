@@ -79,8 +79,6 @@ public class CurrencyElement extends HudElement<CurrencyElement.Configuration> {
         super(uiAccessor, hudManager);
         this.gameInfoMonitor = gameInfoMonitor;
         this.worldMonitor = worldMonitor;
-        // Default anchor point (top-left corner)
-        this.anchorPoint = new Vector2f(10, 10);
 
         options = Suppliers.memoize(() -> List.of(
                 Categories.Hud.Currency.createConfig(0,
@@ -308,12 +306,6 @@ public class CurrencyElement extends HudElement<CurrencyElement.Configuration> {
     }
 
     @Override
-    public Vector2f getAnchorPoint() {
-        // Default anchor point (top-left corner)
-        return new Vector2f(10, 10);
-    }
-
-    @Override
     public Vector2f getBoundingBox() {
         if (!isElementEnabled()) {
             return new Vector2f(HudConstants.PLACEHOLDER_WIDTH_MEDIUM, 15);
@@ -360,12 +352,6 @@ public class CurrencyElement extends HudElement<CurrencyElement.Configuration> {
     @Override
     public String getDisplayName() {
         return "Currency Tracker";
-    }
-
-    @Override
-    public Vector2f getCurrentPosition() {
-        // Use anchor point + delta position for regular positioning
-        return anchorPoint.add(deltaPosition);
     }
 
     @Override

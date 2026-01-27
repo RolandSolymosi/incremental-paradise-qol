@@ -15,6 +15,10 @@ import java.util.List;
  * Handles common rendering logic like background, padding, and text positioning.
  */
 public abstract class TextListHudElement<T extends TextListHudElement.ConfigurationBase> extends HudElement<T> {
+
+    protected boolean downDirection = true;
+    protected boolean leftDirection = true;
+
     protected TextListHudElement(MinecraftClientAccessor uiAccessor,
                                  HudManager hudManager) {
         super(uiAccessor, hudManager);
@@ -57,7 +61,7 @@ public abstract class TextListHudElement<T extends TextListHudElement.Configurat
             return;
         }
 
-        Vector2f pos = getCurrentPosition();
+        Vector2f pos = getTopLeftCornerPosition();
         int x = (int) pos.x;
         int y = (int) pos.y;
 
@@ -127,6 +131,26 @@ public abstract class TextListHudElement<T extends TextListHudElement.Configurat
         int height = HudConstants.TEXT_PADDING_Y + (HudConstants.LINE_SPACING * texts.size()) + 2; // +2 for bottom padding
 
         return new Vector2f((maxWidth + HudConstants.BACKGROUND_PADDING) * scale, height * scale);
+    }
+
+    @Override
+    public Vector2f getOffsetPoint() {
+        int x = 0;
+        int y = 0;
+        List<Text> texts = getTextsToRender(false);
+        int maxWidth = texts.stream()
+                .mapToInt(this::getTextWidth)
+                .max()
+                .orElse(0);
+
+        if (!downDirection) {
+            y = !texts.isEmpty() ? -2 - HudConstants.TEXT_PADDING_Y - HudConstants.TEXT_HEIGHT + HudConstants.LINE_SPACING * texts.size() : 0;
+        }
+        if (!leftDirection) {
+            x = !texts.isEmpty() ? maxWidth + HudConstants.BACKGROUND_PADDING : getPlaceholderWidth();
+        }
+
+        return new Vector2f(x, y);
     }
 }
 

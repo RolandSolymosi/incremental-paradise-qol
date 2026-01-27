@@ -8,7 +8,7 @@ import com.incrementalclient.internals.MinecraftClientAccessor;
 public class Utils {
 
     public static void setScreenSideXPos(ClickableWidget widget, HudElement hudElement) {
-        Vector2f pos = hudElement.getCurrentPosition();
+        Vector2f pos = hudElement.getTopLeftCornerPosition();
         Vector2f bounds = hudElement.getBoundingBox();
         // NOTE: This is a weird way to get a singleton, maybe change?
         int screenWidth = new MinecraftClientAccessor().getClient().getWindow().getScaledWidth();

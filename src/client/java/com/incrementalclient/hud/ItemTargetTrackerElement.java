@@ -38,7 +38,7 @@ public class ItemTargetTrackerElement extends TextListHudElement<ItemTargetTrack
     ) {
         super(uiAccessor, hudManager);
         this.itemTargetMonitor = itemTargetMonitor;
-        this.anchorPoint = new Vector2f(10, 10);
+        this.leftDirection = false;
 
         options = Suppliers.memoize(() -> List.of(
                 Categories.Hud.ItemTarget.createConfig(0,
@@ -93,11 +93,6 @@ public class ItemTargetTrackerElement extends TextListHudElement<ItemTargetTrack
     @Override
     public String getDisplayName() {
         return "Item Tracker";
-    }
-
-    @Override
-    public Vector2f getAnchorPoint() {
-        return anchorPoint;
     }
 
     @Override

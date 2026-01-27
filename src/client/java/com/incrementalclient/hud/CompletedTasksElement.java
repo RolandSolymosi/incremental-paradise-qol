@@ -74,11 +74,6 @@ public class CompletedTasksElement extends HudElement<CompletedTasksElement.Conf
     }
 
     @Override
-    public Vector2f getAnchorPoint() {
-        return new Vector2f(10, 10);
-    }
-
-    @Override
     public Vector2f getBoundingBox() {
         var textRenderer = mcAccessor.getTextRenderer();
         if (textRenderer.isEmpty()) {

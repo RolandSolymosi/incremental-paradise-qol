@@ -100,17 +100,6 @@ public class BottomBarElement extends BarElement {
     }
     
     @Override
-    public Vector2f getAnchorPoint() {
-        // Position at exact bottom of screen (always, regardless of delta position)
-        var window = mcAccessor.getWindow();
-        if (window.isPresent()) {
-            int screenHeight = window.get().getScaledHeight();
-            return new Vector2f(0, screenHeight - HudConstants.BAR_ELEMENT_HEIGHT);
-        }
-        return new Vector2f(0, 0);
-    }
-    
-    @Override
     public String getDisplayName() {
         return "Bottom Bar";
     }

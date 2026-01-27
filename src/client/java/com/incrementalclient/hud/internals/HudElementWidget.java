@@ -30,7 +30,7 @@ public class HudElementWidget extends ClickableWidget {
     }
     
     private void updateBounds() {
-        Vector2f pos = element.getCurrentPosition();
+        Vector2f pos = element.getTopLeftCornerPosition();
         Vector2f bounds = element.getBoundingBox();
         
         this.setX((int) pos.x);
@@ -79,11 +79,10 @@ public class HudElementWidget extends ClickableWidget {
                 return true;
             }
             if (button == 0) {
-                Vector2f anchor = element.getAnchorPoint();
-                Vector2f currentDelta = element.getDeltaPosition();
+                Vector2f currentDelta = element.getElementPosition();
                 dragStartOffset = new Vector2f(
-                    (float) (mouseX - anchor.x),
-                    (float) (mouseY - anchor.y)
+                    (float) (mouseX),
+                    (float) (mouseY)
                 ).subtract(currentDelta);
                 isDragging = true;
                 return true;
@@ -95,10 +94,9 @@ public class HudElementWidget extends ClickableWidget {
     @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double deltaX, double deltaY) {
         if (isDragging && element.isDraggable()) {
-            Vector2f anchor = element.getAnchorPoint();
             Vector2f newDelta = new Vector2f(
-                (float) (mouseX - anchor.x - dragStartOffset.x),
-                (float) (mouseY - anchor.y - dragStartOffset.y)
+                (float) (mouseX - dragStartOffset.x),
+                (float) (mouseY - dragStartOffset.y)
             );
             
             // Apply snap points
@@ -109,7 +107,7 @@ public class HudElementWidget extends ClickableWidget {
             // Constrain to screen bounds
             newDelta = constrainToScreenBounds(newDelta);
             
-            element.setDeltaPosition(newDelta);
+            element.setElementPosition(newDelta);
             updateBounds();
             return true;
         }
@@ -120,7 +118,7 @@ public class HudElementWidget extends ClickableWidget {
      * Applies snap points to the delta position.
      */
     private Vector2f applySnapPoints(Vector2f delta) {
-        Vector2f anchor = element.getAnchorPoint();
+        Vector2f anchor = element.getTopLeftCornerPosition();
         float currentX = anchor.x + delta.x;
         float currentY = anchor.y + delta.y;
         
@@ -151,23 +149,23 @@ public class HudElementWidget extends ClickableWidget {
      * Constrains the element position to stay within screen bounds.
      */
     private Vector2f constrainToScreenBounds(Vector2f delta) {
-        Vector2f anchor = element.getAnchorPoint();
+        Vector2f anchor = element.getOffsetPoint();
         Vector2f bounds = element.getBoundingBox();
         
-        float newX = anchor.x + delta.x;
-        float newY = anchor.y + delta.y;
+        float newX = delta.x;
+        float newY = delta.y;
         
         // Constrain X: element should not go outside screen (0 to screenWidth - bounds.x)
-        float minX = 0;
-        float maxX = screenWidth - bounds.x;
+        float minX = anchor.x;
+        float maxX = screenWidth - bounds.x + anchor.x;
         newX = Math.max(minX, Math.min(maxX, newX));
         
         // Constrain Y: element should not go outside screen (0 to screenHeight - bounds.y)
-        float minY = 0;
-        float maxY = screenHeight - bounds.y;
+        float minY = anchor.y;
+        float maxY = screenHeight - bounds.y + anchor.y;
         newY = Math.max(minY, Math.min(maxY, newY));
         
-        return new Vector2f(newX - anchor.x, newY - anchor.y);
+        return new Vector2f(newX, newY);
     }
     
     @Override

@@ -297,7 +297,7 @@ public class HudManager extends ObservableBase<Observer<HudManager.Event>, HudMa
             if (element.isScalable()) {
                 MatrixStack matrixStack = event.drawContext.getMatrices();
                 matrixStack.push();
-                Vector2f pos = element.getCurrentPosition();
+                Vector2f pos = element.getTopLeftCornerPosition();
                 matrixStack.translate(pos.x, pos.y, 0);
                 matrixStack.scale(element.getScale(), element.getScale(), element.getScale());
                 matrixStack.translate(-pos.x, -pos.y, 0);

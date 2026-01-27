@@ -55,8 +55,6 @@ public class ProgressLayerElement extends HudElement<ProgressLayerElement.Config
     ) {
         super(uiAccessor, hudManager);
         this.gameInfoMonitor = gameInfoMonitor;
-        // Default anchor point (top-left corner)
-        this.anchorPoint = new Vector2f(10, 10);
 
         options = Suppliers.memoize(() -> List.of(
                 Configurable.Categories.Hud.General.createConfig(1000,
@@ -286,12 +284,6 @@ public class ProgressLayerElement extends HudElement<ProgressLayerElement.Config
     }
 
     @Override
-    public Vector2f getAnchorPoint() {
-        // Default anchor point (top-left corner)
-        return new Vector2f(10, 10);
-    }
-
-    @Override
     public Vector2f getBoundingBox() {
         if (!isElementEnabled()) {
             return new Vector2f(HudConstants.PLACEHOLDER_WIDTH_MEDIUM, 15);
@@ -366,12 +358,6 @@ public class ProgressLayerElement extends HudElement<ProgressLayerElement.Config
     @Override
     public String getDisplayName() {
         return "Progress Layer Tracker";
-    }
-
-    @Override
-    public Vector2f getCurrentPosition() {
-        // Use anchor point + delta position for regular positioning
-        return anchorPoint.add(deltaPosition);
     }
 
     @Override

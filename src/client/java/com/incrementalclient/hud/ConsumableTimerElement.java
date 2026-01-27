@@ -35,7 +35,8 @@ public class ConsumableTimerElement extends TextListHudElement<ConsumableTimerEl
     ) {
         super(uiAccessor, hudManager);
         this.activeConsumableMonitor = activeConsumableMonitor;
-        this.anchorPoint = new Vector2f(10, 10);
+        this.downDirection = false;
+        this.leftDirection = false;
 
         options = Suppliers.memoize(() -> List.of(
                 Categories.Hud.Consumable.createConfig(0,
@@ -102,10 +103,6 @@ public class ConsumableTimerElement extends TextListHudElement<ConsumableTimerEl
         return "Consumable Timer";
     }
 
-    @Override
-    public Vector2f getAnchorPoint() {
-        return anchorPoint;
-    }
 
     @Override
     public String getJsonSection() {

@@ -44,7 +44,6 @@ public class TaskTrackerElement extends TextListHudElement<TaskTrackerElement.Co
         super(mcAccessor, hudManager);
         this.worldMonitor = worldMonitor;
         this.taskMonitor = taskMonitor;
-        this.anchorPoint = new Vector2f(10, 10);
 
         options = Suppliers.memoize(() -> List.of(
                 Categories.Tasking.Hud.createConfig(0,
@@ -150,11 +149,6 @@ public class TaskTrackerElement extends TextListHudElement<TaskTrackerElement.Co
     @Override
     protected int getPlaceholderWidth() {
         return HudConstants.PLACEHOLDER_WIDTH_SMALL;
-    }
-
-    @Override
-    public Vector2f getAnchorPoint() {
-        return anchorPoint;
     }
 
     public Text taskRender(TaskMonitor.TaskState taskState) {

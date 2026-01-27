@@ -19,7 +19,7 @@ public class HudElementToggleWidget extends ClickableWidget {
     
     @Override
     public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
-        Vector2f pos = element.getCurrentPosition();
+        Vector2f pos = element.getTopLeftCornerPosition();
         Vector2f bounds = element.getBoundingBox();
 
         Utils.setScreenSideXPos(this, element);
@@ -43,7 +43,7 @@ public class HudElementToggleWidget extends ClickableWidget {
     
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        Vector2f pos = element.getCurrentPosition();
+        Vector2f pos = element.getTopLeftCornerPosition();
         Vector2f bounds = element.getBoundingBox();
         Utils.setScreenSideXPos(this, element);
         this.setY((int) pos.y);

@@ -29,6 +29,7 @@ public class ScoreboardReplacementBarElement extends BarElement {
                                            GameInfoMonitor gameInfoMonitor) {
         super(mcAccessor, hudManager);
         this.gameInfoMonitor = gameInfoMonitor;
+        this.draggable = false;
     }
 
     @Override
@@ -130,12 +131,6 @@ public class ScoreboardReplacementBarElement extends BarElement {
         context.fill(0, y, screenWidth, y + (int) placeholderSize.y, bgColor);
 
         mcAccessor.getTextRenderer().ifPresent(renderer -> context.drawText(renderer, Text.literal("Top Bar"), x + 10, y + 6, 0xFFFFFFFF, false));
-    }
-
-    @Override
-    public Vector2f getAnchorPoint() {
-        // Position at exact top of screen (always, regardless of delta position)
-        return new Vector2f(0, 0);
     }
 
     @Override

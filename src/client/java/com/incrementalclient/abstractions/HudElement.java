@@ -14,8 +14,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class HudElement<T extends HudElement.ConfigurationBase> implements Configurable<T> {
-    protected Vector2f anchorPoint = new Vector2f(0, 0);
-    protected Vector2f deltaPosition = new Vector2f(0, 0);
+    protected Vector2f elementPosition = new Vector2f(0, 0);
     protected float scale = 1.0f;
     protected boolean enabled = true;
     protected boolean scalable = true;
@@ -38,15 +37,20 @@ public abstract class HudElement<T extends HudElement.ConfigurationBase> impleme
             this.subElementDeltas.add(new Vector2f(0, 0));
         }
     }
-    
+
+    public abstract void render(RenderSettings renderSettings);
+
     public Vector2f getCurrentPosition() {
-        Vector2f baseAnchor = getAnchorPoint();
-        return baseAnchor.add(deltaPosition);
+        return elementPosition;
     }
     
-    public abstract void render(RenderSettings renderSettings);
-    
-    public abstract Vector2f getAnchorPoint();
+    public Vector2f getOffsetPoint(){
+        return new Vector2f(0, 0);
+    }
+
+    public Vector2f getTopLeftCornerPosition() {
+        return getCurrentPosition().subtract(getOffsetPoint());
+    }
     
     public abstract Vector2f getBoundingBox();
 
@@ -55,18 +59,14 @@ public abstract class HudElement<T extends HudElement.ConfigurationBase> impleme
     // Optional: called when customization screen opens
     public void onEditModeEnter() {}
     
-    public Vector2f getAnchorPointPosition() {
-        return anchorPoint;
+    public Vector2f getElementPosition() {
+        return elementPosition;
     }
     
-    public Vector2f getDeltaPosition() {
-        return deltaPosition;
-    }
-    
-    public void setDeltaPosition(Vector2f deltaPosition) {
-        this.deltaPosition = deltaPosition;
-        this.getConfiguration().deltaX = deltaPosition.x;
-        this.getConfiguration().deltaY = deltaPosition.y;
+    public void setElementPosition(Vector2f elementPosition) {
+        this.elementPosition = elementPosition;
+        this.getConfiguration().deltaX = elementPosition.x;
+        this.getConfiguration().deltaY = elementPosition.y;
     }
     
     public float getScale() {
@@ -136,7 +136,7 @@ public abstract class HudElement<T extends HudElement.ConfigurationBase> impleme
     }
     
     public void resetDeltaPositions() {
-        this.deltaPosition = new Vector2f(0, 0);
+        this.elementPosition = new Vector2f(0, 0);
         subElementDeltas.replaceAll(ignored -> new Vector2f(0, 0));
     }
     
@@ -178,7 +178,7 @@ public abstract class HudElement<T extends HudElement.ConfigurationBase> impleme
 
     @Override
     public void optionChanged(){
-        deltaPosition = new Vector2f(getConfiguration().deltaX, getConfiguration().deltaY);
+        elementPosition = new Vector2f(getConfiguration().deltaX, getConfiguration().deltaY);
         scale = getConfiguration().scale;
         enabled = getConfiguration().enabled;
     }

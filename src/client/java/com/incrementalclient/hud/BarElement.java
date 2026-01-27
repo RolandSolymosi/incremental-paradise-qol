@@ -21,12 +21,6 @@ public abstract class BarElement extends HudElement<BarElement.Configuration> {
     }
     
     @Override
-    public Vector2f getCurrentPosition() {
-        // Override to ignore delta position for bars (always at anchor)
-        return getAnchorPoint();
-    }
-    
-    @Override
     public Configuration getConfiguration() {
         return configuration;
     }

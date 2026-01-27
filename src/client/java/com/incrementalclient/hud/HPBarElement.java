@@ -160,20 +160,20 @@ public class HPBarElement extends HudElement<HPBarElement.Configuration> {
         context.drawText(textRenderer, Text.literal("HP Bar"), x, textY, 0xFFFFFFFF, true);
     }
 
-    @Override
-    public Vector2f getAnchorPoint() {
-        // Position within bottom bar (left side, above hotbar)
-        // Bottom bar is at screenHeight - 22, HP bar should be just above it
-        var window = mcAccessor.getWindow();
-        if (window.isPresent()) {
-            int screenHeight = window.get().getScaledHeight();
-            int bottomBarY = screenHeight - HudConstants.BAR_ELEMENT_HEIGHT; // Bottom bar height
-            // Position HP bar above the bottom bar with some spacing
-            // Use constant BAR_ELEMENT_HEIGHT instead of calling getBoundingBox().y
-            return new Vector2f(10, bottomBarY - HudConstants.BAR_ELEMENT_HEIGHT - 4);
-        }
-        return new Vector2f(10, 10);
-    }
+//    @Override
+//    public Vector2f getAnchorPoint() {
+//        // Position within bottom bar (left side, above hotbar)
+//        // Bottom bar is at screenHeight - 22, HP bar should be just above it
+//        var window = mcAccessor.getWindow();
+//        if (window.isPresent()) {
+//            int screenHeight = window.get().getScaledHeight();
+//            int bottomBarY = screenHeight - HudConstants.BAR_ELEMENT_HEIGHT; // Bottom bar height
+//            // Position HP bar above the bottom bar with some spacing
+//            // Use constant BAR_ELEMENT_HEIGHT instead of calling getBoundingBox().y
+//            return new Vector2f(10, bottomBarY - HudConstants.BAR_ELEMENT_HEIGHT - 4);
+//        }
+//        return new Vector2f(10, 10);
+//    }
 
     @Override
     public Vector2f getBoundingBox() {

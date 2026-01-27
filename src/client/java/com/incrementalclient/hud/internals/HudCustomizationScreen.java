@@ -3,6 +3,7 @@ package com.incrementalclient.hud.internals;
 import com.incrementalclient.abstractions.HudElement;
 import com.incrementalclient.hud.BottomBarElement;
 import com.incrementalclient.hud.TopBarElement;
+import com.incrementalclient.hud.ScoreboardReplacementBar.ScoreboardReplacementBarElement;
 import com.incrementalclient.internals.MinecraftClientAccessor;
 import com.incrementalclient.services.ConfigHandler;
 import com.incrementalclient.services.HudManager;
@@ -33,8 +34,6 @@ public class HudCustomizationScreen extends Screen {
 
     @Override
     protected void init() {
-        HudManager.Configuration.ActiveBarMode activeBarMode = hudManager.getConfiguration().getActiveBarMode();
-        
         for (HudElement<?> element : hudElements) {
             element.onEditModeEnter();
         }
@@ -45,7 +44,7 @@ public class HudCustomizationScreen extends Screen {
         List<HudElement<?>> otherElementsToAdd = new ArrayList<>();
         
         for (HudElement<?> element : hudElements) {
-            if (element instanceof BottomBarElement || element instanceof TopBarElement) {
+            if (element instanceof BottomBarElement || element instanceof TopBarElement || element instanceof ScoreboardReplacementBarElement) {
                 barsToAdd.add(element);
             } else {
                 otherElementsToAdd.add(element);
@@ -98,7 +97,7 @@ public class HudCustomizationScreen extends Screen {
         snapPointsY.add(height);
 
         for (HudElement<?> element : hudElements) {
-            if (element instanceof BottomBarElement || element instanceof TopBarElement) {
+            if (element instanceof BottomBarElement || element instanceof TopBarElement || element instanceof ScoreboardReplacementBarElement) {
                 continue;
             }
             
@@ -127,7 +126,7 @@ public class HudCustomizationScreen extends Screen {
         List<HudElement<?>> otherElements = new ArrayList<>();
         for (var element : hudElements) {
             if (element instanceof BottomBarElement || element instanceof TopBarElement) {
-                if (HudManager.shouldRenderBar(element, hudManager.getConfiguration())) {
+                if (hudManager.getConfiguration().getBarScoreboardReplacement()) {
                     bars.add(element);
                 }
             } else {
@@ -147,7 +146,7 @@ public class HudCustomizationScreen extends Screen {
 
             net.minecraft.client.util.math.MatrixStack matrixStack = context.getMatrices();
             matrixStack.push();
-            Vector2f pos = element.getCurrentPosition();
+            Vector2f pos = element.getTopLeftCornerPosition();
             matrixStack.translate(pos.x, pos.y, 0);
             matrixStack.scale(element.getScale(), element.getScale(), element.getScale());
             matrixStack.translate(-pos.x, -pos.y, 0);

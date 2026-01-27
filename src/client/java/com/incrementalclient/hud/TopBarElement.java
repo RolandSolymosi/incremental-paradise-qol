@@ -53,12 +53,6 @@ public class TopBarElement extends BarElement {
     }
     
     @Override
-    public Vector2f getAnchorPoint() {
-        // Position at exact top of screen (always, regardless of delta position)
-        return new Vector2f(0, 0);
-    }
-    
-    @Override
     public String getDisplayName() {
         return "Top Bar";
     }
