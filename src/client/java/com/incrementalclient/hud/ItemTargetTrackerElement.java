@@ -2,6 +2,7 @@ package com.incrementalclient.hud;
 
 import com.google.common.base.Suppliers;
 import com.incrementalclient.abstractions.TextListHudElement;
+import com.incrementalclient.common.utils.NumberParser;
 import com.incrementalclient.common.utils.TextUtils;
 import com.incrementalclient.common.utils.Vector2f;
 import com.incrementalclient.internals.MinecraftClientAccessor;
@@ -70,7 +71,7 @@ public class ItemTargetTrackerElement extends TextListHudElement<ItemTargetTrack
         return Text.literal("")
                 .append(item.DisplayText())
                 .append(": ")
-                .append(TextUtils.textColor(item.current() + "/"+item.goal(), 0x00FFFF));
+                .append(TextUtils.textColor(NumberParser.formatSuffixedNumber(item.current()) + "/" + NumberParser.formatSuffixedNumber(item.goal()), 0x00FFFF));
     }
 
     @Override
