@@ -51,7 +51,12 @@ public class TopBarElement extends BarElement {
 
         mcAccessor.getTextRenderer().ifPresent(renderer -> context.drawText(renderer, Text.literal("Top Bar"), x + 10, y + 6, 0xFFFFFFFF, false));
     }
-    
+
+    @Override
+    public Vector2f getDefaultPosition() {
+        return new Vector2f(0, 0);
+    }
+
     @Override
     public String getDisplayName() {
         return "Top Bar";

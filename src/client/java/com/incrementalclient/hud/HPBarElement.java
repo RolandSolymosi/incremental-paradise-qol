@@ -215,6 +215,11 @@ public class HPBarElement extends HudElement<HPBarElement.Configuration> {
     }
 
     @Override
+    public Vector2f getDefaultPosition() {
+        return new Vector2f(0, 0);
+    }
+
+    @Override
     public String getJsonSection() {
         return "hpBarHud";
     }

@@ -95,6 +95,11 @@ public class CompletedTasksElement extends HudElement<CompletedTasksElement.Conf
     }
 
     @Override
+    public Vector2f getDefaultPosition() {
+        return new Vector2f(0, 0);
+    }
+
+    @Override
     public String getDisplayName() {
         return "Completed Tasks";
     }

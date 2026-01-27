@@ -72,7 +72,7 @@ public class HudCustomizationScreen extends Screen {
             Text.literal("Reset All"),
             button -> {
                 for (HudElement<?> element : hudElements) {
-                    element.resetDeltaPositions();
+                    element.resetToDefaultPosition();
                     element.setScale(1.0f);
                 }
             }

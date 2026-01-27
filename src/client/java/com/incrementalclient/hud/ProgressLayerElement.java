@@ -356,6 +356,11 @@ public class ProgressLayerElement extends HudElement<ProgressLayerElement.Config
     }
 
     @Override
+    public Vector2f getDefaultPosition() {
+        return new Vector2f(0, 0);
+    }
+
+    @Override
     public String getDisplayName() {
         return "Progress Layer Tracker";
     }

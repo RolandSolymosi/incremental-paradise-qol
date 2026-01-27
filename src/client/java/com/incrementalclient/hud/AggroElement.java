@@ -92,6 +92,11 @@ public class AggroElement extends HudElement<AggroElement.Configuration> {
     }
 
     @Override
+    public Vector2f getDefaultPosition() {
+        return new Vector2f(0, 0);
+    }
+
+    @Override
     public String getDisplayName() {
         return "Aggro";
     }

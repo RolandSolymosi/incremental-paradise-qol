@@ -350,6 +350,11 @@ public class CurrencyElement extends HudElement<CurrencyElement.Configuration> {
     }
 
     @Override
+    public Vector2f getDefaultPosition() {
+        return new Vector2f(0, 0);
+    }
+
+    @Override
     public String getDisplayName() {
         return "Currency Tracker";
     }

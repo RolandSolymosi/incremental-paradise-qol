@@ -245,6 +245,13 @@ public class TaskTrackerElement extends TextListHudElement<TaskTrackerElement.Co
     }
 
     @Override
+    public Vector2f getDefaultPosition() {
+        var width = mcAccessor.getWindow().get().getScaledWidth();
+        var height = mcAccessor.getWindow().get().getScaledHeight();
+        return new Vector2f(8, hudManager.getBarHeight() + 8);
+    }
+
+    @Override
     public String getJsonSection() {
         return "taskTrackerHud";
     }

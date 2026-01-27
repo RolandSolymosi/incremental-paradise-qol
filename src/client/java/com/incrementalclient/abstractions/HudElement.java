@@ -68,7 +68,13 @@ public abstract class HudElement<T extends HudElement.ConfigurationBase> impleme
         this.getConfiguration().deltaX = elementPosition.x;
         this.getConfiguration().deltaY = elementPosition.y;
     }
-    
+
+    public abstract Vector2f getDefaultPosition();
+
+    public void resetToDefaultPosition() {
+        this.elementPosition = getDefaultPosition();
+    }
+
     public float getScale() {
         return scale;
     }
@@ -243,7 +249,7 @@ public abstract class HudElement<T extends HudElement.ConfigurationBase> impleme
         @SerialEntry
         public float deltaY = 0;
         @SerialEntry
-        public float scale = 0;
+        public float scale = 1;
         @SerialEntry
         public boolean enabled = true;
     }

@@ -134,6 +134,11 @@ public class ScoreboardReplacementBarElement extends BarElement {
     }
 
     @Override
+    public Vector2f getDefaultPosition() {
+        return new Vector2f(0, 0);
+    }
+
+    @Override
     public String getDisplayName() {
         return "Top Bar";
     }

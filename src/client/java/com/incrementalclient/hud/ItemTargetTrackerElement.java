@@ -1,6 +1,7 @@
 package com.incrementalclient.hud;
 
 import com.google.common.base.Suppliers;
+import com.incrementalclient.abstractions.HudElement;
 import com.incrementalclient.abstractions.TextListHudElement;
 import com.incrementalclient.common.utils.NumberParser;
 import com.incrementalclient.common.utils.TextUtils;
@@ -46,7 +47,7 @@ public class ItemTargetTrackerElement extends TextListHudElement<ItemTargetTrack
                         Option.<Boolean>createBuilder()
                                 .name(Text.of("Toggle Item Target HUD on and off"))
                                 .description(OptionDescription.of(Text.of("Turn on and off the item target tracker HUD.")))
-                                .binding( configuration.isHudEnabled, () -> configuration.isHudEnabled, newVal -> configuration.isHudEnabled = newVal)
+                                .binding(configuration.isHudEnabled, () -> configuration.isHudEnabled, newVal -> configuration.isHudEnabled = newVal)
                                 .controller(BooleanControllerBuilder::create)
                                 .build()),
                 Categories.Hud.ItemTarget.createConfig(1,
@@ -89,6 +90,13 @@ public class ItemTargetTrackerElement extends TextListHudElement<ItemTargetTrack
     @Override
     public boolean isElementEnabled() {
         return getConfiguration().isHudEnabled;
+    }
+
+    @Override
+    public Vector2f getDefaultPosition() {
+        var width = mcAccessor.getWindow().get().getScaledWidth();
+        var height = mcAccessor.getWindow().get().getScaledHeight();
+        return new Vector2f(width - 8, hudManager.getBarHeight() + 8);
     }
 
     @Override

@@ -183,7 +183,8 @@ public class HudElementWidget extends ClickableWidget {
     }
     
     public void reset() {
-        element.resetDeltaPositions();
+        element.resetToDefaultPosition();
+        element.setScale(1);
         updateBounds();
     }
 }
