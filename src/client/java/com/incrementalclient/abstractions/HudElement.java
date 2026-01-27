@@ -73,6 +73,8 @@ public abstract class HudElement<T extends HudElement.ConfigurationBase> impleme
 
     public void resetToDefaultPosition() {
         this.elementPosition = getDefaultPosition();
+        this.getConfiguration().deltaX = elementPosition.x;
+        this.getConfiguration().deltaY = elementPosition.y;
     }
 
     public float getScale() {
