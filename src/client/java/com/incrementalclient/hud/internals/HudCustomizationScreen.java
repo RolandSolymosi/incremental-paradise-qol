@@ -91,10 +91,10 @@ public class HudCustomizationScreen extends Screen {
         snapPointsX.clear();
         snapPointsY.clear();
 
-        snapPointsX.add(0);
-        snapPointsX.add(width);
-        snapPointsY.add(0);
-        snapPointsY.add(height);
+        snapPointsX.add(8);
+        snapPointsX.add(width-8);
+        snapPointsY.add(hudManager.getBarHeight()+8);
+        snapPointsY.add(height-8);
 
         for (HudElement<?> element : hudElements) {
             if (element instanceof BottomBarElement || element instanceof TopBarElement || element instanceof ScoreboardReplacementBarElement) {

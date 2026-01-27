@@ -118,9 +118,8 @@ public class HudElementWidget extends ClickableWidget {
      * Applies snap points to the delta position.
      */
     private Vector2f applySnapPoints(Vector2f delta) {
-        Vector2f anchor = element.getTopLeftCornerPosition();
-        float currentX = anchor.x + delta.x;
-        float currentY = anchor.y + delta.y;
+        float currentX = delta.x;
+        float currentY = delta.y;
         
         float snappedX = currentX;
         float snappedY = currentY;
@@ -141,8 +140,9 @@ public class HudElementWidget extends ClickableWidget {
                 break;
             }
         }
-        
-        return new Vector2f(snappedX - anchor.x, snappedY - anchor.y);
+
+
+        return new Vector2f(snappedX, snappedY);
     }
     
     /**
