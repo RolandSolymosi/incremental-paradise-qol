@@ -12,6 +12,7 @@ import com.incrementalclient.hud.internals.HudCustomizationScreen;
 import com.incrementalclient.interfaces.Configurable;
 import com.incrementalclient.interfaces.Observer;
 import com.incrementalclient.internals.MinecraftClientAccessor;
+import com.incrementalclient.internals.events.ClientPlayConnectionObservable;
 import com.incrementalclient.internals.events.HudRenderCallbackObservable;
 import dev.isxander.yacl3.api.ButtonOption;
 import dev.isxander.yacl3.api.NameableEnum;
@@ -146,11 +147,11 @@ public class HudManager extends ObservableBase<Observer<HudManager.Event>, HudMa
         return (o1, o2) -> {
             if (o1 == o2) return 0;
             // Check if elements are bars (BottomBarElement or TopBarElement)
-            boolean o1IsBar = o1 instanceof HudRender(HudElement<?> element1, HudManager hudManager) && 
-                              (element1 instanceof BottomBarElement || element1 instanceof TopBarElement);
-            boolean o2IsBar = o2 instanceof HudRender(HudElement<?> element2, HudManager hudManager) && 
-                              (element2 instanceof BottomBarElement || element2 instanceof TopBarElement);
-            
+            boolean o1IsBar = o1 instanceof HudRender(HudElement<?> element1, HudManager hudManager) &&
+                    (element1 instanceof BottomBarElement || element1 instanceof TopBarElement);
+            boolean o2IsBar = o2 instanceof HudRender(HudElement<?> element2, HudManager hudManager) &&
+                    (element2 instanceof BottomBarElement || element2 instanceof TopBarElement);
+
             // Bars render first (return -1), other elements render after (return 0)
             if (o1IsBar && !o2IsBar) return -1;
             if (!o1IsBar && o2IsBar) return 1;
@@ -289,11 +290,17 @@ public class HudManager extends ObservableBase<Observer<HudManager.Event>, HudMa
 
         @Override
         public void onEvent(Event event) {
+            // TODO: Figure out if there is a better way to do this
+            if (!element.getConfiguration().initialised) {
+                element.resetToDefaultPosition();
+                element.getConfiguration().initialised = true;
+            }
+
             // Check if element is a bar and should be rendered based on activeBarMode
             if (!shouldRenderBar(element, hudManager.getConfiguration())) {
                 return; // Skip rendering if bar is not active
             }
-            
+
             if (element.isScalable()) {
                 MatrixStack matrixStack = event.drawContext.getMatrices();
                 matrixStack.push();

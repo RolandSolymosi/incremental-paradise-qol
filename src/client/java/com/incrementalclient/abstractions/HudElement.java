@@ -65,16 +65,16 @@ public abstract class HudElement<T extends HudElement.ConfigurationBase> impleme
     
     public void setElementPosition(Vector2f elementPosition) {
         this.elementPosition = elementPosition;
-        this.getConfiguration().deltaX = elementPosition.x;
-        this.getConfiguration().deltaY = elementPosition.y;
+        this.getConfiguration().xPosition = elementPosition.x;
+        this.getConfiguration().yPosition = elementPosition.y;
     }
 
     public abstract Vector2f getDefaultPosition();
 
     public void resetToDefaultPosition() {
         this.elementPosition = getDefaultPosition();
-        this.getConfiguration().deltaX = elementPosition.x;
-        this.getConfiguration().deltaY = elementPosition.y;
+        this.getConfiguration().xPosition = elementPosition.x;
+        this.getConfiguration().yPosition = elementPosition.y;
     }
 
     public float getScale() {
@@ -186,7 +186,7 @@ public abstract class HudElement<T extends HudElement.ConfigurationBase> impleme
 
     @Override
     public void optionChanged(){
-        elementPosition = new Vector2f(getConfiguration().deltaX, getConfiguration().deltaY);
+        elementPosition = new Vector2f(getConfiguration().xPosition, getConfiguration().yPosition);
         scale = getConfiguration().scale;
         enabled = getConfiguration().enabled;
     }
@@ -247,13 +247,15 @@ public abstract class HudElement<T extends HudElement.ConfigurationBase> impleme
 
     public static abstract class ConfigurationBase {
         @SerialEntry
-        public float deltaX = 0;
+        public float xPosition = 0;
         @SerialEntry
-        public float deltaY = 0;
+        public float yPosition = 0;
         @SerialEntry
         public float scale = 1;
         @SerialEntry
         public boolean enabled = true;
+        @SerialEntry
+        public boolean initialised = false;
     }
 }
 

@@ -137,10 +137,6 @@ public class ConfigMigrator {
     public static TaskTrackerElement.Configuration convertTaskTrackerElement(OldConfig oldConfig) {
         TaskTrackerElement.Configuration conf = new TaskTrackerElement.Configuration();
         conf.enabled = oldConfig.isHudEnabled;
-        // NOTE: Consider removing these 3 if the hud is redesigned
-        conf.deltaX = oldConfig.hudPosX;
-        conf.deltaY = oldConfig.hudPosY;
-        conf.scale = (float) oldConfig.hudScale;
         conf.taskHudBackgroundOpacity = oldConfig.hudBackgroundOpacity;
         // TODO: Add the hide on boss fight when feature is readded
         conf.textColor = oldConfig.textColor.getRGB() & 0xFFFFFF;
@@ -157,10 +153,6 @@ public class ConfigMigrator {
     public static ConsumableTimerElement.Configuration convertConsumableTimerElement(OldConfig oldConfig) {
         ConsumableTimerElement.Configuration conf = new ConsumableTimerElement.Configuration();
         conf.isConsumableHudEnabled = oldConfig.isConsumableHudEnabled;
-        // NOTE: Consider removing these 3 if the hud is redesigned
-        conf.deltaX = oldConfig.consumableHudPosX;
-        conf.deltaY = oldConfig.consumableHudPosY;
-        conf.scale = (float) oldConfig.consumableHudScale;
         conf.consumableHudBackgroundOpacity = oldConfig.consumableHudBackgroundOpacity;
         // TODO: Add the hide on boss fight when feature is readded
         conf.consumableTimerColor = oldConfig.consumableTimerColor.getRGB() & 0xFFFFFF;
