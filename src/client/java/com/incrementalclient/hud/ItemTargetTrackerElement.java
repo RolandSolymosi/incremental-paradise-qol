@@ -128,7 +128,7 @@ public class ItemTargetTrackerElement extends TextListHudElement<ItemTargetTrack
 
     public static class Configuration extends ConfigurationBase {
         @SerialEntry
-        public boolean isHudEnabled = false;
+        public boolean isHudEnabled = true;
         @SerialEntry
         public boolean filterMessages = true;
         @SerialEntry
