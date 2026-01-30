@@ -5,6 +5,7 @@ import com.incrementalclient.hud.BarElement;
 import com.incrementalclient.internals.MinecraftClientAccessor;
 import com.incrementalclient.services.GameInfoMonitor;
 import com.incrementalclient.services.HudManager;
+import dev.isxander.yacl3.config.v2.api.SerialEntry;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
@@ -21,6 +22,8 @@ public class ScoreboardReplacementBarElement extends BarElement {
     public static final int PADDING = 4;
     // This can be reduced later as techincally the bar is made up of top and bottom padding and text but padding between lines can be less than bottom padding
     public static final int LINE_SPACING = HudConstants.BAR_ELEMENT_HEIGHT;
+
+    private final ScoreboardReplacementBarElement.Configuration configuration = new Configuration();
 
     public int lineCount = 0;
 
@@ -67,7 +70,8 @@ public class ScoreboardReplacementBarElement extends BarElement {
         // Render the area in the middle of the bar
         Text areaText = texts.get("area").get(0);
         int areaWidth = textRenderer.get().getWidth(areaText);
-        renderBarText(context, textRenderer.get(), areaText, (screenWidth - areaWidth) / 2, 0);
+        context.drawText(textRenderer.get(), areaText, (screenWidth - areaWidth) / 2, configuration.topPadding, 0xFFFFFFFF, true);
+//        renderBarText(context, textRenderer.get(), areaText, (screenWidth - areaWidth) / 2, configuration.topPadding);
 
         // Render the player name and progress layers
         int currentLeftWidth = PADDING;
@@ -130,7 +134,7 @@ public class ScoreboardReplacementBarElement extends BarElement {
         int bgColor = ColorHelper.getArgb(200, 0, 0, 0);
         context.fill(0, y, screenWidth, y + (int) placeholderSize.y, bgColor);
 
-        mcAccessor.getTextRenderer().ifPresent(renderer -> context.drawText(renderer, Text.literal("Top Bar"), x + 10, y + 6, 0xFFFFFFFF, false));
+        mcAccessor.getTextRenderer().ifPresent(renderer -> context.drawText(renderer, Text.literal("Scoreboard Replacement Bar"), x + 10, y + 6, 0xFFFFFFFF, false));
     }
 
     @Override
@@ -140,11 +144,20 @@ public class ScoreboardReplacementBarElement extends BarElement {
 
     @Override
     public String getDisplayName() {
-        return "Top Bar";
+        return "Scoreboard Replacement Bar";
     }
 
     @Override
     public String getJsonSection() {
-        return "topBarHud";
+        return "scoreboardReplacementBar";
+    }
+
+    public static class Configuration extends BarElement.ConfigurationBase {
+
+        @SerialEntry
+        public int topPadding = 8;
+
+        @SerialEntry
+        public int bottomPadding = 8;
     }
 }
