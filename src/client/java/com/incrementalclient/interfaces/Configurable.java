@@ -149,6 +149,7 @@ public interface Configurable<TConfiguration> {
             public final Group Currency = new Group(this, "Currency", 300, "Currency Hud related settings.");
             public final Group HpBar = new Group(this, "HpBar", 400, "HpBar related settings.");
             public final Group ItemTarget = new Group(this, "Item Target", 500, "Item Target tracker Hud element.");
+            public final Group ScoreboardReplacementBar = new Group(this, "Scoreboard Replacement Bar", 600, "Scoreboard Replacement Bar Hud element.");
         }
         public static final HudCategory Hud = new HudCategory();
 

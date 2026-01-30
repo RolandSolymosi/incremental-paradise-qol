@@ -1,10 +1,18 @@
 package com.incrementalclient.hud.ScoreboardReplacementBar;
 
+import com.google.common.base.Suppliers;
+import com.incrementalclient.abstractions.HudElement;
 import com.incrementalclient.common.utils.Vector2f;
 import com.incrementalclient.hud.BarElement;
+import com.incrementalclient.hud.HPBarElement;
 import com.incrementalclient.internals.MinecraftClientAccessor;
 import com.incrementalclient.services.GameInfoMonitor;
 import com.incrementalclient.services.HudManager;
+import dev.isxander.yacl3.api.Option;
+import dev.isxander.yacl3.api.OptionDescription;
+import dev.isxander.yacl3.api.controller.DoubleSliderControllerBuilder;
+import dev.isxander.yacl3.api.controller.EnumDropdownControllerBuilder;
+import dev.isxander.yacl3.api.controller.IntegerSliderControllerBuilder;
 import dev.isxander.yacl3.config.v2.api.SerialEntry;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.text.MutableText;
@@ -13,15 +21,19 @@ import net.minecraft.util.math.ColorHelper;
 
 import java.util.HashMap;
 import java.util.List;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-public class ScoreboardReplacementBarElement extends BarElement {
+public class ScoreboardReplacementBarElement extends HudElement<ScoreboardReplacementBarElement.Configuration> {
+
+    // TODO: This file is a mess, clean up
 
     private final GameInfoMonitor gameInfoMonitor;
+    private final Supplier<List<OptionPiece>> options;
 
-    public static final int PADDING = 4;
+    public static final int PADDING = 8;
     // This can be reduced later as techincally the bar is made up of top and bottom padding and text but padding between lines can be less than bottom padding
-    public static final int LINE_SPACING = HudConstants.BAR_ELEMENT_HEIGHT;
+    public static final int LINE_SPACING = 4;
 
     private final ScoreboardReplacementBarElement.Configuration configuration = new Configuration();
 
@@ -32,7 +44,25 @@ public class ScoreboardReplacementBarElement extends BarElement {
                                            GameInfoMonitor gameInfoMonitor) {
         super(mcAccessor, hudManager);
         this.gameInfoMonitor = gameInfoMonitor;
+        this.scalable = false;
         this.draggable = false;
+
+        options = Suppliers.memoize(() -> List.of(
+                Categories.Hud.ScoreboardReplacementBar.createConfig(0,
+                        Option.<Integer>createBuilder()
+                                .name(Text.of("Top Bar Padding"))
+                                .description(OptionDescription.of(Text.of("Changes the top bar padding")))
+                                .binding(configuration.topPadding, () -> configuration.topPadding, newVal -> configuration.topPadding = newVal)
+                                .controller(o -> IntegerSliderControllerBuilder.create(o).step(1).range(0, 32))
+                                .build()),
+                Categories.Hud.ScoreboardReplacementBar.createConfig(1,
+                        Option.<Integer>createBuilder()
+                                .name(Text.of("Bottom Bar Padding"))
+                                .description(OptionDescription.of(Text.of("Changes the bottom bar padding")))
+                                .binding(configuration.bottomPadding, () -> configuration.bottomPadding, newVal -> configuration.bottomPadding = newVal)
+                                .controller(o -> IntegerSliderControllerBuilder.create(o).step(1).range(0, 32))
+                                .build())
+        ));
     }
 
     @Override
@@ -71,7 +101,6 @@ public class ScoreboardReplacementBarElement extends BarElement {
         Text areaText = texts.get("area").get(0);
         int areaWidth = textRenderer.get().getWidth(areaText);
         context.drawText(textRenderer.get(), areaText, (screenWidth - areaWidth) / 2, configuration.topPadding, 0xFFFFFFFF, true);
-//        renderBarText(context, textRenderer.get(), areaText, (screenWidth - areaWidth) / 2, configuration.topPadding);
 
         // Render the player name and progress layers
         int currentLeftWidth = PADDING;
@@ -80,7 +109,8 @@ public class ScoreboardReplacementBarElement extends BarElement {
         int currentLeftLineCount = 0;
         for (Text text : leftTexts) {
             if (currentLeftWidth + textRenderer.get().getWidth(text) > (screenWidth - areaWidth) / 2 - PADDING) {
-                renderBarText(context, textRenderer.get(), currentLeftText, PADDING, LINE_SPACING * currentLeftLineCount);
+                context.drawText(textRenderer.get(), currentLeftText, PADDING, configuration.topPadding + (LINE_SPACING + HudConstants.TEXT_HEIGHT) * currentLeftLineCount, 0xFFFFFFFF, true);
+//                renderBarText(context, textRenderer.get(), currentLeftText, PADDING, LINE_SPACING * currentLeftLineCount);
                 currentLeftWidth = PADDING;
                 currentLeftLineCount += 1;
                 currentLeftText = Text.literal("");
@@ -90,7 +120,8 @@ public class ScoreboardReplacementBarElement extends BarElement {
             currentLeftWidth += textRenderer.get().getWidth(text);
             currentLeftWidth += textRenderer.get().getWidth(Text.literal(" "));
         }
-        renderBarText(context, textRenderer.get(), currentLeftText, PADDING, LINE_SPACING * currentLeftLineCount);
+//        renderBarText(context, textRenderer.get(), currentLeftText, PADDING, LINE_SPACING * currentLeftLineCount);
+        context.drawText(textRenderer.get(), currentLeftText, PADDING, configuration.topPadding + (LINE_SPACING + HudConstants.TEXT_HEIGHT) * currentLeftLineCount, 0xFFFFFFFF, true);
 
         // Render the currencies
         int currentRightWidth = PADDING;
@@ -99,7 +130,8 @@ public class ScoreboardReplacementBarElement extends BarElement {
         int currentRightLineCount = 0;
         for (Text text : rghtTexts) {
             if (currentRightWidth + textRenderer.get().getWidth(text) > (screenWidth - areaWidth) / 2 - PADDING) {
-                renderBarText(context, textRenderer.get(), currentRightText, screenWidth - currentRightWidth - PADDING, LINE_SPACING * currentRightLineCount);
+                context.drawText(textRenderer.get(), currentRightText, screenWidth - currentRightWidth, configuration.topPadding + (LINE_SPACING + HudConstants.TEXT_HEIGHT) * currentRightLineCount, 0xFFFFFFFF, true);
+//                renderBarText(context, textRenderer.get(), currentRightText, screenWidth - currentRightWidth - PADDING, LINE_SPACING * currentRightLineCount);
                 currentRightWidth = PADDING;
                 currentRightLineCount += 1;
                 currentRightText = Text.literal("");
@@ -109,17 +141,17 @@ public class ScoreboardReplacementBarElement extends BarElement {
             currentRightWidth += textRenderer.get().getWidth(text);
             currentRightWidth += textRenderer.get().getWidth(Text.literal(" "));
         }
-        renderBarText(context, textRenderer.get(), currentRightText, screenWidth - currentRightWidth - PADDING, LINE_SPACING * currentRightLineCount);
+        context.drawText(textRenderer.get(), currentRightText, screenWidth - currentRightWidth, configuration.topPadding + (LINE_SPACING + HudConstants.TEXT_HEIGHT) * currentRightLineCount, 0xFFFFFFFF, true);
 
         lineCount = Math.max(currentLeftLineCount, currentRightLineCount) + 1;
 
-        hudManager.setBarHeight(22 * lineCount);
+        hudManager.setBarHeight(configuration.topPadding + (LINE_SPACING + HudConstants.TEXT_HEIGHT) * lineCount - LINE_SPACING + configuration.bottomPadding + 1);
 
         // Draw top bar background (full width)
-        renderBarBackground(context, 0, y, screenWidth, HudConstants.BAR_ELEMENT_HEIGHT * lineCount, editMode);
+        renderBarBackground(context, 0, y, screenWidth, hudManager.getBarHeight(), editMode);
 
         // Draw border for angular look
-        drawAngularBorder(context, 0, y, screenWidth, HudConstants.BAR_ELEMENT_HEIGHT * lineCount);
+        drawAngularBorder(context, 0, y, screenWidth, hudManager.getBarHeight());
     }
 
     private void renderEditModePlaceholder(DrawContext context) {
@@ -137,6 +169,40 @@ public class ScoreboardReplacementBarElement extends BarElement {
         mcAccessor.getTextRenderer().ifPresent(renderer -> context.drawText(renderer, Text.literal("Scoreboard Replacement Bar"), x + 10, y + 6, 0xFFFFFFFF, false));
     }
 
+    protected void drawAngularBorder(DrawContext context, int x, int y, int width, int height) {
+        int borderColor = ColorHelper.getArgb(255, 0, 0, 0);
+        int highlightColor = ColorHelper.getArgb(200, 150, 150, 150);
+
+        // Top border (with highlight on top edge for 3D effect)
+        context.fill(x, y - 1, x + width, y, borderColor);
+        context.fill(x, y - 1, x + width, y, highlightColor);
+
+        // Bottom border
+        context.fill(x, y + height, x + width, y + height + 1, borderColor);
+
+        // Left border
+        context.fill(x - 1, y, x, y + height, borderColor);
+
+        // Right border
+        context.fill(x + width, y, x + width + 1, y + height, borderColor);
+    }
+
+    protected void renderBarBackground(DrawContext context, int x, int y, int width, int height, boolean editMode) {
+        int bgOpacity = editMode ? 100 : 180;
+        int bgColor = ColorHelper.getArgb(bgOpacity, 20, 20, 20);
+        context.fill(x, y, x + width, y + height, bgColor);
+    }
+
+    @Override
+    public Vector2f getBoundingBox() {
+        var window = mcAccessor.getWindow();
+        if (window.isPresent()) {
+            int screenWidth = window.get().getScaledWidth();
+            return new Vector2f(screenWidth, HudElement.HudConstants.BAR_ELEMENT_HEIGHT);
+        }
+        return new Vector2f(400, HudConstants.BAR_ELEMENT_HEIGHT);
+    }
+
     @Override
     public Vector2f getDefaultPosition() {
         return new Vector2f(0, 0);
@@ -152,7 +218,17 @@ public class ScoreboardReplacementBarElement extends BarElement {
         return "scoreboardReplacementBar";
     }
 
-    public static class Configuration extends BarElement.ConfigurationBase {
+    @Override
+    public ScoreboardReplacementBarElement.Configuration getConfiguration() {
+        return configuration;
+    }
+
+    @Override
+    public List<OptionPiece> getOption() {
+        return options.get();
+    }
+
+    public static class Configuration extends HudElement.ConfigurationBase {
 
         @SerialEntry
         public int topPadding = 8;
