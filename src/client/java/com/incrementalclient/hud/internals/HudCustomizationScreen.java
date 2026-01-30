@@ -58,7 +58,7 @@ public class HudCustomizationScreen extends Screen {
         for (HudElement<?> element : otherElementsToAdd) {
             addDrawableChild(new HudElementToggleWidget(element, 0, 0));
             if (element.isScalable()) {
-                Vector2f pos = element.getCurrentPosition();
+                Vector2f pos = element.getElementPosition();
                 addDrawableChild(new HudScaleWidget(element, (int) pos.x + 7, (int) pos.y + 7));
             }
         }
@@ -101,7 +101,7 @@ public class HudCustomizationScreen extends Screen {
                 continue;
             }
             
-            Vector2f pos = element.getCurrentPosition();
+            Vector2f pos = element.getElementPosition();
             Vector2f bounds = element.getBoundingBox();
             int centerX = (int) (pos.x + bounds.x / 2);
             int centerY = (int) (pos.y + bounds.y / 2);

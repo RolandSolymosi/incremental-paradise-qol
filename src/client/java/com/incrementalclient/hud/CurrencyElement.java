@@ -164,7 +164,7 @@ public class CurrencyElement extends HudElement<CurrencyElement.Configuration> {
         int totalHeight = currencyTexts.size() * LINE_HEIGHT + (currencyTexts.size() - 1) * LINE_SPACING;
 
         // Get position from anchor point and delta position
-        Vector2f pos = getCurrentPosition();
+        Vector2f pos = getElementPosition();
         int x = (int) pos.x;
         int y = (int) pos.y;
 
@@ -276,7 +276,7 @@ public class CurrencyElement extends HudElement<CurrencyElement.Configuration> {
     }
 
     private void renderEditModePlaceholder(DrawContext context) {
-        Vector2f pos = getCurrentPosition();
+        Vector2f pos = getElementPosition();
         int x = (int) pos.x;
         int y = (int) pos.y;
 

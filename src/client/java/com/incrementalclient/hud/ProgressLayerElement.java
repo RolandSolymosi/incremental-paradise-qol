@@ -162,7 +162,7 @@ public class ProgressLayerElement extends HudElement<ProgressLayerElement.Config
         int totalHeight = rowCount * lineHeight + (rowCount - 1) * rowSpacing;
 
         // Get position from anchor point and delta position
-        Vector2f pos = getCurrentPosition();
+        Vector2f pos = getElementPosition();
         int x = (int) pos.x;
         int y = (int) pos.y;
 
@@ -259,7 +259,7 @@ public class ProgressLayerElement extends HudElement<ProgressLayerElement.Config
     }
 
     private void renderEditModePlaceholder(DrawContext context) {
-        Vector2f pos = getCurrentPosition();
+        Vector2f pos = getElementPosition();
         int x = (int) pos.x;
         int y = (int) pos.y;
 

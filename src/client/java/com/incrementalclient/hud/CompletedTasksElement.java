@@ -2,15 +2,12 @@ package com.incrementalclient.hud;
 
 import com.incrementalclient.abstractions.HudElement;
 import com.incrementalclient.common.utils.Vector2f;
-import com.incrementalclient.interfaces.Configurable;
 import com.incrementalclient.internals.MinecraftClientAccessor;
 import com.incrementalclient.services.GameInfoMonitor;
 import com.incrementalclient.services.HudManager;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.text.Text;
-
-import java.util.List;
 
 public class CompletedTasksElement extends HudElement<CompletedTasksElement.Configuration> {
 
@@ -51,7 +48,7 @@ public class CompletedTasksElement extends HudElement<CompletedTasksElement.Conf
             totalTasks = progressData.getTotalTasks();
         }
 
-        Vector2f pos = getCurrentPosition();
+        Vector2f pos = getElementPosition();
         int x = (int) pos.x;
         int y = (int) pos.y;
 
@@ -65,7 +62,7 @@ public class CompletedTasksElement extends HudElement<CompletedTasksElement.Conf
     }
 
     private void renderEditModePlaceholder(DrawContext context) {
-        Vector2f pos = getCurrentPosition();
+        Vector2f pos = getElementPosition();
         int x = (int) pos.x;
         int y = (int) pos.y;
 

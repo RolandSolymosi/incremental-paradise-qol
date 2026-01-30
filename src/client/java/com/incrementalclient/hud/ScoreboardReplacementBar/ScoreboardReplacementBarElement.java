@@ -3,15 +3,11 @@ package com.incrementalclient.hud.ScoreboardReplacementBar;
 import com.google.common.base.Suppliers;
 import com.incrementalclient.abstractions.HudElement;
 import com.incrementalclient.common.utils.Vector2f;
-import com.incrementalclient.hud.BarElement;
-import com.incrementalclient.hud.HPBarElement;
 import com.incrementalclient.internals.MinecraftClientAccessor;
 import com.incrementalclient.services.GameInfoMonitor;
 import com.incrementalclient.services.HudManager;
 import dev.isxander.yacl3.api.Option;
 import dev.isxander.yacl3.api.OptionDescription;
-import dev.isxander.yacl3.api.controller.DoubleSliderControllerBuilder;
-import dev.isxander.yacl3.api.controller.EnumDropdownControllerBuilder;
 import dev.isxander.yacl3.api.controller.IntegerSliderControllerBuilder;
 import dev.isxander.yacl3.config.v2.api.SerialEntry;
 import net.minecraft.client.gui.DrawContext;
@@ -77,7 +73,7 @@ public class ScoreboardReplacementBarElement extends HudElement<ScoreboardReplac
             return;
         }
 
-        Vector2f pos = getCurrentPosition();
+        Vector2f pos = getElementPosition();
         int y = (int) pos.y;
         int screenWidth = mcAccessor.getWindow().get().getScaledWidth();
 
@@ -155,7 +151,7 @@ public class ScoreboardReplacementBarElement extends HudElement<ScoreboardReplac
     }
 
     private void renderEditModePlaceholder(DrawContext context) {
-        Vector2f pos = getCurrentPosition();
+        Vector2f pos = getElementPosition();
         int x = (int) pos.x;
         int y = (int) pos.y;
 

@@ -40,7 +40,7 @@ public abstract class HudElement<T extends HudElement.ConfigurationBase> impleme
 
     public abstract void render(RenderSettings renderSettings);
 
-    public Vector2f getCurrentPosition() {
+    public Vector2f getElementPosition() {
         return elementPosition;
     }
     
@@ -49,7 +49,7 @@ public abstract class HudElement<T extends HudElement.ConfigurationBase> impleme
     }
 
     public Vector2f getTopLeftCornerPosition() {
-        return getCurrentPosition().subtract(getOffsetPoint());
+        return getElementPosition().subtract(getOffsetPoint());
     }
     
     public abstract Vector2f getBoundingBox();
@@ -58,10 +58,6 @@ public abstract class HudElement<T extends HudElement.ConfigurationBase> impleme
     
     // Optional: called when customization screen opens
     public void onEditModeEnter() {}
-    
-    public Vector2f getElementPosition() {
-        return elementPosition;
-    }
     
     public void setElementPosition(Vector2f elementPosition) {
         this.elementPosition = elementPosition;
@@ -149,7 +145,7 @@ public abstract class HudElement<T extends HudElement.ConfigurationBase> impleme
     }
     
     public Vector2f getCurrentBoundingPoint() {
-        return getCurrentPosition().add(getBoundingBox());
+        return getElementPosition().add(getBoundingBox());
     }
     
     /**

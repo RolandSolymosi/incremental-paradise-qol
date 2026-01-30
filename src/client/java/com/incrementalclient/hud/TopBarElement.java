@@ -26,7 +26,7 @@ public class TopBarElement extends BarElement {
             return;
         }
         
-        Vector2f pos = getCurrentPosition();
+        Vector2f pos = getElementPosition();
         int y = (int) pos.y;
         int screenWidth = mcAccessor.getWindow().get().getScaledWidth();
         
@@ -38,7 +38,7 @@ public class TopBarElement extends BarElement {
     }
     
     private void renderEditModePlaceholder(DrawContext context) {
-        Vector2f pos = getCurrentPosition();
+        Vector2f pos = getElementPosition();
         int x = (int) pos.x;
         int y = (int) pos.y;
 

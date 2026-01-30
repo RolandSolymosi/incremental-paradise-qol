@@ -94,7 +94,7 @@ public class HPBarElement extends HudElement<HPBarElement.Configuration> {
         }
         float absorption = player.get().getAbsorptionAmount();
 
-        Vector2f pos = getCurrentPosition();
+        Vector2f pos = getElementPosition();
         int x = (int) pos.x;
         int y = (int) pos.y;
 
@@ -151,7 +151,7 @@ public class HPBarElement extends HudElement<HPBarElement.Configuration> {
 
 
     private void renderEditModePlaceholder(DrawContext context) {
-        Vector2f pos = getCurrentPosition();
+        Vector2f pos = getElementPosition();
         int x = (int) pos.x;
         int y = (int) pos.y;
 

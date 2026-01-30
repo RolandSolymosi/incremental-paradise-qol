@@ -42,7 +42,7 @@ public class BottomBarElement extends BarElement {
             updateAnimation();
         }
         
-        Vector2f pos = getCurrentPosition();
+        Vector2f pos = getElementPosition();
         // Add animation offset to Y position (slides down when typing)
         int y = (int) (pos.y + animationOffset);
         int screenWidth = mcAccessor.getWindow().get().getScaledWidth();
@@ -67,7 +67,7 @@ public class BottomBarElement extends BarElement {
     }
     
     private void renderEditModePlaceholder(DrawContext context) {
-        Vector2f pos = getCurrentPosition();
+        Vector2f pos = getElementPosition();
         int x = (int) pos.x;
         int y = (int) pos.y;
 
