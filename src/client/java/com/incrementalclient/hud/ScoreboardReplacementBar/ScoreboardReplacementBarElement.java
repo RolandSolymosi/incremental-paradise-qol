@@ -48,14 +48,14 @@ public class ScoreboardReplacementBarElement extends HudElement<ScoreboardReplac
                         Option.<Integer>createBuilder()
                                 .name(Text.of("Top Bar Padding"))
                                 .description(OptionDescription.of(Text.of("Changes the top bar padding")))
-                                .binding(configuration.topPadding, () -> configuration.topPadding, newVal -> configuration.topPadding = newVal)
+                                .binding(configuration.defaultTopPadding, () -> configuration.topPadding, newVal -> configuration.topPadding = newVal)
                                 .controller(o -> IntegerSliderControllerBuilder.create(o).step(1).range(0, 32))
                                 .build()),
                 Categories.Hud.ScoreboardReplacementBar.createConfig(1,
                         Option.<Integer>createBuilder()
                                 .name(Text.of("Bottom Bar Padding"))
                                 .description(OptionDescription.of(Text.of("Changes the bottom bar padding")))
-                                .binding(configuration.bottomPadding, () -> configuration.bottomPadding, newVal -> configuration.bottomPadding = newVal)
+                                .binding(configuration.defaultBottomPadding, () -> configuration.bottomPadding, newVal -> configuration.bottomPadding = newVal)
                                 .controller(o -> IntegerSliderControllerBuilder.create(o).step(1).range(0, 32))
                                 .build())
         ));
@@ -226,10 +226,13 @@ public class ScoreboardReplacementBarElement extends HudElement<ScoreboardReplac
 
     public static class Configuration extends HudElement.ConfigurationBase {
 
-        @SerialEntry
-        public int topPadding = 8;
+        private static final int defaultTopPadding = 6;
+        private static final int defaultBottomPadding = 6;
 
         @SerialEntry
-        public int bottomPadding = 8;
+        public int topPadding = defaultTopPadding;
+
+        @SerialEntry
+        public int bottomPadding = defaultBottomPadding;
     }
 }
