@@ -29,6 +29,7 @@ public class Main implements ClientModInitializer {
             .addObservable(EntityRendererObservable.class)
             .addListenable(ScoreboardChangedListenable.class)
             .addObservable(ScreenCapture.class)
+            .addObservable(InventoryInteractionInterceptor.class)
             .addObservable(OverlayMessageObservable.class)
             // High level Services
             .addSingleton(MinecraftClientAccessor.class)
