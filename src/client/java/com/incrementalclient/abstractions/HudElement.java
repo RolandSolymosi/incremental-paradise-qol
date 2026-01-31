@@ -40,10 +40,16 @@ public abstract class HudElement<T extends HudElement.ConfigurationBase> impleme
 
     public abstract void render(RenderSettings renderSettings);
 
+    /**
+     * Returns the actual position of the element
+     */
     public Vector2f getElementPosition() {
         return elementPosition;
     }
-    
+
+    /**
+     * Returns the offset from the top left corner of the element compared to the actual position
+     */
     public Vector2f getOffsetPoint(){
         return new Vector2f(0, 0);
     }
@@ -65,6 +71,9 @@ public abstract class HudElement<T extends HudElement.ConfigurationBase> impleme
         this.getConfiguration().yPosition = elementPosition.y;
     }
 
+    /**
+     * Returns the default position of the element when it is reset
+     */
     public abstract Vector2f getDefaultPosition();
 
     public void resetToDefaultPosition() {

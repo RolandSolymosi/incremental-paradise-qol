@@ -16,6 +16,8 @@ import java.util.List;
  */
 public abstract class TextListHudElement<T extends TextListHudElement.ConfigurationBase> extends HudElement<T> {
 
+    // Variables to determine the direction the text grows
+    // NOTE: It is probably worth having this done a bit better as an enum
     protected boolean downDirection = true;
     protected boolean leftDirection = true;
 
@@ -52,7 +54,7 @@ public abstract class TextListHudElement<T extends TextListHudElement.Configurat
             return;
         }
         var textRenderer = mcAccessor.getTextRenderer();
-        if (textRenderer.isEmpty()){
+        if (textRenderer.isEmpty()) {
             return;
         }
 
@@ -135,19 +137,23 @@ public abstract class TextListHudElement<T extends TextListHudElement.Configurat
 
     @Override
     public Vector2f getOffsetPoint() {
-        int x = 0;
-        int y = 0;
         List<Text> texts = getTextsToRender(false);
+
         int maxWidth = texts.stream()
                 .mapToInt(this::getTextWidth)
                 .max()
                 .orElse(0);
 
-        if (!downDirection) {
-            y = !texts.isEmpty() ? -2 - HudConstants.TEXT_PADDING_Y - HudConstants.TEXT_HEIGHT + HudConstants.LINE_SPACING * texts.size() : 0;
+        // Get the y offset
+        if (!downDirection && !texts.isEmpty()) {
+            y = -2 - HudConstants.TEXT_PADDING_Y - HudConstants.TEXT_HEIGHT + HudConstants.LINE_SPACING * texts.size();
         }
-        if (!leftDirection) {
-            x = !texts.isEmpty() ? maxWidth + HudConstants.BACKGROUND_PADDING : getPlaceholderWidth();
+
+        // Get the x offset
+        if (!leftDirection && !texts.isEmpty()) {
+            x = maxWidth + HudConstants.BACKGROUND_PADDING;
+        } else if (!leftDirection && texts.isEmpty()) {
+            x = getPlaceholderWidth();
         }
 
         return new Vector2f(x, y);
