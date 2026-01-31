@@ -1,6 +1,8 @@
 package com.incrementalclient.services;
 
 import com.incrementalclient.abstractions.TaskScheduler;
+import com.incrementalclient.interfaces.AsyncObserver;
+import com.incrementalclient.internals.InventoryInteractionInterceptor;
 import com.incrementalclient.internals.MinecraftClientAccessor;
 import com.incrementalclient.internals.ScreenCapture;
 import com.incrementalclient.internals.events.ClientPlayConnectionObservable;
@@ -9,38 +11,54 @@ import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.minecraft.network.packet.c2s.play.ClickSlotC2SPacket;
 import net.minecraft.screen.slot.SlotActionType;
 import net.minecraft.screen.sync.ItemStackHash;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 
-public class InteractionScheduler<C> extends TaskScheduler<C, InteractionScheduler.InteractionTask<C, ?>> {
+public class InteractionScheduler<C> extends TaskScheduler<C, InteractionScheduler.InteractionTask<C, ?>> implements AsyncObserver<ClickSlotC2SPacket, ScreenCapture.Screen> {
+    private static Logger logger = LoggerFactory.getLogger(InteractionScheduler.class);
     private final MinecraftClientAccessor mcAccessor;
     private volatile int activeSyncId = 0;
     private int lastProcessedSyncId = 0;
     private Predicate<ScreenCapture.Screen> lastExpectedStep = null;
+    private final Set<CompletableFuture<?>> asyncInventoryInterruptors = ConcurrentHashMap.newKeySet();
 
     public InteractionScheduler(
             EndClientTickListenable endClientTickListenable,
             ClientPlayConnectionObservable clientPlayConnectionObservable,
             ScreenCapture screenCapture,
+            InventoryInteractionInterceptor inventoryInteractionInterceptor,
             MinecraftClientAccessor mcAccessor
     ) {
         super(endClientTickListenable, clientPlayConnectionObservable);
         this.mcAccessor = mcAccessor;
 
         screenCapture.registerSilencer(this::shouldSilence);
-
         screenCapture.subscribe(this::screenUpdated);
+        inventoryInteractionInterceptor.subscribe(this);
     }
 
     @Override
     protected void resetAll() {
-        activeSyncId = 0;
+        reset();
         lastProcessedSyncId = 0;
-        lastExpectedStep = null;
-        if (activeTask != null){
+        for (var entry : asyncInventoryInterruptors) {
+            entry.complete(null);
+        }
+        asyncInventoryInterruptors.clear();
+    }
+
+    private void reset() {
+        this.activeSyncId = 0;
+        this.lastExpectedStep = null;
+        if (activeTask != null) {
             activeTask.fail(null);
         }
     }
@@ -54,6 +72,37 @@ public class InteractionScheduler<C> extends TaskScheduler<C, InteractionSchedul
         }
     }
 
+    @Override
+    public CompletableFuture<Void> onEventAsync(ClickSlotC2SPacket packet, CompletableFuture<ScreenCapture.Screen> resolution) {
+        // TODO: For now only try to handle Inventory interactions as interruptors, but it also means interaction handler can't handle inventory based interactions for now (it shouldn't even be needed as inventory can be manipulated without it anytime)
+        if (packet.syncId() != 0) {
+            return CompletableFuture.completedFuture(null);
+        }
+
+        var prepareFuture = new CompletableFuture<Void>();
+
+        mcAccessor.getClient().execute(() -> {
+            try {
+                reset();
+
+                this.asyncInventoryInterruptors.add(resolution);
+
+                resolution.handle((res, ex) -> {
+                    this.asyncInventoryInterruptors.remove(resolution);
+                    return null;
+                });
+
+                prepareFuture.complete(null);
+
+                logger.debug("Manual packet intercepted. Current task aborted, awaiting sync...");
+            } catch (Exception e) {
+                prepareFuture.completeExceptionally(e);
+            }
+        });
+
+        return prepareFuture;
+    }
+
     private boolean shouldSilence(ScreenCapture.Screen screen) {
         var incomingId = screen.syncId();
 
@@ -64,7 +113,7 @@ public class InteractionScheduler<C> extends TaskScheduler<C, InteractionSchedul
         //if (mcAccessor.getScreen().isPresent() && isHardInterrupted()) return false;
 
         // 3. An unexpected screen appeared based on what we are doing
-        if (lastExpectedStep != null && !lastExpectedStep.test(screen)){
+        if (lastExpectedStep != null && !lastExpectedStep.test(screen)) {
             return false;
         }
 
@@ -108,8 +157,8 @@ public class InteractionScheduler<C> extends TaskScheduler<C, InteractionSchedul
 
     public boolean isHardInterrupted() {
         return mcAccessor.getScreen()
-                .map(screen -> screen instanceof net.minecraft.client.gui.screen.ingame.GenericContainerScreen)
-                .orElse(false);
+                .map(screen -> screen instanceof net.minecraft.client.gui.screen.ingame.GenericContainerScreen || screen instanceof net.minecraft.client.gui.screen.ingame.InventoryScreen)
+                .orElse(false) || asyncInventoryInterruptors.stream().anyMatch(f -> !f.isDone());
     }
 
     public int getActualSyncId() {
@@ -127,7 +176,7 @@ public class InteractionScheduler<C> extends TaskScheduler<C, InteractionSchedul
 
     @Override
     protected boolean canProcessNext() {
-        return activeSyncId == 0 && !isCleaning()&& !this.isHardInterrupted();
+        return activeSyncId == 0 && !isCleaning() && !this.isHardInterrupted();
     }
 
     @Override
@@ -147,6 +196,7 @@ public class InteractionScheduler<C> extends TaskScheduler<C, InteractionSchedul
         protected int currentStepIndex = 0;
         protected Runnable startAction;
         protected ScreenCapture.Screen lastSeenScreen;
+        private final boolean isInterruptible;
 
         // References needed for reset logic
         private final InteractionScheduler<?> scheduler;
@@ -156,7 +206,7 @@ public class InteractionScheduler<C> extends TaskScheduler<C, InteractionSchedul
 
         private int cleanupTicks = 0;
 
-        protected InteractionTask(TContext context, int priority, int timeout, int maxRetries, int stepDelay,
+        protected InteractionTask(TContext context, int priority, int timeout, int maxRetries, int stepDelay, boolean isInterruptible,
                                   InteractionScheduler<?> scheduler, MinecraftClientAccessor mc) {
             super(context, priority, timeout, maxRetries);
             this.context = context;
@@ -166,12 +216,19 @@ public class InteractionScheduler<C> extends TaskScheduler<C, InteractionSchedul
             this.stepDelayTick = stepDelay;
             this.scheduler = scheduler;
             this.mcAccessor = mc;
+            this.isInterruptible = isInterruptible;
         }
 
         private void reset() {
             this.currentStepIndex = 0;
             this.lastSeenScreen = null;
 
+
+        }
+
+        @Override
+        public boolean isInterruptible(){
+            return this.isInterruptible;
         }
 
         @Override
@@ -215,15 +272,14 @@ public class InteractionScheduler<C> extends TaskScheduler<C, InteractionSchedul
 
                 // 6. Progress State
                 this.refreshTimeout();
-                if (!stayOnStep){
+                if (!stayOnStep) {
                     this.currentStepIndex++;
                 }
 
-                if (currentStepIndex < steps.size()){
+                if (currentStepIndex < steps.size()) {
                     var actual = steps.get(currentStepIndex);
-                    scheduler.lastExpectedStep =screen -> actual.screenExpectation().test(screen, this.context);
-                }
-                else {
+                    scheduler.lastExpectedStep = screen -> actual.screenExpectation().test(screen, this.context);
+                } else {
                     scheduler.lastExpectedStep = null;
                 }
 
@@ -251,9 +307,7 @@ public class InteractionScheduler<C> extends TaskScheduler<C, InteractionSchedul
             int syncId = scheduler.getActualSyncId();
             if (syncId != 0) {
                 mcAccessor.getNetworkHandler().ifPresent(h ->
-                        {
-                            //h.sendPacket(new net.minecraft.network.packet.c2s.play.CloseHandledScreenC2SPacket(syncId));
-                        }
+                        h.sendPacket(new net.minecraft.network.packet.c2s.play.CloseHandledScreenC2SPacket(syncId))
                 );
                 scheduler.forceSyncId(0);
             }
@@ -293,6 +347,7 @@ public class InteractionScheduler<C> extends TaskScheduler<C, InteractionSchedul
         private int timeout = 20;
         private int retries = 3;
         private int delay;
+        private boolean isInterruptible = false;
 
         public Builder(String identifier, InteractionScheduler<?> scheduler, MinecraftClientAccessor mc) {
             this.identifier = identifier;
@@ -302,6 +357,11 @@ public class InteractionScheduler<C> extends TaskScheduler<C, InteractionSchedul
 
         public Builder<C, T> startWith(Runnable action) {
             this.startAction = action;
+            return this;
+        }
+
+        public Builder<C, T> interruptible() {
+            this.isInterruptible = true;
             return this;
         }
 
@@ -340,11 +400,11 @@ public class InteractionScheduler<C> extends TaskScheduler<C, InteractionSchedul
         }
 
         public InteractionTask<C, T> build(C context, String identitySuffix) {
-            var task = new InteractionTask<C, T>(context, priority, timeout, retries, delay, scheduler, mcAccessor) {
+            var task = new InteractionTask<C, T>(context, priority, timeout, retries, delay, isInterruptible, scheduler, mcAccessor) {
                 @Override
                 public String getIdentifier() {
-                    if (identitySuffix != null){
-                        return  identifier+"-"+identitySuffix;
+                    if (identitySuffix != null) {
+                        return identifier + "-" + identitySuffix;
                     }
                     return identifier;
                 }

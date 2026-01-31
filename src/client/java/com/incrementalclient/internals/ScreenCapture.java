@@ -2,17 +2,19 @@ package com.incrementalclient.internals;
 
 import com.incrementalclient.abstractions.ObservableBase;
 import com.incrementalclient.interfaces.Observer;
-import com.incrementalclient.internals.interfaces.ReentryPacket;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.network.ClientPlayNetworkHandler;
 import net.minecraft.item.ItemStack;
 import net.minecraft.network.packet.s2c.play.*;
 import net.minecraft.text.Text;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.*;
 import java.util.function.Predicate;
 
 public class ScreenCapture extends ObservableBase<Observer<ScreenCapture.Screen>, ScreenCapture.Screen> {
+    private static Logger logger = LoggerFactory.getLogger(ScreenCapture.class);
     private static final int MAX_PENDING = 10;
     private static final long STALE_TIMEOUT_MS = 60000;
 
@@ -167,7 +169,7 @@ public class ScreenCapture extends ObservableBase<Observer<ScreenCapture.Screen>
         var state = new MonitoredScreenState(title, contents, shouldSilence(screen), actualSyncId, revision);
         monitoredScreens.put(data.getSyncId(), state);
 
-
+        logger.debug("Screen content updated: {}", screen.syncId());
         notifyObservers(screen);
 
         if (!state.isSilenced) {

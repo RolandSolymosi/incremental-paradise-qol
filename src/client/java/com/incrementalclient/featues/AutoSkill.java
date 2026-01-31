@@ -61,6 +61,7 @@ public class AutoSkill extends ListenableBase<Listener> implements ComplexConfig
         this.interactionScheduler = interactionScheduler;
         this.minecraftClientAccessor = minecraftClientAccessor;
         this.autoSkillLevelUpTask = new InteractionScheduler.Builder<SkillLevelingContext, Void>("AutoSkillLeveling", interactionScheduler, minecraftClientAccessor)
+                .interruptible()
                 .priority(0)
                 .timeout(20)
                 .retries(3)
