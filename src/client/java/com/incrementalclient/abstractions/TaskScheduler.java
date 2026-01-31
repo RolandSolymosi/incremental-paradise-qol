@@ -21,7 +21,7 @@ public abstract class TaskScheduler<C, T extends TaskScheduler.QueuedTask<C, ?>>
     private boolean isCleaning = false;
 
     public TaskScheduler(EndClientTickListenable endClientTickListenable, ClientPlayConnectionObservable clientPlayConnectionObservable) {
-        var comparator = Comparator.comparingInt(T::getPriority);
+        var comparator = Comparator.comparingInt(T::getPriority).reversed();
         this.queue = new PriorityBlockingQueue<>(11, comparator);
 
         endClientTickListenable.subscribe(this);
@@ -89,6 +89,16 @@ public abstract class TaskScheduler<C, T extends TaskScheduler.QueuedTask<C, ?>>
             return;
         }
 
+        // Preemption logic
+        if (activeTask != null && activeTask.isInterruptible()) {
+            var nextPotential = queue.peek();
+            if (nextPotential != null && nextPotential.getPriority() > activeTask.getPriority()) {
+                activeTask.setPreempted(true);
+                initiateTaskEnd(false);
+                return;
+            }
+        }
+
         if (activeTask == null) {
             if (!canProcessNext() || queue.isEmpty()) return;
 
@@ -97,6 +107,7 @@ public abstract class TaskScheduler<C, T extends TaskScheduler.QueuedTask<C, ?>>
                 activeTask = queue.poll();
                 if (activeTask != null) {
                     pendingTasks.remove(activeTask.getIdentifier());
+                    activeTask.setPreempted(false);
                 }
             } finally {
                 lock.unlock();
@@ -156,6 +167,14 @@ public abstract class TaskScheduler<C, T extends TaskScheduler.QueuedTask<C, ?>>
             task.complete(null);
         }
 
+        // Preemption
+        if (task.isPreempted()) {
+            task.setPreempted(false);
+            task.setTimeoutTicks(task.getInitialTimeoutTicks());
+            submit(task);
+            return;
+        }
+
         var trulyCompleted = future.isDone() && !future.isCompletedExceptionally();
 
         if (!trulyCompleted) {
@@ -181,6 +200,7 @@ public abstract class TaskScheduler<C, T extends TaskScheduler.QueuedTask<C, ?>>
         private final CompletableFuture<TResult> future = new CompletableFuture<>();
         private final int initialTimeout;
         private final int maxRetries;
+        private boolean isPreempted = false;
 
         private int priority;
         private int timeoutTicks;
@@ -201,6 +221,18 @@ public abstract class TaskScheduler<C, T extends TaskScheduler.QueuedTask<C, ?>>
         public abstract String getIdentifier();
 
         public abstract void execute();
+
+        public boolean isInterruptible() {
+            return false;
+        }
+
+        final void setPreempted(boolean preempted) {
+            this.isPreempted = preempted;
+        }
+
+        final boolean isPreempted() {
+            return isPreempted;
+        }
 
         // Hooks for optional behavior
         public boolean preValidate() {

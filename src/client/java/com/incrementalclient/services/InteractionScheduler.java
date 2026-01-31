@@ -196,6 +196,7 @@ public class InteractionScheduler<C> extends TaskScheduler<C, InteractionSchedul
         protected int currentStepIndex = 0;
         protected Runnable startAction;
         protected ScreenCapture.Screen lastSeenScreen;
+        private final boolean isInterruptible;
 
         // References needed for reset logic
         private final InteractionScheduler<?> scheduler;
@@ -205,7 +206,7 @@ public class InteractionScheduler<C> extends TaskScheduler<C, InteractionSchedul
 
         private int cleanupTicks = 0;
 
-        protected InteractionTask(TContext context, int priority, int timeout, int maxRetries, int stepDelay,
+        protected InteractionTask(TContext context, int priority, int timeout, int maxRetries, int stepDelay, boolean isInterruptible,
                                   InteractionScheduler<?> scheduler, MinecraftClientAccessor mc) {
             super(context, priority, timeout, maxRetries);
             this.context = context;
@@ -215,6 +216,7 @@ public class InteractionScheduler<C> extends TaskScheduler<C, InteractionSchedul
             this.stepDelayTick = stepDelay;
             this.scheduler = scheduler;
             this.mcAccessor = mc;
+            this.isInterruptible = isInterruptible;
         }
 
         private void reset() {
@@ -222,6 +224,11 @@ public class InteractionScheduler<C> extends TaskScheduler<C, InteractionSchedul
             this.lastSeenScreen = null;
 
 
+        }
+
+        @Override
+        public boolean isInterruptible(){
+            return this.isInterruptible;
         }
 
         @Override
@@ -340,6 +347,7 @@ public class InteractionScheduler<C> extends TaskScheduler<C, InteractionSchedul
         private int timeout = 20;
         private int retries = 3;
         private int delay;
+        private boolean isInterruptible = false;
 
         public Builder(String identifier, InteractionScheduler<?> scheduler, MinecraftClientAccessor mc) {
             this.identifier = identifier;
@@ -349,6 +357,11 @@ public class InteractionScheduler<C> extends TaskScheduler<C, InteractionSchedul
 
         public Builder<C, T> startWith(Runnable action) {
             this.startAction = action;
+            return this;
+        }
+
+        public Builder<C, T> interruptible() {
+            this.isInterruptible = true;
             return this;
         }
 
@@ -387,7 +400,7 @@ public class InteractionScheduler<C> extends TaskScheduler<C, InteractionSchedul
         }
 
         public InteractionTask<C, T> build(C context, String identitySuffix) {
-            var task = new InteractionTask<C, T>(context, priority, timeout, retries, delay, scheduler, mcAccessor) {
+            var task = new InteractionTask<C, T>(context, priority, timeout, retries, delay, isInterruptible, scheduler, mcAccessor) {
                 @Override
                 public String getIdentifier() {
                     if (identitySuffix != null) {
