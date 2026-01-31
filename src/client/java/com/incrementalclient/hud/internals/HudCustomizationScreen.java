@@ -125,7 +125,7 @@ public class HudCustomizationScreen extends Screen {
         List<HudElement<?>> bars = new ArrayList<>();
         List<HudElement<?>> otherElements = new ArrayList<>();
         for (var element : hudElements) {
-            if (element instanceof BottomBarElement || element instanceof TopBarElement) {
+            if (element instanceof BottomBarElement || element instanceof TopBarElement || element instanceof ScoreboardReplacementBarElement) {
                 if (hudManager.getConfiguration().getBarScoreboardReplacement()) {
                     bars.add(element);
                 }
