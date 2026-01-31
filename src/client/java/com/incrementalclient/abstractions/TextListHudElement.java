@@ -144,6 +144,9 @@ public abstract class TextListHudElement<T extends TextListHudElement.Configurat
                 .max()
                 .orElse(0);
 
+        int x = 0;
+        int y = 0;
+
         // Get the y offset
         if (!downDirection && !texts.isEmpty()) {
             y = -2 - HudConstants.TEXT_PADDING_Y - HudConstants.TEXT_HEIGHT + HudConstants.LINE_SPACING * texts.size();
