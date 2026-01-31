@@ -33,10 +33,6 @@ public class TextUtils {
         );
     }
 
-    public static Text textColorUnderline(String string, int rgb) {
-        return Text.literal(string).styled(s -> s.withColor(rgb));
-    }
-
     public static MutableText mutableRecolor(Text text, int rgb) {
         return Text.literal(text.getString()).styled(s -> s.withColor(rgb));
     }
