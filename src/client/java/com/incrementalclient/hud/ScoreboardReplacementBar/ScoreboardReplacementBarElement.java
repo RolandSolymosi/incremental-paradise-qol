@@ -226,8 +226,8 @@ public class ScoreboardReplacementBarElement extends HudElement<ScoreboardReplac
 
     public static class Configuration extends HudElement.ConfigurationBase {
 
-        private static final int defaultTopPadding = 6;
-        private static final int defaultBottomPadding = 6;
+        private static final int defaultTopPadding = 8;
+        private static final int defaultBottomPadding = 8;
 
         @SerialEntry
         public int topPadding = defaultTopPadding;
