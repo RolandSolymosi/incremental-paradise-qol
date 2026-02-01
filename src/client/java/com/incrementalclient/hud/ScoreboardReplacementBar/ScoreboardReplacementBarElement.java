@@ -22,18 +22,15 @@ import java.util.stream.Stream;
 
 public class ScoreboardReplacementBarElement extends HudElement<ScoreboardReplacementBarElement.Configuration> {
 
-    // TODO: This file is a mess, clean up
-
     private final GameInfoMonitor gameInfoMonitor;
-    private final Supplier<List<OptionPiece>> options;
 
-    public static final int PADDING = 8;
-    // This can be reduced later as techincally the bar is made up of top and bottom padding and text but padding between lines can be less than bottom padding
+    public static final int SIDE_PADDING = 8;
     public static final int LINE_SPACING = 4;
+    public int lineCount = 0;
 
     private final ScoreboardReplacementBarElement.Configuration configuration = new Configuration();
 
-    public int lineCount = 0;
+    private final Supplier<List<OptionPiece>> options;
 
     public ScoreboardReplacementBarElement(MinecraftClientAccessor mcAccessor,
                                            HudManager hudManager,
@@ -99,15 +96,15 @@ public class ScoreboardReplacementBarElement extends HudElement<ScoreboardReplac
         context.drawText(textRenderer.get(), areaText, (screenWidth - areaWidth) / 2, configuration.topPadding, 0xFFFFFFFF, true);
 
         // Render the player name and progress layers
-        int currentLeftWidth = PADDING;
+        int currentLeftWidth = SIDE_PADDING;
         List<Text> leftTexts = Stream.concat(texts.get("playerName").stream(), texts.get("progressLayers").stream()).toList();
         MutableText currentLeftText = Text.literal("");
         int currentLeftLineCount = 0;
         for (Text text : leftTexts) {
-            if (currentLeftWidth + textRenderer.get().getWidth(text) > (screenWidth - areaWidth) / 2 - PADDING) {
-                context.drawText(textRenderer.get(), currentLeftText, PADDING, configuration.topPadding + (LINE_SPACING + HudConstants.TEXT_HEIGHT) * currentLeftLineCount, 0xFFFFFFFF, true);
+            if (currentLeftWidth + textRenderer.get().getWidth(text) > (screenWidth - areaWidth) / 2 - SIDE_PADDING) {
+                context.drawText(textRenderer.get(), currentLeftText, SIDE_PADDING, configuration.topPadding + (LINE_SPACING + HudConstants.TEXT_HEIGHT) * currentLeftLineCount, 0xFFFFFFFF, true);
 //                renderBarText(context, textRenderer.get(), currentLeftText, PADDING, LINE_SPACING * currentLeftLineCount);
-                currentLeftWidth = PADDING;
+                currentLeftWidth = SIDE_PADDING;
                 currentLeftLineCount += 1;
                 currentLeftText = Text.literal("");
             }
@@ -116,19 +113,17 @@ public class ScoreboardReplacementBarElement extends HudElement<ScoreboardReplac
             currentLeftWidth += textRenderer.get().getWidth(text);
             currentLeftWidth += textRenderer.get().getWidth(Text.literal(" "));
         }
-//        renderBarText(context, textRenderer.get(), currentLeftText, PADDING, LINE_SPACING * currentLeftLineCount);
-        context.drawText(textRenderer.get(), currentLeftText, PADDING, configuration.topPadding + (LINE_SPACING + HudConstants.TEXT_HEIGHT) * currentLeftLineCount, 0xFFFFFFFF, true);
+        context.drawText(textRenderer.get(), currentLeftText, SIDE_PADDING, configuration.topPadding + (LINE_SPACING + HudConstants.TEXT_HEIGHT) * currentLeftLineCount, 0xFFFFFFFF, true);
 
         // Render the currencies
-        int currentRightWidth = PADDING;
+        int currentRightWidth = SIDE_PADDING;
         List<Text> rghtTexts = texts.get("currencies");
         MutableText currentRightText = Text.literal("");
         int currentRightLineCount = 0;
         for (Text text : rghtTexts) {
-            if (currentRightWidth + textRenderer.get().getWidth(text) > (screenWidth - areaWidth) / 2 - PADDING) {
+            if (currentRightWidth + textRenderer.get().getWidth(text) > (screenWidth - areaWidth) / 2 - SIDE_PADDING) {
                 context.drawText(textRenderer.get(), currentRightText, screenWidth - currentRightWidth, configuration.topPadding + (LINE_SPACING + HudConstants.TEXT_HEIGHT) * currentRightLineCount, 0xFFFFFFFF, true);
-//                renderBarText(context, textRenderer.get(), currentRightText, screenWidth - currentRightWidth - PADDING, LINE_SPACING * currentRightLineCount);
-                currentRightWidth = PADDING;
+                currentRightWidth = SIDE_PADDING;
                 currentRightLineCount += 1;
                 currentRightText = Text.literal("");
             }
