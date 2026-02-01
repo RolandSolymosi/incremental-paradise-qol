@@ -179,6 +179,10 @@ public abstract class HudElement<T extends HudElement.ConfigurationBase> impleme
             .max()
             .orElse(0);
     }
+
+    public int getScreenWidth() {
+        return mcAccessor.getWindow().get().getScaledWidth();
+    }
     
     protected int getCenteredTextY(int y) {
         return y + (HudConstants.BAR_ELEMENT_HEIGHT - HudConstants.TEXT_HEIGHT) / 2;
@@ -244,6 +248,8 @@ public abstract class HudElement<T extends HudElement.ConfigurationBase> impleme
         private HudConstants() {
             // Utility class - prevent instantiation
         }
+
+//        public static int
     }
 
     public record RenderSettings(DrawContext context, float delta, boolean editMode){

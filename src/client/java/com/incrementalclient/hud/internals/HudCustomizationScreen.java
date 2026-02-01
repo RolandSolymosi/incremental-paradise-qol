@@ -56,10 +56,10 @@ public class HudCustomizationScreen extends Screen {
         }
         
         for (HudElement<?> element : otherElementsToAdd) {
-            addDrawableChild(new HudElementToggleWidget(element, 0, 0));
+            addDrawableChild(new HudElementToggleWidget(element));
             if (element.isScalable()) {
                 Vector2f pos = element.getElementPosition();
-                addDrawableChild(new HudScaleWidget(element, (int) pos.x + 7, (int) pos.y + 7));
+                addDrawableChild(new HudScaleWidget(element));
             }
         }
 
@@ -73,7 +73,10 @@ public class HudCustomizationScreen extends Screen {
             button -> {
                 for (HudElement<?> element : hudElements) {
                     element.resetToDefaultPosition();
-                    element.setScale(1.0f);
+                    if (!hasShiftDown()){
+                        element.setScale(1.0f);
+                    }
+
                 }
             }
         ).dimensions(width / 2 - 105, buttonY, 100, 20).build());
