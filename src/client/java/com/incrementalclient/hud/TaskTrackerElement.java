@@ -217,6 +217,10 @@ public class TaskTrackerElement extends TextListHudElement<TaskTrackerElement.Co
                         Text.literal("").append(TextUtils.textColor("-", textColor)).append(TextUtils.textColor(task.getRegion().getName(), 0xa3cbcb));
                 case Region.W4_Homestead ->
                         Text.literal("").append(TextUtils.textColor("-", textColor)).append(TextUtils.textColor(task.getRegion().getName(), 0x944a00));
+                case Region.W4_Sewer ->
+                        Text.literal("").append(TextUtils.textColor("-", textColor)).append(TextUtils.textColor(task.getRegion().getName(), 0x944a00));
+                case Region.W4_CityOutskirt ->
+                        Text.literal("").append(TextUtils.textColor("-", textColor)).append(TextUtils.textColor(task.getRegion().getName(), 0x944a00));
                 case Region.W4_Alpha ->
                         Text.literal("").append(TextUtils.textColor("-", textColor)).append(TextUtils.textColor(task.getRegion().getName(), 0x00a800));
                 case Region.W4_Beta ->

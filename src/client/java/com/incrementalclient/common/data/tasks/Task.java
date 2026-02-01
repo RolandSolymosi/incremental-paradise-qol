@@ -198,8 +198,8 @@ public enum Task {
     Driftwood(new NormalTask("Driftwood", Region.W4_Delta, List.of("driftwood"), null, TaskType.Foraging, DefaultWardrobe.Foraging, Tool.Axe, null, List.of(Warp.W4_Delta))),
 
     Bat(new NormalTask("Bat", Region.W4_Homestead, List.of("bats"), null, TaskType.Combat, DefaultWardrobe.Combat, Tool.Bow, List.of(Target.W4_Bat), List.of(Warp.W4_Spawn))),
-    Rat(new NormalTask("Rat", Region.W4_Homestead, List.of("rats"), null, TaskType.Combat, DefaultWardrobe.Combat, Tool.Melee, List.of(Target.W4_Rat), List.of(Warp.W4_Sewer, Warp.W4_Spawn))),
-    Rattus(new NormalTask("Rattus", Region.W4_Homestead, List.of("rattus"), null, TaskType.Combat, DefaultWardrobe.Combat, Tool.Melee, null, List.of(Warp.W4_Rattus, Warp.W4_Spawn))),
+    Rat(new NormalTask("Rat", Region.W4_Sewer, List.of("rats"), null, TaskType.Combat, DefaultWardrobe.Combat, Tool.Melee, List.of(Target.W4_Rat), List.of(Warp.W4_Sewer, Warp.W4_Spawn))),
+    Rattus(new NormalTask("Rattus", Region.W4_Sewer, List.of("rattus"), null, TaskType.Combat, DefaultWardrobe.Combat, Tool.Melee, null, List.of(Warp.W4_Rattus, Warp.W4_Spawn))),
     Frog(new NormalTask("Frog", Region.W4_Alpha, List.of("frogs"), null, TaskType.Combat, DefaultWardrobe.Combat, Tool.Melee, List.of(Target.W4_Frog), List.of(Warp.W4_Alpha))),
     Sniper(new NormalTask("Sniper", Region.W4_Beta, List.of("snipers"), null, TaskType.Combat, DefaultWardrobe.Combat, Tool.Bow, List.of(Target.W4_Sniper), List.of(Warp.W4_Beta))),
     AngryMiner(new NormalTask("Angry Miner", Region.W4_Beta, List.of("angry miners"), null, TaskType.Combat, DefaultWardrobe.Combat, Tool.Melee, List.of(Target.W4_AngryMiner), List.of(Warp.W4_Beta))),
@@ -213,8 +213,8 @@ public enum Task {
     BoomShroom(new NormalTask("Boom Shroom", Region.W4_Alpha, List.of("boom shrooms"), null, TaskType.Farming, DefaultWardrobe.Farming, Tool.Hoe, null, List.of(Warp.W4_Alpha))),
     Pearl(new NormalTask("Pearl", Region.W4_Delta, List.of("pearls"), null, TaskType.Farming, DefaultWardrobe.Farming, Tool.Hoe, null, List.of(Warp.W4_Delta))),
 
-    Cat(new NormalTask("Cat", Region.W4_Homestead, List.of("cats"), null, TaskType.Fishing, DefaultWardrobe.CombatFishing, Tool.Spear, List.of(Target.W4_Cat), List.of(Warp.W4_Sewer, Warp.W4_Spawn))),
-    Catfish(new NormalTask("Catfish", Region.W4_Homestead, List.of("catfish"), null, TaskType.Fishing, DefaultWardrobe.Fishing, Tool.Spear, List.of(Target.W4_Catfish), List.of(Warp.W4_Sewer, Warp.W4_Spawn))),
+    Cat(new NormalTask("Cat", Region.W4_Sewer, List.of("cats"), null, TaskType.Fishing, DefaultWardrobe.CombatFishing, Tool.Spear, List.of(Target.W4_Cat), List.of(Warp.W4_Sewer, Warp.W4_Spawn))),
+    Catfish(new NormalTask("Catfish", Region.W4_Sewer, List.of("catfish"), null, TaskType.Fishing, DefaultWardrobe.Fishing, Tool.Spear, List.of(Target.W4_Catfish), List.of(Warp.W4_Sewer, Warp.W4_Spawn))),
     Piranha(new NormalTask("Piranha", Region.W4_Alpha, List.of("piranhas"), null, TaskType.Fishing, DefaultWardrobe.Fishing, Tool.Spear, List.of(Target.W4_Piranha), List.of(Warp.W4_Alpha))),
     Clownfish(new NormalTask("Clownfish", Region.W4_Delta, List.of("clownfish"), null, TaskType.Fishing, DefaultWardrobe.Fishing, Tool.Spear, List.of(Target.W4_Clownfish), List.of(Warp.W4_Delta))),
     Cichild(new NormalTask("Cichild", Region.W4_Delta, List.of("cichlid"), null, TaskType.Fishing, DefaultWardrobe.Fishing, Tool.Spear, List.of(Target.W4_Cichlid), List.of(Warp.W4_Delta))),
@@ -222,7 +222,7 @@ public enum Task {
     RedEmperor(new NormalTask("Red Emperor", Region.W4_Delta, List.of("red emperor"), null, TaskType.Fishing, DefaultWardrobe.Fishing, Tool.Spear, List.of(Target.W4_RedEmperor), List.of(Warp.W4_Delta))),
     Pufferfish(new NormalTask("Pufferfish", Region.W4_Delta, List.of("pufferfish"), null, TaskType.Fishing, DefaultWardrobe.CombatFishing, Tool.Spear, List.of(Target.W4_Pufferfish), List.of(Warp.W4_Delta))),
 
-    SewerChest(new NormalTask("Sewer Chest", Region.W4_Homestead, List.of("sewer chests"), null, TaskType.Misc, null, Tool.Spear, List.of(Target.W4_SewerChest), List.of(Warp.W4_Sewer, Warp.W4_Spawn))),
+    SewerChest(new NormalTask("Sewer Chest", Region.W4_Sewer, List.of("sewer chests"), null, TaskType.Misc, null, Tool.Spear, List.of(Target.W4_SewerChest), List.of(Warp.W4_Sewer, Warp.W4_Spawn))),
 
     // World Nightmare 1
     Quartz(new NormalTask("Quartz", Region.WN1_Overworld, List.of("quartz"), null, TaskType.Mining, DefaultWardrobe.Mining, Tool.Pickaxe, List.of(Target.N1_Quartz), List.of(Warp.WN1_Quartz, Warp.WN1_Spawn))),
