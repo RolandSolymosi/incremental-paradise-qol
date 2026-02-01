@@ -62,18 +62,9 @@ public class Main implements ClientModInitializer {
             .addSingleton(AutoSkill.class).forwardSingleton(Configurable.class, AutoSkill.class)
             // Hud Elements and Screens
             .addTransient(HudCustomizationScreen.class) // It must be transient as a screen shouldn't be reused
-//            .addSingleton(BottomBarElement.class).forwardSingleton(Configurable.class, BottomBarElement.class).forwardSingleton(HudElement.class, BottomBarElement.class)
-//            .addSingleton(TopBarElement.class).forwardSingleton(Configurable.class, TopBarElement.class).forwardSingleton(HudElement.class, TopBarElement.class)
             .addSingleton(ScoreboardReplacementBarElement.class).forwardSingleton(Configurable.class, ScoreboardReplacementBarElement.class).forwardSingleton(HudElement.class, ScoreboardReplacementBarElement.class)
             .addSingleton(ConsumableTimerElement.class).forwardSingleton(Configurable.class, ConsumableTimerElement.class).forwardSingleton(HudElement.class, ConsumableTimerElement.class)
-//            .addSingleton(CurrencyElement.class).forwardSingleton(Configurable.class, CurrencyElement.class).forwardSingleton(HudElement.class, CurrencyElement.class)
-//            .addSingleton(HPBarElement.class).forwardSingleton(Configurable.class, HPBarElement.class).forwardSingleton(HudElement.class, HPBarElement.class)
             .addSingleton(TaskTrackerElement.class).forwardSingleton(Configurable.class, TaskTrackerElement.class).forwardSingleton(HudElement.class, TaskTrackerElement.class)
-//            .addSingleton(PlayerNameElement.class).forwardSingleton(Configurable.class, PlayerNameElement.class).forwardSingleton(HudElement.class, PlayerNameElement.class)
-//            .addSingleton(AreaElement.class).forwardSingleton(Configurable.class, AreaElement.class).forwardSingleton(HudElement.class, AreaElement.class)
-//            .addSingleton(ProgressLayerElement.class).forwardSingleton(Configurable.class, ProgressLayerElement.class).forwardSingleton(HudElement.class, ProgressLayerElement.class)
-//            .addSingleton(CompletedTasksElement.class).forwardSingleton(Configurable.class, CompletedTasksElement.class).forwardSingleton(HudElement.class, CompletedTasksElement.class)
-//            .addSingleton(AggroElement.class).forwardSingleton(Configurable.class, AggroElement.class).forwardSingleton(HudElement.class, AggroElement.class)
             .addSingleton(ItemTargetTrackerElement.class).forwardSingleton(Configurable.class, ItemTargetTrackerElement.class).forwardSingleton(HudElement.class, ItemTargetTrackerElement.class)
             .buildServiceProvider();
 

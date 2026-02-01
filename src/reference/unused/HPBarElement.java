@@ -1,4 +1,4 @@
-package com.incrementalclient.hud;
+package com.incrementalclient.hud.unused;
 
 import com.google.common.base.Suppliers;
 import com.incrementalclient.abstractions.HudElement;

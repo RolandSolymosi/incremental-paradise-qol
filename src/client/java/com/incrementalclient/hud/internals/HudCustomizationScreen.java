@@ -1,13 +1,11 @@
 package com.incrementalclient.hud.internals;
 
 import com.incrementalclient.abstractions.HudElement;
-import com.incrementalclient.hud.BottomBarElement;
-import com.incrementalclient.hud.TopBarElement;
+import com.incrementalclient.common.utils.Vector2f;
 import com.incrementalclient.hud.ScoreboardReplacementBar.ScoreboardReplacementBarElement;
 import com.incrementalclient.internals.MinecraftClientAccessor;
 import com.incrementalclient.services.ConfigHandler;
 import com.incrementalclient.services.HudManager;
-import com.incrementalclient.common.utils.Vector2f;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -44,7 +42,7 @@ public class HudCustomizationScreen extends Screen {
         List<HudElement<?>> otherElementsToAdd = new ArrayList<>();
         
         for (HudElement<?> element : hudElements) {
-            if (element instanceof BottomBarElement || element instanceof TopBarElement || element instanceof ScoreboardReplacementBarElement) {
+            if (element instanceof ScoreboardReplacementBarElement) {
                 barsToAdd.add(element);
             } else {
                 otherElementsToAdd.add(element);
@@ -100,7 +98,7 @@ public class HudCustomizationScreen extends Screen {
         snapPointsY.add(height-8);
 
         for (HudElement<?> element : hudElements) {
-            if (element instanceof BottomBarElement || element instanceof TopBarElement || element instanceof ScoreboardReplacementBarElement) {
+            if (element instanceof ScoreboardReplacementBarElement) {
                 continue;
             }
             
@@ -128,7 +126,7 @@ public class HudCustomizationScreen extends Screen {
         List<HudElement<?>> bars = new ArrayList<>();
         List<HudElement<?>> otherElements = new ArrayList<>();
         for (var element : hudElements) {
-            if (element instanceof BottomBarElement || element instanceof TopBarElement || element instanceof ScoreboardReplacementBarElement) {
+            if (element instanceof ScoreboardReplacementBarElement) {
                 if (hudManager.getConfiguration().getBarScoreboardReplacement()) {
                     bars.add(element);
                 }

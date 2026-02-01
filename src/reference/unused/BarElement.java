@@ -1,13 +1,12 @@
-package com.incrementalclient.hud;
+package com.incrementalclient.hud.unused;
 
 import com.incrementalclient.abstractions.HudElement;
 import com.incrementalclient.common.utils.Vector2f;
 import com.incrementalclient.internals.MinecraftClientAccessor;
 import com.incrementalclient.services.HudManager;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.text.Text;
 import net.minecraft.util.math.ColorHelper;
-
+BIG FUCKING ERROR
 public abstract class BarElement extends HudElement<BarElement.Configuration> {
     public static final int HOTBAR_WIDTH = 182; // Standard hotbar width
     public static final int PADDING = 4; // Padding around elements

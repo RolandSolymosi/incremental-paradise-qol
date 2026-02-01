@@ -5,14 +5,11 @@ import com.incrementalclient.Main;
 import com.incrementalclient.abstractions.HudElement;
 import com.incrementalclient.abstractions.ObservableBase;
 import com.incrementalclient.common.utils.Vector2f;
-import com.incrementalclient.hud.BottomBarElement;
 import com.incrementalclient.hud.ScoreboardReplacementBar.ScoreboardReplacementBarElement;
-import com.incrementalclient.hud.TopBarElement;
 import com.incrementalclient.hud.internals.HudCustomizationScreen;
 import com.incrementalclient.interfaces.Configurable;
 import com.incrementalclient.interfaces.Observer;
 import com.incrementalclient.internals.MinecraftClientAccessor;
-import com.incrementalclient.internals.events.ClientPlayConnectionObservable;
 import com.incrementalclient.internals.events.HudRenderCallbackObservable;
 import dev.isxander.yacl3.api.ButtonOption;
 import dev.isxander.yacl3.api.NameableEnum;
@@ -148,9 +145,9 @@ public class HudManager extends ObservableBase<Observer<HudManager.Event>, HudMa
             if (o1 == o2) return 0;
             // Check if elements are bars (BottomBarElement or TopBarElement)
             boolean o1IsBar = o1 instanceof HudRender(HudElement<?> element1, HudManager hudManager) &&
-                    (element1 instanceof BottomBarElement || element1 instanceof TopBarElement);
+                    (element1 instanceof ScoreboardReplacementBarElement);
             boolean o2IsBar = o2 instanceof HudRender(HudElement<?> element2, HudManager hudManager) &&
-                    (element2 instanceof BottomBarElement || element2 instanceof TopBarElement);
+                    (element2 instanceof ScoreboardReplacementBarElement);
 
             // Bars render first (return -1), other elements render after (return 0)
             if (o1IsBar && !o2IsBar) return -1;
@@ -181,11 +178,7 @@ public class HudManager extends ObservableBase<Observer<HudManager.Event>, HudMa
     }
 
     public static boolean shouldRenderBar(HudElement<?> element, Configuration config) {
-        if (element instanceof BottomBarElement) {
-            return config.getActiveBarMode() == Configuration.ActiveBarMode.BOTTOM;
-        } else if (element instanceof TopBarElement) {
-            return config.getActiveBarMode() == Configuration.ActiveBarMode.TOP;
-        } else if (element instanceof ScoreboardReplacementBarElement) {
+        if (element instanceof ScoreboardReplacementBarElement) {
             return config.getBarScoreboardReplacement();
         }
         return element.isEnabled(); // Non-bar elements always render

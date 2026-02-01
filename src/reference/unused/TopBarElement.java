@@ -1,4 +1,4 @@
-package com.incrementalclient.hud;
+package com.incrementalclient.hud.unused;
 
 import com.incrementalclient.common.utils.Vector2f;
 import com.incrementalclient.internals.MinecraftClientAccessor;
