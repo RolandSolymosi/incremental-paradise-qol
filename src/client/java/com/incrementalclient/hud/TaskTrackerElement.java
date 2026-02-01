@@ -222,7 +222,7 @@ public class TaskTrackerElement extends TextListHudElement<TaskTrackerElement.Co
                 case Region.W4_Beta ->
                         Text.literal("").append(TextUtils.textColor("-", textColor)).append(TextUtils.textColor(task.getRegion().getName(), 0xa800a8));
                 case Region.W4_Delta ->
-                        Text.literal("").append(TextUtils.textColor("-", textColor)).append(TextUtils.textColor(task.getRegion().getName(), 0x54fc54)); //TODO: Need color for Delta;
+                        Text.literal("").append(TextUtils.textColor("-", textColor)).append(TextUtils.textColor(task.getRegion().getName(), 0x5353f9));
                 default -> Text.of("");
             };
         } else return Text.of("");
