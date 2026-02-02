@@ -59,36 +59,36 @@ public class TaskingOverrides extends ListenableBase<Listener> implements Comple
                                                 .name(Text.of("Overrides"))
                                                 .option(Option.<Task>createBuilder()
                                                         .name(Text.of("Task"))
-                                                        .binding(opt.task, () -> opt.task, val -> opt.task = val)
+                                                        .binding(Configuration.Override.defaultTask, () -> opt.task, val -> opt.task = val)
                                                         .controller(t -> EnumDropdownControllerBuilder.create(t)
                                                                 .formatValue(v -> Text.of(v.getDescriptor().displayName()))
                                                         )
                                                         .build())
                                                 .option(Option.<String>createBuilder()
                                                         .name(Text.of("Warp"))
-                                                        .binding(opt.warp, () -> opt.warp, val -> opt.warp = val)
+                                                        .binding(Configuration.Override.defaultWarp, () -> opt.warp, val -> opt.warp = val)
                                                         .controller(StringControllerBuilder::create)
                                                         .build())
                                                 .option(Option.<String>createBuilder()
                                                         .name(Text.of("Wardrobe"))
-                                                        .binding(opt.wardrobe, () -> opt.wardrobe, val -> opt.wardrobe = val)
+                                                        .binding(Configuration.Override.defaultWardrobe, () -> opt.wardrobe, val -> opt.wardrobe = val)
                                                         .controller(StringControllerBuilder::create)
                                                         .build())
                                                 .option(Option.<String>createBuilder()
                                                         .name(Text.of("Pet"))
-                                                        .binding(opt.pet, () -> opt.pet, val -> opt.pet = val)
+                                                        .binding(Configuration.Override.defaultPet, () -> opt.pet, val -> opt.pet = val)
                                                         .controller(StringControllerBuilder::create)
                                                         .build())
                                                 .option(Option.<Tool>createBuilder()
                                                         .name(Text.of("Tool"))
-                                                        .binding(opt.tool, () -> opt.tool, val -> opt.tool = val)
+                                                        .binding(Configuration.Override.defaultTool, () -> opt.tool, val -> opt.tool = val)
                                                         .controller(t -> EnumDropdownControllerBuilder.create(t)
                                                                 .formatValue(v -> Text.of(v.name()))
                                                         )
                                                         .build())
                                                 .option(Option.<TicketTaskOverride>createBuilder()
                                                         .name(Text.of("Ticket task Skip Behavior"))
-                                                        .binding(opt.skipTicket, () -> opt.skipTicket, val -> opt.skipTicket = val)
+                                                        .binding(Configuration.Override.defaultSkipTicket, () -> opt.skipTicket, val -> opt.skipTicket = val)
                                                         .controller(t -> EnumControllerBuilder.create(t)
                                                                 .enumClass(TicketTaskOverride.class)
                                                                 .formatValue(v -> Text.of(v.getName()))
@@ -103,6 +103,7 @@ public class TaskingOverrides extends ListenableBase<Listener> implements Comple
                         .build()
         ));
     }
+
 
     public TicketTaskOverride getTicketTaskOverride(Task task) {
         return overrides.get(task) != null ? overrides.get(task).skipTicket : TicketTaskOverride.Default;
@@ -144,18 +145,25 @@ public class TaskingOverrides extends ListenableBase<Listener> implements Comple
         public List<Override> overrides = new java.util.ArrayList<>();
 
         public static class Override {
+            private static final Task defaultTask = Task.SellItems;
+            private static final String defaultWardrobe = "";
+            private static final String defaultPet = "";
+            private static final String defaultWarp = "";
+            private static final Tool defaultTool = Tool.Default;
+            private static final TicketTaskOverride defaultSkipTicket = TicketTaskOverride.Default;
+
             @SerialEntry
-            public Task task = Task.SellItems;
+            public Task task = defaultTask;
             @SerialEntry
-            public String wardrobe = "";
+            public String wardrobe = defaultWardrobe;
             @SerialEntry
-            public String pet = "";
+            public String pet = defaultPet;
             @SerialEntry
-            public String warp = "";
+            public String warp = defaultWarp;
             @SerialEntry
-            public Tool tool = Tool.Default;
+            public Tool tool = defaultTool;
             @SerialEntry
-            public TicketTaskOverride skipTicket = TicketTaskOverride.Default;
+            public TicketTaskOverride skipTicket = defaultSkipTicket;
         }
     }
 
