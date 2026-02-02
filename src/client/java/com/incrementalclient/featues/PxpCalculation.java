@@ -65,7 +65,7 @@ public class PxpCalculation implements Configurable<PxpCalculation.Configuration
                         Option.<Integer>createBuilder()
                                 .name(Text.of("Legendary Pet Value"))
                                 .description(OptionDescription.of(Text.of("The PXP value of a legendary pet")))
-                                .binding( configuration.legendaryPxpValue, () -> configuration.legendaryPxpValue, newVal -> configuration.legendaryPxpValue = newVal)
+                                .binding( Configuration.defaultLegendaryPxpValue, () -> configuration.legendaryPxpValue, newVal -> configuration.legendaryPxpValue = newVal)
                                 .controller(opt -> IntegerFieldControllerBuilder.create(opt)
                                         .min(50).max(500))
                                 .build()),
@@ -73,7 +73,7 @@ public class PxpCalculation implements Configurable<PxpCalculation.Configuration
                         Option.<Integer>createBuilder()
                                 .name(Text.of("Mythic Pet Value"))
                                 .description(OptionDescription.of(Text.of("The PXP value of a mythic pet")))
-                                .binding(configuration.mythicPxpValue, () -> configuration.mythicPxpValue, newVal -> configuration.mythicPxpValue = newVal)
+                                .binding(Configuration.defaultMythicPxpValue, () -> configuration.mythicPxpValue, newVal -> configuration.mythicPxpValue = newVal)
                                 .controller(opt -> IntegerFieldControllerBuilder.create(opt)
                                         .min(500).max(10000))
                                 .build())));
@@ -142,9 +142,12 @@ public class PxpCalculation implements Configurable<PxpCalculation.Configuration
     }
 
     static public class Configuration {
+        private static final int defaultLegendaryPxpValue = 75;
+        private static final int defaultMythicPxpValue = 500;
+
         @SerialEntry
-        public int legendaryPxpValue = 75;
+        public int legendaryPxpValue = defaultLegendaryPxpValue;
         @SerialEntry
-        public int mythicPxpValue = 500;
+        public int mythicPxpValue = defaultMythicPxpValue;
     }
 }
