@@ -40,7 +40,7 @@ public class SellAllHotkey implements Configurable<SellAllHotkey.Configuration> 
                 Option.<Integer>createBuilder()
                         .name(Text.literal("Sell all"))
                         .binding(
-                                configuration.keybind,
+                                Configuration.defaultKeybind,
                                 () -> configuration.keybind,
                                 v -> configuration.keybind = v
                         )
@@ -74,7 +74,9 @@ public class SellAllHotkey implements Configurable<SellAllHotkey.Configuration> 
     }
 
     static public class Configuration {
+        private final static int defaultKeybind = GLFW.GLFW_KEY_COMMA;
+
         @SerialEntry
-        public int keybind = GLFW.GLFW_KEY_COMMA;
+        public int keybind = defaultKeybind;
     }
 }
