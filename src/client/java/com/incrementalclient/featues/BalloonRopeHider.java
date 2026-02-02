@@ -30,7 +30,7 @@ public class BalloonRopeHider implements Configurable<BalloonRopeHider.Configura
                         Option.<Boolean>createBuilder()
                                 .name(Text.of("Toggle balloon ropes for self."))
                                 .description(OptionDescription.of(Text.of("Turn on and off the balloon rope attached to the player.")))
-                                .binding(configuration.isHidden, () -> configuration.isHidden, newVal -> configuration.isHidden = newVal)
+                                .binding(Configuration.defaultIsHidden, () -> configuration.isHidden, newVal -> configuration.isHidden = newVal)
                                 .controller(BooleanControllerBuilder::create)
                                 .build())));
     }
@@ -69,8 +69,11 @@ public class BalloonRopeHider implements Configurable<BalloonRopeHider.Configura
     }
 
     static public class Configuration {
+
+        private static final boolean defaultIsHidden = true;
+
         @SerialEntry
-        public boolean isHidden = true;
+        public boolean isHidden = defaultIsHidden;
 
     }
 }
