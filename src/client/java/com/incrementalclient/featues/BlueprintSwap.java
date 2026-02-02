@@ -218,7 +218,7 @@ public class BlueprintSwap implements Configurable<BlueprintSwap.Configuration> 
 
     @Override
     public String getJsonSection() {
-        return "depositHotkey";
+        return "blueprintSwap";
     }
 
     @Override
