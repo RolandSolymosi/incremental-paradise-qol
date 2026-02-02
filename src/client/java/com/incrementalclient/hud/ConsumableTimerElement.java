@@ -37,6 +37,8 @@ public class ConsumableTimerElement extends TextListHudElement<ConsumableTimerEl
         this.activeConsumableMonitor = activeConsumableMonitor;
         this.downDirection = false;
         this.leftDirection = false;
+        this.defaultPosition = new Vector2f(0.99F, 0.975F);
+        resetToDefaultPosition();
 
         options = Suppliers.memoize(() -> List.of(
                 Categories.Hud.Consumable.createConfig(0,
@@ -96,11 +98,6 @@ public class ConsumableTimerElement extends TextListHudElement<ConsumableTimerEl
     @Override
     public boolean isElementEnabled() {
         return getConfiguration().isConsumableHudEnabled;
-    }
-
-    @Override
-    public Vector2f getDefaultPosition() {
-        return new Vector2f(0.99F, 0.975F);
     }
 
     @Override

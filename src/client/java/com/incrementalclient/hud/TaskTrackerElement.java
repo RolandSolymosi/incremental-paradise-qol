@@ -28,6 +28,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class TaskTrackerElement extends TextListHudElement<TaskTrackerElement.Configuration> {
+
     private final WorldMonitor worldMonitor;
     private final TaskMonitor taskMonitor;
 
@@ -44,6 +45,8 @@ public class TaskTrackerElement extends TextListHudElement<TaskTrackerElement.Co
         super(mcAccessor, hudManager);
         this.worldMonitor = worldMonitor;
         this.taskMonitor = taskMonitor;
+        this.defaultPosition = new Vector2f(0.01F, 0.01777777F);
+        resetToDefaultPosition();
 
         options = Suppliers.memoize(() -> List.of(
                 Categories.Tasking.Hud.createConfig(0,
@@ -246,11 +249,6 @@ public class TaskTrackerElement extends TextListHudElement<TaskTrackerElement.Co
                 .append(TextUtils.textColor(world, worldColor))
                 .append(getSublocation(taskState))
                 .append(TextUtils.textColor("]", textColor));
-    }
-
-    @Override
-    public Vector2f getDefaultPosition() {
-        return new Vector2f(0.01F, 0.017777F);
     }
 
     @Override

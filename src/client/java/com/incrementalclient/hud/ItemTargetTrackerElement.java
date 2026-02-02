@@ -41,6 +41,8 @@ public class ItemTargetTrackerElement extends TextListHudElement<ItemTargetTrack
         super(uiAccessor, hudManager);
         this.itemTargetMonitor = itemTargetMonitor;
         this.leftDirection = false;
+        this.defaultPosition = new Vector2f(0.99F, 0.017777F);
+        resetToDefaultPosition();
 
         options = Suppliers.memoize(() -> List.of(
                 Categories.Hud.ItemTarget.createConfig(0,
@@ -90,11 +92,6 @@ public class ItemTargetTrackerElement extends TextListHudElement<ItemTargetTrack
     @Override
     public boolean isElementEnabled() {
         return getConfiguration().isHudEnabled;
-    }
-
-    @Override
-    public Vector2f getDefaultPosition() {
-        return new Vector2f(0.99F, 0.017777F);
     }
 
     @Override

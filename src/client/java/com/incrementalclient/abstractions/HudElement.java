@@ -15,6 +15,7 @@ import java.util.List;
 
 public abstract class HudElement<T extends HudElement.ConfigurationBase> implements Configurable<T> {
     protected Vector2f elementPosition = new Vector2f(0, 0);
+    protected Vector2f defaultPosition = new Vector2f(0, 0);
     protected float scale = 1.0f;
     protected boolean enabled = true;
     protected boolean scalable = true;
@@ -79,7 +80,9 @@ public abstract class HudElement<T extends HudElement.ConfigurationBase> impleme
     /**
      * Returns the default position of the element when it is reset
      */
-    public abstract Vector2f getDefaultPosition();
+    public Vector2f getDefaultPosition() {
+        return defaultPosition;
+    }
 
     public void resetToDefaultPosition() {
         this.elementPosition = getDefaultPosition();
@@ -273,8 +276,6 @@ public abstract class HudElement<T extends HudElement.ConfigurationBase> impleme
         public float scale = 1;
         @SerialEntry
         public boolean enabled = true;
-        @SerialEntry
-        public boolean initialised = false;
     }
 }
 

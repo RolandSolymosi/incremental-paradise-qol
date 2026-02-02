@@ -283,12 +283,6 @@ public class HudManager extends ObservableBase<Observer<HudManager.Event>, HudMa
 
         @Override
         public void onEvent(Event event) {
-            // TODO: Figure out if there is a better way to do this
-            if (!element.getConfiguration().initialised) {
-                element.resetToDefaultPosition();
-                element.getConfiguration().initialised = true;
-            }
-
             // Check if element is a bar and should be rendered based on activeBarMode
             if (!shouldRenderBar(element, hudManager.getConfiguration())) {
                 return; // Skip rendering if bar is not active

@@ -157,12 +157,14 @@ public abstract class TextListHudElement<T extends TextListHudElement.Configurat
         // Get the y offset
         if (!downDirection && !texts.isEmpty()) {
             y = HudConstants.TEXT_PADDING_Y + HudConstants.LINE_SPACING * texts.size();
+        } else if (!downDirection) {
+            y = HudConstants.PLACEHOLDER_HEIGHT;
         }
 
         // Get the x offset
         if (!leftDirection && !texts.isEmpty()) {
             x = maxWidth + HudConstants.BACKGROUND_PADDING;
-        } else if (!leftDirection && texts.isEmpty()) {
+        } else if (!leftDirection) {
             x = getPlaceholderWidth();
         }
 
