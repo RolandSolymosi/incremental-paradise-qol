@@ -59,7 +59,7 @@ public class AutoSwapLoadout implements Configurable<AutoSwapLoadout.Configurati
                         Option.<Integer>createBuilder()
                                 .name(Text.literal("Swap Loadout for Next Task"))
                                 .binding(
-                                        configuration.keybind,
+                                        Configuration.defaultKeybind,
                                         () -> configuration.keybind,
                                         v -> configuration.keybind = v
                                 )
@@ -69,49 +69,49 @@ public class AutoSwapLoadout implements Configurable<AutoSwapLoadout.Configurati
                         Option.<Boolean>createBuilder()
                                 .name(Text.of("Toggle the Auto Swap of Wardrobe"))
                                 .description(OptionDescription.of(Text.of("Turning on/off the auto swap of wardrobes functionality")))
-                                .binding(this.configuration.enableWardrobeSwap, () -> this.configuration.enableWardrobeSwap, newVal -> this.configuration.enableWardrobeSwap = newVal)
+                                .binding(Configuration.defaultEnableWardrobeSwap, () -> this.configuration.enableWardrobeSwap, newVal -> this.configuration.enableWardrobeSwap = newVal)
                                 .controller(BooleanControllerBuilder::create)
                                 .build()),
                 Categories.Tasking.Wardrobe.createConfig(1,
                         Option.<String>createBuilder()
                                 .name(Text.of("Combat Wardrobe Name"))
                                 .description(OptionDescription.of(Text.of("The name of your wardrobe slot for Combat tasks.")))
-                                .binding(this.configuration.combatWardrobeName, () -> this.configuration.combatWardrobeName, newVal -> this.configuration.combatWardrobeName = newVal)
+                                .binding(Configuration.defaultCombatWardrobeName, () -> this.configuration.combatWardrobeName, newVal -> this.configuration.combatWardrobeName = newVal)
                                 .controller(StringControllerBuilder::create)
                                 .build()),
                 Categories.Tasking.Wardrobe.createConfig(2,
                         Option.<String>createBuilder()
                                 .name(Text.of("Mining Wardrobe Name"))
                                 .description(OptionDescription.of(Text.of("The name of your wardrobe slot for Mining tasks.")))
-                                .binding(this.configuration.miningWardrobeName, () -> this.configuration.miningWardrobeName, newVal -> this.configuration.miningWardrobeName = newVal)
+                                .binding(Configuration.defaultMiningWardrobeName, () -> this.configuration.miningWardrobeName, newVal -> this.configuration.miningWardrobeName = newVal)
                                 .controller(StringControllerBuilder::create)
                                 .build()),
                 Categories.Tasking.Wardrobe.createConfig(3,
                         Option.<String>createBuilder()
                                 .name(Text.of("Foraging Wardrobe Name"))
                                 .description(OptionDescription.of(Text.of("The name of your wardrobe slot for Foraging tasks.")))
-                                .binding(this.configuration.foragingWardrobeName, () -> this.configuration.foragingWardrobeName, newVal -> this.configuration.foragingWardrobeName = newVal)
+                                .binding(Configuration.defaultForagingWardrobeName, () -> this.configuration.foragingWardrobeName, newVal -> this.configuration.foragingWardrobeName = newVal)
                                 .controller(StringControllerBuilder::create)
                                 .build()),
                 Categories.Tasking.Wardrobe.createConfig(4,
                         Option.<String>createBuilder()
                                 .name(Text.of("Farming Wardrobe Name"))
                                 .description(OptionDescription.of(Text.of("The name of your wardrobe slot for Farming tasks.")))
-                                .binding(this.configuration.farmingWardrobeName, () -> this.configuration.farmingWardrobeName, newVal -> this.configuration.farmingWardrobeName = newVal)
+                                .binding(Configuration.defaultFarmingWardrobeName, () -> this.configuration.farmingWardrobeName, newVal -> this.configuration.farmingWardrobeName = newVal)
                                 .controller(StringControllerBuilder::create)
                                 .build()),
                 Categories.Tasking.Wardrobe.createConfig(5,
                         Option.<String>createBuilder()
                                 .name(Text.of("Fishing Wardrobe Name"))
                                 .description(OptionDescription.of(Text.of("The name of your wardrobe slot for Fishing tasks.")))
-                                .binding(this.configuration.fishingWardrobeName, () -> this.configuration.fishingWardrobeName, newVal -> this.configuration.fishingWardrobeName = newVal)
+                                .binding(Configuration.defaultFishingWardrobeName, () -> this.configuration.fishingWardrobeName, newVal -> this.configuration.fishingWardrobeName = newVal)
                                 .controller(StringControllerBuilder::create)
                                 .build()),
                 Categories.Tasking.Wardrobe.createConfig(6,
                         Option.<String>createBuilder()
                                 .name(Text.of("Combat Fishing Wardrobe Name"))
                                 .description(OptionDescription.of(Text.of("The name of your wardrobe slot for Combat fishing tasks (e.g.: Crabs)")))
-                                .binding(this.configuration.combatFishingWardrobeName, () -> this.configuration.combatFishingWardrobeName, newVal -> this.configuration.combatFishingWardrobeName = newVal)
+                                .binding(Configuration.defaultCombatFishingWardrobeName, () -> this.configuration.combatFishingWardrobeName, newVal -> this.configuration.combatFishingWardrobeName = newVal)
                                 .controller(StringControllerBuilder::create)
                                 .build()),
 
@@ -119,49 +119,49 @@ public class AutoSwapLoadout implements Configurable<AutoSwapLoadout.Configurati
                         Option.<Boolean>createBuilder()
                                 .name(Text.of("Toggle the Auto Swap of Tools"))
                                 .description(OptionDescription.of(Text.of("Turning on/off the auto swap of tools functionality")))
-                                .binding(this.configuration.enableToolSwap, () -> this.configuration.enableToolSwap, newVal -> this.configuration.enableToolSwap = newVal)
+                                .binding(Configuration.defaultEnableToolSwap, () -> this.configuration.enableToolSwap, newVal -> this.configuration.enableToolSwap = newVal)
                                 .controller(BooleanControllerBuilder::create)
                                 .build()),
                 Categories.Tasking.Tools.createConfig(1,
                         Option.<Integer>createBuilder()
                                 .name(Text.of("Melee Weapon HotBar Slot"))
                                 .description(OptionDescription.of(Text.of("The slot on the HotBar for your melee weapon. (1-8)")))
-                                .binding(this.configuration.meleeWeaponSlot + 1, () -> this.configuration.meleeWeaponSlot + 1, newVal -> this.configuration.meleeWeaponSlot = newVal - 1)
+                                .binding(Configuration.defaultMeleeWeaponSlot + 1, () -> this.configuration.meleeWeaponSlot + 1, newVal -> this.configuration.meleeWeaponSlot = newVal - 1)
                                 .controller(o -> IntegerSliderControllerBuilder.create(o).step(1).range(1, 8))
                                 .build()),
                 Categories.Tasking.Tools.createConfig(2,
                         Option.<Integer>createBuilder()
                                 .name(Text.of("Ranged Weapon HotBar Slot"))
                                 .description(OptionDescription.of(Text.of("The slot on the HotBar for your ranged weapon. (1-8)")))
-                                .binding(this.configuration.rangedWeaponSlot + 1, () -> this.configuration.rangedWeaponSlot + 1, newVal -> this.configuration.rangedWeaponSlot = newVal - 1)
+                                .binding(Configuration.defaultRangedWeaponSlot + 1, () -> this.configuration.rangedWeaponSlot + 1, newVal -> this.configuration.rangedWeaponSlot = newVal - 1)
                                 .controller(o -> IntegerSliderControllerBuilder.create(o).step(1).range(1, 8))
                                 .build()),
                 Categories.Tasking.Tools.createConfig(3,
                         Option.<Integer>createBuilder()
                                 .name(Text.of("Pickaxe HotBar Slot"))
                                 .description(OptionDescription.of(Text.of("The slot on the HotBar for your pickaxe. (1-8)")))
-                                .binding(this.configuration.miningWeaponSlot + 1, () -> this.configuration.miningWeaponSlot + 1, newVal -> this.configuration.miningWeaponSlot = newVal - 1)
+                                .binding(Configuration.defaultMiningWeaponSlot + 1, () -> this.configuration.miningWeaponSlot + 1, newVal -> this.configuration.miningWeaponSlot = newVal - 1)
                                 .controller(o -> IntegerSliderControllerBuilder.create(o).step(1).range(1, 8))
                                 .build()),
                 Categories.Tasking.Tools.createConfig(4,
                         Option.<Integer>createBuilder()
                                 .name(Text.of("Axe HotBar Slot"))
                                 .description(OptionDescription.of(Text.of("The slot on the HotBar for your axe. (1-8)")))
-                                .binding(this.configuration.foragingWeaponSlot + 1, () -> this.configuration.foragingWeaponSlot + 1, newVal -> this.configuration.foragingWeaponSlot = newVal - 1)
+                                .binding(Configuration.defaultForagingWeaponSlot + 1, () -> this.configuration.foragingWeaponSlot + 1, newVal -> this.configuration.foragingWeaponSlot = newVal - 1)
                                 .controller(o -> IntegerSliderControllerBuilder.create(o).step(1).range(1, 8))
                                 .build()),
                 Categories.Tasking.Tools.createConfig(5,
                         Option.<Integer>createBuilder()
                                 .name(Text.of("Hoe HotBar Slot"))
                                 .description(OptionDescription.of(Text.of("The slot on the HotBar for your hoe. (1-8)")))
-                                .binding(this.configuration.farmingWeaponSlot + 1, () -> this.configuration.farmingWeaponSlot + 1, newVal -> this.configuration.farmingWeaponSlot = newVal - 1)
+                                .binding(Configuration.defaultFarmingWeaponSlot + 1, () -> this.configuration.farmingWeaponSlot + 1, newVal -> this.configuration.farmingWeaponSlot = newVal - 1)
                                 .controller(o -> IntegerSliderControllerBuilder.create(o).step(1).range(1, 8))
                                 .build()),
                 Categories.Tasking.Tools.createConfig(6,
                         Option.<Integer>createBuilder()
                                 .name(Text.of("Fishing Rod HotBar Slot"))
                                 .description(OptionDescription.of(Text.of("The slot on the HotBar for your fishing rod. (1-8)")))
-                                .binding(this.configuration.fishingWeaponSlot + 1, () -> this.configuration.fishingWeaponSlot + 1, newVal -> this.configuration.fishingWeaponSlot = newVal - 1)
+                                .binding(Configuration.defaultFishingWeaponSlot + 1, () -> this.configuration.fishingWeaponSlot + 1, newVal -> this.configuration.fishingWeaponSlot = newVal - 1)
                                 .controller(o -> IntegerSliderControllerBuilder.create(o).step(1).range(1, 8))
                                 .build())
         ));
@@ -247,38 +247,51 @@ public class AutoSwapLoadout implements Configurable<AutoSwapLoadout.Configurati
     }
 
     public static class Configuration {
-        @SerialEntry
-        public int keybind = GLFW.GLFW_KEY_N;
+        private static final int defaultKeybind = GLFW.GLFW_KEY_R;
+        private static final boolean defaultEnableWardrobeSwap = true;
+        private static final boolean defaultEnableToolSwap = true;
+        private static final String defaultCombatWardrobeName = "1";
+        private static final int defaultMeleeWeaponSlot = 0;
+        private static final int defaultRangedWeaponSlot = 5;
+        private static final String defaultMiningWardrobeName = "2";
+        private static final int defaultMiningWeaponSlot = 1;
+        private static final String defaultForagingWardrobeName = "3";
+        private static final int defaultForagingWeaponSlot = 2;
+        private static final String defaultFarmingWardrobeName = "4";
+        private static final int defaultFarmingWeaponSlot = 3;
+        private static final String defaultFishingWardrobeName = "5";
+        private static final String defaultCombatFishingWardrobeName = "6";
+        private static final int defaultFishingWeaponSlot = 4;
 
         @SerialEntry
-        public boolean enableWardrobeSwap = true;
+        public int keybind = defaultKeybind;
         @SerialEntry
-        public boolean enableToolSwap = true;
-
+        public boolean enableWardrobeSwap = defaultEnableWardrobeSwap;
         @SerialEntry
-        public String combatWardrobeName = "1";
+        public boolean enableToolSwap = defaultEnableToolSwap;
         @SerialEntry
-        public int meleeWeaponSlot = 0;
+        public String combatWardrobeName = defaultCombatWardrobeName;
         @SerialEntry
-        public int rangedWeaponSlot = 5;
-
+        public int meleeWeaponSlot = defaultMeleeWeaponSlot;
         @SerialEntry
-        public String miningWardrobeName = "2";
+        public int rangedWeaponSlot = defaultRangedWeaponSlot;
         @SerialEntry
-        public int miningWeaponSlot = 1;
+        public String miningWardrobeName = defaultMiningWardrobeName;
         @SerialEntry
-        public String foragingWardrobeName = "3";
+        public int miningWeaponSlot = defaultMiningWeaponSlot;
         @SerialEntry
-        public int foragingWeaponSlot = 2;
+        public String foragingWardrobeName = defaultForagingWardrobeName;
         @SerialEntry
-        public String farmingWardrobeName = "4";
+        public int foragingWeaponSlot = defaultForagingWeaponSlot;
         @SerialEntry
-        public int farmingWeaponSlot = 3;
+        public String farmingWardrobeName = defaultFarmingWardrobeName;
         @SerialEntry
-        public String fishingWardrobeName = "5";
+        public int farmingWeaponSlot = defaultFarmingWeaponSlot;
         @SerialEntry
-        public String combatFishingWardrobeName = "6";
+        public String fishingWardrobeName = defaultFishingWardrobeName;
         @SerialEntry
-        public int fishingWeaponSlot = 4;
+        public String combatFishingWardrobeName = defaultCombatFishingWardrobeName;
+        @SerialEntry
+        public int fishingWeaponSlot = defaultFishingWeaponSlot;
     }
 }
