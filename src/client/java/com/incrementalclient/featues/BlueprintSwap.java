@@ -47,7 +47,7 @@ public class BlueprintSwap implements Configurable<BlueprintSwap.Configuration> 
                         Option.<Integer>createBuilder()
                                 .name(Text.literal("Swap Melee Blueprint"))
                                 .binding(
-                                        configuration.meleeSwapHotkey,
+                                        Configuration.defaultMeleeSwapHotkey,
                                         () -> configuration.meleeSwapHotkey,
                                         v -> configuration.meleeSwapHotkey = v
                                 )
@@ -57,7 +57,7 @@ public class BlueprintSwap implements Configurable<BlueprintSwap.Configuration> 
                         Option.<Integer>createBuilder()
                                 .name(Text.literal("Swap Ranged Blueprint"))
                                 .binding(
-                                        configuration.rangedSwapHotkey,
+                                        Configuration.defaultRangedSwapHotkey,
                                         () -> configuration.rangedSwapHotkey,
                                         v -> configuration.rangedSwapHotkey = v
                                 )
@@ -67,7 +67,7 @@ public class BlueprintSwap implements Configurable<BlueprintSwap.Configuration> 
                         Option.<Integer>createBuilder()
                                 .name(Text.literal("Swap Pickaxe Blueprint"))
                                 .binding(
-                                        configuration.pickaxeSwapHotkey,
+                                        Configuration.defaultPickaxeSwapHotkey,
                                         () -> configuration.pickaxeSwapHotkey,
                                         v -> configuration.pickaxeSwapHotkey = v
                                 )
@@ -77,7 +77,7 @@ public class BlueprintSwap implements Configurable<BlueprintSwap.Configuration> 
                         Option.<Integer>createBuilder()
                                 .name(Text.literal("Swap Axe Blueprint"))
                                 .binding(
-                                        configuration.axeSwapHotkey,
+                                        Configuration.defaultAxeSwapHotkey,
                                         () -> configuration.axeSwapHotkey,
                                         v -> configuration.axeSwapHotkey = v
                                 )
@@ -87,7 +87,7 @@ public class BlueprintSwap implements Configurable<BlueprintSwap.Configuration> 
                         Option.<Integer>createBuilder()
                                 .name(Text.literal("Swap Pickaxe Blueprint"))
                                 .binding(
-                                        configuration.hoeSwapHotkey,
+                                        Configuration.defaultHoeSwapHotkey,
                                         () -> configuration.hoeSwapHotkey,
                                         v -> configuration.hoeSwapHotkey = v
                                 )
@@ -97,7 +97,7 @@ public class BlueprintSwap implements Configurable<BlueprintSwap.Configuration> 
                         Option.<Integer>createBuilder()
                                 .name(Text.literal("Swap Fishing Spear Blueprint"))
                                 .binding(
-                                        configuration.spearSwapHotkey,
+                                        Configuration.defaultSpearSwapHotkey,
                                         () -> configuration.spearSwapHotkey,
                                         v -> configuration.spearSwapHotkey = v
                                 )
@@ -242,17 +242,24 @@ public class BlueprintSwap implements Configurable<BlueprintSwap.Configuration> 
     }
 
     public static class Configuration {
+        private static final int defaultMeleeSwapHotkey = GLFW.GLFW_KEY_UNKNOWN;
+        private static final int defaultRangedSwapHotkey = GLFW.GLFW_KEY_UNKNOWN;
+        private static final int defaultPickaxeSwapHotkey = GLFW.GLFW_KEY_UNKNOWN;
+        private static final int defaultAxeSwapHotkey = GLFW.GLFW_KEY_UNKNOWN;
+        private static final int defaultHoeSwapHotkey = GLFW.GLFW_KEY_UNKNOWN;
+        private static final int defaultSpearSwapHotkey = GLFW.GLFW_KEY_UNKNOWN;
+
         @SerialEntry
-        public int meleeSwapHotkey = GLFW.GLFW_KEY_UNKNOWN;
+        public int meleeSwapHotkey = defaultMeleeSwapHotkey;
         @SerialEntry
-        public int rangedSwapHotkey = GLFW.GLFW_KEY_UNKNOWN;
+        public int rangedSwapHotkey = defaultRangedSwapHotkey;
         @SerialEntry
-        public int pickaxeSwapHotkey = GLFW.GLFW_KEY_UNKNOWN;
+        public int pickaxeSwapHotkey = defaultPickaxeSwapHotkey;
         @SerialEntry
-        public int axeSwapHotkey = GLFW.GLFW_KEY_UNKNOWN;
+        public int axeSwapHotkey = defaultAxeSwapHotkey;
         @SerialEntry
-        public int hoeSwapHotkey = GLFW.GLFW_KEY_UNKNOWN;
+        public int hoeSwapHotkey = defaultHoeSwapHotkey;
         @SerialEntry
-        public int spearSwapHotkey = GLFW.GLFW_KEY_UNKNOWN;
+        public int spearSwapHotkey = defaultSpearSwapHotkey;
     }
 }
