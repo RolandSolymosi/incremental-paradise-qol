@@ -133,7 +133,7 @@ public class LoadoutsHotkeys extends ListenableBase<Listener> implements Complex
         public List<Loadout> hotheys = new java.util.ArrayList<>();
 
         static public class Loadout {
-            private static final int defaultHotkey = -1;
+            private static final int defaultHotkey = GLFW.GLFW_KEY_UNKNOWN;
             private static final String defaultWardrobe = "";
             private static final String defaultPet = "";
 
