@@ -100,7 +100,7 @@ public class ConsumableTimerElement extends TextListHudElement<ConsumableTimerEl
 
     @Override
     public Vector2f getDefaultPosition() {
-        return new Vector2f(0.99F, 0.94F);
+        return new Vector2f(0.99F, 0.975F);
     }
 
     @Override

@@ -96,6 +96,13 @@ public abstract class TextListHudElement<T extends TextListHudElement.Configurat
                     y + HudConstants.TEXT_PADDING_Y + (HudConstants.LINE_SPACING * i),
                     textColor, true);
         }
+
+//        // Code to visualise the element's position, good for debugging
+//        Vector2f elementPos = getElementPosition();
+//        int ex = (int) elementPos.x;
+//        int ey = (int) elementPos.y;
+//        context.fill(ex-2, ey-2, ex+2, ey+2, 0xFFFF0000);
+
     }
 
     private void renderEditModePlaceholder(DrawContext context, TextRenderer textRenderer, int x, int y) {
@@ -149,7 +156,7 @@ public abstract class TextListHudElement<T extends TextListHudElement.Configurat
 
         // Get the y offset
         if (!downDirection && !texts.isEmpty()) {
-            y = -2 - HudConstants.TEXT_PADDING_Y - HudConstants.TEXT_HEIGHT + HudConstants.LINE_SPACING * texts.size();
+            y = HudConstants.TEXT_PADDING_Y + HudConstants.LINE_SPACING * texts.size();
         }
 
         // Get the x offset

@@ -189,7 +189,7 @@ public abstract class HudElement<T extends HudElement.ConfigurationBase> impleme
         return mcAccessor.getWindow().get().getScaledWidth();
     }
     public int getScreenHeight() {
-        return mcAccessor.getWindow().get().getScaledHeight();
+        return mcAccessor.getWindow().get().getScaledHeight() - hudManager.getBarHeight();
     }
     
     protected int getCenteredTextY(int y) {
