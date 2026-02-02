@@ -117,7 +117,6 @@ public class DepositHotkey implements Configurable<DepositHotkey.Configuration> 
     }
 
     public static class Configuration {
-
         private static final int defaultKeybind = GLFW.GLFW_KEY_B;
 
         @SerialEntry

@@ -463,10 +463,10 @@ public class AutoSkill extends ListenableBase<Listener> implements ComplexConfig
     }
 
     public static class Configuration {
-
         private static final int defaultKeybind = GLFW.GLFW_KEY_UP;
         private static final boolean defaultEnabled = false;
         private static final boolean defaultRealmChangeTrigger = false;
+
         @SerialEntry
         public int keybind = defaultKeybind;
         @SerialEntry
