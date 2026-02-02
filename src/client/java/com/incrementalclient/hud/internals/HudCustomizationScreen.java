@@ -61,10 +61,7 @@ public class HudCustomizationScreen extends Screen {
             }
         }
 
-        int buttonY = 5;
-        if (hudManager.getConfiguration().getBarScoreboardReplacement()) {
-            buttonY += hudManager.getBarHeight();
-        }
+        int buttonY = 5 + hudManager.getBarHeight();
         
         addDrawableChild(ButtonWidget.builder(
             Text.literal("Reset All"),

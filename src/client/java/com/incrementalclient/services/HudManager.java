@@ -185,7 +185,7 @@ public class HudManager extends ObservableBase<Observer<HudManager.Event>, HudMa
     }
 
     public int getBarHeight() {
-        return barHeight;
+        return getConfiguration().getBarScoreboardReplacement() ? barHeight : 0;
     }
 
     public void setBarHeight(int barHeight) {

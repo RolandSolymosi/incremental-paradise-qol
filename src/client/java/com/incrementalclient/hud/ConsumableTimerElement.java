@@ -100,9 +100,7 @@ public class ConsumableTimerElement extends TextListHudElement<ConsumableTimerEl
 
     @Override
     public Vector2f getDefaultPosition() {
-        var width = mcAccessor.getWindow().get().getScaledWidth();
-        var height = mcAccessor.getWindow().get().getScaledHeight();
-        return new Vector2f(width - 8, height - 28);
+        return new Vector2f(0.99F, 0.94F);
     }
 
     @Override

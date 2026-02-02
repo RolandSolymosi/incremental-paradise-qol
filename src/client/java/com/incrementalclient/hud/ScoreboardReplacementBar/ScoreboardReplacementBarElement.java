@@ -139,10 +139,10 @@ public class ScoreboardReplacementBarElement extends HudElement<ScoreboardReplac
         hudManager.setBarHeight(configuration.topPadding + (LINE_SPACING + HudConstants.TEXT_HEIGHT) * lineCount - LINE_SPACING + configuration.bottomPadding + 1);
 
         // Draw top bar background (full width)
-        renderBarBackground(context, 0, y, screenWidth, hudManager.getBarHeight(), editMode);
+        renderBarBackground(context, 0, 0, screenWidth, hudManager.getBarHeight(), editMode);
 
         // Draw border for angular look
-        drawAngularBorder(context, 0, y, screenWidth, hudManager.getBarHeight());
+        drawAngularBorder(context, 0, 0, screenWidth, hudManager.getBarHeight());
     }
 
     private void renderEditModePlaceholder(DrawContext context) {

@@ -44,7 +44,9 @@ public abstract class HudElement<T extends HudElement.ConfigurationBase> impleme
      * Returns the actual position of the element
      */
     public Vector2f getElementPosition() {
-        return elementPosition;
+        int width = getScreenWidth();
+        int height = getScreenHeight();
+        return new Vector2f(width * elementPosition.x, height * elementPosition.y + hudManager.getBarHeight());
     }
 
     /**
@@ -66,9 +68,12 @@ public abstract class HudElement<T extends HudElement.ConfigurationBase> impleme
     public void onEditModeEnter() {}
     
     public void setElementPosition(Vector2f elementPosition) {
-        this.elementPosition = elementPosition;
-        this.getConfiguration().xPosition = elementPosition.x;
-        this.getConfiguration().yPosition = elementPosition.y;
+        int width = getScreenWidth();
+        int height = getScreenHeight();
+        Vector2f relativePosition = new Vector2f(elementPosition.x / width, (elementPosition.y - hudManager.getBarHeight()) / height);
+        this.elementPosition = relativePosition;
+        this.getConfiguration().xPosition = relativePosition.x;
+        this.getConfiguration().yPosition = relativePosition.y;
     }
 
     /**
@@ -182,6 +187,9 @@ public abstract class HudElement<T extends HudElement.ConfigurationBase> impleme
 
     public int getScreenWidth() {
         return mcAccessor.getWindow().get().getScaledWidth();
+    }
+    public int getScreenHeight() {
+        return mcAccessor.getWindow().get().getScaledHeight();
     }
     
     protected int getCenteredTextY(int y) {
