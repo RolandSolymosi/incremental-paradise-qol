@@ -62,6 +62,18 @@ public class ConfigHandler {
             }
         }
 
+        // Validation: Check no duplicated json sections
+        Map<String, String> jsonSections = new HashMap<>();
+        for (Configurable<?> configurableService : configurableServices) {
+            String currentValue = jsonSections.putIfAbsent(configurableService.getJsonSection(), configurableService.getClass().getSimpleName());
+            if (currentValue != null) {
+                throw new IllegalStateException(String.format(
+                        "Duplicate jsonSection: %s for both %s and %s",
+                        configurableService.getJsonSection(), currentValue, configurableService.getClass().getSimpleName()
+                ));
+            }
+        }
+
         // 1. Flatten all options from all services
         List<ConfigPiece> allPieces = Arrays.stream(configurableServices)
                 .filter(Configurable::hasOption)
