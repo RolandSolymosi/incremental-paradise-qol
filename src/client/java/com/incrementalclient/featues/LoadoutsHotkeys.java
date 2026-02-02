@@ -64,17 +64,17 @@ public class LoadoutsHotkeys extends ListenableBase<Listener> implements Complex
                                                 .name(Text.of("Loadouts"))
                                                 .option(Option.<Integer>createBuilder()
                                                         .name(Text.of("Hotkey"))
-                                                        .binding(opt.hotkey, () -> opt.hotkey, val -> opt.hotkey = val)
+                                                        .binding(Configuration.Loadout.defaultHotkey, () -> opt.hotkey, val -> opt.hotkey = val)
                                                         .controller((option) -> () -> new KeyBindController(option))
                                                         .build())
                                                 .option(Option.<String>createBuilder()
                                                         .name(Text.of("Wardrobe"))
-                                                        .binding(opt.wardrobe, () -> opt.wardrobe, val -> opt.wardrobe = val)
+                                                        .binding(Configuration.Loadout.defaultWardrobe, () -> opt.wardrobe, val -> opt.wardrobe = val)
                                                         .controller(StringControllerBuilder::create)
                                                         .build())
                                                 .option(Option.<String>createBuilder()
                                                         .name(Text.of("Pet"))
-                                                        .binding(opt.pet, () -> opt.pet, val -> opt.pet = val)
+                                                        .binding(Configuration.Loadout.defaultPet, () -> opt.pet, val -> opt.pet = val)
                                                         .controller(StringControllerBuilder::create)
                                                         .build())
                                                 .build())
@@ -133,12 +133,17 @@ public class LoadoutsHotkeys extends ListenableBase<Listener> implements Complex
         public List<Loadout> hotheys = new java.util.ArrayList<>();
 
         static public class Loadout {
+            private static final int defaultHotkey = -1;
+            private static final String defaultWardrobe = "";
+            private static final String defaultPet = "";
+
             @SerialEntry
-            public int hotkey = -1;
+            public int hotkey = defaultHotkey;
             @SerialEntry
-            public String wardrobe = "";
+            public String wardrobe = defaultWardrobe;
             @SerialEntry
-            public String pet = "";
+            public String pet = defaultPet;
         }
+
     }
 }
