@@ -1,0 +1,495 @@
+package com.incrementalclient.services.skillCooldowns;
+
+import com.incrementalclient.common.data.ItemType;
+import com.incrementalclient.common.data.World;
+import com.incrementalclient.common.data.skills.*;
+import com.incrementalclient.common.utils.NumberParser;
+import com.incrementalclient.internals.ItemCooldownWrapper;
+import com.incrementalclient.internals.MinecraftClientAccessor;
+import com.incrementalclient.internals.ScreenCapture;
+import com.incrementalclient.internals.events.StartClientTickListenable;
+import com.incrementalclient.services.ChatHandler;
+import com.incrementalclient.services.WorldMonitor;
+import net.minecraft.component.DataComponentTypes;
+import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
+import net.minecraft.text.Text;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.*;
+import java.util.function.Function;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+public class SkillCooldownMonitor {
+
+    private final MinecraftClientAccessor minecraftClientAccessor;
+
+    private final ItemCooldownWrapper itemCooldownWrapper;
+    private boolean overrideItemCooldowns = true;
+
+    private final ChatHandler chatHandler;
+    private boolean filterChat = true;
+
+    private final SkillCooldownInteractionManager skillCooldownInteractionManager;
+
+    // Mapping from Skill -> SkillCooldown instance
+    private final Map<Skill, SkillCooldown> skillCooldowns = new HashMap<>();
+
+    // Each function is a SkillCooldown constructor
+    // Mapping from Skill -> SkillCooldown constructor for that skill
+    // (It is expected that many constructors will appear many times, ex buzzing assault and beestorm)
+    private final Map<Skill, Function<String, SkillCooldown>> skillCooldownConstructors = Map.ofEntries(
+            // Combat skills
+            Map.entry(NormalCombatSkill.SweepingStrike, InstantSkillCooldown::new),
+            Map.entry(NormalCombatSkill.RhinoCharge, InstantSkillCooldown::new),
+            Map.entry(NormalCombatSkill.BeeStorm, VariableDurationNormalSkill::new),
+            // Not technically accurate, but Devil's Gambit doesn't have a message when the cooldown
+            // starts, beyond the <these buffs are applied!> message.
+            // The cooldown may as well be 24 seconds plus the symbol spin time, which is pretty consistent.
+            Map.entry(NightmareCombatSkill.DevilsGambit, InstantSkillCooldown::new),
+
+            // Excavation (brush) skills
+            // This isn't technically an instant skill, but <Seismic Resonance is over!> is not stated in chat.
+            Map.entry(NormalExcavationSkill.SeismicResonance, InstantSkillCooldown::new),
+            // no nm excavation skill
+
+            // Farming skills
+            // Harvester isn't technically an instant, but <Harvester is over!> is not stated in chat.
+            Map.entry(NormalFarmingSkill.Harvester, InstantSkillCooldown::new),
+            Map.entry(NormalFarmingSkill.CropChomp, InstantSkillCooldown::new),
+            Map.entry(NormalFarmingSkill.Pollinate, InstantSkillCooldown::new),
+            // Landscaper does not make a message, so there's no information to get.
+            Map.entry(NightmareFarmingSkill.Landscaper, SkillCooldownStub::new),
+
+            // Foraging skills
+            // Timberstrike's weird, since sometimes its cooldown will instantly come back.
+            // However, I don't care to deal with that case - it only happens if you miss your axe.
+            Map.entry(NormalForagingSkill.Timberstrike, InstantSkillCooldown::new),
+            Map.entry(NormalForagingSkill.LuckyGathering, FixedDurationNormalSkill::new),
+            Map.entry(NormalForagingSkill.BuzzingAssault, VariableDurationNormalSkill::new),
+            Map.entry(NightmareForagingSkill.AxeJuggling, AxeJugglingCooldown::new),
+
+            // Mining skills
+            Map.entry(NormalMiningSkill.Ricochet, RicochetCooldown::new),
+            Map.entry(NormalMiningSkill.CondensedStrike, InstantSkillCooldown::new),
+            // Wings of Wealth is weird, since it has the <X is over!> message despite being instant,
+            // AND like timberstrike it comes back instantly if it hits nothing.
+            // However, nobody uses this skill, so I'm fine with just giving it an InstantSkillCooldown.
+            Map.entry(NormalMiningSkill.WingsOfWealth, InstantSkillCooldown::new),
+            Map.entry(NightmareMiningSkill.Shatterpoint, VariableDurationNormalSkill::new),
+
+            // Sharpshooting skills
+            Map.entry(NormalSharpshootingSkill.ExplosiveArrow, InstantSkillCooldown::new),
+            // SwarmSurfer is technically a VariableDuration, but since it doesn't have <Swarm Surfer is over!>
+            // it's closer to an Instant skill.
+            Map.entry(NormalSharpshootingSkill.SwarmSurfer, InstantSkillCooldown::new),
+            Map.entry(NightmareSharpshootingSkill.PeaShooter, PeashooterCooldown::new),
+
+            // Spearfishing skills
+            Map.entry(NormalSpearFishingSkill.SpoonBender, FixedDurationNormalSkill::new),
+            Map.entry(NormalSpearFishingSkill.Wavestreak, FixedDurationNormalSkill::new),
+            Map.entry(NormalSpearFishingSkill.Beenado, FixedDurationNormalSkill::new),
+            Map.entry(NightmareSpearFishingSkill.FishSenses, FixedDurationNormalSkill::new)
+    );
+
+    // Mapping of [Skill Name -> Active Skill Upg]
+    // Initialized at runtime (see constructor) using info from each skill.
+    // Treat it as immutable after constructor - aka, as if it had Collections.unmodifiableMap().
+    // TODO: Should this be in its own util class? Or maybe a SkillUtils or SkillsManager singleton?
+    private final Map<String, Skill> skillNameMap = new HashMap<>();
+
+    // Mapping of [Skill Category -> Currently active skill]
+    // Unlike the previous map, not immutable.
+    private final Map<SkillCategory, SkillCooldown> currentlyActiveSkills = new HashMap<>();
+
+    // Mapping of [Realm -> currentlyActiveSkills map for that realm]
+    private final Map<World.Realm, Map<SkillCategory, SkillCooldown>> realmActiveSkills = new HashMap<>();
+
+    // Skill cooldowns which ended this tick - don't yet know if it was because of world change or not, though.
+    private final List<SkillCooldownInfo> cooldownsEnding = new ArrayList<>();
+
+    // Note the startPiece includes a spacebar.
+    private static final String startPiece = "\uD83D\uDD27 ";
+    // Note: I anticipate regex might not be the best solution here, since for two regexes we put a wildcard
+    // at the start followed by two lines of text
+    private static final Pattern skillActivated = Pattern.compile(startPiece + "Activated (?<skill>.+)!");
+    private static final Pattern skillEnded = Pattern.compile(startPiece + "(?<skill>.+) is over!");
+    private static final Pattern skillOnCooldown = Pattern.compile(startPiece + "(?<skill>.+) is on cooldown for another (?<cooldown>" + NumberParser.NumberPattern.pattern() + ") seconds.");
+    private static final Pattern skillReady = Pattern.compile(startPiece + "(?<skill>.+) is ready to use.");
+    private static final Pattern skillUseRecharged = Pattern.compile(startPiece + "A use of (?<skill>.+) has charged.");
+
+    // Still regex (so grouping with the other regex) but this is for screen item lore regex
+    // NOT chat regex/skill regex, which is what is above here.
+    private static final Pattern loreEquippedSkill = Pattern.compile("^Equipped: (?<skill>.+)\\z");
+
+    // Section: Constructor
+
+    public SkillCooldownMonitor(
+            ScreenCapture screenCapture,
+            MinecraftClientAccessor minecraftClientAccessor,
+            ItemCooldownWrapper itemCooldownWrapper,
+            ChatHandler chatHandler,
+            WorldMonitor worldMonitor,
+            StartClientTickListenable startClientTickListenable,
+            SkillCooldownInteractionManager skillCooldownInteractionManager
+    ) {
+
+        screenCapture.subscribe(this::onScreenArrived);
+        this.minecraftClientAccessor = minecraftClientAccessor;
+        this.itemCooldownWrapper = itemCooldownWrapper;
+        this.chatHandler = chatHandler;
+        chatHandler.subscribe(this::onChatMessageReceived);
+        worldMonitor.subscribe(this::onWorldChange);
+        startClientTickListenable.subscribe(this::onTickStart);
+        this.skillCooldownInteractionManager = skillCooldownInteractionManager;
+
+        var allSkills = List.of(
+                NormalCombatSkill.class, NightmareCombatSkill.class,
+                NormalFarmingSkill.class, NightmareFarmingSkill.class,
+                NormalForagingSkill.class, NightmareForagingSkill.class,
+                NormalMiningSkill.class, NightmareMiningSkill.class,
+                NormalSharpshootingSkill.class, NightmareSharpshootingSkill.class,
+                NormalSpearFishingSkill.class, NightmareSpearFishingSkill.class,
+                NormalExcavationSkill.class
+        );
+        for(var skill : allSkills) {
+            for(var skillUpg : skill.getEnumConstants()) {
+                if(skillUpg.isActiveUpgrade()) {
+                    skillNameMap.put(skillUpg.getName(), skillUpg);
+                }
+            }
+        }
+        skillNameMap.put("Devils Gambit", NightmareCombatSkill.DevilsGambit);
+    }
+
+    // Section: Event functions. Basically, onEvent(EventType). AKA the functions used in the constructor
+    // for listenable.subscribe()
+
+    public void onChatMessageReceived(ChatHandler.Event result) {
+        var text = result.message().getString();
+        boolean filterFound = false;
+
+        Matcher matcher;
+        if((matcher = skillActivated.matcher(text)).find()) {
+            var skillInfo = this.getSkillInfoFromName(matcher.group("skill"));
+            var action = skillInfo.cooldown().onActivate();
+            performSkillAction(action, skillInfo.skill);
+            filterFound = true;
+
+            // Only worth updating the "currently active skill" after one gets used.
+            // One just got used, so update the currently active skill
+            if(skillInfo.skill != null) {
+                SkillCategory category = skillInfo.skill.getCategory();
+                currentlyActiveSkills.put(category, skillInfo.cooldown);
+            }
+        } else if((matcher = skillEnded.matcher(text)).find()) {
+            var skillInfo = this.getSkillInfoFromName(matcher.group("skill"));
+            cooldownsEnding.add(skillInfo);
+            filterFound = true;
+        } else if((matcher = skillOnCooldown.matcher(text)).find()) {
+            var skillInfo = this.getSkillInfoFromName(matcher.group("skill"));
+            String cooldownTimeString = matcher.group("cooldown");
+            try {
+                var cooldown = Double.parseDouble(cooldownTimeString);
+                skillInfo.cooldown.onCooldown(cooldown);
+                // note that here, filterFound only applies if parseDouble works
+                filterFound = true;
+            } catch (NumberFormatException nfe) {
+                // This could go into a util class, but there aren't many things in this game which are
+                // decimal outputs. If we get another decimal output to deal with, then this should
+                // go into that util class.
+                chatHandler.sendChatMessage(Text.literal("Couldn't understand cooldown of " + cooldownTimeString + " seconds."));
+            }
+        } else if((matcher = skillReady.matcher(text)).find()) {
+            var skillInfo = this.getSkillInfoFromName(matcher.group("skill"));
+            skillInfo.cooldown.onReady();
+            filterFound = true;
+        } else if((matcher = skillUseRecharged.matcher(text)).find()) {
+            var skillInfo = this.getSkillInfoFromName(matcher.group("skill"));
+            skillInfo.cooldown.onUseRecharged();
+            filterFound = true;
+        }
+
+        if(this.filterChat && filterFound) {
+            result.cancel();
+        }
+    }
+
+    public void onWorldChange(WorldMonitor.Event event) {
+        // Cooldowns ending because of a world change
+        cooldownsEnding.forEach(skillInfo -> performSkillAction(
+                skillInfo.cooldown.onSkillEnd(true),
+                skillInfo.skill
+        ));
+        cooldownsEnding.clear();
+
+        var fromRealm = event.from().getRealm();
+        var toRealm = event.to().getRealm();
+        if(fromRealm == null || toRealm == null) {
+            // shouldn't really be possible but failsafe since we cant use @NullMarked
+            return;
+        }
+
+        if(!isEqualSkillRealm(fromRealm, toRealm)) {
+            // Changing realms
+            // FROM-REALM ACTIONS (ACTIONS FOR THE REALM WE ARE LEAVING)
+            // Save old skills and load in new skills
+            var fromRealmSkillMap = realmActiveSkills.getOrDefault(fromRealm, new HashMap<>());
+            // Update the skillMap for the from-realm
+            fromRealmSkillMap.putAll(currentlyActiveSkills);
+            // then save it back again
+            realmActiveSkills.put(fromRealm, fromRealmSkillMap);
+
+            // Clear the active skills: They aren't the active ones anymore
+            currentlyActiveSkills.clear();
+
+            // TO-REALM ACTIONS (ACTIONS FOR THE REALM WE ARE ENTERING)
+            var toRealmSkillMap = realmActiveSkills.getOrDefault(toRealm, null);
+            if(toRealmSkillMap == null) {
+                // TODO: Use /skills to load in all the skills of the new realm.
+                //   This is the part where we actually say "Hey, do /skills",
+                //   the rest of the code here just controls logic for when we want that
+                toRealmSkillMap = new HashMap<>();
+            }
+            // Note: toRealmSkillMap is now guaranteed not-null
+            // load toRealmSkillMap in to the active skills
+            currentlyActiveSkills.putAll(toRealmSkillMap);
+        }
+    }
+
+    public void onTickStart() {
+        /*
+        Order of operations is:
+        - Chat event, aka onEvent(ChatHandler.Event)
+        - End client tick
+        - Client change world event (onWorldChange)
+        - Start of next client tick
+        Therefore, if we want to detect the difference between "skill is over due to time" and "skill is over due to
+        world change", we MUST put the check at onTickStart! onTickEnd WILL NOT WORK for this situation!
+         */
+        // Cooldowns ending, and NOT because of a world change
+        cooldownsEnding.forEach(skillInfo -> performSkillAction(
+                skillInfo.cooldown.onSkillEnd(false),
+                skillInfo.skill
+        ));
+        cooldownsEnding.clear();
+
+        // Update cooldowns now
+        if(this.overrideItemCooldowns) {
+            for (SkillCategory activeCategory : currentlyActiveSkills.keySet()) {
+                // First, get active category's item type
+                var activeItemType = ItemType.fromSkillCategory(activeCategory);
+                if(activeItemType == ItemType.UNKNOWN) {
+                    return;
+                }
+
+                // Next, get active category's cooldown fraction
+                var activeSkillCooldown = currentlyActiveSkills.get(activeCategory);
+                var activeCooldownFraction = activeSkillCooldown.getCooldownFraction();
+
+                // Finally, override item cooldowns
+                if(activeCooldownFraction.isPresent()) {
+                    this.itemCooldownWrapper.setItemCooldown(activeItemType, activeCooldownFraction.get());
+                }
+                else {
+                    this.itemCooldownWrapper.clearItemCooldown(activeItemType);
+                }
+            }
+        }
+    }
+
+    public void onScreenArrived(ScreenCapture.Screen screen) {
+//        this.chatHandler.sendChatMessage("Screen arrived");
+        // Check for expected screen size
+        var contents = screen.contents();
+        if(contents.size() != 81) {
+            // All skill screens have 45 slots (9 wide, 5 high)
+            // Including the inventory (4 more rows) this is a total of 81.
+//            this.chatHandler.sendChatMessage("Not 81 slots, instead " + contents.size());
+            return;
+        }
+        // Theoretically, I could check for the stained glass panes
+        // and that everything is exactly correct.
+        // However: That would probably take unnecessary computing power
+        // and is honestly kinda overkill.
+        // Therefore, I'm not doing that.
+
+        // Check for expected screen name
+        var expectedCategory = SkillCategory.findByName(screen.title().getString()).orElse(null);
+        if(expectedCategory == null) {
+//            this.chatHandler.sendChatMessage("Bad category:" + screen.title().getString());
+            return;
+        }
+
+        // Slot 20 (note zero-indexed, so row3 slot3) should be a beacon with the active ability information
+        var abilityInfoStack = screen.contents().get(20);
+        if(abilityInfoStack == null || abilityInfoStack.getItem() != Items.BEACON) {
+            // Not ability info slot
+//            this.chatHandler.sendChatMessage("Ability info slot isn't at slot 20");
+            return;
+        }
+        var abilityInfoStackName = abilityInfoStack.getName();
+        if(!abilityInfoStackName.getString().equals("Abilities")) {
+//            this.chatHandler.sendChatMessage("Ability info slot isn't named right");
+            return;
+        }
+
+        var abilityInfoStackLore = abilityInfoStack.get(DataComponentTypes.LORE);
+        if(abilityInfoStackLore == null) {
+//            this.chatHandler.sendChatMessage("Ability stack had no lore");
+            return;
+        }
+        var abilityStackLines = abilityInfoStackLore.lines().stream().map(Text::getString).toList();
+        // Expected lines:
+        // Drop your [TOOL] to activate abilities
+        // [EMPTY LINE]
+        // Equipped: [SKILL NAME]
+        // [EMPTY LINE]
+        // Click to view [CATEGORY] abilities
+        //
+        // We have a LOT of checks already, I'll just check line count and lines 2 and 4 and move on
+        // UPDATE: Empty lines aren't empty, they have a whitespace character (just a space) in them.
+        if(abilityStackLines.size() != 5) {
+//            this.chatHandler.sendChatMessage("Ability stack didn't have 5 lore lines");
+            return;
+        }
+        var lineTwo = abilityStackLines.get(1).strip();
+        if(!lineTwo.isEmpty()) {
+//            this.chatHandler.sendChatMessage("Ability line index 1 wasn't empty, was instead \"" + lineTwo + "\" with length " + lineTwo.length());
+            return;
+        }
+        var lineFour = abilityStackLines.get(3).strip();
+        if(!lineFour.isEmpty()) {
+//            this.chatHandler.sendChatMessage("Ability line index 3 wasn't empty, was instead \"" + lineFour + "\" with length " + lineFour.length());
+            return;
+        }
+
+        var equippedSkillLine = abilityStackLines.get(2);
+        var matcher = loreEquippedSkill.matcher(equippedSkillLine);
+        if(!matcher.find()) {
+//            this.chatHandler.sendChatMessage("Regex matcher failed");
+            return;
+        }
+        var skillNameFound = matcher.group("skill");
+        if(skillNameFound.equals("None")) {
+            // confirmed from testing in-game this is what it says
+//            this.chatHandler.sendChatMessage("No skill found");
+            return;
+        }
+        var skillInfo = this.getSkillInfoFromName(skillNameFound);
+        if(skillInfo.skill.getCategory() != expectedCategory) {
+//            this.chatHandler.sendChatMessage("Category mismatch");
+            return;
+        }
+        currentlyActiveSkills.put(expectedCategory, skillInfo.cooldown);
+    }
+
+    // Other helper functions used by the onEvent functions
+
+    private @NotNull SkillCooldown getSkillCooldown(Skill skill) {
+        var ret = this.skillCooldowns.getOrDefault(skill, null);
+        if(ret != null) {
+            // skill is already in skillCooldowns map, so it's already been defined
+            return ret;
+        }
+
+        SkillCooldown skillCooldown;
+        if(skill == null) {
+            skillCooldown = new SkillCooldownStub("Null skill");
+        }
+        else {
+            var skillConstructor = skillCooldownConstructors.getOrDefault(skill, SkillCooldownStub::new);
+            skillCooldown = skillConstructor.apply(skill.getName());
+        }
+
+        this.skillCooldowns.put(skill, skillCooldown);
+        return skillCooldown;
+    }
+
+    private void performSkillAction(@NotNull SkillCooldown.SkillAction action, Skill skill) {
+        if(action == SkillCooldown.SkillAction.NONE) {
+            return;
+        }
+        else if(action == SkillCooldown.SkillAction.DROP_SKILL_ITEM) {
+            var category = skill.getCategory();
+            var targetItemType = ItemType.fromSkillCategory(category);
+            if (targetItemType == ItemType.UNKNOWN) {
+                return;
+            }
+            // itemType gotten, now drop it
+            // Note: This code will only drop the 1st instance of itemType. If autodrop code is needed again,
+            // then it'll get its own manager that can select whether to drop one or all.
+            minecraftClientAccessor.getPlayer().ifPresent(player -> {
+                /*
+                Note: Yes, it is possible to trigger a skill even if you aren't holding an item.
+                Don't believe me? Hold your pickaxe out, open your inventory, mouse over your spear, and press Q.
+                This will drop your SPEAR, and activate your SPEAR ability.
+
+                I looked around. It might be possible to implement this technology, but it is a lot of work for
+                what is (in my opinion) not a lot of gain. Especially given that I'm pretty sure dropping an item
+                interrupts both spear-throw and bow-fire actions, resetting them so you have to charge them again.
+
+                If you still insist on trying to do it, look into ClickSlotC2SPacket with SlotActionType.THROW.
+                 */
+                var selectedStack = player.getInventory().getSelectedStack();
+                var selectedStackType = ItemType.getItemType(selectedStack);
+                if(selectedStackType == targetItemType) {
+                    player.dropSelectedItem(false);
+                }
+            });
+        }
+        // No other SkillActions right now.
+    }
+
+    // For the purposes of skills, are these two realms equal?
+    // Notably, Hub and Normal realms are the same realm for skill info.
+    private boolean isEqualSkillRealm(World.Realm a, World.Realm b) {
+        if(a == b) {
+            // well they are literally the same realm so yes theyre the same skill realm too
+            return true;
+        }
+        var aIsHubOrNormal = (a == World.Realm.Hub) || (a == World.Realm.Normal);
+        var bIsHubOrNormal = (b == World.Realm.Hub) || (b == World.Realm.Normal);
+        //noinspection RedundantIfStatement: ide can figure it out + left this way for readability
+        if(aIsHubOrNormal && bIsHubOrNormal) {
+            return true;
+        }
+
+        // no other edge cases to check
+        // and we already checked a == b earlier: it was false
+        return false;
+    }
+
+    // SkillCooldownInfo functions (basically helper functions)
+    private record SkillCooldownInfo(String skillName, Skill skill, SkillCooldown cooldown) {
+    }
+
+    private SkillCooldownInfo getSkillInfoFromName(String skillName) {
+        var skill = skillNameMap.get(skillName);
+        var skillCooldown = getSkillCooldown(skill);
+        return new SkillCooldownInfo(skillName, skill, skillCooldown);
+    }
+
+    // Functions used by the HUD element (not used by the event functions)
+
+    public Map<SkillCategory, SkillCooldown> getCurrentlyActiveSkills() {
+        return currentlyActiveSkills;
+    }
+
+    public void setOverrideItemCooldowns(boolean overrideItemCooldowns) {
+        if(this.overrideItemCooldowns && !overrideItemCooldowns) {
+            // going from true to false
+            // need to override one last time to clear all
+            Arrays.stream(SkillCategory.values())
+                    .map(ItemType::fromSkillCategory)
+                    .forEach(this.itemCooldownWrapper::clearItemCooldown);
+        }
+
+        this.overrideItemCooldowns = overrideItemCooldowns;
+    }
+
+    public void setFilterChat(boolean filterChat) {
+        this.filterChat = filterChat;
+    }
+}

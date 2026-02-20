@@ -1,13 +1,15 @@
 package com.incrementalclient.common.data.skills;
 
 
+import com.incrementalclient.common.data.World;
 import dev.isxander.yacl3.api.NameableEnum;
 import net.minecraft.text.Text;
+import org.jetbrains.annotations.NotNull;
 
 public enum NormalForagingSkill implements Skill {
-    Timberstrike("Timberstrike"),
-    LuckyGathering("Lucky Gathering"),
-    BuzzingAssault("Buzzing Assault"),
+    Timberstrike("Timberstrike", true),
+    LuckyGathering("Lucky Gathering", true),
+    BuzzingAssault("Buzzing Assault", true),
     KeySeeker("Key Seeker"),
     WideChop("Wide Chop"),
     Stockpile("Stockpile"),
@@ -22,9 +24,15 @@ public enum NormalForagingSkill implements Skill {
     ;
 
     private final String name;
+    private final boolean active;
+
+    NormalForagingSkill(String name, boolean active) {
+        this.name = name;
+        this.active = active;
+    }
 
     NormalForagingSkill(String name) {
-        this.name = name;
+        this(name, false);
     }
 
     @Override
@@ -34,5 +42,20 @@ public enum NormalForagingSkill implements Skill {
 
     public String getName() {
         return name;
+    }
+
+    @Override
+    public @NotNull SkillCategory getCategory() {
+        return SkillCategory.Foraging;
+    }
+
+    @Override
+    public @NotNull World.Realm getRealm() {
+        return World.Realm.Normal;
+    }
+
+    @Override
+    public boolean isActiveUpgrade() {
+        return active;
     }
 }

@@ -163,10 +163,11 @@ public class ServiceCollection {
             }
 
             try {
-                if (descriptor.implementationType().getConstructors().length != 1){
-                    throw new RuntimeException("There must be exactly one public constructor. This type either have multiple, or none: " + descriptor.implementationType().getSimpleName());
+                var allConstructors = descriptor.implementationType().getConstructors();
+                if (allConstructors.length != 1){
+                    throw new RuntimeException("There must be exactly one public constructor. This type instead has " + allConstructors.length + ": " + descriptor.implementationType().getSimpleName());
                 }
-                Constructor<?> constructor = descriptor.implementationType().getConstructors()[0];
+                Constructor<?> constructor = allConstructors[0];
 
                 Class<?>[] paramTypes = constructor.getParameterTypes();
                 Object[] args = new Object[paramTypes.length];

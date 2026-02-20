@@ -1,13 +1,15 @@
 package com.incrementalclient.common.data.skills;
 
 
+import com.incrementalclient.common.data.World;
 import dev.isxander.yacl3.api.NameableEnum;
 import net.minecraft.text.Text;
+import org.jetbrains.annotations.NotNull;
 
 public enum NormalMiningSkill implements Skill {
-    Ricochet("Ricochet"),
-    CondensedStrike("Condensed Strike"),
-    WingsOfWealth("Wings of Wealth"),
+    Ricochet("Ricochet", true),
+    CondensedStrike("Condensed Strike", true),
+    WingsOfWealth("Wings of Wealth", true),
     KeySeeker("Key Seeker"),
     Cascade("Cascade"),
     TreasureHunter("Treasure Hunter"),
@@ -23,9 +25,15 @@ public enum NormalMiningSkill implements Skill {
     ;
 
     private final String name;
+    private final boolean active;
+
+    NormalMiningSkill(String name, boolean active) {
+        this.name = name;
+        this.active = active;
+    }
 
     NormalMiningSkill(String name) {
-        this.name = name;
+        this(name, false);
     }
 
     @Override
@@ -35,5 +43,20 @@ public enum NormalMiningSkill implements Skill {
 
     public String getName() {
         return name;
+    }
+
+    @Override
+    public @NotNull SkillCategory getCategory() {
+        return SkillCategory.Mining;
+    }
+
+    @Override
+    public @NotNull World.Realm getRealm() {
+        return World.Realm.Normal;
+    }
+
+    @Override
+    public boolean isActiveUpgrade() {
+        return active;
     }
 }

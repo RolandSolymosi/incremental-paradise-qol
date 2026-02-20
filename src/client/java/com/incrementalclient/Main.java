@@ -13,12 +13,14 @@ import com.incrementalclient.internals.events.*;
 import com.incrementalclient.services.*;
 import com.incrementalclient.common.utils.dependencyInjection.ServiceCollection;
 import com.incrementalclient.common.utils.dependencyInjection.ServiceProvider;
+import com.incrementalclient.services.skillCooldowns.SkillCooldownMonitor;
 import net.fabricmc.api.ClientModInitializer;
 
 public class Main implements ClientModInitializer {
 
     public static final ServiceProvider SERVICE_PROVIDER = new ServiceCollection()
             // Low level Services (Minecraft Event and Mixin wrappers)
+            .addListenable(StartClientTickListenable.class)
             .addListenable(EndClientTickListenable.class)
             .addObservable(HudRenderCallbackObservable.class)
             .addObservable(ClientCommandRegistrationCallbackObservable.class)
@@ -31,6 +33,7 @@ public class Main implements ClientModInitializer {
             .addObservable(ScreenCapture.class)
             .addObservable(InventoryInteractionInterceptor.class)
             .addObservable(OverlayMessageObservable.class)
+            .addSingleton(ItemCooldownWrapper.class)
             // High level Services
             .addSingleton(MinecraftClientAccessor.class)
             .addSingleton(CommandHandler.class)
@@ -46,6 +49,7 @@ public class Main implements ClientModInitializer {
             .addObservable(ActiveConsumableMonitor.class)
             .addObservable(ShinyOreMonitor.class)
             .addSingleton(ItemTargetMonitor.class)
+            .addSingleton(SkillCooldownMonitor.class)
             // Features
             .addSingleton(SellAllHotkey.class).forwardSingleton(Configurable.class, SellAllHotkey.class)
             .addSingleton(DepositHotkey.class).forwardSingleton(Configurable.class, DepositHotkey.class)
@@ -73,6 +77,7 @@ public class Main implements ClientModInitializer {
             .addSingleton(CompletedTasksElement.class).forwardSingleton(Configurable.class, CompletedTasksElement.class).forwardSingleton(HudElement.class, CompletedTasksElement.class)
             .addSingleton(AggroElement.class).forwardSingleton(Configurable.class, AggroElement.class).forwardSingleton(HudElement.class, AggroElement.class)
             .addSingleton(ItemTargetTrackerElement.class).forwardSingleton(Configurable.class, ItemTargetTrackerElement.class).forwardSingleton(HudElement.class, ItemTargetTrackerElement.class)
+            .addSingleton(SkillCooldownElement.class).forwardSingleton(Configurable.class, SkillCooldownElement.class).forwardSingleton(HudElement.class, SkillCooldownElement.class)
             .buildServiceProvider();
 
     @Override

@@ -1,12 +1,14 @@
 package com.incrementalclient.common.data.skills;
 
 
+import com.incrementalclient.common.data.World;
 import dev.isxander.yacl3.api.NameableEnum;
 import net.minecraft.text.Text;
+import org.jetbrains.annotations.NotNull;
 
 public enum NormalSharpshootingSkill implements Skill {
-    ExplosiveArrow("Explosive Arrow"),
-    SwarmSurfer("Swarm Surfer"),
+    ExplosiveArrow("Explosive Arrow", true),
+    SwarmSurfer("Swarm Surfer", true),
     Hawkeye("Hawkeye"),
     Assassin("Assassin"),
     FullForce("Full Force"),
@@ -20,9 +22,15 @@ public enum NormalSharpshootingSkill implements Skill {
     ;
 
     private final String name;
+    private final boolean active;
+
+    NormalSharpshootingSkill(String name, boolean active) {
+        this.name = name;
+        this.active = active;
+    }
 
     NormalSharpshootingSkill(String name) {
-        this.name = name;
+        this(name, false);
     }
 
     @Override
@@ -32,5 +40,20 @@ public enum NormalSharpshootingSkill implements Skill {
 
     public String getName() {
         return name;
+    }
+
+    @Override
+    public @NotNull SkillCategory getCategory() {
+        return SkillCategory.Sharpshooting;
+    }
+
+    @Override
+    public @NotNull World.Realm getRealm() {
+        return World.Realm.Normal;
+    }
+
+    @Override
+    public boolean isActiveUpgrade() {
+        return active;
     }
 }

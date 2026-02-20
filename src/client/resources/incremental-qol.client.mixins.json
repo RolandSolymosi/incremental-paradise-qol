@@ -9,7 +9,8 @@
     "EntityRenderer",
     "InGameHud",
     "Packet",
-    "ParticleManager"
+    "ParticleManager",
+    "ItemCooldownManager"
   ],
   "injectors": {
     "defaultRequire": 1

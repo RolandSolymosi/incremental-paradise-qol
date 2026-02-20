@@ -6,6 +6,7 @@ import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
 import net.minecraft.text.Text;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -76,5 +77,14 @@ public class Utils {
             }
         }
         return slotId;
+    }
+
+    public static String formatDurationSeconds(Duration duration) {
+        // there isn't an ofSeconds, and either way I want this more.
+        var millis = duration.toMillis();
+        // typecast to ensure floating point division is used
+        // instead of integer division (will round)
+        var seconds = ((double) millis) / 1000d;
+        return String.format("%.2f", seconds);
     }
 }

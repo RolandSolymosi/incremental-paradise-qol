@@ -3,12 +3,9 @@ package com.incrementalclient.services;
 import com.incrementalclient.common.utils.NumberParser;
 import com.incrementalclient.interfaces.Observer;
 import com.incrementalclient.internals.events.ClientPlayConnectionObservable;
-import net.minecraft.text.ClickEvent;
 import net.minecraft.text.Text;
-import net.minecraft.util.Pair;
 
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Pattern;
@@ -26,17 +23,14 @@ public class ItemTargetMonitor implements Observer<ChatHandler.Event> {
 
     private static final ChatHandler.ChatFilter itemTrackingProgress = new ChatHandler.ChatFilter(Pattern.compile(startPiece + "🧭 Item Tracking >>>\\s+(?<current>" + NumberParser.NumberPattern.pattern() + ")/(?<goal>" + NumberParser.NumberPattern.pattern() + ")\\s+(?<item>.+)$"), false, false);
 
+    private boolean shouldFilterChat = true;
+
     public ItemTargetMonitor(
             ChatHandler chatHandler,
             CommandHandler commandHandler,
             ClientPlayConnectionObservable clientPlayConnectionObservable
     ) {
         chatHandler.subscribe(this);
-        chatHandler.registerFilter(currentlyTrackingList);
-        chatHandler.registerFilter(itemList);
-        chatHandler.registerFilter(nowTracking);
-        chatHandler.registerFilter(removedTracking);
-        chatHandler.registerFilter(itemTrackingProgress);
 
         clientPlayConnectionObservable.subscribe((e)->
         {
@@ -52,6 +46,10 @@ public class ItemTargetMonitor implements Observer<ChatHandler.Event> {
 
     @Override
     public void onEvent(ChatHandler.Event result) {
+        // If it doesn't get to the final else block - only possible if one of the filters was caught -
+        // then this will remain true.
+        boolean matchedFilter = true;
+
         var text = result.message().getString();
         if (currentlyTrackingList.getRegex().matcher(text).find()) {
             targets.clear();
@@ -85,6 +83,14 @@ public class ItemTargetMonitor implements Observer<ChatHandler.Event> {
                 var goal = matcher.group("goal");
                 targets.put(item, new ItemTarget(result.message().getSiblings().getLast(), item, NumberParser.parseSuffixedNumber(current), NumberParser.parseSuffixedNumber(goal)));
             }
+        } else {
+            matchedFilter = false;
+        }
+
+        if(matchedFilter && this.shouldFilterChat) {
+            // cancelling event means it doesn't show up on hud
+            // aka it gets filted out
+            result.cancel();
         }
     }
 
@@ -92,7 +98,8 @@ public class ItemTargetMonitor implements Observer<ChatHandler.Event> {
         return targetView;
     }
 
-    public void shouldFilterChat(boolean shouldFilter) {
+    public void setShouldFilterChat(boolean shouldFilter) {
+        this.shouldFilterChat = true;
         currentlyTrackingList.setEnabled(shouldFilter);
         itemList.setEnabled(shouldFilter);
         nowTracking.setEnabled(shouldFilter);
