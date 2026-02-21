@@ -1,4 +1,4 @@
-package com.incrementalclient.hud;
+package com.incrementalclient.hud.unused;
 
 import com.incrementalclient.common.utils.Vector2f;
 import com.incrementalclient.internals.MinecraftClientAccessor;
@@ -42,7 +42,7 @@ public class BottomBarElement extends BarElement {
             updateAnimation();
         }
         
-        Vector2f pos = getCurrentPosition();
+        Vector2f pos = getElementPosition();
         // Add animation offset to Y position (slides down when typing)
         int y = (int) (pos.y + animationOffset);
         int screenWidth = mcAccessor.getWindow().get().getScaledWidth();
@@ -67,7 +67,7 @@ public class BottomBarElement extends BarElement {
     }
     
     private void renderEditModePlaceholder(DrawContext context) {
-        Vector2f pos = getCurrentPosition();
+        Vector2f pos = getElementPosition();
         int x = (int) pos.x;
         int y = (int) pos.y;
 
@@ -98,18 +98,12 @@ public class BottomBarElement extends BarElement {
             animationOffset = Math.max(0, animationOffset - animationSpeed);
         }
     }
-    
+
     @Override
-    public Vector2f getAnchorPoint() {
-        // Position at exact bottom of screen (always, regardless of delta position)
-        var window = mcAccessor.getWindow();
-        if (window.isPresent()) {
-            int screenHeight = window.get().getScaledHeight();
-            return new Vector2f(0, screenHeight - HudConstants.BAR_ELEMENT_HEIGHT);
-        }
+    public Vector2f getDefaultPosition() {
         return new Vector2f(0, 0);
     }
-    
+
     @Override
     public String getDisplayName() {
         return "Bottom Bar";

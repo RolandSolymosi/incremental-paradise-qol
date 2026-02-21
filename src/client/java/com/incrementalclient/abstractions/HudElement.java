@@ -14,8 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class HudElement<T extends HudElement.ConfigurationBase> implements Configurable<T> {
-    protected Vector2f anchorPoint = new Vector2f(0, 0);
-    protected Vector2f deltaPosition = new Vector2f(0, 0);
+    protected Vector2f elementPosition = new Vector2f(0, 0);
+    protected Vector2f defaultPosition = new Vector2f(0, 0);
     protected float scale = 1.0f;
     protected boolean enabled = true;
     protected boolean scalable = true;
@@ -38,15 +38,28 @@ public abstract class HudElement<T extends HudElement.ConfigurationBase> impleme
             this.subElementDeltas.add(new Vector2f(0, 0));
         }
     }
-    
-    public Vector2f getCurrentPosition() {
-        Vector2f baseAnchor = getAnchorPoint();
-        return baseAnchor.add(deltaPosition);
-    }
-    
+
     public abstract void render(RenderSettings renderSettings);
-    
-    public abstract Vector2f getAnchorPoint();
+
+    /**
+     * Returns the actual position of the element
+     */
+    public Vector2f getElementPosition() {
+        int width = getScreenWidth();
+        int height = getScreenHeight();
+        return new Vector2f(width * elementPosition.x, height * elementPosition.y + hudManager.getBarHeight());
+    }
+
+    /**
+     * Returns the offset from the top left corner of the element compared to the actual position
+     */
+    public Vector2f getOffsetPoint(){
+        return new Vector2f(0, 0);
+    }
+
+    public Vector2f getTopLeftCornerPosition() {
+        return getElementPosition().subtract(getOffsetPoint());
+    }
     
     public abstract Vector2f getBoundingBox();
 
@@ -55,20 +68,28 @@ public abstract class HudElement<T extends HudElement.ConfigurationBase> impleme
     // Optional: called when customization screen opens
     public void onEditModeEnter() {}
     
-    public Vector2f getAnchorPointPosition() {
-        return anchorPoint;
+    public void setElementPosition(Vector2f elementPosition) {
+        int width = getScreenWidth();
+        int height = getScreenHeight();
+        Vector2f relativePosition = new Vector2f(elementPosition.x / width, (elementPosition.y - hudManager.getBarHeight()) / height);
+        this.elementPosition = relativePosition;
+        this.getConfiguration().xPosition = relativePosition.x;
+        this.getConfiguration().yPosition = relativePosition.y;
     }
-    
-    public Vector2f getDeltaPosition() {
-        return deltaPosition;
+
+    /**
+     * Returns the default position of the element when it is reset
+     */
+    public Vector2f getDefaultPosition() {
+        return defaultPosition;
     }
-    
-    public void setDeltaPosition(Vector2f deltaPosition) {
-        this.deltaPosition = deltaPosition;
-        this.getConfiguration().deltaX = deltaPosition.x;
-        this.getConfiguration().deltaY = deltaPosition.y;
+
+    public void resetToDefaultPosition() {
+        this.elementPosition = getDefaultPosition();
+        this.getConfiguration().xPosition = elementPosition.x;
+        this.getConfiguration().yPosition = elementPosition.y;
     }
-    
+
     public float getScale() {
         return scale;
     }
@@ -136,12 +157,12 @@ public abstract class HudElement<T extends HudElement.ConfigurationBase> impleme
     }
     
     public void resetDeltaPositions() {
-        this.deltaPosition = new Vector2f(0, 0);
+        this.elementPosition = new Vector2f(0, 0);
         subElementDeltas.replaceAll(ignored -> new Vector2f(0, 0));
     }
     
     public Vector2f getCurrentBoundingPoint() {
-        return getCurrentPosition().add(getBoundingBox());
+        return getElementPosition().add(getBoundingBox());
     }
     
     /**
@@ -166,6 +187,13 @@ public abstract class HudElement<T extends HudElement.ConfigurationBase> impleme
             .max()
             .orElse(0);
     }
+
+    public int getScreenWidth() {
+        return mcAccessor.getWindow().get().getScaledWidth();
+    }
+    public int getScreenHeight() {
+        return mcAccessor.getWindow().get().getScaledHeight() - hudManager.getBarHeight();
+    }
     
     protected int getCenteredTextY(int y) {
         return y + (HudConstants.BAR_ELEMENT_HEIGHT - HudConstants.TEXT_HEIGHT) / 2;
@@ -178,7 +206,7 @@ public abstract class HudElement<T extends HudElement.ConfigurationBase> impleme
 
     @Override
     public void optionChanged(){
-        deltaPosition = new Vector2f(getConfiguration().deltaX, getConfiguration().deltaY);
+        elementPosition = new Vector2f(getConfiguration().xPosition, getConfiguration().yPosition);
         scale = getConfiguration().scale;
         enabled = getConfiguration().enabled;
     }
@@ -186,7 +214,8 @@ public abstract class HudElement<T extends HudElement.ConfigurationBase> impleme
     public static final class HudConstants {
         // Bar element constants
         public static final int BAR_ELEMENT_HEIGHT = 22;
-        public static final int TEXT_HEIGHT = 9;
+        // The actual font is 9 however 6 looks more centered
+        public static final int TEXT_HEIGHT = 6;
         
         // Padding and spacing
         public static final int TEXT_PADDING_X = 2;
@@ -230,6 +259,8 @@ public abstract class HudElement<T extends HudElement.ConfigurationBase> impleme
         private HudConstants() {
             // Utility class - prevent instantiation
         }
+
+//        public static int
     }
 
     public record RenderSettings(DrawContext context, float delta, boolean editMode){
@@ -238,11 +269,11 @@ public abstract class HudElement<T extends HudElement.ConfigurationBase> impleme
 
     public static abstract class ConfigurationBase {
         @SerialEntry
-        public float deltaX = 0;
+        public float xPosition = 0;
         @SerialEntry
-        public float deltaY = 0;
+        public float yPosition = 0;
         @SerialEntry
-        public float scale = 0;
+        public float scale = 1;
         @SerialEntry
         public boolean enabled = true;
     }

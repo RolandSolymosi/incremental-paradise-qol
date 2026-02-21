@@ -17,7 +17,7 @@ public class ItemTargetMonitor implements Observer<ChatHandler.Event> {
     private final ConcurrentHashMap<String, ItemTarget> targets = new ConcurrentHashMap<>();
     private final Map<String, ItemTarget> targetView = Collections.unmodifiableMap(targets);
 
-    private static final String startPiece = "^.*?(?:§r)?";
+    private static final String startPiece = "^(?![ \\w]*\\[)";
     private static final ChatHandler.ChatFilter currentlyTrackingList = new ChatHandler.ChatFilter(Pattern.compile(startPiece + "Currently Tracking$"), false, false);
     private static final ChatHandler.ChatFilter itemList = new ChatHandler.ChatFilter(Pattern.compile(startPiece + "(?<item>.+?):\\s+(?<current>" + NumberParser.NumberPattern.pattern() + ")/(?<goal>" + NumberParser.NumberPattern.pattern() + ")$"), false, false);
 

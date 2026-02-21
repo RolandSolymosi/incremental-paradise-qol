@@ -1,7 +1,9 @@
 package com.incrementalclient.hud;
 
 import com.google.common.base.Suppliers;
+import com.incrementalclient.abstractions.HudElement;
 import com.incrementalclient.abstractions.TextListHudElement;
+import com.incrementalclient.common.utils.NumberParser;
 import com.incrementalclient.common.utils.TextUtils;
 import com.incrementalclient.common.utils.Vector2f;
 import com.incrementalclient.internals.MinecraftClientAccessor;
@@ -38,14 +40,16 @@ public class ItemTargetTrackerElement extends TextListHudElement<ItemTargetTrack
     ) {
         super(uiAccessor, hudManager);
         this.itemTargetMonitor = itemTargetMonitor;
-        this.anchorPoint = new Vector2f(10, 10);
+        this.leftDirection = false;
+        this.defaultPosition = new Vector2f(0.99F, 0.017777F);
+        resetToDefaultPosition();
 
         options = Suppliers.memoize(() -> List.of(
                 Categories.Hud.ItemTarget.createConfig(0,
                         Option.<Boolean>createBuilder()
                                 .name(Text.of("Toggle Item Target HUD on and off"))
                                 .description(OptionDescription.of(Text.of("Turn on and off the item target tracker HUD.")))
-                                .binding( configuration.isHudEnabled, () -> configuration.isHudEnabled, newVal -> configuration.isHudEnabled = newVal)
+                                .binding(configuration.isHudEnabled, () -> configuration.isHudEnabled, newVal -> configuration.isHudEnabled = newVal)
                                 .controller(BooleanControllerBuilder::create)
                                 .build()),
                 Categories.Hud.ItemTarget.createConfig(1,
@@ -70,7 +74,7 @@ public class ItemTargetTrackerElement extends TextListHudElement<ItemTargetTrack
         return Text.literal("")
                 .append(item.DisplayText())
                 .append(": ")
-                .append(TextUtils.textColor(item.current() + "/"+item.goal(), 0x00FFFF));
+                .append(TextUtils.textColor(NumberParser.formatSuffixedNumber(item.current()) + "/" + NumberParser.formatSuffixedNumber(item.goal()), 0x00FFFF));
     }
 
     @Override
@@ -82,7 +86,7 @@ public class ItemTargetTrackerElement extends TextListHudElement<ItemTargetTrack
 
     @Override
     protected int getBackgroundOpacity() {
-        return (int) (getConfiguration().hudBackgroundOpacity * 255);
+        return (int) (0);
     }
 
     @Override
@@ -93,11 +97,6 @@ public class ItemTargetTrackerElement extends TextListHudElement<ItemTargetTrack
     @Override
     public String getDisplayName() {
         return "Item Tracker";
-    }
-
-    @Override
-    public Vector2f getAnchorPoint() {
-        return anchorPoint;
     }
 
     @Override
@@ -124,11 +123,11 @@ public class ItemTargetTrackerElement extends TextListHudElement<ItemTargetTrack
 
     public static class Configuration extends ConfigurationBase {
         @SerialEntry
-        public boolean isHudEnabled = false;
+        public boolean isHudEnabled = true;
         @SerialEntry
         public boolean filterMessages = true;
         @SerialEntry
-        public double hudBackgroundOpacity = 0.3;
+        public double hudBackgroundOpacity = 0.0;
     }
 }
 

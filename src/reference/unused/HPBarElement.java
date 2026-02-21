@@ -1,4 +1,4 @@
-package com.incrementalclient.hud;
+package com.incrementalclient.hud.unused;
 
 import com.google.common.base.Suppliers;
 import com.incrementalclient.abstractions.HudElement;
@@ -94,7 +94,7 @@ public class HPBarElement extends HudElement<HPBarElement.Configuration> {
         }
         float absorption = player.get().getAbsorptionAmount();
 
-        Vector2f pos = getCurrentPosition();
+        Vector2f pos = getElementPosition();
         int x = (int) pos.x;
         int y = (int) pos.y;
 
@@ -151,7 +151,7 @@ public class HPBarElement extends HudElement<HPBarElement.Configuration> {
 
 
     private void renderEditModePlaceholder(DrawContext context) {
-        Vector2f pos = getCurrentPosition();
+        Vector2f pos = getElementPosition();
         int x = (int) pos.x;
         int y = (int) pos.y;
 
@@ -160,20 +160,20 @@ public class HPBarElement extends HudElement<HPBarElement.Configuration> {
         context.drawText(textRenderer, Text.literal("HP Bar"), x, textY, 0xFFFFFFFF, true);
     }
 
-    @Override
-    public Vector2f getAnchorPoint() {
-        // Position within bottom bar (left side, above hotbar)
-        // Bottom bar is at screenHeight - 22, HP bar should be just above it
-        var window = mcAccessor.getWindow();
-        if (window.isPresent()) {
-            int screenHeight = window.get().getScaledHeight();
-            int bottomBarY = screenHeight - HudConstants.BAR_ELEMENT_HEIGHT; // Bottom bar height
-            // Position HP bar above the bottom bar with some spacing
-            // Use constant BAR_ELEMENT_HEIGHT instead of calling getBoundingBox().y
-            return new Vector2f(10, bottomBarY - HudConstants.BAR_ELEMENT_HEIGHT - 4);
-        }
-        return new Vector2f(10, 10);
-    }
+//    @Override
+//    public Vector2f getAnchorPoint() {
+//        // Position within bottom bar (left side, above hotbar)
+//        // Bottom bar is at screenHeight - 22, HP bar should be just above it
+//        var window = mcAccessor.getWindow();
+//        if (window.isPresent()) {
+//            int screenHeight = window.get().getScaledHeight();
+//            int bottomBarY = screenHeight - HudConstants.BAR_ELEMENT_HEIGHT; // Bottom bar height
+//            // Position HP bar above the bottom bar with some spacing
+//            // Use constant BAR_ELEMENT_HEIGHT instead of calling getBoundingBox().y
+//            return new Vector2f(10, bottomBarY - HudConstants.BAR_ELEMENT_HEIGHT - 4);
+//        }
+//        return new Vector2f(10, 10);
+//    }
 
     @Override
     public Vector2f getBoundingBox() {
@@ -190,7 +190,7 @@ public class HPBarElement extends HudElement<HPBarElement.Configuration> {
             double sizeScale = Math.max(0.4, Math.min(1.0, configuration.hpBarSizeScale));
             int barWidth = Math.max(40, (int) Math.round(BASE_BAR_WIDTH * sizeScale));
             int width = barWidth + 4 + textWidth;
-            return new Vector2f(width, HudConstants.BAR_ELEMENT_HEIGHT);
+            return new Vector2f(width * scale, HudConstants.BAR_ELEMENT_HEIGHT * scale);
         }
     }
 
@@ -212,6 +212,11 @@ public class HPBarElement extends HudElement<HPBarElement.Configuration> {
         public String getDisplayName() {
             return displayName;
         }
+    }
+
+    @Override
+    public Vector2f getDefaultPosition() {
+        return new Vector2f(0, 0);
     }
 
     @Override

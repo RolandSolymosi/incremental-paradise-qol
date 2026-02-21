@@ -1,4 +1,4 @@
-package com.incrementalclient.hud;
+package com.incrementalclient.hud.unused;
 
 import com.incrementalclient.common.utils.Vector2f;
 import com.incrementalclient.internals.MinecraftClientAccessor;
@@ -26,7 +26,7 @@ public class TopBarElement extends BarElement {
             return;
         }
         
-        Vector2f pos = getCurrentPosition();
+        Vector2f pos = getElementPosition();
         int y = (int) pos.y;
         int screenWidth = mcAccessor.getWindow().get().getScaledWidth();
         
@@ -38,7 +38,7 @@ public class TopBarElement extends BarElement {
     }
     
     private void renderEditModePlaceholder(DrawContext context) {
-        Vector2f pos = getCurrentPosition();
+        Vector2f pos = getElementPosition();
         int x = (int) pos.x;
         int y = (int) pos.y;
 
@@ -51,13 +51,12 @@ public class TopBarElement extends BarElement {
 
         mcAccessor.getTextRenderer().ifPresent(renderer -> context.drawText(renderer, Text.literal("Top Bar"), x + 10, y + 6, 0xFFFFFFFF, false));
     }
-    
+
     @Override
-    public Vector2f getAnchorPoint() {
-        // Position at exact top of screen (always, regardless of delta position)
+    public Vector2f getDefaultPosition() {
         return new Vector2f(0, 0);
     }
-    
+
     @Override
     public String getDisplayName() {
         return "Top Bar";
