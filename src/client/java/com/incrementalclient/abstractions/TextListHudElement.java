@@ -15,6 +15,12 @@ import java.util.List;
  * Handles common rendering logic like background, padding, and text positioning.
  */
 public abstract class TextListHudElement<T extends TextListHudElement.ConfigurationBase> extends HudElement<T> {
+
+    // Variables to determine the direction the text grows
+    // NOTE: It is probably worth having this done a bit better as an enum
+    protected boolean downDirection = true;
+    protected boolean leftDirection = true;
+
     protected TextListHudElement(MinecraftClientAccessor uiAccessor,
                                  HudManager hudManager) {
         super(uiAccessor, hudManager);
@@ -48,7 +54,7 @@ public abstract class TextListHudElement<T extends TextListHudElement.Configurat
             return;
         }
         var textRenderer = mcAccessor.getTextRenderer();
-        if (textRenderer.isEmpty()){
+        if (textRenderer.isEmpty()) {
             return;
         }
 
@@ -57,7 +63,7 @@ public abstract class TextListHudElement<T extends TextListHudElement.Configurat
             return;
         }
 
-        Vector2f pos = getCurrentPosition();
+        Vector2f pos = getTopLeftCornerPosition();
         int x = (int) pos.x;
         int y = (int) pos.y;
 
@@ -90,6 +96,13 @@ public abstract class TextListHudElement<T extends TextListHudElement.Configurat
                     y + HudConstants.TEXT_PADDING_Y + (HudConstants.LINE_SPACING * i),
                     textColor, true);
         }
+
+//        // Code to visualise the element's position, good for debugging
+//        Vector2f elementPos = getElementPosition();
+//        int ex = (int) elementPos.x;
+//        int ey = (int) elementPos.y;
+//        context.fill(ex-2, ey-2, ex+2, ey+2, 0xFFFF0000);
+
     }
 
     private void renderEditModePlaceholder(DrawContext context, TextRenderer textRenderer, int x, int y) {
@@ -126,7 +139,36 @@ public abstract class TextListHudElement<T extends TextListHudElement.Configurat
                 .orElse(0);
         int height = HudConstants.TEXT_PADDING_Y + (HudConstants.LINE_SPACING * texts.size()) + 2; // +2 for bottom padding
 
-        return new Vector2f(maxWidth + HudConstants.BACKGROUND_PADDING, height);
+        return new Vector2f((maxWidth + HudConstants.BACKGROUND_PADDING) * scale, height * scale);
+    }
+
+    @Override
+    public Vector2f getOffsetPoint() {
+        List<Text> texts = getTextsToRender(false);
+
+        int maxWidth = texts.stream()
+                .mapToInt(this::getTextWidth)
+                .max()
+                .orElse(0);
+
+        int x = 0;
+        int y = 0;
+
+        // Get the y offset
+        if (!downDirection && !texts.isEmpty()) {
+            y = HudConstants.TEXT_PADDING_Y + HudConstants.LINE_SPACING * texts.size();
+        } else if (!downDirection) {
+            y = HudConstants.PLACEHOLDER_HEIGHT;
+        }
+
+        // Get the x offset
+        if (!leftDirection && !texts.isEmpty()) {
+            x = maxWidth + HudConstants.BACKGROUND_PADDING;
+        } else if (!leftDirection) {
+            x = getPlaceholderWidth();
+        }
+
+        return new Vector2f(x, y);
     }
 }
 

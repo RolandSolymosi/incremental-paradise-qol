@@ -28,6 +28,7 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 public class TaskTrackerElement extends TextListHudElement<TaskTrackerElement.Configuration> {
+
     private final WorldMonitor worldMonitor;
     private final TaskMonitor taskMonitor;
 
@@ -44,7 +45,8 @@ public class TaskTrackerElement extends TextListHudElement<TaskTrackerElement.Co
         super(mcAccessor, hudManager);
         this.worldMonitor = worldMonitor;
         this.taskMonitor = taskMonitor;
-        this.anchorPoint = new Vector2f(10, 10);
+        this.defaultPosition = new Vector2f(0.01F, 0.01777777F);
+        resetToDefaultPosition();
 
         options = Suppliers.memoize(() -> List.of(
                 Categories.Tasking.Hud.createConfig(0,
@@ -152,11 +154,6 @@ public class TaskTrackerElement extends TextListHudElement<TaskTrackerElement.Co
         return HudConstants.PLACEHOLDER_WIDTH_SMALL;
     }
 
-    @Override
-    public Vector2f getAnchorPoint() {
-        return anchorPoint;
-    }
-
     public Text taskRender(TaskMonitor.TaskState taskState) {
 
         int textColor = configuration.textColor;
@@ -170,7 +167,7 @@ public class TaskTrackerElement extends TextListHudElement<TaskTrackerElement.Co
         MutableText displayText = Text.literal("")
                 .append(getLocation(taskState))
                 .append(TextUtils.textColor(" " + taskState.getTaskType().name() + ": ", textColor))
-                .append(TextUtils.textColorUnderline(isQuestOrTutorial(taskState) ? taskState.getName() : taskState.getDisplayName(), taskState.isSocialite() ? socialiteColor : taskColor));
+                .append(TextUtils.textColor(isQuestOrTutorial(taskState) ? taskState.getName() : taskState.getDisplayName(), taskState.isSocialite() ? socialiteColor : taskColor, true, false));
 
 
         if (!isQuestOrTutorial(taskState)) {
@@ -223,12 +220,16 @@ public class TaskTrackerElement extends TextListHudElement<TaskTrackerElement.Co
                         Text.literal("").append(TextUtils.textColor("-", textColor)).append(TextUtils.textColor(task.getRegion().getName(), 0xa3cbcb));
                 case Region.W4_Homestead ->
                         Text.literal("").append(TextUtils.textColor("-", textColor)).append(TextUtils.textColor(task.getRegion().getName(), 0x944a00));
+                case Region.W4_Sewer ->
+                        Text.literal("").append(TextUtils.textColor("-", textColor)).append(TextUtils.textColor(task.getRegion().getName(), 0x944a00));
+                case Region.W4_CityOutskirt ->
+                        Text.literal("").append(TextUtils.textColor("-", textColor)).append(TextUtils.textColor(task.getRegion().getName(), 0x944a00));
                 case Region.W4_Alpha ->
                         Text.literal("").append(TextUtils.textColor("-", textColor)).append(TextUtils.textColor(task.getRegion().getName(), 0x00a800));
                 case Region.W4_Beta ->
                         Text.literal("").append(TextUtils.textColor("-", textColor)).append(TextUtils.textColor(task.getRegion().getName(), 0xa800a8));
                 case Region.W4_Delta ->
-                        Text.literal("").append(TextUtils.textColor("-", textColor)).append(TextUtils.textColor(task.getRegion().getName(), 0x54fc54)); //TODO: Need color for Delta;
+                        Text.literal("").append(TextUtils.textColor("-", textColor)).append(TextUtils.textColor(task.getRegion().getName(), 0x5353f9));
                 default -> Text.of("");
             };
         } else return Text.of("");

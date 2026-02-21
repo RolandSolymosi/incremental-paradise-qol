@@ -1,13 +1,12 @@
-package com.incrementalclient.hud;
+package com.incrementalclient.hud.unused;
 
 import com.incrementalclient.abstractions.HudElement;
 import com.incrementalclient.common.utils.Vector2f;
 import com.incrementalclient.internals.MinecraftClientAccessor;
 import com.incrementalclient.services.HudManager;
 import net.minecraft.client.gui.DrawContext;
-import net.minecraft.text.Text;
 import net.minecraft.util.math.ColorHelper;
-
+BIG FUCKING ERROR
 public abstract class BarElement extends HudElement<BarElement.Configuration> {
     public static final int HOTBAR_WIDTH = 182; // Standard hotbar width
     public static final int PADDING = 4; // Padding around elements
@@ -18,12 +17,6 @@ public abstract class BarElement extends HudElement<BarElement.Configuration> {
         super(mcAccessor, hudManager);
         this.scalable = false; // Bars should not be scalable (full width)
         this.draggable = false; // Bars should not be draggable (fixed position)
-    }
-    
-    @Override
-    public Vector2f getCurrentPosition() {
-        // Override to ignore delta position for bars (always at anchor)
-        return getAnchorPoint();
     }
     
     @Override

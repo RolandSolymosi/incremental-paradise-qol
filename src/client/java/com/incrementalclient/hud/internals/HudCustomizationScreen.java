@@ -1,12 +1,11 @@
 package com.incrementalclient.hud.internals;
 
 import com.incrementalclient.abstractions.HudElement;
-import com.incrementalclient.hud.BottomBarElement;
-import com.incrementalclient.hud.TopBarElement;
+import com.incrementalclient.common.utils.Vector2f;
+import com.incrementalclient.hud.ScoreboardReplacementBar.ScoreboardReplacementBarElement;
 import com.incrementalclient.internals.MinecraftClientAccessor;
 import com.incrementalclient.services.ConfigHandler;
 import com.incrementalclient.services.HudManager;
-import com.incrementalclient.common.utils.Vector2f;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.Screen;
 import net.minecraft.client.gui.widget.ButtonWidget;
@@ -33,8 +32,6 @@ public class HudCustomizationScreen extends Screen {
 
     @Override
     protected void init() {
-        HudManager.Configuration.ActiveBarMode activeBarMode = hudManager.getConfiguration().getActiveBarMode();
-        
         for (HudElement<?> element : hudElements) {
             element.onEditModeEnter();
         }
@@ -45,11 +42,7 @@ public class HudCustomizationScreen extends Screen {
         List<HudElement<?>> otherElementsToAdd = new ArrayList<>();
         
         for (HudElement<?> element : hudElements) {
-            if (!HudManager.shouldRenderBar(element, hudManager.getConfiguration())) {
-                continue;
-            }
-            
-            if (element instanceof BottomBarElement || element instanceof TopBarElement) {
+            if (element instanceof ScoreboardReplacementBarElement) {
                 barsToAdd.add(element);
             } else {
                 otherElementsToAdd.add(element);
@@ -61,24 +54,24 @@ public class HudCustomizationScreen extends Screen {
         }
         
         for (HudElement<?> element : otherElementsToAdd) {
-            addDrawableChild(new HudElementToggleWidget(element, 0, 0));
+            addDrawableChild(new HudElementToggleWidget(element));
             if (element.isScalable()) {
-                Vector2f pos = element.getCurrentPosition();
-                addDrawableChild(new HudScaleWidget(element, (int) pos.x + 7, (int) pos.y + 7));
+                Vector2f pos = element.getElementPosition();
+                addDrawableChild(new HudScaleWidget(element));
             }
         }
 
-        int buttonY = 5;
-        if (activeBarMode == HudManager.Configuration.ActiveBarMode.TOP) {
-            buttonY = 27;
-        }
+        int buttonY = 5 + hudManager.getBarHeight();
         
         addDrawableChild(ButtonWidget.builder(
             Text.literal("Reset All"),
             button -> {
                 for (HudElement<?> element : hudElements) {
-                    element.resetDeltaPositions();
-                    element.setScale(1.0f);
+                    element.resetToDefaultPosition();
+                    if (!hasShiftDown()){
+                        element.setScale(1.0f);
+                    }
+
                 }
             }
         ).dimensions(width / 2 - 105, buttonY, 100, 20).build());
@@ -96,17 +89,17 @@ public class HudCustomizationScreen extends Screen {
         snapPointsX.clear();
         snapPointsY.clear();
 
-        snapPointsX.add(0);
-        snapPointsX.add(width);
-        snapPointsY.add(0);
-        snapPointsY.add(height);
+        snapPointsX.add(8);
+        snapPointsX.add(width-8);
+        snapPointsY.add(hudManager.getBarHeight()+8);
+        snapPointsY.add(height-8);
 
         for (HudElement<?> element : hudElements) {
-            if (element instanceof BottomBarElement || element instanceof TopBarElement) {
+            if (element instanceof ScoreboardReplacementBarElement) {
                 continue;
             }
             
-            Vector2f pos = element.getCurrentPosition();
+            Vector2f pos = element.getElementPosition();
             Vector2f bounds = element.getBoundingBox();
             int centerX = (int) (pos.x + bounds.x / 2);
             int centerY = (int) (pos.y + bounds.y / 2);
@@ -120,7 +113,7 @@ public class HudCustomizationScreen extends Screen {
     public void render(DrawContext context, int mouseX, int mouseY, float delta) {
         renderBackground(context, mouseX, mouseY, delta);
 
-        String instructions = "Drag elements to move | Right-click to reset | Toggle ON/OFF to show/hide";
+        String instructions = "Drag elements to move (Shift to disable snapping) | Right-click to reset | Toggle ON/OFF to show/hide";
         var textRenderer = client.textRenderer;
         int textWidth = textRenderer.getWidth(instructions);
         int textX = (width - textWidth) / 2;
@@ -130,8 +123,8 @@ public class HudCustomizationScreen extends Screen {
         List<HudElement<?>> bars = new ArrayList<>();
         List<HudElement<?>> otherElements = new ArrayList<>();
         for (var element : hudElements) {
-            if (element instanceof BottomBarElement || element instanceof TopBarElement) {
-                if (HudManager.shouldRenderBar(element, hudManager.getConfiguration())) {
+            if (element instanceof ScoreboardReplacementBarElement) {
+                if (hudManager.getConfiguration().getBarScoreboardReplacement()) {
                     bars.add(element);
                 }
             } else {
@@ -151,7 +144,10 @@ public class HudCustomizationScreen extends Screen {
 
             net.minecraft.client.util.math.MatrixStack matrixStack = context.getMatrices();
             matrixStack.push();
+            Vector2f pos = element.getTopLeftCornerPosition();
+            matrixStack.translate(pos.x, pos.y, 0);
             matrixStack.scale(element.getScale(), element.getScale(), element.getScale());
+            matrixStack.translate(-pos.x, -pos.y, 0);
 
             element.render(new HudElement.RenderSettings(context, delta, true));
 

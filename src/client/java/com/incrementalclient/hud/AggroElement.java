@@ -2,7 +2,6 @@ package com.incrementalclient.hud;
 
 import com.incrementalclient.abstractions.HudElement;
 import com.incrementalclient.common.utils.Vector2f;
-import com.incrementalclient.interfaces.Configurable;
 import com.incrementalclient.internals.MinecraftClientAccessor;
 import com.incrementalclient.services.GameInfoMonitor;
 import com.incrementalclient.services.HudManager;
@@ -10,8 +9,6 @@ import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.text.Text;
 import net.minecraft.util.Formatting;
-
-import java.util.List;
 
 public class AggroElement extends HudElement<AggroElement.Configuration> {
 
@@ -48,7 +45,7 @@ public class AggroElement extends HudElement<AggroElement.Configuration> {
         float experienceProgress = gameInfoMonitor.getPlayerExperienceProgress();
         int aggroProgressPercent = Math.round(experienceProgress * 100.0f);
 
-        Vector2f pos = getCurrentPosition();
+        Vector2f pos = getElementPosition();
         int x = (int) pos.x;
         int y = (int) pos.y;
 
@@ -65,18 +62,13 @@ public class AggroElement extends HudElement<AggroElement.Configuration> {
     }
 
     private void renderEditModePlaceholder(DrawContext context) {
-        Vector2f pos = getCurrentPosition();
+        Vector2f pos = getElementPosition();
         int x = (int) pos.x;
         int y = (int) pos.y;
 
         TextRenderer textRenderer = mcAccessor.getTextRenderer().get();
         Text placeholderText = buildAggroText(0, 0);
         renderBarText(context, textRenderer, placeholderText, x, y);
-    }
-
-    @Override
-    public Vector2f getAnchorPoint() {
-        return new Vector2f(10, 10);
     }
 
     @Override
@@ -93,7 +85,12 @@ public class AggroElement extends HudElement<AggroElement.Configuration> {
         Text displayText = Text.literal(displayTextString);
         int textWidth = textRenderer.get().getWidth(displayText);
 
-        return new Vector2f(textWidth, HudConstants.BAR_ELEMENT_HEIGHT);
+        return new Vector2f(textWidth * scale, HudConstants.BAR_ELEMENT_HEIGHT * scale);
+    }
+
+    @Override
+    public Vector2f getDefaultPosition() {
+        return new Vector2f(0, 0);
     }
 
     @Override

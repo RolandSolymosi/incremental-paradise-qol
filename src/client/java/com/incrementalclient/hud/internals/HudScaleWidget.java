@@ -1,55 +1,21 @@
 package com.incrementalclient.hud.internals;
 
 import com.incrementalclient.abstractions.HudElement;
-import com.incrementalclient.common.utils.Vector2f;
-import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.screen.narration.NarrationMessageBuilder;
-import net.minecraft.client.gui.widget.ClickableWidget;
-import net.minecraft.text.Text;
 
-public class HudScaleWidget extends ClickableWidget {
-    private final HudElement<?> element;
+public class HudScaleWidget extends HudElementOptionWidget {
     private boolean isDragging = false;
     private float dragStartScale = 1.0f;
     private double dragStartY = 0;
     private static final int WIDGET_WIDTH = 25;
     private static final int WIDGET_HEIGHT = 10;
-    
-    public HudScaleWidget(HudElement<?> element, int x, int y) {
-        super(x, y, WIDGET_WIDTH, WIDGET_HEIGHT, Text.empty());
-        this.element = element;
+
+    public HudScaleWidget(HudElement<?> element) {
+        super(element, WIDGET_WIDTH, WIDGET_HEIGHT, WIDGET_HEIGHT + 2);
     }
-    
-    @Override
-    public void renderWidget(DrawContext context, int mouseX, int mouseY, float delta) {
-        Vector2f pos = element.getCurrentPosition();
-        Vector2f bounds = element.getBoundingBox();
-        this.setX((int) (pos.x + bounds.x + 2));
-        this.setY((int) (pos.y + WIDGET_HEIGHT + 2));
-        
-        if (getX() < 0) this.setX((int) pos.x);
-        if (getY() < 0) this.setY((int) pos.y);
-        
-        int bgColor = isHovered() ? HudElement.HudConstants.SCALE_WIDGET_HOVER : HudElement.HudConstants.SCALE_WIDGET_NORMAL;
-        int borderColor = isDragging ? HudElement.HudConstants.WIDGET_BORDER_DRAGGING : HudElement.HudConstants.WIDGET_BORDER_HOVER;
-        
-        context.fill(getX(), getY(), getX() + width, getY() + height, bgColor);
-        context.drawBorder(getX(), getY(), width, height, borderColor);
-        
-        String scaleText = String.format("%.1f", element.getScale());
-        var textRenderer = net.minecraft.client.MinecraftClient.getInstance().textRenderer;
-        int textX = getX() + (width - textRenderer.getWidth(scaleText)) / 2;
-        int textY = getY() + (height - 8) / 2;
-        context.drawText(textRenderer, scaleText, textX, textY, HudElement.HudConstants.TEXT_WHITE, false);
-    }
-    
+
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
-        Vector2f pos = element.getCurrentPosition();
-        Vector2f bounds = element.getBoundingBox();
-        this.setX((int) (pos.x + bounds.x + 2));
-        this.setY((int) (pos.y + WIDGET_HEIGHT + 2));
-        
         if (isMouseOver(mouseX, mouseY)) {
             if (button == 1) {
                 resetScale();
@@ -90,9 +56,24 @@ public class HudScaleWidget extends ClickableWidget {
     @Override
     protected void appendClickableNarrations(NarrationMessageBuilder builder) {
     }
-    
+
     public void resetScale() {
         element.setScale(1.0f);
+    }
+
+    @Override
+    protected int getBorderColor(){
+        return isDragging ? HudElement.HudConstants.WIDGET_BORDER_DRAGGING : HudElement.HudConstants.WIDGET_BORDER_HOVER;
+    }
+
+    @Override
+    protected int getBackgroundColor(){
+        return isHovered() ? HudElement.HudConstants.SCALE_WIDGET_HOVER : HudElement.HudConstants.SCALE_WIDGET_NORMAL;
+    }
+
+    @Override
+    protected String getText(){
+        return String.format("%.1f", element.getScale());
     }
 }
 

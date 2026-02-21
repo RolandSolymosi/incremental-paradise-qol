@@ -4,26 +4,25 @@ import com.google.common.base.Suppliers;
 import com.incrementalclient.Main;
 import com.incrementalclient.abstractions.HudElement;
 import com.incrementalclient.abstractions.ObservableBase;
-import com.incrementalclient.hud.BottomBarElement;
-import com.incrementalclient.hud.TopBarElement;
+import com.incrementalclient.common.utils.Vector2f;
+import com.incrementalclient.hud.ScoreboardReplacementBar.ScoreboardReplacementBarElement;
 import com.incrementalclient.hud.internals.HudCustomizationScreen;
 import com.incrementalclient.interfaces.Configurable;
-import com.incrementalclient.interfaces.Configurable.Categories;
 import com.incrementalclient.interfaces.Observer;
 import com.incrementalclient.internals.MinecraftClientAccessor;
 import com.incrementalclient.internals.events.HudRenderCallbackObservable;
 import dev.isxander.yacl3.api.ButtonOption;
+import dev.isxander.yacl3.api.NameableEnum;
 import dev.isxander.yacl3.api.Option;
 import dev.isxander.yacl3.api.OptionDescription;
 import dev.isxander.yacl3.api.controller.BooleanControllerBuilder;
-import dev.isxander.yacl3.api.controller.EnumControllerBuilder;
-import dev.isxander.yacl3.api.NameableEnum;
 import dev.isxander.yacl3.config.v2.api.SerialEntry;
 import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.text.Text;
 
-import java.util.*;
+import java.util.Comparator;
+import java.util.List;
 import java.util.function.Supplier;
 
 public class HudManager extends ObservableBase<Observer<HudManager.Event>, HudManager.Event> implements Observer<HudRenderCallbackObservable.Event>, Configurable<HudManager.Configuration> {
@@ -32,6 +31,8 @@ public class HudManager extends ObservableBase<Observer<HudManager.Event>, HudMa
     private final Configuration configuration = new Configuration();
 
     private final Supplier<List<OptionPiece>> options;
+
+    private int barHeight = 0;
 
     public HudManager(
             MinecraftClientAccessor mcClient,
@@ -52,21 +53,21 @@ public class HudManager extends ObservableBase<Observer<HudManager.Event>, HudMa
                                 .description(OptionDescription.of(Text.of("Open the HUD customization screen to position and scale all HUD elements.")))
                                 .action((t, o) -> mcClient.setScreen(Main.SERVICE_PROVIDER.getService(HudCustomizationScreen.class)))
                                 .build()),
-                Categories.Hud.General.createConfig(200,
-                        Option.<Configuration.ActiveBarMode>createBuilder()
-                                .name(Text.of("Active Bar Mode"))
-                                .description(OptionDescription.of(Text.of("Bottom: Hotbar moves to bottom bar. Top: Hotbar stays in normal position. None: Hotbar stays in normal position.")))
-                                .binding(configuration.activeBarMode,
-                                        () -> configuration.activeBarMode,
-                                        newVal -> configuration.activeBarMode = newVal)
-                                .controller(opt -> EnumControllerBuilder.create(opt)
-                                        .enumClass(Configuration.ActiveBarMode.class))
-                                .build()),
-                Categories.Hud.Vanilla.createConfig(0,
+//                Categories.Hud.General.createConfig(200,
+//                        Option.<Configuration.ActiveBarMode>createBuilder()
+//                                .name(Text.of("Active Bar Mode"))
+//                                .description(OptionDescription.of(Text.of("Bottom: Hotbar moves to bottom bar. Top: Hotbar stays in normal position. None: Hotbar stays in normal position.")))
+//                                .binding(configuration.activeBarMode,
+//                                        () -> configuration.activeBarMode,
+//                                        newVal -> configuration.activeBarMode = newVal)
+//                                .controller(opt -> EnumControllerBuilder.create(opt)
+//                                        .enumClass(Configuration.ActiveBarMode.class))
+//                                .build()),
+                Categories.Hud.General.createConfig(300,
                         Option.<Boolean>createBuilder()
-                                .name(Text.of("Hide vanilla scoreboard"))
-                                .description(OptionDescription.of(Text.of("Hides the vanilla scoreboard sidebar.")))
-                                .binding(configuration.hideVanillaScoreboard, () -> configuration.hideVanillaScoreboard, newVal -> configuration.hideVanillaScoreboard = newVal)
+                                .name(Text.of("Replace scoreboard with bar"))
+                                .description(OptionDescription.of(Text.of("Replaces the vanilla scoreboard with a top bar")))
+                                .binding(true, () -> configuration.barScoreboardReplacement, newVal -> configuration.barScoreboardReplacement = newVal)
                                 .controller(BooleanControllerBuilder::create)
                                 .build()),
                 Categories.Hud.Vanilla.createConfig(100,
@@ -143,11 +144,11 @@ public class HudManager extends ObservableBase<Observer<HudManager.Event>, HudMa
         return (o1, o2) -> {
             if (o1 == o2) return 0;
             // Check if elements are bars (BottomBarElement or TopBarElement)
-            boolean o1IsBar = o1 instanceof HudRender(HudElement<?> element1, HudManager hudManager) && 
-                              (element1 instanceof BottomBarElement || element1 instanceof TopBarElement);
-            boolean o2IsBar = o2 instanceof HudRender(HudElement<?> element2, HudManager hudManager) && 
-                              (element2 instanceof BottomBarElement || element2 instanceof TopBarElement);
-            
+            boolean o1IsBar = o1 instanceof HudRender(HudElement<?> element1, HudManager hudManager) &&
+                    (element1 instanceof ScoreboardReplacementBarElement);
+            boolean o2IsBar = o2 instanceof HudRender(HudElement<?> element2, HudManager hudManager) &&
+                    (element2 instanceof ScoreboardReplacementBarElement);
+
             // Bars render first (return -1), other elements render after (return 0)
             if (o1IsBar && !o2IsBar) return -1;
             if (!o1IsBar && o2IsBar) return 1;
@@ -177,12 +178,18 @@ public class HudManager extends ObservableBase<Observer<HudManager.Event>, HudMa
     }
 
     public static boolean shouldRenderBar(HudElement<?> element, Configuration config) {
-        if (element instanceof BottomBarElement) {
-            return config.getActiveBarMode() == Configuration.ActiveBarMode.BOTTOM;
-        } else if (element instanceof TopBarElement) {
-            return config.getActiveBarMode() == Configuration.ActiveBarMode.TOP;
+        if (element instanceof ScoreboardReplacementBarElement) {
+            return config.getBarScoreboardReplacement();
         }
-        return true; // Non-bar elements always render
+        return element.isEnabled(); // Non-bar elements always render
+    }
+
+    public int getBarHeight() {
+        return getConfiguration().getBarScoreboardReplacement() ? barHeight : 0;
+    }
+
+    public void setBarHeight(int barHeight) {
+        this.barHeight = barHeight;
     }
 
     public static class Configuration {
@@ -209,6 +216,8 @@ public class HudManager extends ObservableBase<Observer<HudManager.Event>, HudMa
         @SerialEntry
         public ActiveBarMode activeBarMode = ActiveBarMode.NONE;
         @SerialEntry
+        public boolean barScoreboardReplacement = true;
+        @SerialEntry
         public boolean hideVanillaScoreboard = false;
         @SerialEntry
         public boolean hideVanillaHearts = false;
@@ -231,6 +240,10 @@ public class HudManager extends ObservableBase<Observer<HudManager.Event>, HudMa
 
         public ActiveBarMode getActiveBarMode() {
             return activeBarMode;
+        }
+
+        public boolean getBarScoreboardReplacement() {
+            return barScoreboardReplacement;
         }
 
         public boolean isHideVanillaArmor() {
@@ -274,11 +287,14 @@ public class HudManager extends ObservableBase<Observer<HudManager.Event>, HudMa
             if (!shouldRenderBar(element, hudManager.getConfiguration())) {
                 return; // Skip rendering if bar is not active
             }
-            
+
             if (element.isScalable()) {
                 MatrixStack matrixStack = event.drawContext.getMatrices();
                 matrixStack.push();
+                Vector2f pos = element.getTopLeftCornerPosition();
+                matrixStack.translate(pos.x, pos.y, 0);
                 matrixStack.scale(element.getScale(), element.getScale(), element.getScale());
+                matrixStack.translate(-pos.x, -pos.y, 0);
 
                 element.render(new HudElement.RenderSettings(event.drawContext, 1.0f, false));
 

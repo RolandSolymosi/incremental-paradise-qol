@@ -29,8 +29,8 @@ public enum Region {
     W3_Topside("Topside", World.World3, Warp.W3_Topside, List.of()),
 
     W4_Homestead("Homestead", World.World4, Warp.W4_Spawn, List.of()),
-    W4_CityOutskirt("", World.World4, Warp.W4_Spawn, List.of()),
-    W4_Sewer("Sewer", World.World4, Warp.W4_Sewer, List.of()),
+    W4_CityOutskirt("Homestead", World.World4, Warp.W4_Spawn, List.of()),
+    W4_Sewer("Homestead", World.World4, Warp.W4_Sewer, List.of()),
     W4_Alpha("Alpha", World.World4, Warp.W4_Alpha, List.of()),
     W4_Beta("Beta", World.World4, Warp.W4_Beta, List.of()),
     W4_Delta("Delta", World.World4, Warp.W4_Beta, List.of()),
@@ -41,6 +41,7 @@ public enum Region {
     WN1_NetherGoldMine("Nether Gold", World.WorldNightmare1, Warp.WN1_NetherGold, List.of()),
     WN1_AncientDebrisMine("Ancient Debris", World.WorldNightmare1, Warp.WN1_Netherite, List.of());
 
+    // The name is only used for display so it is the actually sub-area
     private final String name;
     private final World world;
     private final Warp warp;

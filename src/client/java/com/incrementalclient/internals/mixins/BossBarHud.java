@@ -44,11 +44,10 @@ public class BossBarHud {
         bossBarReader.get().bossBarUpdate(bossBars);
 
         // Only apply translation when top bar is active
-        if (hudManager.get().getConfiguration().getActiveBarMode() == HudManager.Configuration.ActiveBarMode.TOP) {
+        if (hudManager.get().getConfiguration().getBarScoreboardReplacement()) {
             // Top bar height is 22 pixels, add some padding (4 pixels) for spacing
-            int topBarHeight = 22;
             int padding = 4;
-            int offsetY = topBarHeight + padding;
+            int offsetY = hudManager.get().getBarHeight() + padding;
 
             // Translate matrix to move boss bars down
             var matrices = ctx.getMatrices();
@@ -63,7 +62,7 @@ public class BossBarHud {
     )
     private void onRenderBossBarEnd(DrawContext context, CallbackInfo ci) {
         // Only restore matrix when top bar is active
-        if (hudManager.get().getConfiguration().getActiveBarMode() != HudManager.Configuration.ActiveBarMode.TOP) {
+        if (!hudManager.get().getConfiguration().getBarScoreboardReplacement()) {
             return;
         }
 
