@@ -69,56 +69,56 @@ public class HudManager extends ObservableBase<Observer<HudManager.Event>, HudMa
                                 .description(OptionDescription.of(Text.of("Replaces the vanilla scoreboard with a top bar")))
                                 .binding(Configuration.defaultBarScoreboardReplacement, () -> configuration.barScoreboardReplacement, newVal -> configuration.barScoreboardReplacement = newVal)
                                 .controller(BooleanControllerBuilder::create)
-                                .build()),
-                Categories.Hud.Vanilla.createConfig(100,
-                        Option.<Boolean>createBuilder()
-                                .name(Text.of("Hide vanilla hearts"))
-                                .description(OptionDescription.of(Text.of("Hides the vanilla health hearts.")))
-                                .binding(Configuration.defaultHideVanillaHearts, () -> configuration.hideVanillaHearts, newVal -> configuration.hideVanillaHearts = newVal)
-                                .controller(BooleanControllerBuilder::create)
-                                .build()),
-                Categories.Hud.Vanilla.createConfig(200,
-                        Option.<Boolean>createBuilder()
-                                .name(Text.of("Hide vanilla food"))
-                                .description(OptionDescription.of(Text.of("Hides the vanilla hunger/food bar.")))
-                                .binding(Configuration.defaultHideVanillaFood, () -> configuration.hideVanillaFood, newVal -> configuration.hideVanillaFood = newVal)
-                                .controller(BooleanControllerBuilder::create)
-                                .build()),
-                Categories.Hud.Vanilla.createConfig(300,
-                        Option.<Boolean>createBuilder()
-                                .name(Text.of("Hide vanilla armor"))
-                                .description(OptionDescription.of(Text.of("Hides the vanilla armor indicators.")))
-                                .binding(Configuration.defaultHideVanillaArmor, () -> configuration.hideVanillaArmor, newVal -> configuration.hideVanillaArmor = newVal)
-                                .controller(BooleanControllerBuilder::create)
-                                .build()),
-                Categories.Hud.Vanilla.createConfig(400,
-                        Option.<Boolean>createBuilder()
-                                .name(Text.of("Hide vanilla effects"))
-                                .description(OptionDescription.of(Text.of("Hides the vanilla potion effect icons.")))
-                                .binding(Configuration.defaultHideVanillaEffects, () -> configuration.hideVanillaEffects, newVal -> configuration.hideVanillaEffects = newVal)
-                                .controller(BooleanControllerBuilder::create)
-                                .build()),
-                Categories.Hud.Vanilla.createConfig(500,
-                        Option.<Boolean>createBuilder()
-                                .name(Text.of("Hide vanilla overlay message"))
-                                .description(OptionDescription.of(Text.of("Hides the vanilla action bar overlay (health/mana display).")))
-                                .binding(Configuration.defaultHideVanillaOverlayMessage, () -> configuration.hideVanillaOverlayMessage, newVal -> configuration.hideVanillaOverlayMessage = newVal)
-                                .controller(BooleanControllerBuilder::create)
-                                .build()),
-                Categories.Hud.Vanilla.createConfig(600,
-                        Option.<Boolean>createBuilder()
-                                .name(Text.of("Hide vanilla experience bar"))
-                                .description(OptionDescription.of(Text.of("Hides the vanilla experience bar.")))
-                                .binding(Configuration.defaultHideVanillaExperienceBar, () -> configuration.hideVanillaExperienceBar, newVal -> configuration.hideVanillaExperienceBar = newVal)
-                                .controller(BooleanControllerBuilder::create)
-                                .build()),
-                Categories.Hud.Vanilla.createConfig(700,
-                        Option.<Boolean>createBuilder()
-                                .name(Text.of("Hide vanilla experience level"))
-                                .description(OptionDescription.of(Text.of("Hides the vanilla experience level number.")))
-                                .binding(Configuration.defaultHideVanillaExperienceLevel, () -> configuration.hideVanillaExperienceLevel, newVal -> configuration.hideVanillaExperienceLevel = newVal)
-                                .controller(BooleanControllerBuilder::create)
                                 .build())
+//                Categories.Hud.Vanilla.createConfig(100,
+//                        Option.<Boolean>createBuilder()
+//                                .name(Text.of("Hide vanilla hearts"))
+//                                .description(OptionDescription.of(Text.of("Hides the vanilla health hearts.")))
+//                                .binding(Configuration.defaultHideVanillaHearts, () -> configuration.hideVanillaHearts, newVal -> configuration.hideVanillaHearts = newVal)
+//                                .controller(BooleanControllerBuilder::create)
+//                                .build()),
+//                Categories.Hud.Vanilla.createConfig(200,
+//                        Option.<Boolean>createBuilder()
+//                                .name(Text.of("Hide vanilla food"))
+//                                .description(OptionDescription.of(Text.of("Hides the vanilla hunger/food bar.")))
+//                                .binding(Configuration.defaultHideVanillaFood, () -> configuration.hideVanillaFood, newVal -> configuration.hideVanillaFood = newVal)
+//                                .controller(BooleanControllerBuilder::create)
+//                                .build()),
+//                Categories.Hud.Vanilla.createConfig(300,
+//                        Option.<Boolean>createBuilder()
+//                                .name(Text.of("Hide vanilla armor"))
+//                                .description(OptionDescription.of(Text.of("Hides the vanilla armor indicators.")))
+//                                .binding(Configuration.defaultHideVanillaArmor, () -> configuration.hideVanillaArmor, newVal -> configuration.hideVanillaArmor = newVal)
+//                                .controller(BooleanControllerBuilder::create)
+//                                .build()),
+//                Categories.Hud.Vanilla.createConfig(400,
+//                        Option.<Boolean>createBuilder()
+//                                .name(Text.of("Hide vanilla effects"))
+//                                .description(OptionDescription.of(Text.of("Hides the vanilla potion effect icons.")))
+//                                .binding(Configuration.defaultHideVanillaEffects, () -> configuration.hideVanillaEffects, newVal -> configuration.hideVanillaEffects = newVal)
+//                                .controller(BooleanControllerBuilder::create)
+//                                .build()),
+//                Categories.Hud.Vanilla.createConfig(500,
+//                        Option.<Boolean>createBuilder()
+//                                .name(Text.of("Hide vanilla overlay message"))
+//                                .description(OptionDescription.of(Text.of("Hides the vanilla action bar overlay (health/mana display).")))
+//                                .binding(Configuration.defaultHideVanillaOverlayMessage, () -> configuration.hideVanillaOverlayMessage, newVal -> configuration.hideVanillaOverlayMessage = newVal)
+//                                .controller(BooleanControllerBuilder::create)
+//                                .build()),
+//                Categories.Hud.Vanilla.createConfig(600,
+//                        Option.<Boolean>createBuilder()
+//                                .name(Text.of("Hide vanilla experience bar"))
+//                                .description(OptionDescription.of(Text.of("Hides the vanilla experience bar.")))
+//                                .binding(Configuration.defaultHideVanillaExperienceBar, () -> configuration.hideVanillaExperienceBar, newVal -> configuration.hideVanillaExperienceBar = newVal)
+//                                .controller(BooleanControllerBuilder::create)
+//                                .build()),
+//                Categories.Hud.Vanilla.createConfig(700,
+//                        Option.<Boolean>createBuilder()
+//                                .name(Text.of("Hide vanilla experience level"))
+//                                .description(OptionDescription.of(Text.of("Hides the vanilla experience level number.")))
+//                                .binding(Configuration.defaultHideVanillaExperienceLevel, () -> configuration.hideVanillaExperienceLevel, newVal -> configuration.hideVanillaExperienceLevel = newVal)
+//                                .controller(BooleanControllerBuilder::create)
+//                                .build())
         ));
 
         hudRenderCallbackObservable.subscribe(this);

@@ -156,16 +156,9 @@ public interface Configurable<TConfiguration> {
         }
         public static final HudCategory Hud = new HudCategory();
 
-        public static final class HotkeysCategory extends BaseCategory {
-            private HotkeysCategory() { super("Hotkeys", "Hotkey related settings.", 1000, 0); }
-
-            public final Group Bank = new Group(this, "Banking", 0, "Banking related hotkeys");
-            public final Group BlueprintSwap = new Group(this, "Blueprint Swap", 100, "Blueprint swapping hotkeys (swap to the first blueprint in the list, for now)");
-        }
-        public static final HotkeysCategory Hotkeys = new HotkeysCategory();
 
         public static final class TaskingCategory extends BaseCategory {
-            private TaskingCategory() { super("Tasking", "Tasking related settings.", 2500, 0); }
+            private TaskingCategory() { super("Tasking", "Tasking related settings.", 1, 0); }
 
             public final Group General = new Group(this, "General", 0, "Tasking general settings, like hotkey.");
             public final Group Wardrobe = new Group(this, "Wardrobe", 1000, "Auto swap settings of wardrobes.");
@@ -173,15 +166,26 @@ public interface Configurable<TConfiguration> {
         }
         public static final TaskingCategory Tasking = new TaskingCategory();
 
+
         public static final class SkillLevelingCategory extends BaseCategory {
-            private SkillLevelingCategory() { super("Skill Leveling", "Skill leveling related settings.", 5000, 0); }
+            private SkillLevelingCategory() { super("Skill Leveling", "Skill leveling related settings.", 2, 0); }
 
             public final Group General = new Group(this, "General", 0, "The common base settings for all skill category");
         }
         public static final SkillLevelingCategory SkillLeveling = new SkillLevelingCategory();
 
+
+        public static final class HotkeysCategory extends BaseCategory {
+            private HotkeysCategory() { super("Hotkeys", "Hotkey related settings.", 3, 0); }
+
+            public final Group Bank = new Group(this, "Banking", 0, "Banking related hotkeys");
+            public final Group BlueprintSwap = new Group(this, "Blueprint Swap", 100, "Blueprint swapping hotkeys (swap to the first blueprint in the list, for now)");
+        }
+        public static final HotkeysCategory Hotkeys = new HotkeysCategory();
+
+
         public static final class MiscCategory extends BaseCategory {
-            private MiscCategory() { super("Misc", "Other small settings.", 10000, 0); }
+            private MiscCategory() { super("Misc", "Other small settings.", 4, 0); }
 
             public final Group General = new Group(this, "General", 0, "Small features not fitting anywhere else.");
             public final Group PetXp = new Group(this, "Pet XP", 100, "Pet XP calculation settings");
