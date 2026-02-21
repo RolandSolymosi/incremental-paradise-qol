@@ -3,15 +3,13 @@ package com.incrementalclient.hud;
 import com.google.common.base.Suppliers;
 import com.incrementalclient.abstractions.HudElement;
 import com.incrementalclient.abstractions.TextListHudElement;
+import com.incrementalclient.common.data.World;
 import com.incrementalclient.common.utils.NumberParser;
 import com.incrementalclient.common.utils.TextUtils;
 import com.incrementalclient.common.utils.Vector2f;
 import com.incrementalclient.internals.MinecraftClientAccessor;
 import com.incrementalclient.internals.events.ClientPlayConnectionObservable;
-import com.incrementalclient.services.ActiveConsumableMonitor;
-import com.incrementalclient.services.CommandHandler;
-import com.incrementalclient.services.HudManager;
-import com.incrementalclient.services.ItemTargetMonitor;
+import com.incrementalclient.services.*;
 import dev.isxander.yacl3.api.Option;
 import dev.isxander.yacl3.api.OptionDescription;
 import dev.isxander.yacl3.api.controller.BooleanControllerBuilder;
@@ -30,15 +28,18 @@ public class ItemTargetTrackerElement extends TextListHudElement<ItemTargetTrack
 
     private final Configuration configuration = new Configuration();
 
+    private final WorldMonitor worldMonitor;
     private final Supplier<List<OptionPiece>> options;
     private final ItemTargetMonitor itemTargetMonitor;
 
     public ItemTargetTrackerElement(
             MinecraftClientAccessor uiAccessor,
+            WorldMonitor worldMonitor,
             HudManager hudManager,
             ItemTargetMonitor itemTargetMonitor
     ) {
         super(uiAccessor, hudManager);
+        this.worldMonitor = worldMonitor;
         this.itemTargetMonitor = itemTargetMonitor;
         this.leftDirection = false;
         this.defaultPosition = new Vector2f(0.99F, 0.017777F);
@@ -50,6 +51,13 @@ public class ItemTargetTrackerElement extends TextListHudElement<ItemTargetTrack
                                 .name(Text.of("Filter message"))
                                 .description(OptionDescription.of(Text.of("Toggle if item tracker should filter message or not. If item tracker is disabled it won't filter message anyway.")))
                                 .binding(Configuration.defaultFilterMessages, () -> configuration.filterMessages, newVal -> configuration.filterMessages = newVal)
+                                .controller(BooleanControllerBuilder::create)
+                                .build()),
+                Categories.Hud.ItemTarget.createConfig(2,
+                        Option.<Boolean>createBuilder()
+                                .name(Text.of("Disable Hud element during Boss Fights"))
+                                .description(OptionDescription.of(Text.of("Toggle if you want this element to be disabled and hidden during boss fights")))
+                                .binding(Configuration.defaultIsHudDisabledDuringBossFight, () -> configuration.isHudDisabledDuringBossFight, newVal -> configuration.isHudDisabledDuringBossFight = newVal)
                                 .controller(BooleanControllerBuilder::create)
                                 .build()),
                 Categories.Hud.ItemTarget.createConfig(4,
@@ -83,6 +91,11 @@ public class ItemTargetTrackerElement extends TextListHudElement<ItemTargetTrack
     }
 
     @Override
+    public boolean isEnabled() {
+        return enabled && (worldMonitor.currentWorld() != World.BossArenas || !configuration.isHudDisabledDuringBossFight);
+    }
+
+    @Override
     public String getDisplayName() {
         return "Item Tracker";
     }
@@ -112,10 +125,13 @@ public class ItemTargetTrackerElement extends TextListHudElement<ItemTargetTrack
     public static class Configuration extends ConfigurationBase {
 
         private static final boolean defaultFilterMessages = true;
+        private static final boolean defaultIsHudDisabledDuringBossFight = false;
         private static final double defaultHudBackgroundOpacity = 0.0;
 
         @SerialEntry
         public boolean filterMessages = defaultFilterMessages;
+        @SerialEntry
+        public boolean isHudDisabledDuringBossFight = defaultIsHudDisabledDuringBossFight;
         @SerialEntry
         public double hudBackgroundOpacity = defaultHudBackgroundOpacity;
     }
