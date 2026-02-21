@@ -196,6 +196,13 @@ public class ActiveConsumableMonitor extends ObservableBase<Observer<List<Active
         // Parse strings like "5 Minutes", "57 Seconds", "5 Minutes 30 Seconds", etc.
         long totalSeconds = 0;
 
+        // Match hours (full word only)
+        Pattern hoursPattern = Pattern.compile("(\\d+)\\s+hours?", Pattern.CASE_INSENSITIVE);
+        Matcher hoursMatcher = hoursPattern.matcher(timeLeft);
+        if (hoursMatcher.find()) {
+            totalSeconds += Long.parseLong(hoursMatcher.group(1)) * 3600;
+        }
+
         // Match minutes (full word only)
         Pattern minutesPattern = Pattern.compile("(\\d+)\\s+minutes?", Pattern.CASE_INSENSITIVE);
         Matcher minutesMatcher = minutesPattern.matcher(timeLeft);
