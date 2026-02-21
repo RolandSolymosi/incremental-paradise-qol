@@ -153,7 +153,8 @@ public class PlayerProgressParser {
             Pattern layerPattern = Pattern.compile(patternBuilder.toString());
             Matcher matcher = layerPattern.matcher(text);
 
-            if (matcher.find()) {
+            // A bit of a hack but in the case multiple are found take the latest as area will always be first (only case is area Nightmare 1 and Nmr X
+            while (matcher.find()) {
                 // Extract the matched text and create plain Text
                 String matchedText = text.substring(matcher.start(), matcher.end()).trim();
                 layers.put(layer, Text.literal(matchedText));

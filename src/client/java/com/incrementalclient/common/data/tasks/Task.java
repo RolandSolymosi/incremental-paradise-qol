@@ -274,7 +274,7 @@ public enum Task {
     SmokedSalmon(new NormalTask("Smoked Salmon", Region.WN1_Overworld, List.of("smoked salmon"), null, TaskType.Fishing, DefaultWardrobe.Fishing, Tool.Spear, List.of(Target.N1_SmokedSalmon), List.of(Warp.WN1_Decay, Warp.WN1_Spawn))),
     Strider(new NormalTask("Strider", Region.WN1_Overworld, List.of("striders"), null, TaskType.Fishing, DefaultWardrobe.CombatFishing, Tool.Spear, List.of(Target.N1_Strider), List.of(Warp.WN1_Spawn))),
 
-    EarnTicketDice(new GamingTask("Ticker for Pairdice", Region.WN1_Overworld, List.of("pairadice"), GameKind.Pairdice, List.of(Constraint.Ticket), List.of(Warp.WN1_Spawn))),
+    EarnTicketDice(new GamingTask("Ticket for Pairdice", Region.WN1_Overworld, List.of("pairadice"), GameKind.Pairdice, List.of(Constraint.Ticket), List.of(Warp.WN1_Spawn))),
     EarnPointDice(new GamingTask("Score in Pairdice", Region.WN1_Overworld, List.of("pairadice"), GameKind.Pairdice, null /* TODO: Missing constraint name*/, List.of(Warp.WN1_Spawn))),
     ShiverMoney(new NormalTask("Shiver from selling items", Region.WN1_Overworld, List.of("shiver from selling items"), null, TaskType.Mining, DefaultWardrobe.Mining, Tool.Pickaxe, null, List.of(Warp.WN1_Quartz, Warp.WN1_Spawn))),
     ;
