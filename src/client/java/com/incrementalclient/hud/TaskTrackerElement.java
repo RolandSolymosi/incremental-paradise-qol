@@ -139,10 +139,9 @@ public class TaskTrackerElement extends TextListHudElement<TaskTrackerElement.Co
         return (int) (configuration.taskHudBackgroundOpacity * 255);
     }
 
-    // TODO: Add the config element and prob add to item tracker as well
     @Override
     public boolean isEnabled() {
-        return enabled && (worldMonitor.currentWorld() != World.BossArenas);
+        return enabled && (worldMonitor.currentWorld() != World.BossArenas || !configuration.isHudDisabledDuringBossFight);
     }
 
     @Override
@@ -269,6 +268,7 @@ public class TaskTrackerElement extends TextListHudElement<TaskTrackerElement.Co
 
     public static class Configuration extends HudElement.ConfigurationBase {
 
+        private static final boolean defaultIsHudDisabledDuringBossFight = false;
         private static final double defaultTaskHudBackgroundOpacity = 0.0;
         private static final int defaultTextColor = 0xfcfcfc;
         private static final int defaultWorldColor = 0x555555;
@@ -279,6 +279,8 @@ public class TaskTrackerElement extends TextListHudElement<TaskTrackerElement.Co
         private static final int defaultCompleteColor = 0x00aa00;
         private static final int defaultTicketColor = 0x8845d1;
 
+        @SerialEntry
+        public boolean isHudDisabledDuringBossFight = defaultIsHudDisabledDuringBossFight;
         @SerialEntry
         public double taskHudBackgroundOpacity = defaultTaskHudBackgroundOpacity;
         @SerialEntry
