@@ -38,7 +38,7 @@ public class DepositHotkey implements Configurable<DepositHotkey.Configuration> 
                 Option.<Integer>createBuilder()
                         .name(Text.literal("Deposit all"))
                         .binding(
-                                configuration.keybind,
+                                Configuration.defaultKeybind,
                                 () -> configuration.keybind,
                                 v -> configuration.keybind = v
                         )
@@ -117,7 +117,9 @@ public class DepositHotkey implements Configurable<DepositHotkey.Configuration> 
     }
 
     public static class Configuration {
+        private static final int defaultKeybind = GLFW.GLFW_KEY_B;
+
         @SerialEntry
-        public int keybind = GLFW.GLFW_KEY_B;
+        public int keybind = defaultKeybind;
     }
 }

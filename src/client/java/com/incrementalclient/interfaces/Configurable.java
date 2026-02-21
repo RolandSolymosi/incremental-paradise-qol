@@ -2,6 +2,7 @@ package com.incrementalclient.interfaces;
 
 import dev.isxander.yacl3.api.Option;
 
+import java.lang.reflect.Modifier;
 import java.util.List;
 
 public interface Configurable<TConfiguration> {
@@ -29,14 +30,17 @@ public interface Configurable<TConfiguration> {
         var currentClass = target.getClass();
         while (currentClass != null && currentClass != Object.class) {
             for (java.lang.reflect.Field field : currentClass.getDeclaredFields()) {
-                try {
-                    field.setAccessible(true);
-                    // Copy the value from the 'other' (loaded) object to 'target' (live) object
-                    var value = field.get(other);
-                    field.set(target, value);
-                } catch (IllegalAccessException e) {
-                    System.err.println("Failed to copy field: " + field.getName());
+                if (!Modifier.isFinal(field.getModifiers())) {
+                    try {
+                        field.setAccessible(true);
+                        // Copy the value from the 'other' (loaded) object to 'target' (live) object
+                        var value = field.get(other);
+                        field.set(target, value);
+                    } catch (IllegalAccessException e) {
+                        System.err.println("Failed to copy field: " + field.getName());
+                    }
                 }
+
             }
             currentClass = currentClass.getSuperclass();
         }
@@ -145,41 +149,43 @@ public interface Configurable<TConfiguration> {
 
             public final Group General = new Group(this, "General", 0, "Combat settings.");
             public final Group Vanilla = new Group(this, "Vanilla", 100, "Hide vanilla Minecraft HUD elements to replace them with custom versions.");
-            public final Group Consumable = new Group(this, "Consumable", 200, "Active Consumable tracker Hud related settings.");
-            public final Group Currency = new Group(this, "Currency", 300, "Currency Hud related settings.");
-            public final Group HpBar = new Group(this, "HpBar", 400, "HpBar related settings.");
-            public final Group ItemTarget = new Group(this, "Item Target", 500, "Item Target tracker Hud element.");
-            public final Group ScoreboardReplacementBar = new Group(this, "Scoreboard Replacement Bar", 600, "Scoreboard Replacement Bar Hud element.");
+            public final Group Tasking = new Group(this, "Tasking", 200, "Task Tracker Hud related settings.");
+            public final Group Consumable = new Group(this, "Consumable", 300, "Active Consumable tracker Hud related settings.");
+            public final Group ItemTarget = new Group(this, "Item Target", 400, "Item Target tracker Hud element.");
+            public final Group ScoreboardReplacementBar = new Group(this, "Scoreboard Replacement Bar", 500, "Scoreboard Replacement Bar Hud element.");
         }
         public static final HudCategory Hud = new HudCategory();
 
+
+        public static final class TaskingCategory extends BaseCategory {
+            private TaskingCategory() { super("Tasking", "Tasking related settings.", 1, 0); }
+
+            public final Group General = new Group(this, "General", 0, "Tasking general settings, like hotkey.");
+            public final Group Wardrobe = new Group(this, "Wardrobe", 1000, "Auto swap settings of wardrobes.");
+            public final Group Tools = new Group(this, "Tools", 2000, "Auto swap settings of tools.");
+        }
+        public static final TaskingCategory Tasking = new TaskingCategory();
+
+
+        public static final class SkillLevelingCategory extends BaseCategory {
+            private SkillLevelingCategory() { super("Skill Leveling", "Skill leveling related settings.", 2, 0); }
+
+            public final Group General = new Group(this, "General", 0, "The common base settings for all skill category");
+        }
+        public static final SkillLevelingCategory SkillLeveling = new SkillLevelingCategory();
+
+
         public static final class HotkeysCategory extends BaseCategory {
-            private HotkeysCategory() { super("Hotkeys", "Hotkey related settings.", 1000, 0); }
+            private HotkeysCategory() { super("Hotkeys", "Hotkey related settings.", 3, 0); }
 
             public final Group Bank = new Group(this, "Banking", 0, "Banking related hotkeys");
             public final Group BlueprintSwap = new Group(this, "Blueprint Swap", 100, "Blueprint swapping hotkeys (swap to the first blueprint in the list, for now)");
         }
         public static final HotkeysCategory Hotkeys = new HotkeysCategory();
 
-        public static final class TaskingCategory extends BaseCategory {
-            private TaskingCategory() { super("Tasking", "Tasking related settings.", 2500, 0); }
-
-            public final Group General = new Group(this, "General", 0, "Tasking general settings, like hotkey.");
-            public final Group Hud = new Group(this, "Hud", 500, "Task Tracker Hud related settings.");
-            public final Group Wardrobe = new Group(this, "Wardrobe", 1000, "Auto swap settings of wardrobes.");
-            public final Group Tools = new Group(this, "Tools", 2000, "Auto swap settings of tools.");
-        }
-        public static final TaskingCategory Tasking = new TaskingCategory();
-
-        public static final class SkillLevelingCategory extends BaseCategory {
-            private SkillLevelingCategory() { super("Skill Leveling", "Skill leveling related settings.", 5000, 0); }
-
-            public final Group General = new Group(this, "General", 0, "The common base settings for all skill category");
-        }
-        public static final SkillLevelingCategory SkillLeveling = new SkillLevelingCategory();
 
         public static final class MiscCategory extends BaseCategory {
-            private MiscCategory() { super("Misc", "Other small settings.", 10000, 0); }
+            private MiscCategory() { super("Misc", "Other small settings.", 4, 0); }
 
             public final Group General = new Group(this, "General", 0, "Small features not fitting anywhere else.");
             public final Group PetXp = new Group(this, "Pet XP", 100, "Pet XP calculation settings");

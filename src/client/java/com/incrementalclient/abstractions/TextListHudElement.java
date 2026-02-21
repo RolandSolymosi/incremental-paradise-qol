@@ -50,9 +50,6 @@ public abstract class TextListHudElement<T extends TextListHudElement.Configurat
     public void render(RenderSettings renderSettings) {
         var editMode = renderSettings.editMode();
         var context = renderSettings.context();
-        if (!isElementEnabled()) {
-            return;
-        }
         var textRenderer = mcAccessor.getTextRenderer();
         if (textRenderer.isEmpty()) {
             return;
@@ -124,10 +121,6 @@ public abstract class TextListHudElement<T extends TextListHudElement.Configurat
 
     @Override
     public Vector2f getBoundingBox() {
-        if (!isElementEnabled()) {
-            return new Vector2f(0, 0);
-        }
-
         List<Text> texts = getTextsToRender(false);
         if (texts.isEmpty()) {
             return new Vector2f(getPlaceholderWidth(), HudConstants.PLACEHOLDER_HEIGHT);

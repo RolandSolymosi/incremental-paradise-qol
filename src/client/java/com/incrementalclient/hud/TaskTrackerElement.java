@@ -16,6 +16,7 @@ import com.incrementalclient.common.utils.Vector2f;
 import com.incrementalclient.services.WorldMonitor;
 import dev.isxander.yacl3.api.Option;
 import dev.isxander.yacl3.api.OptionDescription;
+import dev.isxander.yacl3.api.controller.BooleanControllerBuilder;
 import dev.isxander.yacl3.api.controller.ColorControllerBuilder;
 import dev.isxander.yacl3.api.controller.DoubleSliderControllerBuilder;
 import dev.isxander.yacl3.config.v2.api.SerialEntry;
@@ -49,67 +50,74 @@ public class TaskTrackerElement extends TextListHudElement<TaskTrackerElement.Co
         resetToDefaultPosition();
 
         options = Suppliers.memoize(() -> List.of(
-                Categories.Tasking.Hud.createConfig(0,
+                Categories.Hud.Tasking.createConfig(0,
+                        Option.<Boolean>createBuilder()
+                                .name(Text.of("Disable Hud element during Boss Fights"))
+                                .description(OptionDescription.of(Text.of("Toggle if you want this element to be disabled and hidden during boss fights")))
+                                .binding(Configuration.defaultIsHudDisabledDuringBossFight, () -> configuration.isHudDisabledDuringBossFight, newVal -> configuration.isHudDisabledDuringBossFight = newVal)
+                                .controller(BooleanControllerBuilder::create)
+                                .build()),
+                Categories.Hud.Tasking.createConfig(1,
                         Option.<Double>createBuilder()
                                 .name(Text.of("Task HUD background opacity"))
                                 .description(OptionDescription.of(Text.of("Set the opacity of the HUD background.")))
-                                .binding(configuration.taskHudBackgroundOpacity, () -> configuration.taskHudBackgroundOpacity, newVal -> configuration.taskHudBackgroundOpacity = newVal)
+                                .binding(Configuration.defaultTaskHudBackgroundOpacity, () -> configuration.taskHudBackgroundOpacity, newVal -> configuration.taskHudBackgroundOpacity = newVal)
                                 .controller(o -> DoubleSliderControllerBuilder.create(o).step(0.01).range(0.0, 1.0))
                                 .build()),
-                Categories.Tasking.Hud.createConfig(1,
+                Categories.Hud.Tasking.createConfig(2,
                         Option.<Color>createBuilder()
                                 .name(Text.of("Color of the base text"))
                                 .description(OptionDescription.of(Text.of("The color of the base text.")))
-                                .binding(new Color(configuration.textColor), () -> new Color(configuration.textColor), newVal -> configuration.textColor = newVal.getRGB())
+                                .binding(new Color(Configuration.defaultTextColor), () -> new Color(configuration.textColor), newVal -> configuration.textColor = newVal.getRGB())
                                 .controller(ColorControllerBuilder::create)
                                 .build()),
-                Categories.Tasking.Hud.createConfig(2,
+                Categories.Hud.Tasking.createConfig(3,
                         Option.<Color>createBuilder()
                                 .name(Text.of("Color of the world text"))
                                 .description(OptionDescription.of(Text.of("The color of the world text.")))
-                                .binding(new Color(configuration.worldColor), () -> new Color(configuration.worldColor), newVal -> configuration.worldColor = newVal.getRGB())
+                                .binding(new Color(Configuration.defaultWorldColor), () -> new Color(configuration.worldColor), newVal -> configuration.worldColor = newVal.getRGB())
                                 .controller(ColorControllerBuilder::create)
                                 .build()),
-                Categories.Tasking.Hud.createConfig(3,
+                Categories.Hud.Tasking.createConfig(4,
                         Option.<Color>createBuilder()
                                 .name(Text.of("Color of the task text"))
                                 .description(OptionDescription.of(Text.of("The color of the task target.")))
-                                .binding(new Color(configuration.taskColor), () -> new Color(configuration.taskColor), newVal -> configuration.taskColor = newVal.getRGB())
+                                .binding(new Color(Configuration.defaultTaskColor), () -> new Color(configuration.taskColor), newVal -> configuration.taskColor = newVal.getRGB())
                                 .controller(ColorControllerBuilder::create)
                                 .build()),
-                Categories.Tasking.Hud.createConfig(4,
+                Categories.Hud.Tasking.createConfig(5,
                         Option.<Color>createBuilder()
                                 .name(Text.of("Color of the socialite text"))
                                 .description(OptionDescription.of(Text.of("The highlight color used for socialite tasks.")))
-                                .binding( new Color(configuration.socialiteColor), () -> new Color(configuration.socialiteColor), newVal -> configuration.socialiteColor = newVal.getRGB())
+                                .binding(new Color(Configuration.defaultSocialiteColor), () -> new Color(configuration.socialiteColor), newVal -> configuration.socialiteColor = newVal.getRGB())
                                 .controller(ColorControllerBuilder::create)
                                 .build()),
-                Categories.Tasking.Hud.createConfig(5,
+                Categories.Hud.Tasking.createConfig(6,
                         Option.<Color>createBuilder()
                                 .name(Text.of("Color of the progress text"))
                                 .description(OptionDescription.of(Text.of("The color used for the current task progress number.")))
-                                .binding(new Color(configuration.progressColor), () -> new Color(configuration.progressColor), newVal -> configuration.progressColor = newVal.getRGB())
+                                .binding(new Color(Configuration.defaultProgressColor), () -> new Color(configuration.progressColor), newVal -> configuration.progressColor = newVal.getRGB())
                                 .controller(ColorControllerBuilder::create)
                                 .build()),
-                Categories.Tasking.Hud.createConfig(6,
+                Categories.Hud.Tasking.createConfig(7,
                         Option.<Color>createBuilder()
                                 .name(Text.of("Color of the target text"))
                                 .description(OptionDescription.of(Text.of("The color used for the target amount required.")))
-                                .binding(new Color(configuration.targetColor), () -> new Color(configuration.targetColor), newVal -> configuration.targetColor = newVal.getRGB())
+                                .binding(new Color(Configuration.defaultTargetColor), () -> new Color(configuration.targetColor), newVal -> configuration.targetColor = newVal.getRGB())
                                 .controller(ColorControllerBuilder::create)
                                 .build()),
-                Categories.Tasking.Hud.createConfig(7,
+                Categories.Hud.Tasking.createConfig(8,
                         Option.<Color>createBuilder()
                                 .name(Text.of("Color of the completed text"))
                                 .description(OptionDescription.of(Text.of("The text color used when a task is completed.")))
-                                .binding(new Color(configuration.completeColor), () -> new Color(configuration.completeColor), newVal -> configuration.completeColor = newVal.getRGB())
+                                .binding(new Color(Configuration.defaultCompleteColor), () -> new Color(configuration.completeColor), newVal -> configuration.completeColor = newVal.getRGB())
                                 .controller(ColorControllerBuilder::create)
                                 .build()),
-                Categories.Tasking.Hud.createConfig(8,
+                Categories.Hud.Tasking.createConfig(9,
                         Option.<Color>createBuilder()
                                 .name(Text.of("Color of the ticket text"))
                                 .description(OptionDescription.of(Text.of("The color used to highlight ticket tasks.")))
-                                .binding(new Color(configuration.ticketColor), () -> new Color(configuration.ticketColor), newVal -> configuration.ticketColor = newVal.getRGB())
+                                .binding(new Color(Configuration.defaultTicketColor), () -> new Color(configuration.ticketColor), newVal -> configuration.ticketColor = newVal.getRGB())
                                 .controller(ColorControllerBuilder::create)
                                 .build())
         ));
@@ -140,8 +148,8 @@ public class TaskTrackerElement extends TextListHudElement<TaskTrackerElement.Co
     }
 
     @Override
-    public boolean isElementEnabled() {
-        return worldMonitor.currentWorld() != World.BossArenas;
+    public boolean isEnabled() {
+        return enabled && (worldMonitor.currentWorld() != World.BossArenas || !configuration.isHudDisabledDuringBossFight);
     }
 
     @Override
@@ -268,25 +276,37 @@ public class TaskTrackerElement extends TextListHudElement<TaskTrackerElement.Co
 
     public static class Configuration extends HudElement.ConfigurationBase {
 
-        @SerialEntry
-        public double taskHudBackgroundOpacity = 0.3;
+        private static final boolean defaultIsHudDisabledDuringBossFight = false;
+        private static final double defaultTaskHudBackgroundOpacity = 0.0;
+        private static final int defaultTextColor = 0xfcfcfc;
+        private static final int defaultWorldColor = 0x555555;
+        private static final int defaultTaskColor = 0xffaa00;
+        private static final int defaultSocialiteColor = 0x55ffff;
+        private static final int defaultProgressColor = 0x5555ff;
+        private static final int defaultTargetColor = 0xff5555;
+        private static final int defaultCompleteColor = 0x00aa00;
+        private static final int defaultTicketColor = 0x8845d1;
 
         @SerialEntry
-        public int textColor = 0xfcfcfc;
+        public boolean isHudDisabledDuringBossFight = defaultIsHudDisabledDuringBossFight;
         @SerialEntry
-        public int worldColor = 0x555555;
+        public double taskHudBackgroundOpacity = defaultTaskHudBackgroundOpacity;
         @SerialEntry
-        public int taskColor = 0xffaa00;
+        public int textColor = defaultTextColor;
         @SerialEntry
-        public int socialiteColor = 0x55ffff;
+        public int worldColor = defaultWorldColor;
         @SerialEntry
-        public int progressColor = 0x5555ff;
+        public int taskColor = defaultTaskColor;
         @SerialEntry
-        public int targetColor = 0xff5555;
+        public int socialiteColor = defaultSocialiteColor;
         @SerialEntry
-        public int completeColor = 0x00aa00;
+        public int progressColor = defaultProgressColor;
         @SerialEntry
-        public int ticketColor = 0x8845d1;
+        public int targetColor = defaultTargetColor;
+        @SerialEntry
+        public int completeColor = defaultCompleteColor;
+        @SerialEntry
+        public int ticketColor = defaultTicketColor;
     }
 }
 

@@ -104,7 +104,7 @@ public class AutoSkill extends ListenableBase<Listener> implements ComplexConfig
                         Option.<Boolean>createBuilder()
                                 .name(Text.literal("Is Enabled"))
                                 .binding(
-                                        configuration.enabled,
+                                        Configuration.defaultEnabled,
                                         () -> configuration.enabled,
                                         v -> configuration.enabled = v
                                 )
@@ -114,7 +114,7 @@ public class AutoSkill extends ListenableBase<Listener> implements ComplexConfig
                         Option.<Boolean>createBuilder()
                                 .name(Text.literal("Trigger all skill on realm change (Nightmare <-> Normal), including login."))
                                 .binding(
-                                        configuration.realmChangeTrigger,
+                                        Configuration.defaultRealmChangeTrigger,
                                         () -> configuration.realmChangeTrigger,
                                         v -> configuration.realmChangeTrigger = v
                                 )
@@ -124,7 +124,7 @@ public class AutoSkill extends ListenableBase<Listener> implements ComplexConfig
                         Option.<Integer>createBuilder()
                                 .name(Text.literal("Force all skill to level up"))
                                 .binding(
-                                        configuration.keybind,
+                                        Configuration.defaultKeybind,
                                         () -> configuration.keybind,
                                         v -> configuration.keybind = v
                                 )
@@ -463,12 +463,16 @@ public class AutoSkill extends ListenableBase<Listener> implements ComplexConfig
     }
 
     public static class Configuration {
+        private static final int defaultKeybind = GLFW.GLFW_KEY_UP;
+        private static final boolean defaultEnabled = false;
+        private static final boolean defaultRealmChangeTrigger = false;
+
         @SerialEntry
-        public int keybind = GLFW.GLFW_KEY_UP;
+        public int keybind = defaultKeybind;
         @SerialEntry
-        public boolean enabled = false;
+        public boolean enabled = defaultEnabled;
         @SerialEntry
-        public boolean realmChangeTrigger = false;
+        public boolean realmChangeTrigger = defaultRealmChangeTrigger;
         @SerialEntry
         public List<SkillLevel<NormalCombatSkill>> normalCombat = new java.util.ArrayList<>();
         @SerialEntry

@@ -113,7 +113,7 @@ public class WarpNextHotkey extends ListenableBase<Listener> implements Configur
                         Option.<Integer>createBuilder()
                                 .name(Text.literal("Warp closest to Next Task"))
                                 .binding(
-                                        configuration.keybind,
+                                        Configuration.defaultKeybind,
                                         () -> configuration.keybind,
                                         v -> configuration.keybind = v
                                 )
@@ -123,7 +123,7 @@ public class WarpNextHotkey extends ListenableBase<Listener> implements Configur
                         Option.<Boolean>createBuilder()
                                 .name(Text.literal("Toggle Auto LevelUp on WarpNext"))
                                 .binding(
-                                        configuration.autoLevelUp,
+                                        Configuration.defaultAutoLevelUp,
                                         () -> configuration.autoLevelUp,
                                         v -> configuration.autoLevelUp = v
                                 )
@@ -133,7 +133,7 @@ public class WarpNextHotkey extends ListenableBase<Listener> implements Configur
                         Option.<Boolean>createBuilder()
                                 .name(Text.literal("Warp after Auto LevelUp"))
                                 .binding(
-                                        configuration.warpOnAutoLevelUp,
+                                        Configuration.defaultWarpOnAutoLevelUp,
                                         () -> configuration.warpOnAutoLevelUp,
                                         v -> configuration.warpOnAutoLevelUp = v
                                 )
@@ -143,9 +143,9 @@ public class WarpNextHotkey extends ListenableBase<Listener> implements Configur
                         Option.<Boolean>createBuilder()
                                 .name(Text.literal("Ticket Task Skip Default"))
                                 .binding(
-                                        configuration.ticketTastkDefaultSkip,
-                                        () -> configuration.ticketTastkDefaultSkip,
-                                        v -> configuration.ticketTastkDefaultSkip = v
+                                        Configuration.defaultTicketTaskDefaultSkip,
+                                        () -> configuration.ticketTaskDefaultSkip,
+                                        v -> configuration.ticketTaskDefaultSkip = v
                                 )
                                 .controller(b -> BooleanControllerBuilder.create(b)
                                         .valueFormatter(val -> val ? Text.of("Skipped") : Text.of("Not Skipped")))
@@ -158,7 +158,7 @@ public class WarpNextHotkey extends ListenableBase<Listener> implements Configur
                 var nextUnfinishedTask = taskMonitor.getTaskList().stream().filter(p -> !p.isCompleted() &&
                         // http://32x8.com/sop5_____A-B-C-D-E_____m_1-2-4-9-10-12-17-20-25_____d_0-3-5-6-7-8-11-13-14-15-16-19-21-22-23-24-27-29-30-31_____option-0_____899788866575856596687
                         (!p.isTicket() ||
-                                (!configuration.ticketTastkDefaultSkip && taskingOverrides.getTicketTaskOverride(p.getTask()) != TicketTaskOverride.Skipped) ||
+                                (!configuration.ticketTaskDefaultSkip && taskingOverrides.getTicketTaskOverride(p.getTask()) != TicketTaskOverride.Skipped) ||
                                 taskingOverrides.getTicketTaskOverride(p.getTask()) == TicketTaskOverride.NotSkipped)
                         )
                                 .findFirst();
@@ -268,13 +268,18 @@ public class WarpNextHotkey extends ListenableBase<Listener> implements Configur
     }
 
     public static class Configuration {
+        private static final int defaultKeybind = GLFW.GLFW_KEY_R;
+        private static final boolean defaultAutoLevelUp = true;
+        private static final boolean defaultWarpOnAutoLevelUp = false;
+        private static final boolean defaultTicketTaskDefaultSkip = false;
+
         @SerialEntry
-        public int keybind = GLFW.GLFW_KEY_N;
+        public int keybind = defaultKeybind;
         @SerialEntry
-        public boolean autoLevelUp = true;
+        public boolean autoLevelUp = defaultAutoLevelUp;
         @SerialEntry
-        public boolean warpOnAutoLevelUp = true;
+        public boolean warpOnAutoLevelUp = defaultWarpOnAutoLevelUp;
         @SerialEntry
-        public boolean ticketTastkDefaultSkip = false;
+        public boolean ticketTaskDefaultSkip = defaultTicketTaskDefaultSkip;
     }
 }
