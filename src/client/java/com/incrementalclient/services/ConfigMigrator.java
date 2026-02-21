@@ -154,7 +154,7 @@ public class ConfigMigrator {
 
     public static ConsumableTimerElement.Configuration convertConsumableTimerElement(OldConfig oldConfig) {
         ConsumableTimerElement.Configuration conf = new ConsumableTimerElement.Configuration();
-        conf.isConsumableHudEnabled = oldConfig.isConsumableHudEnabled;
+        conf.enabled = oldConfig.isConsumableHudEnabled;
         conf.consumableHudBackgroundOpacity = oldConfig.consumableHudBackgroundOpacity;
         conf.xPosition = 0.99F;
         conf.yPosition = 0.975F;

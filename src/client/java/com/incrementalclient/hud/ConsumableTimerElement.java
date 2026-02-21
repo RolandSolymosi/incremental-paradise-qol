@@ -41,13 +41,6 @@ public class ConsumableTimerElement extends TextListHudElement<ConsumableTimerEl
         resetToDefaultPosition();
 
         options = Suppliers.memoize(() -> List.of(
-                Categories.Hud.Consumable.createConfig(0,
-                        Option.<Boolean>createBuilder()
-                                .name(Text.of("Toggle Consumable HUD on and off"))
-                                .description(OptionDescription.of(Text.of("Turn on and off the consumable timer HUD.")))
-                                .binding(configuration.defaultIsConsumableHudEnabled, () -> configuration.isConsumableHudEnabled, newVal -> configuration.isConsumableHudEnabled = newVal)
-                                .controller(BooleanControllerBuilder::create)
-                                .build()),
                 Categories.Hud.Consumable.createConfig(1,
                         Option.<Double>createBuilder()
                                 .name(Text.of("Consumable HUD background opacity"))
@@ -96,11 +89,6 @@ public class ConsumableTimerElement extends TextListHudElement<ConsumableTimerEl
     }
 
     @Override
-    public boolean isElementEnabled() {
-        return getConfiguration().isConsumableHudEnabled;
-    }
-
-    @Override
     public String getDisplayName() {
         return "Consumable Timer";
     }
@@ -122,13 +110,10 @@ public class ConsumableTimerElement extends TextListHudElement<ConsumableTimerEl
 
 
     public static class Configuration extends HudElement.ConfigurationBase {
-        public static final boolean defaultIsConsumableHudEnabled = true;
         public static final double defaultConsumableHudBackgroundOpacity = 0.0;
         public static final int defaultConsumableTimerColor = 0xffaa00;
         public static final int defaultConsumableTimeColor = 0x55ff55;
 
-        @SerialEntry
-        public boolean isConsumableHudEnabled = defaultIsConsumableHudEnabled;
         @SerialEntry
         public double consumableHudBackgroundOpacity = defaultConsumableHudBackgroundOpacity;
         @SerialEntry

@@ -3,6 +3,7 @@ package com.incrementalclient.featues.Tasking;
 import com.google.common.base.Suppliers;
 import com.incrementalclient.common.data.DefaultWardrobe;
 import com.incrementalclient.common.data.Tool;
+import com.incrementalclient.common.data.World;
 import com.incrementalclient.common.data.tasks.TaskType;
 import com.incrementalclient.common.data.tasks.abstractions.NormalTask;
 import com.incrementalclient.config.controllers.KeyBindController;
@@ -25,6 +26,7 @@ import java.util.function.Supplier;
 
 public class AutoSwapLoadout implements Configurable<AutoSwapLoadout.Configuration> {
     private final CommandHandler commandHandler;
+    private final WorldMonitor worldMonitor;
     private final TaskMonitor taskMonitor;
     private final TaskingOverrides taskingOverrides;
     private final HotbarHandler hotbarHandler;
@@ -37,12 +39,14 @@ public class AutoSwapLoadout implements Configurable<AutoSwapLoadout.Configurati
     public AutoSwapLoadout(
             KeyBindMonitor keyBindMonitor,
             CommandHandler commandHandler,
+            WorldMonitor worldMonitor,
             TaskMonitor taskMonitor,
             TaskingOverrides taskingOverrides,
             HotbarHandler hotbarHandler,
             WarpNextHotkey warpNextHotkey
     ) {
         this.commandHandler = commandHandler;
+        this.worldMonitor = worldMonitor;
         this.taskMonitor = taskMonitor;
         this.taskingOverrides = taskingOverrides;
         this.hotbarHandler = hotbarHandler;
@@ -169,7 +173,7 @@ public class AutoSwapLoadout implements Configurable<AutoSwapLoadout.Configurati
 
     private void swap() {
         var nextUnfinishedTask = taskMonitor.getTaskList().stream().filter(p -> !p.isCompleted()).findFirst();
-        if (nextUnfinishedTask.isPresent()) {
+        if (nextUnfinishedTask.isPresent() && worldMonitor.currentWorld() != World.BossArenas) {
             var task = nextUnfinishedTask.get().getTask();
             if (task != null) {
                 if (task.getDescriptor().taskType() != TaskType.Quest && task.getDescriptor().taskType() != TaskType.Tutorial) {

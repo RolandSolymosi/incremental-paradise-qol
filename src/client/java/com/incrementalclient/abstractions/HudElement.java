@@ -107,13 +107,6 @@ public abstract class HudElement<T extends HudElement.ConfigurationBase> impleme
         this.enabled = enabled;
         this.getConfiguration().enabled = enabled;
     }
-
-    /**
-     * Check if this element should be enabled based on config/runtime.
-     */
-    public boolean isElementEnabled(){
-        return isEnabled();
-    }
     
     public boolean isScalable() {
         return scalable;

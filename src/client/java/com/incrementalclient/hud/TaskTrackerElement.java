@@ -139,9 +139,10 @@ public class TaskTrackerElement extends TextListHudElement<TaskTrackerElement.Co
         return (int) (configuration.taskHudBackgroundOpacity * 255);
     }
 
+    // TODO: Add the config element and prob add to item tracker as well
     @Override
-    public boolean isElementEnabled() {
-        return worldMonitor.currentWorld() != World.BossArenas;
+    public boolean isEnabled() {
+        return enabled && (worldMonitor.currentWorld() != World.BossArenas);
     }
 
     @Override

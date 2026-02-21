@@ -45,13 +45,6 @@ public class ItemTargetTrackerElement extends TextListHudElement<ItemTargetTrack
         resetToDefaultPosition();
 
         options = Suppliers.memoize(() -> List.of(
-                Categories.Hud.ItemTarget.createConfig(0,
-                        Option.<Boolean>createBuilder()
-                                .name(Text.of("Toggle Item Target HUD on and off"))
-                                .description(OptionDescription.of(Text.of("Turn on and off the item target tracker HUD.")))
-                                .binding(Configuration.defaultHudEnabled, () -> configuration.isHudEnabled, newVal -> configuration.isHudEnabled = newVal)
-                                .controller(BooleanControllerBuilder::create)
-                                .build()),
                 Categories.Hud.ItemTarget.createConfig(1,
                         Option.<Boolean>createBuilder()
                                 .name(Text.of("Filter message"))
@@ -90,11 +83,6 @@ public class ItemTargetTrackerElement extends TextListHudElement<ItemTargetTrack
     }
 
     @Override
-    public boolean isElementEnabled() {
-        return getConfiguration().isHudEnabled;
-    }
-
-    @Override
     public String getDisplayName() {
         return "Item Tracker";
     }
@@ -123,12 +111,9 @@ public class ItemTargetTrackerElement extends TextListHudElement<ItemTargetTrack
 
     public static class Configuration extends ConfigurationBase {
 
-        private static final boolean defaultHudEnabled = true;
         private static final boolean defaultFilterMessages = true;
         private static final double defaultHudBackgroundOpacity = 0.0;
 
-        @SerialEntry
-        public boolean isHudEnabled = defaultHudEnabled;
         @SerialEntry
         public boolean filterMessages = defaultFilterMessages;
         @SerialEntry
