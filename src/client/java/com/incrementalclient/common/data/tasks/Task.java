@@ -168,10 +168,10 @@ public enum Task {
     EarnTicketMatcher(new GamingTask("Ticket for Matcher", Region.W3_Overworld, List.of("matcher"), GameKind.Matcher, List.of(Constraint.Ticket), List.of(Warp.W3_Spawn))),
 
     // World 4
-    Cheddore(new NormalTask("Cheddore", Region.W4_Homestead, List.of("cheddore"), null, TaskType.Mining, DefaultWardrobe.Mining, Tool.Pickaxe, List.of(Target.W4_Cheddore), List.of(Warp.W4_Spawn))),
-    ShinyCheddore(new NormalTask("Shiny Cheddore", Region.W4_Homestead, List.of("cheddore"), List.of(Constraint.Shiny), TaskType.Mining, DefaultWardrobe.Mining, Tool.Pickaxe, List.of(Target.W4_Cheddore), List.of(Warp.W4_Spawn))),
-    BlueCheese(new NormalTask("Blue Cheese", Region.W4_Homestead, List.of("blue cheese"), null, TaskType.Mining, DefaultWardrobe.Mining, Tool.Pickaxe, List.of(Target.W4_BlueCheese), List.of(Warp.W4_Spawn))),
-//    ShinyBlueCheese(new NormalTask("Shiny blue cheese", Region.W4_Homestead, List.of("blue cheese"), List.of(Constraint.Shiny), TaskType.Mining, DefaultWardrobe.Mining, Tool.Pickaxe, List.of(Target.W4_BlueCheese), List.of(Warp.W4_Spawn))),
+    Cheddore(new NormalTask("Cheddore", Region.W4_Homestead, List.of("cheddore"), null, TaskType.Mining, DefaultWardrobe.Mining, Tool.Pickaxe, List.of(Target.W4_Cheddore), List.of(Warp.W4_Cheddore, Warp.W4_Spawn))),
+    ShinyCheddore(new NormalTask("Shiny Cheddore", Region.W4_Homestead, List.of("cheddore"), List.of(Constraint.Shiny), TaskType.Mining, DefaultWardrobe.Mining, Tool.Pickaxe, List.of(Target.W4_Cheddore), List.of(Warp.W4_Cheddore, Warp.W4_Spawn))),
+    BlueCheese(new NormalTask("Blue Cheese", Region.W4_Homestead, List.of("blue cheese"), null, TaskType.Mining, DefaultWardrobe.Mining, Tool.Pickaxe, List.of(Target.W4_BlueCheese), List.of(Warp.W4_Cheddore, Warp.W4_Spawn))),
+//    ShinyBlueCheese(new NormalTask("Shiny blue cheese", Region.W4_Homestead, List.of("blue cheese"), List.of(Constraint.Shiny), TaskType.Mining, DefaultWardrobe.Mining, Tool.Pickaxe, List.of(Target.W4_BlueCheese), List.of(Warp.W4_Cheddore, Warp.W4_Spawn))),
     Glowdust(new NormalTask("Glowdust", Region.W4_Beta, List.of("glowdust"), null, TaskType.Mining, DefaultWardrobe.Mining, Tool.Pickaxe, List.of(Target.W4_Glowdust), List.of(Warp.W4_Beta))),
     ShinyGlowdust(new NormalTask("Shiny Glowdust", Region.W4_Beta, List.of("glowdust"), List.of(Constraint.Shiny), TaskType.Mining, DefaultWardrobe.Mining, Tool.Pickaxe, List.of(Target.W4_Glowdust), List.of(Warp.W4_Beta))),
     Slimecrust(new NormalTask("Slimecrust", Region.W4_Beta, List.of("slimecrust"), null, TaskType.Mining, DefaultWardrobe.Mining, Tool.Pickaxe, List.of(Target.W4_Slimecrust), List.of(Warp.W4_Beta))),

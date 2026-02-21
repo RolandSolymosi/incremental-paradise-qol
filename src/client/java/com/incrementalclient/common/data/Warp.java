@@ -48,6 +48,7 @@ public enum Warp {
     W3_Dreadhorn("dreadhorn", World.World3, new BlockPos(343, 109, 235)),
 
     W4_Spawn("w4", World.World4, new BlockPos(343, 109, 235)),
+    W4_Cheddore("cheddore", World.World4, new BlockPos(343, 109, 235)),
     W4_Sewer("sewer", World.World4, new BlockPos(343, 109, 235)),
     W4_Rattus("rattus", World.World4, new BlockPos(343, 109, 235)),
     W4_Alpha("alpha", World.World4, new BlockPos(343, 109, 235)),
