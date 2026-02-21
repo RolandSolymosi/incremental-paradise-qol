@@ -49,21 +49,21 @@ public class ItemTargetTrackerElement extends TextListHudElement<ItemTargetTrack
                         Option.<Boolean>createBuilder()
                                 .name(Text.of("Toggle Item Target HUD on and off"))
                                 .description(OptionDescription.of(Text.of("Turn on and off the item target tracker HUD.")))
-                                .binding(configuration.isHudEnabled, () -> configuration.isHudEnabled, newVal -> configuration.isHudEnabled = newVal)
+                                .binding(Configuration.defaultHudEnabled, () -> configuration.isHudEnabled, newVal -> configuration.isHudEnabled = newVal)
                                 .controller(BooleanControllerBuilder::create)
                                 .build()),
                 Categories.Hud.ItemTarget.createConfig(1,
                         Option.<Boolean>createBuilder()
                                 .name(Text.of("Filter message"))
                                 .description(OptionDescription.of(Text.of("Toggle if item tracker should filter message or not. If item tracker is disabled it won't filter message anyway.")))
-                                .binding(configuration.filterMessages, () -> configuration.filterMessages, newVal -> configuration.filterMessages = newVal)
+                                .binding(Configuration.defaultFilterMessages, () -> configuration.filterMessages, newVal -> configuration.filterMessages = newVal)
                                 .controller(BooleanControllerBuilder::create)
                                 .build()),
                 Categories.Hud.Consumable.createConfig(4,
                         Option.<Double>createBuilder()
                                 .name(Text.of("Consumable HUD background opacity"))
                                 .description(OptionDescription.of(Text.of("Set the opacity of the consumable HUD background.")))
-                                .binding(configuration.hudBackgroundOpacity, () -> configuration.hudBackgroundOpacity, newVal -> configuration.hudBackgroundOpacity = newVal)
+                                .binding(Configuration.defaultHudBackgroundOpacity, () -> configuration.hudBackgroundOpacity, newVal -> configuration.hudBackgroundOpacity = newVal)
                                 .controller(o -> DoubleSliderControllerBuilder.create(o).step(0.01).range(0.0, 1.0))
                                 .build())
         ));
@@ -122,12 +122,17 @@ public class ItemTargetTrackerElement extends TextListHudElement<ItemTargetTrack
 
 
     public static class Configuration extends ConfigurationBase {
+
+        private static final boolean defaultHudEnabled = true;
+        private static final boolean defaultFilterMessages = true;
+        private static final double defaultHudBackgroundOpacity = 0.0;
+
         @SerialEntry
-        public boolean isHudEnabled = true;
+        public boolean isHudEnabled = defaultHudEnabled;
         @SerialEntry
-        public boolean filterMessages = true;
+        public boolean filterMessages = defaultFilterMessages;
         @SerialEntry
-        public double hudBackgroundOpacity = 0.0;
+        public double hudBackgroundOpacity = defaultHudBackgroundOpacity;
     }
 }
 
