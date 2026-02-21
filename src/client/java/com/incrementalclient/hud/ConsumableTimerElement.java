@@ -123,7 +123,7 @@ public class ConsumableTimerElement extends TextListHudElement<ConsumableTimerEl
 
     public static class Configuration extends HudElement.ConfigurationBase {
         public static final boolean defaultIsConsumableHudEnabled = true;
-        public static final double defaultConsumableHudBackgroundOpacity = 0.3;
+        public static final double defaultConsumableHudBackgroundOpacity = 0.0;
         public static final int defaultConsumableTimerColor = 0xffaa00;
         public static final int defaultConsumableTimeColor = 0x55ff55;
 

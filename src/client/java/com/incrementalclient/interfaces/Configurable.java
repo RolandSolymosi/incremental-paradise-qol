@@ -149,11 +149,10 @@ public interface Configurable<TConfiguration> {
 
             public final Group General = new Group(this, "General", 0, "Combat settings.");
             public final Group Vanilla = new Group(this, "Vanilla", 100, "Hide vanilla Minecraft HUD elements to replace them with custom versions.");
-            public final Group Consumable = new Group(this, "Consumable", 200, "Active Consumable tracker Hud related settings.");
-            public final Group Currency = new Group(this, "Currency", 300, "Currency Hud related settings.");
-            public final Group HpBar = new Group(this, "HpBar", 400, "HpBar related settings.");
-            public final Group ItemTarget = new Group(this, "Item Target", 500, "Item Target tracker Hud element.");
-            public final Group ScoreboardReplacementBar = new Group(this, "Scoreboard Replacement Bar", 600, "Scoreboard Replacement Bar Hud element.");
+            public final Group Tasking = new Group(this, "Tasking", 200, "Task Tracker Hud related settings.");
+            public final Group Consumable = new Group(this, "Consumable", 300, "Active Consumable tracker Hud related settings.");
+            public final Group ItemTarget = new Group(this, "Item Target", 400, "Item Target tracker Hud element.");
+            public final Group ScoreboardReplacementBar = new Group(this, "Scoreboard Replacement Bar", 500, "Scoreboard Replacement Bar Hud element.");
         }
         public static final HudCategory Hud = new HudCategory();
 
@@ -169,7 +168,6 @@ public interface Configurable<TConfiguration> {
             private TaskingCategory() { super("Tasking", "Tasking related settings.", 2500, 0); }
 
             public final Group General = new Group(this, "General", 0, "Tasking general settings, like hotkey.");
-            public final Group Hud = new Group(this, "Hud", 500, "Task Tracker Hud related settings.");
             public final Group Wardrobe = new Group(this, "Wardrobe", 1000, "Auto swap settings of wardrobes.");
             public final Group Tools = new Group(this, "Tools", 2000, "Auto swap settings of tools.");
         }

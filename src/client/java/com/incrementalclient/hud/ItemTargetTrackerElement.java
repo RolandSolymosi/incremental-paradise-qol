@@ -59,10 +59,10 @@ public class ItemTargetTrackerElement extends TextListHudElement<ItemTargetTrack
                                 .binding(Configuration.defaultFilterMessages, () -> configuration.filterMessages, newVal -> configuration.filterMessages = newVal)
                                 .controller(BooleanControllerBuilder::create)
                                 .build()),
-                Categories.Hud.Consumable.createConfig(4,
+                Categories.Hud.ItemTarget.createConfig(4,
                         Option.<Double>createBuilder()
-                                .name(Text.of("Consumable HUD background opacity"))
-                                .description(OptionDescription.of(Text.of("Set the opacity of the consumable HUD background.")))
+                                .name(Text.of("Item Target HUD background opacity"))
+                                .description(OptionDescription.of(Text.of("Set the opacity of the Item Target HUD background.")))
                                 .binding(Configuration.defaultHudBackgroundOpacity, () -> configuration.hudBackgroundOpacity, newVal -> configuration.hudBackgroundOpacity = newVal)
                                 .controller(o -> DoubleSliderControllerBuilder.create(o).step(0.01).range(0.0, 1.0))
                                 .build())
@@ -86,7 +86,7 @@ public class ItemTargetTrackerElement extends TextListHudElement<ItemTargetTrack
 
     @Override
     protected int getBackgroundOpacity() {
-        return (int) (0);
+        return (int) (getConfiguration().hudBackgroundOpacity * 255);
     }
 
     @Override

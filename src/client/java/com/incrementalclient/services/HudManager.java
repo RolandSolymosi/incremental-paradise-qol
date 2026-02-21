@@ -255,7 +255,7 @@ public class HudManager extends ObservableBase<Observer<HudManager.Event>, HudMa
         }
 
         public boolean getBarScoreboardReplacement() {
-            return barScoreboardReplacement;
+            return barScoreboardReplacement && isHudEnabled;
         }
 
         public boolean isHideVanillaArmor() {

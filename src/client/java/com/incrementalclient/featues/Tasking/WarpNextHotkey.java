@@ -270,7 +270,7 @@ public class WarpNextHotkey extends ListenableBase<Listener> implements Configur
     public static class Configuration {
         private static final int defaultKeybind = GLFW.GLFW_KEY_R;
         private static final boolean defaultAutoLevelUp = true;
-        private static final boolean defaultWarpOnAutoLevelUp = true;
+        private static final boolean defaultWarpOnAutoLevelUp = false;
         private static final boolean defaultTicketTaskDefaultSkip = false;
 
         @SerialEntry
