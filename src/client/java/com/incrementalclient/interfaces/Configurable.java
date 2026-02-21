@@ -2,6 +2,7 @@ package com.incrementalclient.interfaces;
 
 import dev.isxander.yacl3.api.Option;
 
+import java.lang.reflect.Modifier;
 import java.util.List;
 
 public interface Configurable<TConfiguration> {
@@ -29,14 +30,17 @@ public interface Configurable<TConfiguration> {
         var currentClass = target.getClass();
         while (currentClass != null && currentClass != Object.class) {
             for (java.lang.reflect.Field field : currentClass.getDeclaredFields()) {
-                try {
-                    field.setAccessible(true);
-                    // Copy the value from the 'other' (loaded) object to 'target' (live) object
-                    var value = field.get(other);
-                    field.set(target, value);
-                } catch (IllegalAccessException e) {
-                    System.err.println("Failed to copy field: " + field.getName());
+                if (!Modifier.isFinal(field.getModifiers())) {
+                    try {
+                        field.setAccessible(true);
+                        // Copy the value from the 'other' (loaded) object to 'target' (live) object
+                        var value = field.get(other);
+                        field.set(target, value);
+                    } catch (IllegalAccessException e) {
+                        System.err.println("Failed to copy field: " + field.getName());
+                    }
                 }
+
             }
             currentClass = currentClass.getSuperclass();
         }
