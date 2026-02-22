@@ -29,7 +29,8 @@ public class KeyBindController implements Controller<Integer> {
         if (code == GLFW.GLFW_KEY_UNKNOWN) {
             return Text.literal("None");
         }
-        return InputUtil.fromKeyCode(code, 0).getLocalizedText();
+        // TODO: There is only 8 valid cases, however a better case would be to have the keycodes stored not as ints
+        return code < 8 ? InputUtil.Type.MOUSE.createFromCode(code).getLocalizedText() : InputUtil.fromKeyCode(code, 0).getLocalizedText();
     }
 
     @Override
@@ -62,18 +63,18 @@ public class KeyBindController implements Controller<Integer> {
                 }
             }
 
+            // TODO: Figure out how to have this event triggered even in the case that it is not mouseOver
             @Override
             public boolean mouseClicked(double mouseX, double mouseY, int button) {
                 boolean mouseOver = isMouseOver(mouseX, mouseY);
 
-                if (mouseOver && isAvailable()) {
-                    listening = !listening;
-                    if (listening) playDownSound();
+                if (mouseOver && isAvailable() && !listening) {
+                    listening = true;
+                    playDownSound();
                     return true;
-                }
-
-                if (listening) {
+                } else if (mouseOver && isAvailable() && listening) {
                     listening = false;
+                    option.requestSet(button);
                     return true;
                 }
 
