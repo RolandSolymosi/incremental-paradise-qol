@@ -4,7 +4,9 @@ import com.google.common.base.Suppliers;
 import com.incrementalclient.common.data.DefaultWardrobe;
 import com.incrementalclient.common.data.Tool;
 import com.incrementalclient.common.data.World;
+import com.incrementalclient.common.data.tasks.Task;
 import com.incrementalclient.common.data.tasks.TaskType;
+import com.incrementalclient.common.data.tasks.abstractions.ITask;
 import com.incrementalclient.common.data.tasks.abstractions.NormalTask;
 import com.incrementalclient.config.controllers.KeyBindController;
 import com.incrementalclient.interfaces.Configurable;
@@ -177,33 +179,39 @@ public class AutoSwapLoadout implements Configurable<AutoSwapLoadout.Configurati
             var task = nextUnfinishedTask.get().getTask();
             if (task != null) {
                 if (task.getDescriptor().taskType() != TaskType.Quest && task.getDescriptor().taskType() != TaskType.Tutorial) {
-                    var taskDescriptor = task.getDescriptor();
-                    if (taskDescriptor instanceof NormalTask normalTask) {
-                        var override = taskingOverrides.getOverrides().get(task);
-                        if (configuration.enableWardrobeSwap) {
-                            var wardrobe = override != null && !override.wardrobe.isEmpty()
-                                    ? override.wardrobe
-                                    : normalTask.wardrobe() != null
-                                    ? getWardrobeNameToDefault(normalTask.wardrobe())
-                                    : null;
-                            if (wardrobe != null) {
-                                commandHandler.send("wardrobe " + wardrobe);
-                            }
-                            var pet = override != null && !override.pet.isEmpty()
-                                    ? override.pet
-                                    : null;
-                            if (pet != null) {
-                                commandHandler.send("pet " + pet);
-                            }
+
+                    var taskDescriptor = getDescriptor(task);
+                    var override = taskingOverrides.getOverrides().get(task);
+
+                    if (configuration.enableWardrobeSwap) {
+                        String wardrobe = null;
+                        if (override != null && !override.wardrobe.isEmpty()) {
+                            wardrobe = override.wardrobe;
+                        } else if (taskDescriptor instanceof NormalTask normalTask && normalTask.wardrobe() != null) {
+                            wardrobe = getWardrobeNameToDefault(normalTask.wardrobe());
                         }
-                        var slot = getSlotToDefault((override == null || override.tool == Tool.Default ? normalTask.tool() : override.tool));
-                        if (configuration.enableToolSwap) {
-                            hotbarHandler.swapActiveHotbarSlot(slot);
+                        if (wardrobe != null) {
+                            commandHandler.send("wardrobe " + wardrobe);
+                        }
+
+                        if (override != null && !override.pet.isEmpty()) {
+                            commandHandler.send("pet " + override.pet);
                         }
                     }
+
+                    if (configuration.enableToolSwap && taskDescriptor instanceof NormalTask normalTask) {
+                        var slot = getSlotToDefault((override == null || override.tool == Tool.Default ? normalTask.tool() : override.tool));
+                        hotbarHandler.swapActiveHotbarSlot(slot);
+                    }
+
+
                 }
             }
         }
+    }
+
+    private static ITask getDescriptor(Task task) {
+        return task.getDescriptor();
     }
 
     public String getWardrobeNameToDefault(DefaultWardrobe defaultWardrobe) {

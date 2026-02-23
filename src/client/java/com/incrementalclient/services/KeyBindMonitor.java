@@ -108,7 +108,8 @@ public class KeyBindMonitor extends ListenableBase<KeyBindMonitor.KeyBindListene
 
         public void updateKeyBind(int keyBind){
             monitor.unsubscribe(this);
-            keyBinding.setBoundKey(InputUtil.fromKeyCode(keyBind, 0));
+            // TODO: There is only 8 valid cases, however a better case would be to have the keycodes stored not as ints
+            keyBinding.setBoundKey(keyBind < 8 ? InputUtil.Type.MOUSE.createFromCode(keyBind) : InputUtil.fromKeyCode(keyBind, 0));
             KeyBinding.updateKeysByCode();
             monitor.subscribe(this);
         }
