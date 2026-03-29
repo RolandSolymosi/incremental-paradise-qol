@@ -59,7 +59,7 @@ public class PxpCalculation implements Configurable<PxpCalculation.Configuration
     ) {
         this.minecraftClientAccessor = minecraftClientAccessor;
 
-        commandHandler.register(new CommandHandler.CommandRegistration("pxpcalc", this::sumPetXpValue));
+        commandHandler.register(new CommandHandler.CommandRegistration("pxpcalc", this::runPxpCommand));
 
         options = Suppliers.memoize(() -> List.of(Categories.Misc.PetXp.createConfig(0,
                         Option.<Integer>createBuilder()
@@ -79,7 +79,11 @@ public class PxpCalculation implements Configurable<PxpCalculation.Configuration
                                 .build())));
     }
 
-    public int sumPetXpValue() {
+    private void runPxpCommand() {
+        minecraftClientAccessor.getPlayer().get().sendMessage(Text.literal("§bCurrent pxp in inventory:§r " + sumPetXpValue()), false);
+    }
+
+    private int sumPetXpValue() {
         var player =  minecraftClientAccessor.getPlayer();
         if (player.isPresent()){
             PlayerInventory inventory = player.get().getInventory();
@@ -94,7 +98,7 @@ public class PxpCalculation implements Configurable<PxpCalculation.Configuration
         return 0;
     }
 
-    public OptionalInt getPetXpStackValue(ItemStack itemStack) {
+    private OptionalInt getPetXpStackValue(ItemStack itemStack) {
         if (Utils.isPlayerHead(itemStack)) {
             LoreComponent lore = itemStack.get(DataComponentTypes.LORE);
             List<Text> text = lore.lines();
