@@ -4,6 +4,7 @@ import com.incrementalclient.common.data.skills.SkillCategory;
 import com.incrementalclient.internals.ScreenCapture;
 import net.minecraft.item.Item;
 import net.minecraft.item.ItemStack;
+import net.minecraft.item.Items;
 import net.minecraft.text.Text;
 
 import java.util.ArrayList;
@@ -13,7 +14,7 @@ import java.util.Objects;
 public class Utils {
     public static boolean isPlayerHead(ItemStack stack) {
         Item currentItem = stack.getItem();
-        return currentItem.getName().getString().contains("Head");
+        return currentItem == Items.PLAYER_HEAD;
     }
 
     public static List<String> parseLoreLines(List<Text> text) {

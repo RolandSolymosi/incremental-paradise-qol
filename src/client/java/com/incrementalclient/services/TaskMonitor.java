@@ -11,6 +11,7 @@ import com.incrementalclient.internals.MinecraftClientAccessor;
 import com.incrementalclient.internals.ScreenCapture;
 import net.minecraft.component.DataComponentTypes;
 import net.minecraft.item.ItemStack;
+import net.minecraft.registry.tag.ItemTags;
 import net.minecraft.text.Text;
 
 import java.util.ArrayList;
@@ -222,8 +223,7 @@ public class TaskMonitor extends ObservableBase<Observer<List<TaskMonitor.TaskSt
         }
 
         private static boolean isTaskBook(ItemStack stack) {
-            var currentItem = stack.getItem();
-            return currentItem.getName().getString().contains("Book");
+            return stack.isIn(ItemTags.BOOKSHELF_BOOKS);
         }
 
         private static Optional<TaskType> extractTaskType(String block) {
