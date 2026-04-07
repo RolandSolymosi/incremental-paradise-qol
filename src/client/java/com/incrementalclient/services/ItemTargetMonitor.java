@@ -1,8 +1,11 @@
 package com.incrementalclient.services;
 
 import com.incrementalclient.common.utils.NumberParser;
+import com.incrementalclient.interfaces.Listener;
 import com.incrementalclient.interfaces.Observer;
+import com.incrementalclient.internals.ScreenCapture;
 import com.incrementalclient.internals.events.ClientPlayConnectionObservable;
+import com.incrementalclient.internals.events.EndClientTickListenable;
 import net.minecraft.text.ClickEvent;
 import net.minecraft.text.Text;
 import net.minecraft.util.Pair;
@@ -16,6 +19,7 @@ import java.util.regex.Pattern;
 public class ItemTargetMonitor implements Observer<ChatHandler.Event> {
     private final ConcurrentHashMap<String, ItemTarget> targets = new ConcurrentHashMap<>();
     private final Map<String, ItemTarget> targetView = Collections.unmodifiableMap(targets);
+    private final ConcurrentHashMap<String, Integer> completedItems = new ConcurrentHashMap<>();
 
     private static final String startPiece = "^(?![ \\w]*\\[)";
     private static final ChatHandler.ChatFilter currentlyTrackingList = new ChatHandler.ChatFilter(Pattern.compile(startPiece + "Currently Tracking$"), false, false);
@@ -26,9 +30,12 @@ public class ItemTargetMonitor implements Observer<ChatHandler.Event> {
 
     private static final ChatHandler.ChatFilter itemTrackingProgress = new ChatHandler.ChatFilter(Pattern.compile(startPiece + "🧭 Item Tracking >>>\\s+(?<current>" + NumberParser.NumberPattern.pattern() + ")/(?<goal>" + NumberParser.NumberPattern.pattern() + ")\\s+(?<item>.+)$"), false, false);
 
+    private static final int removalCooldown = 4*20;
+
     public ItemTargetMonitor(
             ChatHandler chatHandler,
             CommandHandler commandHandler,
+            EndClientTickListenable endClientTickListenable,
             ClientPlayConnectionObservable clientPlayConnectionObservable
     ) {
         chatHandler.subscribe(this);
@@ -37,6 +44,8 @@ public class ItemTargetMonitor implements Observer<ChatHandler.Event> {
         chatHandler.registerFilter(nowTracking);
         chatHandler.registerFilter(removedTracking);
         chatHandler.registerFilter(itemTrackingProgress);
+
+        endClientTickListenable.subscribe(new Listener.DefaultListener(this::updateCounter));
 
         clientPlayConnectionObservable.subscribe((e)->
         {
@@ -84,6 +93,9 @@ public class ItemTargetMonitor implements Observer<ChatHandler.Event> {
                 var current = matcher.group("current");
                 var goal = matcher.group("goal");
                 targets.put(item, new ItemTarget(result.message().getSiblings().getLast(), item, NumberParser.parseSuffixedNumber(current), NumberParser.parseSuffixedNumber(goal)));
+                if (targets.get(item).isComplete()) {
+                    completedItems.put(item, removalCooldown);
+                }
             }
         }
     }
@@ -100,6 +112,21 @@ public class ItemTargetMonitor implements Observer<ChatHandler.Event> {
         itemTrackingProgress.setEnabled(shouldFilter);
     }
 
+    public void updateCounter() {
+        if (!completedItems.isEmpty()) {
+            completedItems.replaceAll((k, v) -> v > 0 ? v -1 : v);
+            completedItems.forEach((k, v) -> {
+                if (v == 0) {
+                    targets.remove((k));
+                    completedItems.remove(k);
+                }
+            });
+        }
+    }
+
     public record ItemTarget(Text DisplayText, String item, long current, long goal) {
+        public boolean isComplete() {
+            return current > goal;
+        }
     }
 }

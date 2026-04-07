@@ -72,10 +72,16 @@ public class ItemTargetTrackerElement extends TextListHudElement<ItemTargetTrack
 
     public Text render(ItemTargetMonitor.ItemTarget item) {
 
-        return Text.literal("")
+        Text text = Text.literal("")
                 .append(item.DisplayText())
                 .append(": ")
                 .append(TextUtils.textColor(NumberParser.formatSuffixedNumber(item.current()) + "/" + NumberParser.formatSuffixedNumber(item.goal()), 0x00FFFF));
+
+        if (item.current() > item.goal()) {
+            text = TextUtils.mutableRecolor(text, 0x00aa00);
+        }
+
+        return text;
     }
 
     @Override
