@@ -42,7 +42,7 @@ public class PxpCalculation implements Configurable<PxpCalculation.Configuration
             "Unicorn", // Technically tradable rn but shouldn't be so can remove later if you want
             "Queen Bee",
             "Cococrab",
-            "Sky Beelte Nest",
+            "Sky Beetle Nest",
             "Monkey",
             "Harvest Spirit",
             "Golden Rabbit"
