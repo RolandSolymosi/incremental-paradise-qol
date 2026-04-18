@@ -148,7 +148,7 @@ public class PlayerProgressParser {
                 patternBuilder.append(Pattern.quote(variants[i]));
             }
 
-            patternBuilder.append(")\\s+(\\d+)");
+            patternBuilder.append(")\\s+([\\d,]+)");
 
             Pattern layerPattern = Pattern.compile(patternBuilder.toString());
             Matcher matcher = layerPattern.matcher(text);
