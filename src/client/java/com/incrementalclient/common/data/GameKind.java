@@ -6,7 +6,7 @@ public enum GameKind {
     Pixelpop("Pixel Pop", "pixelpop"),
     Blackjack("Blackjack", "21"),
     Matcher("Matcher", "matcher"),
-    Pairdice("Pairdice", "pairdice");
+    Pairdice("Pairdice", "dice");
 
     private final String name;
     private final String command;
