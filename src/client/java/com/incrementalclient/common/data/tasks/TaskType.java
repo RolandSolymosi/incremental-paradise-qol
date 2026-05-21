@@ -36,6 +36,7 @@ public enum TaskType {
             Pattern.compile("Gain (?<amount>[0-9.,]+[kmbt]?) (?<type>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)"),
             Pattern.compile("Loot (?<amount>[0-9.,]+[kmbt]?) (?<type>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)"))),
     Gaming("Gaming", List.of(
+            Pattern.compile("Earn (?<amount>[0-9.,]+[kmbt]?) (?<constraint>.+) while playing (?<type>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)"),
             Pattern.compile("Play (?<amount>[0-9.,]+[kmbt]?) (?<constraint>.+) of (?<type>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)"),
             Pattern.compile("Earn (?<amount>[0-9.,]+[kmbt]?) (?<constraint>.+) in (?<type>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)"),
             Pattern.compile("Earn (?<amount>[0-9.,]+[kmbt]?) (?<constraint>.+) playing (?<type>.+) \\(?(?<progress>[0-9.,]+[kmbt]?)"),

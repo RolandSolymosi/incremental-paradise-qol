@@ -275,7 +275,7 @@ public enum Task {
     Strider(new NormalTask("Strider", Region.WN1_Overworld, List.of("striders"), null, TaskType.Fishing, DefaultWardrobe.CombatFishing, Tool.Spear, List.of(Target.N1_Strider), List.of(Warp.WN1_Spawn))),
 
     EarnTicketDice(new GamingTask("Ticket for Pairdice", Region.WN1_Overworld, List.of("pairadice"), GameKind.Pairdice, List.of(Constraint.Ticket), List.of(Warp.WN1_Spawn))),
-    EarnPointDice(new GamingTask("Score in Pairdice", Region.WN1_Overworld, List.of("pairadice"), GameKind.Pairdice, null /* TODO: Missing constraint name*/, List.of(Warp.WN1_Spawn))),
+    EarnPointDice(new GamingTask("Score in Pairdice", Region.WN1_Overworld, List.of("pairadice"), GameKind.Pairdice, List.of(Constraint.Score), List.of(Warp.WN1_Spawn))),
     ShiverMoney(new NormalTask("Shiver from selling items", Region.WN1_Overworld, List.of("shiver from selling items"), null, TaskType.Mining, DefaultWardrobe.Mining, Tool.Pickaxe, null, List.of(Warp.WN1_Quartz, Warp.WN1_Spawn))),
     ;
 
