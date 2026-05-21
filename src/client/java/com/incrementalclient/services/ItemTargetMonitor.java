@@ -126,7 +126,7 @@ public class ItemTargetMonitor implements Observer<ChatHandler.Event> {
 
     public record ItemTarget(Text DisplayText, String item, long current, long goal) {
         public boolean isComplete() {
-            return current > goal;
+            return current >= goal;
         }
     }
 }
