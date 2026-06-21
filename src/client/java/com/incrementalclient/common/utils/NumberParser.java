@@ -22,16 +22,14 @@ public class NumberParser {
             cleanInput = cleanInput.substring(0, cleanInput.length() - 1);
         }
 
-        // Fix decimal separator (make it culture invariant), or remove a thousand separator
-        if (multiplier > 1) {
-            cleanInput = cleanInput.replace(',', '.');
-        } else {
-            cleanInput = cleanInput.replace(",", "").replace(".", "");
-        }
+        // Remove a thousand separator, no need for cultural as number is provided by the server which is not localised.
+        cleanInput = cleanInput.replace(",", "");
+
 
         try {
             double baseValue = Double.parseDouble(cleanInput);
-            return (long) (baseValue * multiplier);
+            // Round up numbers to the nearest int in the case of a float.
+            return (long) Math.ceil((baseValue * multiplier));
         } catch (NumberFormatException e) {
             return 0L;
         }
@@ -41,7 +39,7 @@ public class NumberParser {
         if (value < 1000) return String.valueOf(value);
 
         var val = (double) value;
-        String suffix = "";
+        String suffix;
 
         if (value >= 1_000_000_000_000L) {
             val /= 1_000_000_000_000L;
