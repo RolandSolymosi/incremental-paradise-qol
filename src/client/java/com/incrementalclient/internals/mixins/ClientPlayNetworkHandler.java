@@ -4,6 +4,7 @@ import com.google.common.base.Suppliers;
 import com.incrementalclient.Main;
 import com.incrementalclient.internals.ScoreboardChangedListenable;
 import com.incrementalclient.internals.ScreenCapture;
+import com.incrementalclient.internals.TitleObservable;
 import com.incrementalclient.internals.interfaces.ReentryPacket;
 import com.incrementalclient.services.HotbarHandler;
 import com.incrementalclient.services.ShinyOreMonitor;
@@ -34,6 +35,10 @@ public class ClientPlayNetworkHandler {
     @Unique
     private static final Supplier<ShinyOreMonitor> shinyOreMonitor = Suppliers.memoize(() ->
             Main.SERVICE_PROVIDER.getService(ShinyOreMonitor.class));
+
+    @Unique
+    private static final Supplier<TitleObservable> titleObservable = Suppliers.memoize(() ->
+            Main.SERVICE_PROVIDER.getService(TitleObservable.class));
 
 
     @Inject(method = "onOpenScreen", at = @At("HEAD"), cancellable = true)
@@ -103,5 +108,10 @@ public class ClientPlayNetworkHandler {
     @Inject(method = "onTeam", at = @At("TAIL"))
     private void onTeam(TeamS2CPacket packet, CallbackInfo ci) {
         scoreboardListener.get().notifyScoreboardInfoUpdate();
+    }
+
+    @Inject(method = "onTitle", at = @At("TAIL"))
+    private void onTitle(TitleS2CPacket packet, CallbackInfo ci) {
+        titleObservable.get().titleUpdate(packet);
     }
 }

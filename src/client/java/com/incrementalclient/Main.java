@@ -47,6 +47,7 @@ public class Main implements ClientModInitializer {
             .addObservable(ActiveConsumableMonitor.class)
             .addObservable(ShinyOreMonitor.class)
             .addSingleton(ItemTargetMonitor.class)
+            .addObservable(TitleObservable.class)
             // Features
             .addSingleton(SellAllHotkey.class).forwardSingleton(Configurable.class, SellAllHotkey.class)
             .addSingleton(DepositHotkey.class).forwardSingleton(Configurable.class, DepositHotkey.class)

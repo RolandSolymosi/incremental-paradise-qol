@@ -3,13 +3,18 @@ package com.incrementalclient.featues;
 import com.google.common.base.Suppliers;
 import com.incrementalclient.config.controllers.KeyBindController;
 import com.incrementalclient.interfaces.Configurable;
+import com.incrementalclient.interfaces.Observable;
+import com.incrementalclient.interfaces.Observer;
 import com.incrementalclient.internals.MinecraftClientAccessor;
 import com.incrementalclient.internals.ScreenCapture;
+import com.incrementalclient.internals.TitleObservable;
 import com.incrementalclient.services.CommandHandler;
 import com.incrementalclient.services.InteractionScheduler;
 import com.incrementalclient.services.KeyBindMonitor;
 import dev.isxander.yacl3.api.Option;
+import dev.isxander.yacl3.api.OptionDescription;
 import dev.isxander.yacl3.config.v2.api.SerialEntry;
+import dev.isxander.yacl3.gui.controllers.BooleanController;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.component.DataComponentTypes;
@@ -31,10 +36,12 @@ public class DepositHotkey implements Configurable<DepositHotkey.Configuration> 
             InteractionScheduler<Void> interactionScheduler,
             KeyBindMonitor keyBindMonitor,
             MinecraftClientAccessor mcAccessor,
+            TitleObservable titleObservable,
             CommandHandler commandHandler
     ) {
         this.interactionScheduler = interactionScheduler;
-        options = Suppliers.memoize(() -> List.of(Categories.Hotkeys.Bank.createConfig(0,
+        options = Suppliers.memoize(() -> List.of(
+                Categories.Hotkeys.Bank.createConfig(0,
                 Option.<Integer>createBuilder()
                         .name(Text.literal("Deposit all"))
                         .binding(
@@ -43,6 +50,16 @@ public class DepositHotkey implements Configurable<DepositHotkey.Configuration> 
                                 v -> configuration.keybind = v
                         )
                         .controller((option) -> () -> new KeyBindController(option))
+                        .build()),
+                Categories.Hotkeys.Bank.createConfig(1,Option.<Boolean>createBuilder()
+                        .name(Text.literal("Auto Deposit on full inventory"))
+                        .description(OptionDescription.of(Text.of("Automatically deposit all items to the bank when you're inventory or pouch is full (Requires /bank)")))
+                        .binding(
+                                Configuration.defaultAutoDeposit,
+                                () -> configuration.autoDeposit,
+                                v -> configuration.autoDeposit = v
+                        )
+                        .controller((option) -> () -> new BooleanController(option))
                         .build())));
         keyBindListener = new KeyBindMonitor.KeyBindListener(keyBindMonitor, new KeyBinding(
                 "Deposit",
@@ -79,10 +96,21 @@ public class DepositHotkey implements Configurable<DepositHotkey.Configuration> 
                         }
                 )
                 .priority(5);
+
+        titleObservable.subscribe(new TitleObserver(this));
     }
 
     private void deposit() {
         interactionScheduler.submit(depositTaskBuilder.build(null));
+    }
+
+    private void onTitleArrived(TitleObservable.Title title) {
+        if (configuration.autoDeposit) {
+            String titleString = title.text().getString();
+            if (titleString.equals("Your pouch is full of") || titleString.equals("Your inventory is full")) {
+                deposit();
+            }
+        }
     }
 
     private boolean hasItemsToDeposit(ScreenCapture.Screen screen) {
@@ -118,8 +146,18 @@ public class DepositHotkey implements Configurable<DepositHotkey.Configuration> 
 
     public static class Configuration {
         private static final int defaultKeybind = GLFW.GLFW_KEY_B;
+        private static final boolean defaultAutoDeposit = false;
 
         @SerialEntry
         public int keybind = defaultKeybind;
+        @SerialEntry
+        public boolean autoDeposit = defaultAutoDeposit;
+    }
+
+    private record TitleObserver(DepositHotkey depositHotkey) implements Observer<TitleObservable.Title> {
+        @Override
+        public void onEvent(TitleObservable.Title title) {
+            depositHotkey.onTitleArrived(title);
+        }
     }
 }

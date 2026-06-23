@@ -36,7 +36,7 @@ public class SellAllHotkey implements Configurable<SellAllHotkey.Configuration> 
                 "Incremental QOL"
         ), this::sellAll);
 
-        options = Suppliers.memoize(() -> List.of(Categories.Hotkeys.Bank.createConfig(1,
+        options = Suppliers.memoize(() -> List.of(Categories.Hotkeys.Bank.createConfig(2,
                 Option.<Integer>createBuilder()
                         .name(Text.literal("Sell all"))
                         .binding(
