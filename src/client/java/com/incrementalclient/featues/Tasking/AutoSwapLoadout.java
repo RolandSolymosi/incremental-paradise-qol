@@ -3,6 +3,7 @@ package com.incrementalclient.featues.Tasking;
 import com.google.common.base.Suppliers;
 import com.incrementalclient.common.data.DefaultWardrobe;
 import com.incrementalclient.common.data.Tool;
+import com.incrementalclient.common.data.Warp;
 import com.incrementalclient.common.data.World;
 import com.incrementalclient.common.data.tasks.Task;
 import com.incrementalclient.common.data.tasks.TaskType;
@@ -32,6 +33,7 @@ public class AutoSwapLoadout implements Configurable<AutoSwapLoadout.Configurati
     private final TaskMonitor taskMonitor;
     private final TaskingOverrides taskingOverrides;
     private final HotbarHandler hotbarHandler;
+    private final WarpNextHotkey warpNextHotkey;
 
     private final AutoSwapLoadout.Configuration configuration = new Configuration();
 
@@ -52,6 +54,7 @@ public class AutoSwapLoadout implements Configurable<AutoSwapLoadout.Configurati
         this.taskMonitor = taskMonitor;
         this.taskingOverrides = taskingOverrides;
         this.hotbarHandler = hotbarHandler;
+        this.warpNextHotkey = warpNextHotkey;
         keyBindListener = new KeyBindMonitor.KeyBindListener(keyBindMonitor, new KeyBinding(
                 "Swap Loadout for Next Task",
                 InputUtil.Type.KEYSYM,
@@ -174,7 +177,14 @@ public class AutoSwapLoadout implements Configurable<AutoSwapLoadout.Configurati
     }
 
     private void swap() {
-        var nextUnfinishedTask = taskMonitor.getTaskList().stream().filter(p -> !p.isCompleted()).findFirst();
+        // TODO: This really should be refactored properly as this is duplicated code as the same as WarpNextHotkey.
+        var nextUnfinishedTask = taskMonitor.getTaskList().stream().filter(p -> !p.isCompleted() &&
+                        // http://32x8.com/sop5_____A-B-C-D-E_____m_1-2-4-9-10-12-17-20-25_____d_0-3-5-6-7-8-11-13-14-15-16-19-21-22-23-24-27-29-30-31_____option-0_____899788866575856596687
+                        (!p.isTicket() ||
+                                (!warpNextHotkey.getConfiguration().ticketTaskDefaultSkip && taskingOverrides.getTicketTaskOverride(p.getTask()) != TicketTaskOverride.Skipped) ||
+                                taskingOverrides.getTicketTaskOverride(p.getTask()) == TicketTaskOverride.NotSkipped)
+                )
+                .findFirst();
         if (nextUnfinishedTask.isPresent() && worldMonitor.currentWorld() != World.BossArenas) {
             var task = nextUnfinishedTask.get().getTask();
             if (task != null) {
