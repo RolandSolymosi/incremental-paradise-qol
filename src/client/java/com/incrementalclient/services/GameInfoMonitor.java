@@ -549,6 +549,8 @@ public class GameInfoMonitor {
         // Currencies (updated from scoreboard, persists if not present)
         private final EnumMap<CurrencyType, CurrencyValue> currencies = new EnumMap<>(CurrencyType.class);
 
+        private Text miscTask = Text.empty();
+
         /**
          * Updates this data with values from a new snapshot.
          * Updates values that are present in the snapshot, keeps old values if not present.
@@ -587,6 +589,10 @@ public class GameInfoMonitor {
             // If currency is in snapshot, update it. If not, keep old value.
             // Always update if present in snapshot (preserves original formatting)
             currencies.putAll(snapshot.currencies);
+
+            if (!snapshot.miscTask.getString().isEmpty()) {
+                this.miscTask = snapshot.miscTask;
+            }
         }
 
         /**
@@ -609,6 +615,7 @@ public class GameInfoMonitor {
         public LocalDate getDate() { return date; }
         public Text getArea() { return area != null ? area : Text.empty(); }
         public Text getRank() { return rank != null ? rank : Text.empty(); }
+        public Text getMiscTask() { return miscTask != null ? miscTask : Text.empty(); }
 
         /**
          * Gets the styled Text for a specific progress layer.

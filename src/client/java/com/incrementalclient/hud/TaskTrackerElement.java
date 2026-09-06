@@ -10,6 +10,7 @@ import com.incrementalclient.common.data.tasks.abstractions.NormalTask;
 import com.incrementalclient.common.utils.TextUtils;
 import com.incrementalclient.interfaces.Configurable;
 import com.incrementalclient.internals.MinecraftClientAccessor;
+import com.incrementalclient.services.GameInfoMonitor;
 import com.incrementalclient.services.HudManager;
 import com.incrementalclient.services.TaskMonitor;
 import com.incrementalclient.common.utils.Vector2f;
@@ -22,8 +23,10 @@ import dev.isxander.yacl3.api.controller.DoubleSliderControllerBuilder;
 import dev.isxander.yacl3.config.v2.api.SerialEntry;
 import net.minecraft.text.MutableText;
 import net.minecraft.text.Text;
+import net.minecraft.util.Formatting;
 
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
@@ -32,6 +35,7 @@ public class TaskTrackerElement extends TextListHudElement<TaskTrackerElement.Co
 
     private final WorldMonitor worldMonitor;
     private final TaskMonitor taskMonitor;
+    private final GameInfoMonitor gameInfoMonitor;
 
     private final TaskTrackerElement.Configuration configuration = new Configuration();
 
@@ -41,11 +45,13 @@ public class TaskTrackerElement extends TextListHudElement<TaskTrackerElement.Co
             MinecraftClientAccessor mcAccessor,
             WorldMonitor worldMonitor,
             TaskMonitor taskMonitor,
+            GameInfoMonitor gameInfoMonitor,
             HudManager hudManager
     ) {
         super(mcAccessor, hudManager);
         this.worldMonitor = worldMonitor;
         this.taskMonitor = taskMonitor;
+        this.gameInfoMonitor = gameInfoMonitor;
         this.defaultPosition = new Vector2f(0.01F, 0.01777777F);
         resetToDefaultPosition();
 
@@ -125,6 +131,11 @@ public class TaskTrackerElement extends TextListHudElement<TaskTrackerElement.Co
 
     @Override
     protected List<Text> getTextsToRender(boolean editMode) {
+
+        if (worldMonitor.currentWorld() == World.Supermarket) {
+            return miscTaskRender(gameInfoMonitor.getCurrentSnapshot().miscTask);
+        }
+
         var taskList = taskMonitor.getTaskList();
 
         if (taskList.isEmpty()) {
@@ -162,7 +173,7 @@ public class TaskTrackerElement extends TextListHudElement<TaskTrackerElement.Co
         return HudConstants.PLACEHOLDER_WIDTH_SMALL;
     }
 
-    public Text taskRender(TaskMonitor.TaskState taskState) {
+    private Text taskRender(TaskMonitor.TaskState taskState) {
 
         int textColor = configuration.textColor;
         int taskColor = configuration.taskColor;
@@ -196,6 +207,47 @@ public class TaskTrackerElement extends TextListHudElement<TaskTrackerElement.Co
         }
 
         return displayText;
+    }
+
+    private List<Text> miscTaskRender(Text miscTask) {
+        String[] words = miscTask.getString().split(" ");
+        int maxWidth = (int) (getScreenWidth() * 0.28);
+
+        List<Text> lines = new ArrayList<>();
+        MutableText currentLine = Text.literal("");
+        int currentWidth = 0;
+
+        for (String word : words) {
+            // This block is specifically for the supermarket event task format, if another case for this comes up this
+            // block should be fixed up for that, however remaining code is just to split it up so task doesn't take up
+            // more than 28% of the screen
+            Text wordText = word.equals("TASK")
+                    ? TextUtils.textColor(word, Formatting.YELLOW, false, true)
+                    : Text.literal(word);
+
+            int wordWidth = getTextWidth(wordText);
+            int spaceWidth = currentWidth == 0 ? 0 : getTextWidth(Text.literal(" "));
+
+            if (currentWidth != 0 && currentWidth + spaceWidth + wordWidth > maxWidth) {
+                lines.add(currentLine);
+                currentLine = Text.literal("");
+                currentWidth = 0;
+                spaceWidth = 0;
+            }
+
+            if (currentWidth != 0) {
+                currentLine.append(" ");
+                currentWidth += spaceWidth;
+            }
+            currentLine.append(wordText);
+            currentWidth += wordWidth;
+        }
+
+        if (currentWidth != 0 || lines.isEmpty()) {
+            lines.add(currentLine);
+        }
+
+        return lines;
     }
 
     private boolean isQuestOrTutorial(TaskMonitor.TaskState taskState) {

@@ -14,7 +14,8 @@ public enum World {
     World2("World 2", "W2",Identifier.of("minecraft", "world2"), Realm.Normal),
     World3("World 3", "W3",Identifier.of("minecraft", "world3"), Realm.Normal),
     World4("World 4", "W4",Identifier.of("minecraft", "world4"), Realm.Normal),
-    WorldNightmare1("Nightmare 1","N1", Identifier.of("minecraft", "worldnightmare"), Realm.Nightmare);
+    WorldNightmare1("Nightmare 1","N1", Identifier.of("minecraft", "worldnightmare"), Realm.Nightmare),
+    Supermarket("Supermarket", "Supermarket",Identifier.of("minecraft", "supermarket"), Realm.Unknown);
 
 
     private final String name;

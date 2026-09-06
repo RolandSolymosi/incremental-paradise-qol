@@ -27,6 +27,9 @@ public class PlayerProgressParser {
     // Completed tasks pattern: "Completed Tasks X/Y" or "Completed Tasks X / Y"
     private static final Pattern TASKS_PATTERN = Pattern.compile("(?i)Completed\\s+Tasks\\s+(\\d+)\\s*/\\s*(\\d+)");
 
+    // Completed misc task pattern: "TASK - X incremental Prison.com" with only TASK - X captured.
+    private static final Pattern MISC_TASK_PATTERN = Pattern.compile("(?s)(TASK\\s*-\\s*.*?)\\s*incrementalparadise\\.com");
+
     /**
      * Parses the scoreboard text to extract all player progress information.
      * Returns plain text - styling applied later by individual HUD elements.
@@ -47,6 +50,7 @@ public class PlayerProgressParser {
             LocalDate date = parseDate(cleanText);
             Text area = parseAreaAsText(cleanText);
             Text rank = parseRankAsText(cleanText);
+            Text miscTask = parseMiscTaskAsText(cleanText);
 
             EnumMap<ProgressLayer, Text> layers = parseProgressLayers(cleanText);
 
@@ -71,7 +75,8 @@ public class PlayerProgressParser {
                     layers,
                     completedTasks,
                     totalTasks,
-                    currencies
+                    currencies,
+                    miscTask
             );
         } catch (Exception e) {
             LOGGER.error("Error parsing scoreboard: " + e.getMessage(), e);
@@ -221,6 +226,23 @@ public class PlayerProgressParser {
     }
 
     /**
+     * Parses misc task data that may be in the scoreboard such as in the case of an event (Labor Day)
+     * Returns plain text - styling will be applied later.
+     */
+    private static Text parseMiscTaskAsText(String text) {
+
+        String miscTaskStr = "";
+
+        Matcher miscTaskMatcher = MISC_TASK_PATTERN.matcher(text);
+        if (miscTaskMatcher.find()) {
+            miscTaskStr = miscTaskMatcher.group(1).trim();
+            }
+
+            return miscTaskStr.isEmpty() ? Text.empty() : Text.literal(miscTaskStr);
+
+    }
+
+    /**
      * Result of parsing a number string.
      */
     private static class ParsedNumber {
@@ -354,6 +376,8 @@ public class PlayerProgressParser {
         // Currencies (with original formatting preserved)
         public final EnumMap<CurrencyType, CurrencyValue> currencies;
 
+        public final Text miscTask;
+
         public PlayerProgressSnapshot(
                 LocalDate date,
                 Text area,
@@ -370,6 +394,27 @@ public class PlayerProgressParser {
             this.completedTasks = completedTasks;
             this.totalTasks = totalTasks;
             this.currencies = currencies != null ? currencies : new EnumMap<>(CurrencyType.class);
+            this.miscTask = Text.empty();
+        }
+
+        public PlayerProgressSnapshot(
+                LocalDate date,
+                Text area,
+                Text rank,
+                EnumMap<ProgressLayer, Text> layers,
+                int completedTasks,
+                int totalTasks,
+                EnumMap<CurrencyType, CurrencyValue> currencies,
+                Text miscTask
+        ) {
+            this.date = date;
+            this.area = area != null ? area : Text.empty();
+            this.rank = rank != null ? rank : Text.empty();
+            this.layers = layers != null ? layers : new EnumMap<>(ProgressLayer.class);
+            this.completedTasks = completedTasks;
+            this.totalTasks = totalTasks;
+            this.currencies = currencies != null ? currencies : new EnumMap<>(CurrencyType.class);
+            this.miscTask = miscTask != null ? miscTask : Text.empty();
         }
 
         /**
