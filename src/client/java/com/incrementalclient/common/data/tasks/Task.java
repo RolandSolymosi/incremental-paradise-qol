@@ -57,7 +57,7 @@ public enum Task {
     EarnScorePixelpop(new GamingTask("Score in Pixelpop", Region.W1_Overworld, List.of("pixel pop"), GameKind.Pixelpop, List.of(Constraint.Score), List.of(Warp.W1_Spawn))),
     EarnTicketPixelpop(new GamingTask("Tickets for Pixelpop", Region.W1_Overworld, List.of("pixel pop"), GameKind.Pixelpop, List.of(Constraint.Ticket), List.of(Warp.W1_Spawn))),
 
-    GoldMoney(new NormalTask("Gold from selling items", Region.W1_Overworld, List.of("gold from selling items"), null, TaskType.Misc, DefaultWardrobe.Farming, Tool.Hoe, List.of(Target.W1_Carrot), List.of(Warp.W1_Carrot, Warp.W1_Spawn))),
+    GoldMoney(new NormalTask("Gold from selling items", Region.W1_Overworld, List.of("gold from selling items"), null, TaskType.Misc, DefaultWardrobe.Mining, Tool.Pickaxe, List.of(Target.W1_Redstone), List.of(Warp.W1_RedStone, Warp.W1_Gold, Warp.W1_Copper, Warp.W1_Iron, Warp.W1_Coal, Warp.W1_Mines, Warp.W1_Spawn))),
     GarbageCans(new NormalTask("Garbage Cans", Region.W1_Overworld, List.of("garbage cans"), null, TaskType.Misc, DefaultWardrobe.Fishing, Tool.Spear, List.of(Target.W1_GarbageCan), List.of(Warp.W1_Spawn))),
 
     // World 2
